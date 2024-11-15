@@ -69,11 +69,6 @@ class _MapState extends State<Map> {
                 point: _currentPosition!,
                 width: 80.0,
                 height: 80.0,
-                // builder: (ctx) => const Icon(
-                //   Icons.location_pin,
-                //   color: Colors.red,
-                //   size: 40,
-                // ),
                 child: Icon(Icons.location_pin, size: 40,color: Colors.red,),
               ),
             ],

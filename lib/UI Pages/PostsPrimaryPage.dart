@@ -110,7 +110,7 @@ class _PostsPrimaryPageState extends State<PostsPrimaryPage> {
           child: FloatingActionButton(
             onPressed: (){},
             isExtended: true,
-            backgroundColor: Colors.teal[200],
+            backgroundColor: Colors.teal[600],
             child: Icon(Icons.edit,color: Colors.white,),
 
           ),

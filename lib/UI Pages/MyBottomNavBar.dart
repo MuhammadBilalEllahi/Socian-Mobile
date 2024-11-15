@@ -25,7 +25,7 @@ class MyBottomNavBar extends StatelessWidget {
         child: BottomNavigationBar(
 
           type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.teal[200],
+          backgroundColor: Colors.teal[600],
           fixedColor: Colors.white,
           showUnselectedLabels: true,
           showSelectedLabels: true,
