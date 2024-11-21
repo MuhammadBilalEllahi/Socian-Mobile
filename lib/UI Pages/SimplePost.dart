@@ -55,7 +55,7 @@ class _SimplePostState extends State<SimplePost> {
             // Picture
             Container(
               height: 250,
-              child: Image.asset("assets/images/scenery.jpg")
+              child: Image.asset("assets/images/anime2.png",fit: BoxFit.fill,)
             ),
             SizedBox(height: 5,),
             // Like comment row

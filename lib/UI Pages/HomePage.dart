@@ -4,6 +4,7 @@ import 'package:beyondtheclass/UI%20Pages/MyBottomNavBar.dart';
 import 'package:beyondtheclass/UI%20Pages/Map.dart';
 
 import 'PostsPrimaryPage.dart';
+import 'ProfilePage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -21,7 +22,7 @@ class _HomePageState extends State<HomePage> {
     Messages(),
     Center(child: Text('Societies', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold))),
     Map(),
-    Center(child: Text('Profile Page', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold))),
+    ProfilePage(),
   ];
 
   void _onNavBarTapped(int index) {

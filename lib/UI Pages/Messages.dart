@@ -41,73 +41,73 @@ class _MessagesState extends State<Messages> {
             ),
             // Add MessageCard widgets
             MessageCard(
-              picture: 'assets/images/scenery.jpg', // Replace with your image URL or asset path
+              picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Bilal Ellahi',
               message: 'Hey there! How are you doing today?',
               time: '2:45 PM',
             ),
             MessageCard(
-              picture: 'assets/images/scenery.jpg', // Replace with your image URL or asset path
+              picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Mohammad Bilal Ellahi',
               message: 'Hey there! How are you doing today?',
               time: '2:45 PM',
             ),
             MessageCard(
-              picture: 'assets/images/scenery.jpg', // Replace with your image URL or asset path
+              picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Muhammmad Rayyan',
               message: 'Hey there! How are you doing today?',
               time: '2:45 PM',
             ),
             MessageCard(
-              picture: 'assets/images/scenery.jpg', // Replace with your image URL or asset path
+              picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Bilal Ellahi',
               message: 'Hey there! How are you doing today?',
               time: '2:45 PM',
             ),
             MessageCard(
-              picture: 'assets/images/scenery.jpg', // Replace with your image URL or asset path
+              picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Mohammad Bilal Ellahi',
               message: 'Hey there! How are you doing today?',
               time: '2:45 PM',
             ),
             MessageCard(
-              picture: 'assets/images/scenery.jpg', // Replace with your image URL or asset path
+              picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Muhammmad Rayyan',
               message: 'Hey there! How are you doing today?',
               time: '2:45 PM',
             ),
             MessageCard(
-              picture: 'assets/images/scenery.jpg', // Replace with your image URL or asset path
+              picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Bilal Ellahi',
               message: 'Hey there! How are you doing today?',
               time: '2:45 PM',
             ),
             MessageCard(
-              picture: 'assets/images/scenery.jpg', // Replace with your image URL or asset path
+              picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Mohammad Bilal Ellahi',
               message: 'Hey there! How are you doing today?',
               time: '2:45 PM',
             ),
             MessageCard(
-              picture: 'assets/images/scenery.jpg', // Replace with your image URL or asset path
+              picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Muhammmad Rayyan',
               message: 'Hey there! How are you doing today?',
               time: '2:45 PM',
             ),
             MessageCard(
-              picture: 'assets/images/scenery.jpg', // Replace with your image URL or asset path
+              picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Bilal Ellahi',
               message: 'Hey there! How are you doing today?',
               time: '2:45 PM',
             ),
             MessageCard(
-              picture: 'assets/images/scenery.jpg', // Replace with your image URL or asset path
+              picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Mohammad Bilal Ellahi',
               message: 'Hey there! How are you doing today?',
               time: '2:45 PM',
             ),
             MessageCard(
-              picture: 'assets/images/scenery.jpg', // Replace with your image URL or asset path
+              picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Muhammmad Rayyan',
               message: 'Hey there! How are you doing today?',
               time: '2:45 PM',
