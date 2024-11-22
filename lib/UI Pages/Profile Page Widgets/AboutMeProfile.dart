@@ -11,7 +11,6 @@ class _AboutMeProfileState extends State<AboutMeProfile> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: ClipRRect(

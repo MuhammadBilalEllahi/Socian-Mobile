@@ -26,7 +26,7 @@ class _SimplePostState extends State<SimplePost> {
                   // width: 50,
                   child: CircleAvatar(
                     radius: 20,
-                    backgroundColor: Colors.greenAccent,
+                    backgroundImage: AssetImage("assets/images/profilepic2.jpg"),
                   ),
                 ),
                 SizedBox(width: 10,),

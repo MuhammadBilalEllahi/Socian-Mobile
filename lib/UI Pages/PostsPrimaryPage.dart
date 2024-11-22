@@ -2,7 +2,9 @@ import 'package:beyondtheclass/UI%20Pages/MyDrawer.dart';
 import 'package:beyondtheclass/UI%20Pages/SimplePost.dart';
 import 'package:flutter/material.dart';
 
+import 'BreakingNewsScroller.dart';
 import 'Filters.dart';
+import 'QnA Post Widgets/QnAPost.dart';
 
 class PostsPrimaryPage extends StatefulWidget {
   const PostsPrimaryPage({super.key});
@@ -48,15 +50,21 @@ class _PostsPrimaryPageState extends State<PostsPrimaryPage> {
                           ),
                           Row(
                             children: [
-                              Container(
-                                width: 40,
-                                // color: Colors.yellow,
-                                child: Icon(Icons.search),
-                              ),
+
                               Container(
                                 width: 40,
                                 // color: Colors.blue,
-                                child: Icon(Icons.notifications_none_outlined),
+                                child: GestureDetector(
+                                    onTap: (){
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (context) => BreakingNewsScroller(
+                                            newsText: 'AAAAAAAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC',
+                                          ),),
+
+                                      );
+                                    },
+                                    child: Icon(Icons.notifications_none_outlined)),
                               ),
                             ],
                           ),
@@ -72,21 +80,20 @@ class _PostsPrimaryPageState extends State<PostsPrimaryPage> {
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: [
-                              Filters(color: Colors.blue, text: "Example"),
-                              Filters(color: Colors.red, text: "Example"),
-                              Filters(color: Colors.purple, text: "Example"),
-                              Filters(color: Colors.brown, text: "Example"),
-                              Filters(color: Colors.greenAccent, text: "Example"),
-                              Filters(color: Colors.black38, text: "Example"),
-                              Filters(color: Colors.deepPurpleAccent, text: "Example"),
+                              Filters(color: Colors.blue, text: "Latest Feed"),
+                              Filters(color: Colors.red, text: "Ongoing"),
+                              Filters(color: Colors.greenAccent, text: "QnA"),
+                              Filters(color: Colors.purple, text: "Lost & Found"),
+                              Filters(color: Colors.brown, text: "Polls"),
                             ],
                           ),
                         ),
                       ),
                     ),
                     SimplePost(),
+                    QnAPost(),
                     SimplePost(),
-                    SimplePost(),
+                    QnAPost(),
                     SimplePost(),
                     SimplePost(),
                   ],
