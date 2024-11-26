@@ -40,7 +40,7 @@ class MyBottomNavBar extends StatelessWidget {
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.people_outline),
-              label: 'Societies',
+              label: 'Explore',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.gps_fixed_rounded),
