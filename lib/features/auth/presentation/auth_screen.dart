@@ -1,6 +1,7 @@
 import 'package:beyondtheclass/UI%20Pages/HomePage.dart';
 import 'package:beyondtheclass/features/auth/presentation/widgets/login_form.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
+import 'package:beyondtheclass/shared/services/secure_storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,7 +14,8 @@ class AuthScreen extends ConsumerWidget {
      final authController = ref.watch(authProvider.notifier);
 
     print("authController ${authController.authUseCases}");
-    if (authState.user != null) {
+    // if(SecureStorageService.instance.getToken())
+    if (authState.user != null ) {
       Future.microtask(() {
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>const HomePage()));
       });
