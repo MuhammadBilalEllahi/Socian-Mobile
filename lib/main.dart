@@ -1,10 +1,12 @@
-import 'UI Pages/splashScreen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'UI Pages/SplashScreen.dart';
 import 'package:flutter/material.dart';
 
 import 'UI Pages/AppThemes.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -15,11 +17,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'Beyond The Class',
       themeMode: ThemeMode.system,
       theme: AppThemes.lightTheme, // Use light theme
       darkTheme: AppThemes.darkTheme, // Use dark theme
-      home: const splashScreen(),
+      home: const SplashScreen(),
     );
   }
 }

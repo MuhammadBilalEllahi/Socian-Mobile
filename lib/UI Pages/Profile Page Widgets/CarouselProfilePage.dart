@@ -18,8 +18,8 @@ class _CarouselProfilePageState extends State<CarouselProfilePage> {
         autoPlay: true,
         enableInfiniteScroll: true,
 
-        autoPlayInterval: Duration(seconds: 1),
-        autoPlayAnimationDuration: Duration(milliseconds: 2000),
+        autoPlayInterval: const Duration(seconds: 1),
+        autoPlayAnimationDuration: const Duration(milliseconds: 2000),
 
 
       ),
@@ -31,8 +31,8 @@ class _CarouselProfilePageState extends State<CarouselProfilePage> {
               child: Container(
                   width: MediaQuery.of(context).size.width/1.2,
                   height: MediaQuery.of(context).size.height/4,
-                  margin: EdgeInsets.symmetric(horizontal: 5.0),
-                  decoration: BoxDecoration(
+                  margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                  decoration: const BoxDecoration(
                       color: Colors.transparent
                   ),
                   child: Image.asset(i,fit:
