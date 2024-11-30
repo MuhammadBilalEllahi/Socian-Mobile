@@ -28,41 +28,41 @@ class _MyDrawerState extends State<MyDrawer> {
                     onTap: () {
                       Navigator.of(context).pop();
                     },
-                    child: Icon(Icons.arrow_back_ios_sharp),
+                    child: const Icon(Icons.arrow_back_ios_sharp),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
 
             // Drawer Options
             ListTile(
-              leading: Icon(Icons.home),
-              title: Text("Home"),
+              leading: const Icon(Icons.home),
+              title: const Text("Home"),
               onTap: () {
                 // Navigate to Home Page
                 Navigator.of(context).pop();
               },
             ),
             ListTile(
-              leading: Icon(Icons.person),
-              title: Text("All Unis"),
+              leading: const Icon(Icons.person),
+              title: const Text("All Unis"),
               onTap: () {
                 // Navigate to Profile Page
                 Navigator.of(context).pop();
               },
             ),
             ListTile(
-              leading: Icon(Icons.notifications),
-              title: Text("Alumni"),
+              leading: const Icon(Icons.notifications),
+              title: const Text("Alumni"),
               onTap: () {
                 // Navigate to Notifications Page
                 Navigator.of(context).pop();
               },
             ),
             ListTile(
-              leading: Icon(Icons.fastfood_outlined),
-              title: Text("Cafe Information Services"),
+              leading: const Icon(Icons.fastfood_outlined),
+              title: const Text("Cafe Information Services"),
               onTap: () {
                 // Navigate to Settings Page
                 Navigator.of(context).pop();
@@ -70,8 +70,8 @@ class _MyDrawerState extends State<MyDrawer> {
             ),
 
             ListTile(
-              leading: Icon(Icons.document_scanner_outlined),
-              title: Text("Past Paper"),
+              leading: const Icon(Icons.document_scanner_outlined),
+              title: const Text("Past Paper"),
               onTap: () {
                 // Handle Log Out
                 Navigator.of(context).pop();
