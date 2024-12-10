@@ -1,24 +1,13 @@
 import 'dart:async';
-<<<<<<< HEAD
-
-=======
 import 'package:beyondtheclass/features/auth/presentation/auth_screen.dart';
 import 'package:beyondtheclass/UI%20Pages/HomePage.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
->>>>>>> bilal
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
-<<<<<<< HEAD
-import 'Login Widgets/LoginPage.dart';
-
-class splashScreen extends StatefulWidget {
-  const splashScreen({super.key});
-=======
->>>>>>> bilal
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
@@ -27,18 +16,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
-<<<<<<< HEAD
-    // Navigate to HomeScreen after 5 seconds
-    Timer(const Duration(seconds: 2), () {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) =>  LoginPage()),
-      );
-    });
-=======
 
     // Delay splash logic for smooth transition
     Future.delayed(const Duration(seconds: 2), _checkAuthentication);
->>>>>>> bilal
   }
 
   Future<void> _checkAuthentication() async {
