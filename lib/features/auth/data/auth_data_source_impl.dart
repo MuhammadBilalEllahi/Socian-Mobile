@@ -27,14 +27,14 @@ class AuthDataSourceImpl implements AuthDataSource {
       // Check the response status
       print("4.2 - API call response: ${response.toString()}");
 
-      if (response.containsKey('token')) {
-        String token = response['token'];
+      if (response.containsKey('access_token')) {
+        String token = response['access_token'];
         
         // await SecureStorageService.instance.saveToken(token);
   // await  SharedPreferencesService.instance.saveToken(token);
         print("Token received: $token");
 
-        return {'token': token};
+        return {'access_token': token};
       } else {
         throw Exception('No token received');
       }

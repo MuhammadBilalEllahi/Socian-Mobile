@@ -30,7 +30,7 @@ class AuthController extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true);
     try {
       final response = await authUseCases.login(email, password);
-      final token = response['token'];
+      final token = response['access_token'];
       final user = JwtDecoder.decode(token);
       if (user.isNotEmpty) {
         state = state.copyWith(user: user, token: token, isLoading: false, error: null);
