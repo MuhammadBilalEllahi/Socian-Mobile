@@ -17,7 +17,7 @@ class _StatsBoxProfileState extends State<StatsBoxProfile> {
 
       child: Container(
         // width:screenWidth/2 ,
-        padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+        padding: const EdgeInsets.fromLTRB(5, 5, 5, 5),
         color: Colors.teal[100],
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -26,7 +26,7 @@ class _StatsBoxProfileState extends State<StatsBoxProfile> {
             Container(
               // width:screenWidth/4.2,
 
-              child: Column(
+              child: const Column(
                 children: [
                   Text("500",style: TextStyle(fontSize: 26,fontWeight: FontWeight.bold,color: Colors.black),),
                   Text("Connects",style: TextStyle(fontSize: 18,color: Colors.black),),
@@ -34,12 +34,12 @@ class _StatsBoxProfileState extends State<StatsBoxProfile> {
                 ],
               ),
             ),
-            Container(height:50 , child: VerticalDivider(thickness: 2,width: 20,color: Colors.black,)),
+            const SizedBox(height:50 , child: VerticalDivider(thickness: 2,width: 20,color: Colors.black,)),
             // Credibility
             Container(
               // width:screenWidth/4.2 ,
 
-              child: Column(
+              child: const Column(
                 children: [
                   Text("6.9",style: TextStyle(fontSize: 26,fontWeight: FontWeight.bold,color: Colors.black),),
                   Text("Credibility",style: TextStyle(fontSize: 18,color: Colors.black),),
