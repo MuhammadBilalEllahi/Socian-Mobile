@@ -13,7 +13,7 @@ class Login extends StatelessWidget {
             MaterialPageRoute(builder: (context) => const HomePage()),
           );
         },
-            child: const Text("Login")),
+            child: const Text("Logined")),
       ),
     );
   }

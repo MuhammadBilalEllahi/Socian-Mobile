@@ -11,15 +11,19 @@ class _YourAnswerTextFieldState extends State<YourAnswerTextField> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.grey[350],
+      // color: Colors.grey[350],
       height: 40,
       width: MediaQuery.of(context).size.width/1.5,
       child: TextField(
 
         decoration: InputDecoration(
+          icon: Icon(Icons.question_answer_rounded),
+          iconColor: Colors.teal,
           labelText: 'Write your answer',
-          border: OutlineInputBorder(),
-          prefixIcon: Icon(Icons.notes_rounded),
+          // border: OutlineInputBorder(),
+          labelStyle: TextStyle(
+            color: Colors.teal, // Replace with your desired color
+          ),
         ),
 
       ),
@@ -27,3 +31,5 @@ class _YourAnswerTextFieldState extends State<YourAnswerTextField> {
     ;
   }
 }
+
+

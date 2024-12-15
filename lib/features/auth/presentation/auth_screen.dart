@@ -1,3 +1,4 @@
+
 import 'package:beyondtheclass/UI%20Pages/HomePage.dart';
 import 'package:beyondtheclass/features/auth/presentation/widgets/login_form.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
@@ -11,21 +12,108 @@ class AuthScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
-     final authController = ref.watch(authProvider.notifier);
+    final authController = ref.watch(authProvider.notifier);
 
     print("authController ${authController.authUseCases}");
-    // if(SecureStorageService.instance.getToken())
-    if (authState.user != null ) {
+
+    if (authState.user != null) {
       Future.microtask(() {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>const HomePage()));
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
       });
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Login")),
-      body: authState.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : const LoginForm(),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.teal.shade50, Colors.teal.shade800],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: authState.isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
+                ),
+                child: IntrinsicHeight(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(height: 100),
+                        Icon(
+                          Icons.school,
+                          size: 80,
+                          color: Colors.teal.shade600,
+                        ),
+                        SizedBox(height: 20),
+                        Text(
+                          "Beyond The Class",
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.teal.shade900,
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          "Login to access your account",
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.teal.shade700,
+                          ),
+                        ),
+                        SizedBox(height: 40),
+                        const LoginForm(),
+                        SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Don't have an account?",
+                              style: TextStyle(
+                                // color: Colors.teal.shade600,
+                                color: Colors.white,
+                                fontSize: 14,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {},
+                              child: Text(
+                                "Sign Up",
+                                style: TextStyle(
+                                  // color: Colors.teal.shade800,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Spacer(),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }
+
+

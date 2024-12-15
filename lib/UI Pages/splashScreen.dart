@@ -1,3 +1,4 @@
+
 import 'dart:async';
 import 'package:beyondtheclass/features/auth/presentation/auth_screen.dart';
 import 'package:beyondtheclass/UI%20Pages/HomePage.dart';
@@ -43,24 +44,49 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Icon(
-              Icons.app_blocking_sharp,
-              size: 100.0,
-              color: Colors.blue,
-            ),
-            SizedBox(height: 20),
-            Text(
-              "Beyond The Class",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            CircularProgressIndicator(),
-          ],
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.teal.shade50, Colors.teal.shade800],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(
+                Icons.school,
+                size: 120.0,
+                color: Colors.teal.shade600,
+              ),
+              SizedBox(height: 20),
+              Text(
+                "Beyond The Class",
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.teal.shade900,
+                ),
+              ),
+              SizedBox(height: 10),
+              Text(
+                "Discover New Horizons, Look Beyond the Class",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.teal.shade700,
+                ),
+              ),
+              SizedBox(height: 30),
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.teal.shade600),
+              ),
+            ],
+          ),
         ),
       ),
     );

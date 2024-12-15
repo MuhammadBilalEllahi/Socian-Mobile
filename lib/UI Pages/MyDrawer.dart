@@ -11,76 +11,151 @@ class _MyDrawerState extends State<MyDrawer> {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      width: MediaQuery.of(context).size.width,
+      width: MediaQuery.of(context).size.width * 0.75,
       child: Container(
-        color: Colors.transparent.withOpacity(0.2),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.teal.shade50, Colors.teal.shade800],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Close Drawer Button
             Padding(
-              padding: const EdgeInsets.fromLTRB(5, 30, 0, 0),
+              padding: const EdgeInsets.fromLTRB(16, 40, 0, 0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   GestureDetector(
                     onTap: () {
                       Navigator.of(context).pop();
                     },
-                    child: const Icon(Icons.arrow_back_ios_sharp),
+                    child: const Icon(
+                      Icons.arrow_back_ios_sharp,
+                      color: Colors.white,
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 30),
 
-            // Drawer Options
-            ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text("Home"),
-              onTap: () {
-                // Navigate to Home Page
-                Navigator.of(context).pop();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text("All Unis"),
-              onTap: () {
-                // Navigate to Profile Page
-                Navigator.of(context).pop();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.notifications),
-              title: const Text("Alumni"),
-              onTap: () {
-                // Navigate to Notifications Page
-                Navigator.of(context).pop();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.fastfood_outlined),
-              title: const Text("Cafe Information Services"),
-              onTap: () {
-                // Navigate to Settings Page
-                Navigator.of(context).pop();
-              },
+            // Drawer Header
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    radius: 40,
+                    backgroundColor: Colors.teal.shade800,
+                    child: Icon(
+                      Icons.person,
+                      size: 50,
+                      color: Colors.teal.shade100,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    "Good Day, User!",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  // Text(
+                  //   "Beyond The Class",
+                  //   style: TextStyle(
+                  //     fontSize: 14,
+                  //     color: Colors.white
+                  //   ),
+                  // ),
+                ],
+              ),
             ),
 
-            ListTile(
-              leading: const Icon(Icons.document_scanner_outlined),
-              title: const Text("Past Paper"),
-              onTap: () {
-                // Handle Log Out
-                Navigator.of(context).pop();
-              },
+            // const Divider(color: Colors.white70, thickness: 1),
+
+            // Drawer Options
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  ListTile(
+                    leading: Text(
+                      '🏠', // Emoji for Home (House)
+                      style: TextStyle(fontSize: 24),
+                    ),
+                    title: Text("Home", style: TextStyle(color: Colors.white)),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  ListTile(
+                    // leading: Icon(Icons.person, color: Colors.white),
+                    leading: Text(
+                      '🏛️', // Emoji for All Unis (Classical Building)
+                      style: TextStyle(fontSize: 24),
+                    ),
+                    title: Text("All Unis", style: TextStyle(color: Colors.white)),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  ListTile(
+                    // leading: Icon(Icons.notifications, color: Colors.white),
+                    leading: Text(
+                      '👨‍🎓', // Emoji for alumni
+                      style: TextStyle(fontSize: 24),
+                    ),
+                    title: Text("Alumni", style: TextStyle(color: Colors.white)),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  ListTile(
+                    leading: Text(
+                      '☕', // Emoji for Cafe Information Services (Coffee Cup)
+                      style: TextStyle(fontSize: 24),
+                    ),
+                    title: Text("Cafe Information Services", style: TextStyle(color: Colors.white)),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  ListTile(
+                    leading: Text(
+                      '📄', // Emoji for Past Papers (Document)
+                      style: TextStyle(fontSize: 24),
+                    ),
+                    title: Text("Past Papers", style: TextStyle(color: Colors.white)),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
             ),
+
+            // const Divider(color: Colors.white70, thickness: 1),
+
+            // Footer
+            // Padding(
+            //   padding: const EdgeInsets.all(16.0),
+            //   child: Text(
+            //     "Version 1.0.0",
+            //     style: TextStyle(
+            //       color: Colors.teal.shade200,
+            //       fontSize: 12,
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),
     );
   }
 }
-

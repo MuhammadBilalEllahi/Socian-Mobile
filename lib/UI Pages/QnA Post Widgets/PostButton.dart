@@ -10,10 +10,13 @@ class PostButton extends StatefulWidget {
 class _PostButtonState extends State<PostButton> {
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(onPressed: (){}, child: Text("Post"),
+    return ElevatedButton(onPressed: (){}, child: Text("Post", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),),
       style: ButtonStyle(
-        // backgroundBuilder: Widgets
+        backgroundColor: WidgetStatePropertyAll<Color>(Colors.tealAccent.shade400),
+
       )
+
+
     );
   }
 }
