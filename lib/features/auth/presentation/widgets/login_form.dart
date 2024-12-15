@@ -50,15 +50,21 @@ class _LoginFormState extends ConsumerState<LoginForm> {
         children: [
           TextField(
             controller: emailController,
-            decoration: const InputDecoration(labelText: "Email"),
+            decoration: const InputDecoration(labelText: "Email",labelStyle: TextStyle(color: Colors.white)),
           ),
           TextField(
             controller: passwordController,
-            decoration: const InputDecoration(labelText: "Password"),
+            decoration: const InputDecoration(labelText: "Password",labelStyle: TextStyle(color: Colors.white)),
             obscureText: true,
           ),
           const SizedBox(height: 20),
-          ElevatedButton(onPressed: login, child: const Text("Login")),
+          ElevatedButton(onPressed: login, child: const Text("Login",style: TextStyle(fontWeight: FontWeight.bold),),
+              style: ButtonStyle(
+                backgroundColor: WidgetStatePropertyAll<Color>(Colors.teal.shade800),
+                foregroundColor:  WidgetStatePropertyAll<Color>(Colors.white),
+
+              )
+          ),
         ],
       ),
     );

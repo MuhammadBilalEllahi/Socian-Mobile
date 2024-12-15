@@ -1,32 +1,18 @@
-
-import 'package:beyondtheclass/UI%20Pages/HomePage.dart';
-import 'package:beyondtheclass/features/auth/presentation/student_signupScreen.dart';
-import 'package:beyondtheclass/features/auth/presentation/widgets/RoleSelectionPage.dart';
-import 'package:beyondtheclass/features/auth/presentation/widgets/login_form.dart';
-import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
-import 'package:beyondtheclass/shared/services/secure_storage_service.dart';
+import 'package:beyondtheclass/features/auth/presentation/widgets/signup_form.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:beyondtheclass/features/auth/presentation/auth_screen.dart';
 
-class AuthScreen extends ConsumerWidget {
-  const AuthScreen({super.key});
+
+class signup_screen extends StatefulWidget {
+  const signup_screen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider);
-    final authController = ref.watch(authProvider.notifier);
+  State<signup_screen> createState() => _signup_screenState();
+}
 
-    print("authController ${authController.authUseCases}");
-
-    if (authState.user != null) {
-      Future.microtask(() {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
-        );
-      });
-    }
-
+class _signup_screenState extends State<signup_screen> {
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -38,9 +24,7 @@ class AuthScreen extends ConsumerWidget {
             end: Alignment.bottomCenter,
           ),
         ),
-        child: authState.isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : LayoutBuilder(
+        child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
               child: ConstrainedBox(
@@ -70,20 +54,20 @@ class AuthScreen extends ConsumerWidget {
                         ),
                         SizedBox(height: 10),
                         Text(
-                          "Login to access your account",
+                          "Student Sign Up",
                           style: TextStyle(
                             fontSize: 18,
                             color: Colors.white,
                           ),
                         ),
                         SizedBox(height: 40),
-                        const LoginForm(),
+                        const signup_form(),
                         SizedBox(height: 20),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              "Don't have an account?",
+                              "Already have an account?",
                               style: TextStyle(
                                 // color: Colors.teal.shade600,
                                 color: Colors.white,
@@ -94,11 +78,11 @@ class AuthScreen extends ConsumerWidget {
                               onPressed: () {
                                 Navigator.pushReplacement(
                                   context,
-                                  MaterialPageRoute(builder: (context) => const RoleSelectionPage()),
+                                  MaterialPageRoute(builder: (context) => const AuthScreen()),
                                 );
                               },
                               child: Text(
-                                "Sign Up",
+                                "Log In",
                                 style: TextStyle(
                                   // color: Colors.teal.shade800,
                                   color: Colors.white,
@@ -122,5 +106,3 @@ class AuthScreen extends ConsumerWidget {
     );
   }
 }
-
-

@@ -20,7 +20,7 @@ class _HomePageState extends State<HomePage> {
   static const List<Widget> _pages = <Widget>[
     PostsPrimaryPage(),
     Messages(),
-    Center(child: Text('Societies', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold))),
+    Center(child: Text('Explore', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold))),
     Map(),
     ProfilePage(),
   ];

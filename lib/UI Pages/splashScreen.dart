@@ -19,7 +19,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     super.initState();
 
     // Delay splash logic for smooth transition
-    Future.delayed(const Duration(seconds: 2), _checkAuthentication);
+    Future.delayed(const Duration(seconds: 6), _checkAuthentication);
   }
 
   Future<void> _checkAuthentication() async {
@@ -42,7 +42,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     }
   }
 
-  @override
+
+
+
+    @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
@@ -62,7 +65,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
               Icon(
                 Icons.school,
                 size: 120.0,
-                color: Colors.teal.shade600,
+                // color: Colors.teal.shade600,
+                color: Colors.white,
               ),
               SizedBox(height: 20),
               Text(
@@ -70,7 +74,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Colors.teal.shade900,
+                  // color: Colors.teal.shade900,
+                  color: Colors.white,
                 ),
               ),
               SizedBox(height: 10),
@@ -78,12 +83,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 "Discover New Horizons, Look Beyond the Class",
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.teal.shade700,
+                  // color: Colors.teal.shade900,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+
                 ),
               ),
               SizedBox(height: 30),
               CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.teal.shade600),
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
             ],
           ),

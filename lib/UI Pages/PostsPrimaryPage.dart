@@ -22,11 +22,11 @@ class _PostsPrimaryPageState extends ConsumerState<PostsPrimaryPage> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          const SliverAppBar(
+          SliverAppBar(
             backgroundColor: Colors.transparent,
             toolbarHeight: 23.0,
             centerTitle: false,
-            title: Text("Beyond The Class"),
+            title: Text("Beyond The Class", style: TextStyle(color: Colors.teal[800],fontWeight: FontWeight.bold)),
             automaticallyImplyLeading: false,
             pinned: false, // This line makes the app bar scroll
           ),

@@ -23,7 +23,6 @@ class MyBottomNavBar extends StatelessWidget {
 
 
         child: BottomNavigationBar(
-
           type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.teal[600],
           fixedColor: Colors.white,
@@ -31,12 +30,12 @@ class MyBottomNavBar extends StatelessWidget {
           showSelectedLabels: true,
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
+              icon: Icon(Icons.newspaper_rounded),
+              label: 'Feed',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.messenger_outline),
-              label: 'Message',
+              label: 'Messages',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.people_outline),

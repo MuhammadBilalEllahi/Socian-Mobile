@@ -4,6 +4,7 @@ import 'UI Pages/SplashScreen.dart';
 import 'package:flutter/material.dart';
 
 import 'UI Pages/AppThemes.dart';
+import 'features/auth/presentation/auth_screen.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
