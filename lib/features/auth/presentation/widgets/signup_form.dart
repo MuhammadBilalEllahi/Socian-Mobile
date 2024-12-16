@@ -1,64 +1,3 @@
-// import 'package:flutter/material.dart';
-//
-// class signup_form extends StatefulWidget {
-//   const signup_form({super.key});
-//
-//   @override
-//   State<signup_form> createState() => _signup_formState();
-// }
-//
-// class _signup_formState extends State<signup_form> {
-//   final emailController = TextEditingController();
-//   final passwordController = TextEditingController();
-//   final nameController = TextEditingController();
-//   final usernameController = TextEditingController();
-//
-//   void signup(){
-//
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Padding(
-//       padding: const EdgeInsets.all(16.0),
-//       child: Column(
-//         children: [
-//           TextField(
-//             controller: nameController,
-//             decoration: const InputDecoration(labelText: "Select University",labelStyle: TextStyle(color: Colors.white)),
-//           ),
-//           TextField(
-//             controller: nameController,
-//             decoration: const InputDecoration(labelText: "Full Name",labelStyle: TextStyle(color: Colors.white)),
-//           ),
-//           TextField(
-//             controller: usernameController,
-//             decoration: const InputDecoration(labelText: "Choose a Username",labelStyle: TextStyle(color: Colors.white)),
-//           ),
-//           TextField(
-//             controller: emailController,
-//             decoration: const InputDecoration(labelText: "Your Institutional Email",labelStyle: TextStyle(color: Colors.white)),
-//             obscureText: true,
-//           ),
-//           TextField(
-//             controller: passwordController,
-//             decoration: const InputDecoration(labelText: "Password",labelStyle: TextStyle(color: Colors.white)),
-//             obscureText: true,
-//           ),
-//           const SizedBox(height: 20),
-//           ElevatedButton(onPressed: signup, child: const Text("Sign Up",style: TextStyle(fontWeight: FontWeight.bold),),
-//               style: ButtonStyle(
-//                 backgroundColor: WidgetStatePropertyAll<Color>(Colors.teal.shade800),
-//                 foregroundColor:  WidgetStatePropertyAll<Color>(Colors.white),
-//
-//               )
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
 import 'package:flutter/material.dart';
 
 class signup_form extends StatefulWidget {
@@ -75,6 +14,7 @@ class _signup_formState extends State<signup_form> {
   final usernameController = TextEditingController();
 
   String? selectedUniversity; // To store the selected value
+  bool isPasswordVisible = false; // Track password visibility
 
   void signup() {
     // Implement signup logic here
@@ -129,8 +69,6 @@ class _signup_formState extends State<signup_form> {
           const SizedBox(height: 16),
 
           // Full Name TextField
-
-
           TextField(
             controller: nameController,
             decoration: const InputDecoration(
@@ -139,6 +77,7 @@ class _signup_formState extends State<signup_form> {
             ),
           ),
           const SizedBox(height: 16),
+
           // Username TextField
           TextField(
             controller: usernameController,
@@ -156,18 +95,30 @@ class _signup_formState extends State<signup_form> {
               labelText: "Your Institutional Email",
               labelStyle: TextStyle(color: Colors.white),
             ),
-            obscureText: false,
           ),
           const SizedBox(height: 16),
 
-          // Password TextField
+          // Password TextField with Toggle Visibility
           TextField(
             controller: passwordController,
-            decoration: const InputDecoration(
+            obscureText: !isPasswordVisible, // Toggle visibility
+            decoration: InputDecoration(
               labelText: "Password",
-              labelStyle: TextStyle(color: Colors.white),
+              labelStyle: const TextStyle(color: Colors.white),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  isPasswordVisible
+                      ? Icons.visibility // Open eye icon
+                      : Icons.visibility_off, // Closed eye icon
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  setState(() {
+                    isPasswordVisible = !isPasswordVisible; // Toggle state
+                  });
+                },
+              ),
             ),
-            obscureText: true,
           ),
           const SizedBox(height: 20),
 
@@ -180,14 +131,15 @@ class _signup_formState extends State<signup_form> {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               style: ButtonStyle(
-                backgroundColor:
-                WidgetStatePropertyAll<Color>(Colors.teal.shade800),
-                foregroundColor: const WidgetStatePropertyAll<Color>(
-                    Colors.white),
-                padding: const WidgetStatePropertyAll<EdgeInsets>(
+                backgroundColor: MaterialStatePropertyAll<Color>(
+                  Colors.teal.shade800,
+                ),
+                foregroundColor:
+                const MaterialStatePropertyAll<Color>(Colors.white),
+                padding: const MaterialStatePropertyAll<EdgeInsets>(
                   EdgeInsets.symmetric(horizontal: 40, vertical: 12),
                 ),
-                shape: WidgetStatePropertyAll<OutlinedBorder>(
+                shape: MaterialStatePropertyAll<OutlinedBorder>(
                   RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -200,4 +152,3 @@ class _signup_formState extends State<signup_form> {
     );
   }
 }
-

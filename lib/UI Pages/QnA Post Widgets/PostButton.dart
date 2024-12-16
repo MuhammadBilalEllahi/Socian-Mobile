@@ -12,7 +12,7 @@ class _PostButtonState extends State<PostButton> {
   Widget build(BuildContext context) {
     return ElevatedButton(onPressed: (){}, child: Text("Post", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),),
       style: ButtonStyle(
-        backgroundColor: WidgetStatePropertyAll<Color>(Colors.tealAccent.shade400),
+        backgroundColor: WidgetStatePropertyAll<Color>(Colors.teal.shade700),
 
       )
 

@@ -40,15 +40,23 @@ class _SimplePostState extends State<SimplePost> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Muhammad Rayyan"),
-                            Text("CS",style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),)
+                            Text("Muhammad Rayyan",style: TextStyle(fontSize: 16),),
+                            Row(
+                              children: [
+                                Text("CS",style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),),
+                                SizedBox(width: 5,),
+                                Icon(Icons.circle,size: 6,),
+                                SizedBox(width: 5,),
+                                Text("10 min ago",style: TextStyle(fontSize: 12,color: Colors.grey),)
+                              ],
+                            )
                           ],
                         ),
                       ),],),
 
                   ],),
                   Column(children: [
-                    Icon(Icons.more_horiz)
+                    Icon(Icons.more_horiz,size: 24,)
                   ],),
                 ],
               ),
@@ -73,31 +81,20 @@ class _SimplePostState extends State<SimplePost> {
             SizedBox(height: 5,),
             // Like comment row
             Padding(
-              padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              padding: const EdgeInsets.fromLTRB(10, 0, 5, 0),
+              child: Column(
                 children: [
-                  // buttons
-                  Column(
+                  Row(
                     children: [
-                      Row(
-                        children: [
-                          // SizedBox(width: 10,),
-                          Icon(Icons.thumb_up_outlined),
-                          Text("10",),
-                          SizedBox(width: 10,),
-                          Icon(Icons.mode_comment_outlined),
-                          Text("6",),
+                      // SizedBox(width: 10,),
+                      Icon(Icons.thumb_up_outlined,size: 30,),
+                      Text("10",style: TextStyle(fontSize:18 ),),
+                      SizedBox(width: 10,),
+                      Icon(Icons.mode_comment_outlined, size: 30,),
+                      Text("6",style: TextStyle(fontSize:18 ),),
 
-                        ],
-                      )
                     ],
-                  ),
-                  Column(
-                    children: [
-                      Text("10 min ago",style: TextStyle(fontSize: 10,color: Colors.grey),)
-                    ],
-                  ),
+                  )
                 ],
               ),
             ),

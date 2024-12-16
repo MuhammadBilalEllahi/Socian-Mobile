@@ -1,3 +1,5 @@
+
+
 import 'package:beyondtheclass/UI%20Pages/HomePage.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
@@ -14,33 +16,29 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  
+  // State for toggling password visibility
+  bool isPasswordVisible = false;
 
   void login() {
-        print("1 - File: login_form.dart - This is credentials: ${emailController.text} and ${passwordController.text}");
+    print("1 - File: login_form.dart - This is credentials: ${emailController.text} and ${passwordController.text}");
     ref.read(authProvider.notifier).login(
-          emailController.text,
-          passwordController.text,
-        );
+      emailController.text,
+      passwordController.text,
+    );
   }
-
-@override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    
-  }
-  
 
   @override
   Widget build(BuildContext context) {
-      final authState = ref.watch(authProvider);
-     final authController = ref.watch(authProvider.notifier);
+    final authState = ref.watch(authProvider);
+    final authController = ref.watch(authProvider.notifier);
 
     print("authController ${authController.authUseCases}");
     if (authState.user != null) {
       Future.microtask(() {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>const HomePage()));
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
       });
     }
 
@@ -50,20 +48,41 @@ class _LoginFormState extends ConsumerState<LoginForm> {
         children: [
           TextField(
             controller: emailController,
-            decoration: const InputDecoration(labelText: "Email",labelStyle: TextStyle(color: Colors.white)),
+            decoration: const InputDecoration(
+              labelText: "Email",
+              labelStyle: TextStyle(color: Colors.white),
+            ),
           ),
           TextField(
             controller: passwordController,
-            decoration: const InputDecoration(labelText: "Password",labelStyle: TextStyle(color: Colors.white)),
-            obscureText: true,
+            obscureText: !isPasswordVisible,
+            decoration: InputDecoration(
+              labelText: "Password",
+              labelStyle: const TextStyle(color: Colors.white),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  setState(() {
+                    isPasswordVisible = !isPasswordVisible;
+                  });
+                },
+              ),
+            ),
           ),
           const SizedBox(height: 20),
-          ElevatedButton(onPressed: login, child: const Text("Login",style: TextStyle(fontWeight: FontWeight.bold),),
-              style: ButtonStyle(
-                backgroundColor: WidgetStatePropertyAll<Color>(Colors.teal.shade800),
-                foregroundColor:  WidgetStatePropertyAll<Color>(Colors.white),
-
-              )
+          ElevatedButton(
+            onPressed: login,
+            child: const Text(
+              "Login",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            style: ButtonStyle(
+              backgroundColor: MaterialStatePropertyAll<Color>(Colors.teal.shade800),
+              foregroundColor: const MaterialStatePropertyAll<Color>(Colors.white),
+            ),
           ),
         ],
       ),

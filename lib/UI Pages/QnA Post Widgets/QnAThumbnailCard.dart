@@ -1,3 +1,6 @@
+
+
+
 import 'package:flutter/material.dart';
 
 class QnAThumbnailCard extends StatefulWidget {
@@ -11,43 +14,104 @@ class _QnAThumbnailCardState extends State<QnAThumbnailCard> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(15),
-
-        child: Container(
-          height: 180,
-          width: 200,
-          color: Colors.tealAccent[400],
+      padding: const EdgeInsets.all(12.0),
+      child: Container(
+        height: 200,
+        width: 220,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.teal.shade900, Colors.tealAccent.shade400],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 10,
+              spreadRadius: 2,
+              offset: const Offset(4, 6),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // profile pic
-              Padding(
-                padding: const EdgeInsets.all(2.0),
-                child: Row(mainAxisAlignment:MainAxisAlignment.center, children: [CircleAvatar(radius: 25,backgroundImage: AssetImage("assets/images/anime.png"),)],),
-              ),
-              // answer
-              Row(children: [Padding(
-                padding: const EdgeInsets.all(3.0),
-                child: Container(width:190,child: Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit, aliqua consectetur amet, consectetur .",style: TextStyle(fontStyle: FontStyle.italic),)),
-              )],),
-              // upvote and downvote
+              // Profile picture and name
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.arrow_upward),
-                  Text("15"),
-                  Icon(Icons.arrow_downward),
-                  Text("3")
+                  const CircleAvatar(
+                    radius: 20,
+                    backgroundImage: AssetImage("assets/images/anime.png"),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    "John Doe",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
 
-              ],),
+              // Answer snippet
+              const Text(
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus magna lacus.",
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontStyle: FontStyle.italic,
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
+              ),
+
+              // Upvote and downvote row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Row(
+                    children: const [
+                      Icon(Icons.arrow_upward, size: 24, color: Colors.white),
+                      SizedBox(width: 5),
+                      Text(
+                        "15",
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: const [
+                      Icon(Icons.arrow_downward, size: 24, color: Colors.white),
+                      SizedBox(width: 5),
+                      Text(
+                        "3",
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: const [
+                      Icon(Icons.reply, size: 24, color: Colors.white),
+                      SizedBox(width: 5),
+                      Text(
+                        "15",
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ],
           ),
-
         ),
       ),
     );
   }
 }
+
