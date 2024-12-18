@@ -16,11 +16,11 @@ class _QnAThumbnailCardState extends State<QnAThumbnailCard> {
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: Container(
-        height: 200,
+        height: 260,
         width: 220,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.teal.shade900, Colors.tealAccent.shade400],
+            colors: [Colors.tealAccent.shade400, Colors.teal.shade900],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -44,29 +44,45 @@ class _QnAThumbnailCardState extends State<QnAThumbnailCard> {
               Row(
                 children: [
                   const CircleAvatar(
-                    radius: 20,
+                    radius: 22,
                     backgroundImage: AssetImage("assets/images/anime.png"),
                   ),
                   const SizedBox(width: 10),
-                  const Text(
-                    "John Doe",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "John Doe",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Text("CS",style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold,fontSize: 12),),
+                          SizedBox(width: 5,),
+                          Icon(Icons.circle,size: 6,color: Colors.white,),
+                          SizedBox(width: 5,),
+                          Text("10 min ago",style: TextStyle(fontSize: 12,color: Colors.white),
+                          )
+                        ],
+                      ),
+
+                    ],
                   ),
                 ],
               ),
 
               // Answer snippet
               const Text(
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus magna lacus.",
-                maxLines: 3,
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus magna lacus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus magna lacus.",
+                maxLines: 5,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontStyle: FontStyle.italic,
-                  fontSize: 16,
+                  fontSize: 13,
                   color: Colors.white,
                 ),
               ),

@@ -53,7 +53,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         height: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.teal.shade50, Colors.teal.shade800],
+            colors: [Colors.teal.shade900, Colors.tealAccent.shade400],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -80,7 +80,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
               ),
               SizedBox(height: 10),
               Text(
-                "Discover New Horizons, Look Beyond the Class",
+                "Discover New Horizons, Look Beyond the Class",  textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
                   // color: Colors.teal.shade900,

@@ -9,9 +9,9 @@ class RoleSelectionPage extends StatelessWidget {
     return Scaffold(
 
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFB2DFDB), Color(0xFF004D40)],
+            colors: [Colors.teal.shade900, Colors.tealAccent.shade400],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),

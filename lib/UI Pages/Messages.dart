@@ -32,10 +32,13 @@ class _MessagesState extends State<Messages> {
               ],
             ),
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  color: Colors.red,
-                  height: 30,
+                  // color: Colors.red,
+                  // height: 30,
+                  // width: 80,
+                  child: Text("Inbox",style: TextStyle(color: Colors.teal.shade900,fontSize: 28,fontWeight: FontWeight.bold),),
                 )
               ],
             ),

@@ -53,7 +53,7 @@ class _QnAPostState extends State<QnAPost> {
                                 children: [
                                   Text(
                                     "Muhammad Bilal Ellahi",
-                                    style: TextStyle(fontSize: 16),
+                                    style: TextStyle(fontSize: 12),
                                   ),
                                   Row(
                                     children: [
@@ -61,7 +61,9 @@ class _QnAPostState extends State<QnAPost> {
                                         "PHY",
                                         style: TextStyle(
                                             color: Colors.blue,
-                                            fontWeight: FontWeight.bold),
+                                            fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                        )
                                       ),
                                       SizedBox(
                                         width: 5,
@@ -76,7 +78,7 @@ class _QnAPostState extends State<QnAPost> {
                                       Text(
                                         "10 min ago",
                                         style: TextStyle(
-                                            fontSize: 12, color: Colors.grey),
+                                            fontSize: 12, color: Colors.grey,fontWeight: FontWeight.bold),
                                       )
                                     ],
                                   )
@@ -102,7 +104,7 @@ class _QnAPostState extends State<QnAPost> {
             Padding(
               padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
               child: Text(
-                  "Seniors! I need guidance. Do I need to focus on OOP and DSA concepts more and take Modern Physics lightly. Or focus on every course"),
+                  "Seniors! I need guidance. Do I need to focus on OOP and DSA concepts more and take Modern Physics lightly. Or focus on every course",style: TextStyle(fontSize: 12),),
             ),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,

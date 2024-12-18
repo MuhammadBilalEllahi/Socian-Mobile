@@ -19,7 +19,7 @@ class _signup_screenState extends State<signup_screen> {
         height: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.teal.shade50, Colors.teal.shade800],
+            colors: [Colors.teal.shade900, Colors.tealAccent.shade400],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),

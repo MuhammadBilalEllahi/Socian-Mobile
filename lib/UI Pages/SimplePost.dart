@@ -40,14 +40,14 @@ class _SimplePostState extends State<SimplePost> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Muhammad Rayyan",style: TextStyle(fontSize: 16),),
+                            Text("Muhammad Rayyan",style: TextStyle(fontSize: 12),),
                             Row(
                               children: [
-                                Text("CS",style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),),
+                                Text("CS",style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold,fontSize: 12),),
                                 SizedBox(width: 5,),
                                 Icon(Icons.circle,size: 6,),
                                 SizedBox(width: 5,),
-                                Text("10 min ago",style: TextStyle(fontSize: 12,color: Colors.grey),)
+                                Text("10 min ago",style: TextStyle(fontSize: 12,color: Colors.grey,fontWeight: FontWeight.bold),)
                               ],
                             )
                           ],
@@ -68,7 +68,9 @@ class _SimplePostState extends State<SimplePost> {
                 children: [
                   Expanded(
                     child: Text("Lorem ipsum Quisque blandit dolor vel ullamcorper fringilla. "
-                        "Etiam ut ultricies nibh. Maecenas sit amet ipsum",),
+                        "Etiam ut ultricies nibh. Maecenas sit amet ipsum",
+                      style: TextStyle(fontSize: 12),
+                    ),
                   )
                 ],
               ),

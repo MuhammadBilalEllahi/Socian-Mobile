@@ -22,7 +22,8 @@ class _YourAnswerTextFieldState extends State<YourAnswerTextField> {
           labelText: 'Write your answer',
           // border: OutlineInputBorder(),
           labelStyle: TextStyle(
-            color: Colors.teal, // Replace with your desired color
+            color: Colors.teal,
+            fontSize: 12
           ),
         ),
 

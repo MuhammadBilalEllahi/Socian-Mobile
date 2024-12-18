@@ -15,7 +15,7 @@ class _MyDrawerState extends State<MyDrawer> {
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.teal.shade50, Colors.teal.shade800],
+            colors: [Colors.teal.shade900, Colors.tealAccent.shade400],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -50,11 +50,11 @@ class _MyDrawerState extends State<MyDrawer> {
                 children: [
                   CircleAvatar(
                     radius: 40,
-                    backgroundColor: Colors.teal.shade800,
+                    backgroundColor: Colors.teal.shade100,
                     child: Icon(
                       Icons.person,
                       size: 50,
-                      color: Colors.teal.shade100,
+                      color: Colors.teal.shade800,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -104,6 +104,16 @@ class _MyDrawerState extends State<MyDrawer> {
                     onTap: () {
                       Navigator.of(context).pop();
                     },
+                  ),ListTile(
+                    // leading: Icon(Icons.person, color: Colors.white),
+                    leading: Text(
+                      '🏫', // Emoji for All Unis (Classical Building)
+                      style: TextStyle(fontSize: 24),
+                    ),
+                    title: Text("Inter Campuses", style: TextStyle(color: Colors.white)),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
                   ),
                   ListTile(
                     // leading: Icon(Icons.notifications, color: Colors.white),
@@ -112,6 +122,16 @@ class _MyDrawerState extends State<MyDrawer> {
                       style: TextStyle(fontSize: 24),
                     ),
                     title: Text("Alumni", style: TextStyle(color: Colors.white)),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),ListTile(
+                    // leading: Icon(Icons.notifications, color: Colors.white),
+                    leading: Text(
+                      '👨‍🏫', // Emoji for alumni
+                      style: TextStyle(fontSize: 24),
+                    ),
+                    title: Text("Teacher's Reviews", style: TextStyle(color: Colors.white)),
                     onTap: () {
                       Navigator.of(context).pop();
                     },

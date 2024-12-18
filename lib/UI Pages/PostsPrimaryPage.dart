@@ -88,8 +88,8 @@ class _PostsPrimaryPageState extends ConsumerState<PostsPrimaryPage> {
                         ],
                       ),
                     ),
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
                       child: SizedBox(
                         height: 50,
                         // color: Colors.red,
@@ -97,12 +97,12 @@ class _PostsPrimaryPageState extends ConsumerState<PostsPrimaryPage> {
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: [
-                              Filters(color: Colors.blue, text: "Latest Feed"),
-                              Filters(color: Colors.red, text: "Ongoing"),
-                              Filters(color: Colors.greenAccent, text: "QnA"),
-                              Filters(
-                                  color: Colors.purple, text: "Lost & Found"),
-                              Filters(color: Colors.brown, text: "Polls"),
+                              Filters(color: Colors.teal.shade900, text: "Latest Feed"),
+                              Filters(color: Colors.tealAccent.shade400, text: "Ongoing"),
+                              Filters(color: Colors.teal.shade900, text: "QnA"),
+                              Filters(color: Colors.tealAccent.shade400, text: "Lost & Found"),
+                              Filters(color: Colors.teal.shade900, text: "Polls"),
+                              Filters(color: Colors.tealAccent.shade400, text: "Alerts"),
                             ],
                           ),
                         ),
