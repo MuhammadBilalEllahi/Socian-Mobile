@@ -1,5 +1,6 @@
 
 import 'package:beyondtheclass/UI%20Pages/HomePage.dart';
+import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/presentation/student_signupScreen.dart';
 import 'package:beyondtheclass/features/auth/presentation/widgets/RoleSelectionPage.dart';
 import 'package:beyondtheclass/features/auth/presentation/widgets/login_form.dart';
@@ -53,36 +54,36 @@ class AuthScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        SizedBox(height: 100),
-                        Icon(
+                        const SizedBox(height: 100),
+                        const Icon(
                           Icons.school,
                           size: 80,
                           color: Colors.white,
                         ),
-                        SizedBox(height: 20),
-                        Text(
-                          "Beyond The Class",
+                        const SizedBox(height: 20),
+                        const Text(
+                          AppConstants.appName,
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
                         ),
-                        SizedBox(height: 10),
-                        Text(
+                        const SizedBox(height: 10),
+                        const Text(
                           "Login to access your account",
                           style: TextStyle(
                             fontSize: 18,
                             color: Colors.white,
                           ),
                         ),
-                        SizedBox(height: 40),
+                        const SizedBox(height: 40),
                         const LoginForm(),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
+                            const Text(
                               "Don't have an account?",
                               style: TextStyle(
                                 // color: Colors.teal.shade600,
@@ -97,7 +98,7 @@ class AuthScreen extends ConsumerWidget {
                                   MaterialPageRoute(builder: (context) => const RoleSelectionPage()),
                                 );
                               },
-                              child: Text(
+                              child: const Text(
                                 "Sign Up",
                                 style: TextStyle(
                                   // color: Colors.teal.shade800,
@@ -109,7 +110,7 @@ class AuthScreen extends ConsumerWidget {
                             ),
                           ],
                         ),
-                        Spacer(),
+                        const Spacer(),
                       ],
                     ),
                   ),

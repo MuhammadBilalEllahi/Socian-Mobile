@@ -22,7 +22,7 @@
 //           children: [
 //             myTextField(textEditingController: _emailController, label: 'label', obscureTextBool: false ,focus: true, validator: null),
 //             Text(
-//               "Beyond The Class",
+//              AppConstants.appName,
 //               style: TextStyle(
 //                 fontSize: 28,
 //                 fontWeight: FontWeight.bold,
@@ -123,12 +123,15 @@
 
 
 
+import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:flutter/material.dart';
 
 import '../../components/my_textfield.dart';
 
 class LoginPage extends StatelessWidget {
   final _emailController = TextEditingController();
+
+  LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -146,22 +149,22 @@ class LoginPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(height: 100),
+              const SizedBox(height: 100),
               Icon(
                 Icons.school,
                 size: 80,
                 color: Colors.teal.shade600,
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Text(
-                "Beyond The Class",
+                AppConstants.appName,
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: Colors.teal.shade900,
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Text(
                 "Login to your account",
                 style: TextStyle(
@@ -169,15 +172,15 @@ class LoginPage extends StatelessWidget {
                   color: Colors.teal.shade700,
                 ),
               ),
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 30.0),
                 child: Column(
                   children: [
-                    _buildTextField("Email", Icons.email, false),
-                    SizedBox(height: 20),
+                    _buildTextField("Email/Username", Icons.email, false),
+                    const SizedBox(height: 20),
                     _buildTextField("Password", Icons.lock, true),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
@@ -191,19 +194,19 @@ class LoginPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SizedBox(height: 30),
+                    const SizedBox(height: 30),
                     ElevatedButton(
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.teal.shade600,
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                             horizontal: 50, vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
                         elevation: 5,
                       ),
-                      child: Text(
+                      child: const Text(
                         "LOGIN",
                         style: TextStyle(
                           fontSize: 18,
@@ -212,7 +215,7 @@ class LoginPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -239,7 +242,7 @@ class LoginPage extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(height: 50),
+              const SizedBox(height: 50),
             ],
           ),
         ),

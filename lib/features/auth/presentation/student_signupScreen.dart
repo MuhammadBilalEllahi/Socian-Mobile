@@ -1,3 +1,4 @@
+import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/presentation/widgets/signup_form.dart';
 import 'package:flutter/material.dart';
 import 'package:beyondtheclass/features/auth/presentation/auth_screen.dart';
@@ -37,36 +38,36 @@ class _signup_screenState extends State<signup_screen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        SizedBox(height: 100),
-                        Icon(
+                        const SizedBox(height: 100),
+                        const Icon(
                           Icons.school,
                           size: 80,
                           color: Colors.white,
                         ),
-                        SizedBox(height: 20),
-                        Text(
-                          "Beyond The Class",
+                        const SizedBox(height: 20),
+                        const Text(
+                          AppConstants.appName,
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
                         ),
-                        SizedBox(height: 10),
-                        Text(
+                        const SizedBox(height: 10),
+                        const Text(
                           "Student Sign Up",
                           style: TextStyle(
                             fontSize: 18,
                             color: Colors.white,
                           ),
                         ),
-                        SizedBox(height: 40),
+                        const SizedBox(height: 40),
                         const signup_form(),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
+                            const Text(
                               "Already have an account?",
                               style: TextStyle(
                                 // color: Colors.teal.shade600,
@@ -81,7 +82,7 @@ class _signup_screenState extends State<signup_screen> {
                                   MaterialPageRoute(builder: (context) => const AuthScreen()),
                                 );
                               },
-                              child: Text(
+                              child: const Text(
                                 "Log In",
                                 style: TextStyle(
                                   // color: Colors.teal.shade800,
@@ -93,7 +94,7 @@ class _signup_screenState extends State<signup_screen> {
                             ),
                           ],
                         ),
-                        Spacer(),
+                        const Spacer(),
                       ],
                     ),
                   ),
