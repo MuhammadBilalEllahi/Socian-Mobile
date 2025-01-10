@@ -5,3 +5,12 @@ class ApiConstants {
   static const String baseUrl = "https://backend.beyondtheclass.bilalellahi.com";
   static const String loginEndpoint = "/api/auth/login";
 }
+
+class AppConstants {
+  static const String appName = "Beyond The Class";
+  static const String appSlogan = "Discover New Horizons, Look Beyond the Class";
+    static const String appGreeting ="Good Day, User!";
+
+   
+
+}

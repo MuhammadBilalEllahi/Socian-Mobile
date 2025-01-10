@@ -1,5 +1,6 @@
 import 'package:beyondtheclass/UI%20Pages/MyDrawer.dart';
 import 'package:beyondtheclass/UI%20Pages/SimplePost.dart';
+import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/presentation/auth_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
@@ -26,7 +27,7 @@ class _PostsPrimaryPageState extends ConsumerState<PostsPrimaryPage> {
             backgroundColor: Colors.transparent,
             toolbarHeight: 23.0,
             centerTitle: false,
-            title: Text("Beyond The Class", style: TextStyle(color: Colors.teal[800],fontWeight: FontWeight.bold)),
+            title: Text( AppConstants.appName, style: TextStyle(color: Colors.teal[800],fontWeight: FontWeight.bold)),
             automaticallyImplyLeading: false,
             pinned: false, // This line makes the app bar scroll
           ),

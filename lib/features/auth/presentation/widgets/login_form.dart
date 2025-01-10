@@ -49,7 +49,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
           TextField(
             controller: emailController,
             decoration: const InputDecoration(
-              labelText: "Email",
+              labelText: "Email/Username",
               labelStyle: TextStyle(color: Colors.white),
             ),
           ),
@@ -75,13 +75,13 @@ class _LoginFormState extends ConsumerState<LoginForm> {
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: login,
+            style: ButtonStyle(
+              backgroundColor: WidgetStatePropertyAll<Color>(Colors.teal.shade800),
+              foregroundColor: const WidgetStatePropertyAll<Color>(Colors.white),
+            ),
             child: const Text(
               "Login",
               style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            style: ButtonStyle(
-              backgroundColor: MaterialStatePropertyAll<Color>(Colors.teal.shade800),
-              foregroundColor: const MaterialStatePropertyAll<Color>(Colors.white),
             ),
           ),
         ],

@@ -1,3 +1,4 @@
+import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:flutter/material.dart';
 
 class MyDrawer extends StatefulWidget {
@@ -58,8 +59,8 @@ class _MyDrawerState extends State<MyDrawer> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  Text(
-                    "Good Day, User!",
+                  const Text(
+                    AppConstants.appGreeting,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -67,7 +68,7 @@ class _MyDrawerState extends State<MyDrawer> {
                     ),
                   ),
                   // Text(
-                  //   "Beyond The Class",
+                  //   AppConstants.appName,
                   //   style: TextStyle(
                   //     fontSize: 14,
                   //     color: Colors.white
@@ -85,73 +86,73 @@ class _MyDrawerState extends State<MyDrawer> {
                 padding: EdgeInsets.zero,
                 children: [
                   ListTile(
-                    leading: Text(
+                    leading: const Text(
                       '🏠', // Emoji for Home (House)
                       style: TextStyle(fontSize: 24),
                     ),
-                    title: Text("Home", style: TextStyle(color: Colors.white)),
+                    title: const Text("Home", style: TextStyle(color: Colors.white)),
                     onTap: () {
                       Navigator.of(context).pop();
                     },
                   ),
                   ListTile(
                     // leading: Icon(Icons.person, color: Colors.white),
-                    leading: Text(
+                    leading: const Text(
                       '🏛️', // Emoji for All Unis (Classical Building)
                       style: TextStyle(fontSize: 24),
                     ),
-                    title: Text("All Unis", style: TextStyle(color: Colors.white)),
+                    title: const Text("All Unis", style: TextStyle(color: Colors.white)),
                     onTap: () {
                       Navigator.of(context).pop();
                     },
                   ),ListTile(
                     // leading: Icon(Icons.person, color: Colors.white),
-                    leading: Text(
+                    leading: const Text(
                       '🏫', // Emoji for All Unis (Classical Building)
                       style: TextStyle(fontSize: 24),
                     ),
-                    title: Text("Inter Campuses", style: TextStyle(color: Colors.white)),
+                    title: const Text("Inter Campuses", style: TextStyle(color: Colors.white)),
                     onTap: () {
                       Navigator.of(context).pop();
                     },
                   ),
                   ListTile(
                     // leading: Icon(Icons.notifications, color: Colors.white),
-                    leading: Text(
+                    leading: const Text(
                       '👨‍🎓', // Emoji for alumni
                       style: TextStyle(fontSize: 24),
                     ),
-                    title: Text("Alumni", style: TextStyle(color: Colors.white)),
+                    title: const Text("Alumni", style: TextStyle(color: Colors.white)),
                     onTap: () {
                       Navigator.of(context).pop();
                     },
                   ),ListTile(
                     // leading: Icon(Icons.notifications, color: Colors.white),
-                    leading: Text(
+                    leading: const Text(
                       '👨‍🏫', // Emoji for alumni
                       style: TextStyle(fontSize: 24),
                     ),
-                    title: Text("Teacher's Reviews", style: TextStyle(color: Colors.white)),
+                    title: const Text("Teacher's Reviews", style: TextStyle(color: Colors.white)),
                     onTap: () {
                       Navigator.of(context).pop();
                     },
                   ),
                   ListTile(
-                    leading: Text(
+                    leading: const Text(
                       '☕', // Emoji for Cafe Information Services (Coffee Cup)
                       style: TextStyle(fontSize: 24),
                     ),
-                    title: Text("Cafe Information Services", style: TextStyle(color: Colors.white)),
+                    title: const Text("Cafe Information Services", style: TextStyle(color: Colors.white)),
                     onTap: () {
                       Navigator.of(context).pop();
                     },
                   ),
                   ListTile(
-                    leading: Text(
+                    leading: const Text(
                       '📄', // Emoji for Past Papers (Document)
                       style: TextStyle(fontSize: 24),
                     ),
-                    title: Text("Past Papers", style: TextStyle(color: Colors.white)),
+                    title: const Text("Past Papers", style: TextStyle(color: Colors.white)),
                     onTap: () {
                       Navigator.of(context).pop();
                     },

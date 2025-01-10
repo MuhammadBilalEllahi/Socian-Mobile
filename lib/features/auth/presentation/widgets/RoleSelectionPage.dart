@@ -19,8 +19,8 @@ class RoleSelectionPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Select Your Role",style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 28),),
-            SizedBox(height: 10,),
+            const Text("Select Your Role",style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 28),),
+            const SizedBox(height: 10,),
             _buildRoleCard(
               context,
               role: "Student",
@@ -77,11 +77,11 @@ class RoleSelectionPage extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(15),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               color: Colors.black26,
               blurRadius: 8,
-              offset: const Offset(0, 4),
+              offset: Offset(0, 4),
             ),
           ],
         ),
