@@ -19,8 +19,8 @@ class MyBottomNavBar extends StatelessWidget {
       // borderRadius: BorderRadius.circular(25),
       // borderRadius: BorderRadius.circular(0),
       borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(30.0),
-        topRight: Radius.circular(30.0),
+        // topLeft: Radius.circular(30.0),
+        // topRight: Radius.circular(30.0),
         // bottomRight: Radius.circular(30.0),
         // bottomLeft: Radius.circular(40.0),
       ),        child: Container(
