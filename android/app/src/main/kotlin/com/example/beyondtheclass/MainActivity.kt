@@ -1,4 +1,4 @@
-package com.example.beyondtheclass
+package com.beyondtheclass.app
 
 import io.flutter.embedding.android.FlutterActivity
 
