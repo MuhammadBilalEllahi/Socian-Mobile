@@ -33,7 +33,7 @@ class ApiClient {
     }
   }
 
-  Future<Map<String, dynamic>> get(
+  Future<T> get<T>(
     String endpoint, {
     Map<String, String>? headers,
     Map<String, dynamic>? queryParameters,
@@ -50,11 +50,59 @@ class ApiClient {
         options: Options(headers: mergedHeaders),
       );
 
-      return response.data as Map<String, dynamic>;
+      return response.data as T ;
     } catch (e) {
+      print("Error in DIO GET $e");
       throw ApiException.fromDioError(e);
     }
   }
+
+Future<Map<String, dynamic>> getMap(
+  String endpoint, {
+  Map<String, String>? headers,
+  Map<String, dynamic>? queryParameters,
+}) async {
+  return get<Map<String, dynamic>>(endpoint, headers: headers, queryParameters: queryParameters);
+}
+
+Future<List<dynamic>> getList(
+  String endpoint, {
+  Map<String, String>? headers,
+  Map<String, dynamic>? queryParameters,
+}) async {
+  return get<List<dynamic>>(endpoint, headers: headers, queryParameters: queryParameters);
+}
+
+
+// Future<Map<String, dynamic>> getMap(
+//   String endpoint, {
+//   Map<String, String>? headers,
+//   Map<String, dynamic>? queryParameters,
+// }) async {
+//   try {
+//     final response = await get(endpoint, headers: headers, queryParameters: queryParameters);
+//     // ignore: unnecessary_cast
+//     return response as Map<String, dynamic>;
+//   } catch (e) {
+//     throw ApiException.fromDioError(e);
+//   }
+// }
+
+// Future<List<dynamic>> getList(
+//   String endpoint, {
+//   Map<String, String>? headers,
+//   Map<String, dynamic>? queryParameters,
+// }) async {
+//   try {
+//     final response = await get(endpoint, headers: headers, queryParameters: queryParameters);
+//     print("DATA$response");
+//     return response as List<dynamic>;
+//   } catch (e) {
+//     throw ApiException.fromDioError(e);
+//   }
+// }
+
+
 }
 
 class ApiException implements Exception {
@@ -84,3 +132,6 @@ class ApiException implements Exception {
   @override
   String toString() => message;
 }
+
+
+

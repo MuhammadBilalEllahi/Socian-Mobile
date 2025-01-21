@@ -18,6 +18,8 @@ class MyTextField extends StatelessWidget {
     this.padZero,
     this.keybordType,
     this.validatorForm,
+    this.suffixIcon,
+    this.customKey
   }) : _textEditingController = textEditingController;
 
   final TextEditingController _textEditingController;
@@ -33,6 +35,9 @@ class MyTextField extends StatelessWidget {
   final double? width;
   final double? padZero;
   final TextInputType? keybordType;
+  final IconButton? suffixIcon;
+
+  final Key? customKey;
 
   @override
   Widget build(BuildContext context) {
@@ -41,14 +46,16 @@ class MyTextField extends StatelessWidget {
       width: width ?? 400,
       child: Padding(
         padding: EdgeInsets.fromLTRB(
-            padZero ?? 25, padZero ?? 10, padZero ?? 25, padZero ?? 20),
+            padZero ?? 0, padZero ?? 0, padZero ?? 0, padZero ?? 0),
         child: TextFormField(
-          style: TextStyle(color: Theme.of(context).primaryColorLight),
+          key: customKey,
+          style: const TextStyle(color: Colors.white,),
           controller: _textEditingController,
           autofocus: focus,
           validator: validatorForm ?? validator,
           readOnly: readOnly,
           keyboardType: keybordType,
+          
 
           // style: GoogleFonts.abel(),
 
@@ -56,17 +63,18 @@ class MyTextField extends StatelessWidget {
           // textInputAction: textInputType,
           inputFormatters: inputFormatters,
           decoration: InputDecoration(
-            fillColor: Theme.of(context).primaryColorLight,
+            fillColor: Colors.white,
             // error: ,
 
+            suffixIcon: suffixIcon ,
             errorStyle: const TextStyle(color: Colors.redAccent, fontSize: 10),
             // iconColor: Colors.blue,
 
             border: inputBorder ?? const UnderlineInputBorder(),
             label: Text(
               label,
-              style: TextStyle(
-                  fontSize: 16, color: Theme.of(context).primaryColorLight),
+              style: const TextStyle(
+                  fontSize: 16, color: Colors.white),
             ),
 
             //  focusColor: Colors.amber

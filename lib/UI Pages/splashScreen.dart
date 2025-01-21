@@ -84,20 +84,20 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             top: _moveToTop ? 50 : MediaQuery.of(context).size.height / 2 - 100,
             left: 0,
             right: 0,
-            child: Column(
+            child: const Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   "Beyond The Class",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 36,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                     letterSpacing: 1.2,
                   ),
                 ),
-                const SizedBox(height: 10),
-                const Text(
+                SizedBox(height: 10),
+                Text(
                   "Discover New Horizons\nLook Beyond the Class",
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -166,8 +166,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             borderRadius: BorderRadius.circular(12),
 
                           ),
-                          child: Center(
-                            child: const Text(
+                          child: const Center(
+                            child: Text(
                               "Sign Up",
                               style: TextStyle(
                                 fontSize: 16,
@@ -178,13 +178,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           ),
                         ),
                       ),
-                      SizedBox(width: 10,),
+                      const SizedBox(width: 10,),
                       // login
                       GestureDetector(
                         onTap: (){
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) =>  AuthScreen()),
+                            MaterialPageRoute(builder: (context) =>  const AuthScreen()),
                           );
                         },
                         child: Container(
@@ -194,8 +194,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             color: Colors.teal.shade900,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Center(
-                            child: const Text(
+                          child: const Center(
+                            child: Text(
                               "Login",
                               style: TextStyle(
                                 fontSize: 16,

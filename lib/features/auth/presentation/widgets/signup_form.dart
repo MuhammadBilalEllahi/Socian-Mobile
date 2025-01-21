@@ -1,3 +1,7 @@
+import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:beyondtheclass/shared/widgets/my_dropdown.dart';
+import 'package:beyondtheclass/shared/widgets/my_textfield.dart';
 import 'package:flutter/material.dart';
 
 class signup_form extends StatefulWidget {
@@ -8,103 +12,295 @@ class signup_form extends StatefulWidget {
 }
 
 class _signup_formState extends State<signup_form> {
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  final nameController = TextEditingController();
-  final usernameController = TextEditingController();
 
-  String? selectedUniversity; // To store the selected value
+    final _formKey = GlobalKey<FormState>(); // FormKey for validation
+final GlobalKey<FormFieldState<String>> _usernameKey = GlobalKey<FormFieldState<String>>();
+
+
+
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _usernameController = TextEditingController();
+
+  String? selectedUniversity; // To store the selected value  ### _id
+  String? selectedDepartment; // To store the selected value  ### _id
+  String? selectedRegex;
+  String? selectedDomain;
   bool isPasswordVisible = false; // Track password visibility
+  List<Map<String, dynamic>> universities = [];
+  List<Map<String, dynamic>> departmentsInSelectedUniversity = [];
+  bool isLoading = true;
+  final ApiClient apiClient = ApiClient();
+
+    bool isUsernameTaken = false; // Flag to track if username is taken
+
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUniversities();
+
+
+       // Add listener to the username controller to check for uniqueness
+    _usernameController.addListener(() {
+      if (_usernameController.text.length >= 7) {
+        checkUsernameAvailability(_usernameController.text);
+      } else {
+        setState(() {
+          isUsernameTaken = false; // Reset flag if username is less than 7 characters
+        });
+      }
+    });
+  }
+
+  void fetchUniversities() async {
+    try {
+      final response =
+          await apiClient.getList(ApiConstants.universityAndCampusNames);
+
+      setState(() {
+        universities = (response)
+            .map((uni) => {
+                  'name': uni['name'],
+                  '_id': uni['_id'],
+                  'departments': uni['departments'],
+                  'regex': uni['regex'],
+                  'domain': uni['domain'],
+                })
+            .toList();
+
+        print("fetching universities: $universities");
+        isLoading = false;
+      });
+    } catch (e) {
+      print("Error fetching universities: $e");
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  FormFieldValidator<dynamic> emailValidator() {
+    return (dynamic value) {
+      if (value == null || value.isEmpty) {
+        return 'Please enter an email';
+      }
+
+      // Regular expression for email validation
+      final emailRegex =
+          RegExp(selectedRegex ?? ''); // Fallback to empty string
+      if (!emailRegex.hasMatch(value)) {
+        return 'Please enter a valid email address';
+      }
+
+      return null; // Return null if valid
+    };
+  }
+
+
+
+
+// Function to check username availability
+void checkUsernameAvailability(String username) async {
+  try {
+    final response = await apiClient.get(
+      ApiConstants.usernames, 
+      queryParameters: {'username': username}
+    );
+print("REsponse $response ${response ==true}");
+    if (response == true) {
+      setState(() {
+        isUsernameTaken = true; // Set the flag for taken username
+      });
+
+// WidgetsBinding.instance.addPostFrameCallback((_) {
+//     _usernameKey.currentState?.validate();
+//   });
+    } else {
+      setState(() {
+        isUsernameTaken = false; // Reset flag if username is available
+      });
+      // _usernameKey.currentState?.validate();
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+    _usernameKey.currentState?.validate();
+  });
+  } catch (e) {
+    print("Error checking username: $e");
+  }
+}
+
+
+FormFieldValidator<dynamic> usernameValidator() {
+  return (value) {
+    if (value == null || value.isEmpty) {
+      return 'Username cannot be empty';
+    }
+    if (value.length < 8) {
+      return 'Username must be at least 8 characters long';
+    }
+    // Ensure username is lowercase and only contains letters, numbers, or underscores
+    final usernameRegex = RegExp(r'^[a-z0-9_]+$');
+    if (!usernameRegex.hasMatch(value)) {
+      return 'Username must be lowercase and can only contain letters, numbers, and underscores';
+    }
+
+    if (isUsernameTaken) {
+                  return 'Username is already taken';
+                }
+    return null;
+  };
+}
+
+
+
+void signupStudent() async{
+  try{
+
+   final universityDetails = selectedUniversity?.split('-');
+    final universityId = universityDetails?[0];
+    final campusId = universityDetails?[1];
+
+    final requestBody = {
+      'universityEmail': _emailController.text,
+      'name': _nameController.text,
+      'password': _passwordController.text,
+      'username': _usernameController.text,
+      'universityId': universityId,
+      'campusId': campusId,
+      'role': 'student', // Change when needed (this is just an example rolee)
+      'departmentId': selectedDepartment,
+    };
+
+    final response = await apiClient.post(
+      ApiConstants.registerEndpoint,
+      requestBody
+    );
+
+        print("Signup response: $response");
+
+
+  }catch(e){
+    print("ERROR WHILE SIGNING UP $e");
+  }
+}
+
+
+
 
   void signup() {
-    // Implement signup logic here
+       if (_formKey.currentState?.validate() ?? false) {
+
+
+        signupStudent();
+
+
+
+
+
+      // Form is valid, proceed with signup logic
+      print("Signing up with:");
+      print("Name: ${_nameController.text}");
+      print("Username: ${_usernameController.text}");
+      print("Email: ${_emailController.text}");
+      print("Password: ${_passwordController.text}");
+      print("University: $selectedUniversity");
+      print("Department: $selectedDepartment");
+    } else {
+      // If form is not valid, show an error or message
+      print("Form is invalid");
+    print("Signing up with:");
+    print("Name: ${_nameController.text}");
+    print("Username: ${_usernameController.text}");
+    print("Email: ${_emailController.text}");
+    print("Password: ${_passwordController.text}");
+    print("University: $selectedUniversity");
+    print("Department: $selectedDepartment");
+  }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Form(
+      key: _formKey,
+      child:    Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Dropdown Menu
-          DropdownButtonFormField<String>(
+          MyDropdownField<String>(
             value: selectedUniversity,
-            items: [
-              DropdownMenuItem(
-                value: 'COMSATS Lahore Campus',
-                child: Text("COMSATS Lahore Campus"),
-              ),
-              DropdownMenuItem(
-                value: 'FAST Lahore',
-                child: Text("FAST Lahore"),
-              ),
-              DropdownMenuItem(
-                value: 'NUST Islamabad',
-                child: Text("NUST Islamabad"),
-              ),
-            ],
+            items: universities,
+            label: "Select University",
+            validator: dropdownValidator(selectedUniversity, 'University'),
             onChanged: (value) {
               setState(() {
-                selectedUniversity = value!;
+                selectedUniversity = value;
+                selectedDepartment = null;
+                final selectedUni = universities.firstWhere(
+                    (uni) => uni['_id'] == value,
+                    orElse: () => {'departments': []});
+
+                departmentsInSelectedUniversity =
+                    List<Map<String, dynamic>>.from(
+                        selectedUni['departments'] ?? []);
+
+                selectedRegex = selectedUni['regex'];
               });
             },
-            decoration: InputDecoration(
-              labelText: "Select University",
-              labelStyle: const TextStyle(color: Colors.white),
-              filled: true,
-              fillColor: Colors.teal.shade800.withOpacity(0.2),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.teal.shade800, width: 2),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.teal.shade400, width: 2),
-              ),
-            ),
-            style: const TextStyle(color: Colors.white),
-            dropdownColor: Colors.teal.shade800, // Dropdown menu color
           ),
+
+        
           const SizedBox(height: 16),
+
+          MyDropdownField<String>(
+            value: selectedDepartment,
+            items: departmentsInSelectedUniversity,
+            label: "Select Department",
+                        validator: dropdownValidator(selectedDepartment, 'Department'),
+            onChanged: (value) {
+              setState(() {
+                selectedDepartment = value;
+              });
+            },
+          ),
+       
 
           // Full Name TextField
-          TextField(
-            controller: nameController,
-            decoration: const InputDecoration(
-              labelText: "Full Name",
-              labelStyle: TextStyle(color: Colors.white),
-            ),
-          ),
-          const SizedBox(height: 16),
+          MyTextField(
+              textEditingController: _nameController,
+              label: 'Full Name',
+              obscureTextBool: false,
+              focus: false,
+              validator: nameValidator()),
+
+          // const SizedBox(height: 16),
 
           // Username TextField
-          TextField(
-            controller: usernameController,
-            decoration: const InputDecoration(
-              labelText: "Choose a Username",
-              labelStyle: TextStyle(color: Colors.white),
-            ),
-          ),
-          const SizedBox(height: 16),
+          MyTextField(
+  customKey: _usernameKey,
+              textEditingController: _usernameController,
+              label: 'Choose a Username',
+              obscureTextBool: false,
+              focus: false,
+              validator: usernameValidator()),
 
+          // const SizedBox(height: 16),
           // Institutional Email TextField
-          TextField(
-            controller: emailController,
-            decoration: const InputDecoration(
-              labelText: "Your Institutional Email",
-              labelStyle: TextStyle(color: Colors.white),
-            ),
-          ),
-          const SizedBox(height: 16),
+          MyTextField(
+              textEditingController: _emailController,
+              label: 'Your Instituitonal Email',
+              obscureTextBool: false,
+              focus: false,
+              validator: emailValidator()),
 
-          // Password TextField with Toggle Visibility
-          TextField(
-            controller: passwordController,
-            obscureText: !isPasswordVisible, // Toggle visibility
-            decoration: InputDecoration(
-              labelText: "Password",
-              labelStyle: const TextStyle(color: Colors.white),
+          MyTextField(
+              textEditingController: _passwordController,
+              label: 'Password',
+              obscureTextBool: !isPasswordVisible,
+              focus: false,
               suffixIcon: IconButton(
                 icon: Icon(
                   isPasswordVisible
@@ -118,37 +314,76 @@ class _signup_formState extends State<signup_form> {
                   });
                 },
               ),
-            ),
-          ),
+              validator: passwordValidator()),
+
           const SizedBox(height: 20),
 
           // Sign Up Button
           Center(
             child: ElevatedButton(
               onPressed: signup,
-              child: const Text(
-                "Sign Up",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
               style: ButtonStyle(
-                backgroundColor: MaterialStatePropertyAll<Color>(
+                backgroundColor: WidgetStatePropertyAll<Color>(
                   Colors.teal.shade800,
                 ),
                 foregroundColor:
-                const MaterialStatePropertyAll<Color>(Colors.white),
-                padding: const MaterialStatePropertyAll<EdgeInsets>(
+                    const WidgetStatePropertyAll<Color>(Colors.white),
+                padding: const WidgetStatePropertyAll<EdgeInsets>(
                   EdgeInsets.symmetric(horizontal: 40, vertical: 12),
                 ),
-                shape: MaterialStatePropertyAll<OutlinedBorder>(
+                shape: WidgetStatePropertyAll<OutlinedBorder>(
                   RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
               ),
+              child: const Text(
+                "Sign Up",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
           ),
         ],
       ),
-    );
+    )
+  );
+  
+  
   }
+}
+
+
+FormFieldValidator<dynamic> dropdownValidator(String? value, String fieldName) {
+  return (value) {
+    if (value == null || value.isEmpty) {
+      return '$fieldName cannot be empty';
+    }
+    return null;
+  };
+}
+
+
+
+FormFieldValidator<dynamic> nameValidator() {
+  return (value) {
+    if (value == null || value.isEmpty) {
+      return 'Name cannot be empty';
+    }
+    return null;
+  };
+}
+
+
+FormFieldValidator<dynamic> passwordValidator() {
+  return (value) {
+    if (value == null || value.isEmpty) {
+      return 'Password cannot be empty';
+    }
+    final passwordRegex = RegExp(
+        r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$');
+    if (!passwordRegex.hasMatch(value)) {
+      return 'Password must contain at least one uppercase letter, one lowercase letter, one number, one special character, and be at least 8 characters long';
+    }
+    return null;
+  };
 }
