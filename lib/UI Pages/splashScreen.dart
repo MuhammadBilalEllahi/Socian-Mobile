@@ -58,7 +58,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             height: double.infinity,
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/images/cuilahore.jpg'),
+                image: AssetImage('assets/images/bg-splash2.jpg'),
                 fit: BoxFit.cover,
               ),
             ),
@@ -124,7 +124,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       children: [
                         _buildInfoContainer(
-                          'assets/images/cuilahore.jpg', // Image path
+                          'assets/images/bg-splash2.jpg', // Image path
                           'Explore the new features of our app that make your life easier.',
                           Colors.teal,
                         ),
@@ -139,7 +139,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           Colors.teal,
                         ),
                         _buildInfoContainer(
-                          'assets/images/cuilahore.jpg', // Image path
+                          'assets/images/bg-splash2.jpg', // Image path
                           'Explore the new features of our app that make your life easier.',
                           Colors.teal,
                         ),

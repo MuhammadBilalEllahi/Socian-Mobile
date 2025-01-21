@@ -1,3 +1,4 @@
+import 'package:beyondtheclass/UI%20Pages/PastPapers.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:flutter/material.dart';
 
@@ -9,6 +10,21 @@ class MyDrawer extends StatefulWidget {
 }
 
 class _MyDrawerState extends State<MyDrawer> {
+
+  // This is just for testing purpose
+  final apiResponse = {
+    "pastPapers": [
+      {
+        "year": 2021,
+        "type": "MIDTERM",
+      },
+      {
+        "year": 2024,
+        "type": "FINAL",
+      },
+    ]
+  };
+  // ///////////////////////////////////
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -152,10 +168,13 @@ class _MyDrawerState extends State<MyDrawer> {
                       '📄', // Emoji for Past Papers (Document)
                       style: TextStyle(fontSize: 24),
                     ),
-                    title: const Text("Past Papers", style: TextStyle(color: Colors.white)),
+                    title: GestureDetector(child: const Text("Past Papers", style: TextStyle(color: Colors.white))),
                     onTap: () {
-                      Navigator.of(context).pop();
-                    },
+                      Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) =>  PastPapers(apiResponse: apiResponse)),
+                      );
+                      },
                   ),
                 ],
               ),
