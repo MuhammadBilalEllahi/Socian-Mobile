@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:beyondtheclass/features/auth/presentation/widgets/otp_form.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:beyondtheclass/shared/widgets/my_dropdown.dart';
 import 'package:beyondtheclass/shared/widgets/my_textfield.dart';
@@ -182,6 +185,18 @@ void signupStudent() async{
         print("Signup response: $response");
 
 
+      final data = response  ;
+      final userId = data['redirectUrl'].split('/otp/')[1].split('?')[0]; // Extract userId from URL
+
+      // Navigate to OTP verification page
+      Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => OTPVerificationScreen(
+          userId: userId, // Pass userId directly as a parameter to OTPVerificationScreen
+        ),
+      ),
+    );
   }catch(e){
     print("ERROR WHILE SIGNING UP $e");
   }
