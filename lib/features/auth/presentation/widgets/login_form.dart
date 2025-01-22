@@ -1,6 +1,8 @@
 
 
 import 'package:beyondtheclass/UI%20Pages/HomePage.dart';
+import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:beyondtheclass/features/auth/domain/auth_state.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,18 +31,25 @@ class _LoginFormState extends ConsumerState<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
-    final authController = ref.watch(authProvider.notifier);
 
-    print("authController ${authController.authUseCases}");
-    if (authState.user != null) {
-      Future.microtask(() {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
-        );
-      });
+    ref.listen<AuthState>(authProvider, (previous, next) {
+    if (next.user != null) {
+      Navigator.pushReplacementNamed(context, AppRoutes.home);
     }
+  });
+
+    // final authState = ref.watch(authProvider);
+    // final authController = ref.watch(authProvider.notifier);
+
+    // print("authController ${authController.authUseCases}");
+    // if (authState.user != null) {
+    //   Future.microtask(() {
+    //     Navigator.pushReplacement(
+    //       context,
+    //       MaterialPageRoute(builder: (context) => const HomePage()),
+    //     );
+    //   });
+    // }
 
     return Padding(
       padding: const EdgeInsets.all(16.0),

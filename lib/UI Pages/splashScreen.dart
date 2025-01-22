@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:beyondtheclass/features/auth/domain/auth_state.dart';
 import 'package:beyondtheclass/features/auth/presentation/auth_screen.dart';
 import 'package:beyondtheclass/UI%20Pages/HomePage.dart';
 import 'package:beyondtheclass/features/auth/presentation/widgets/RoleSelectionPage.dart';
@@ -9,7 +11,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../features/auth/presentation/student_signupScreen.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
-  const SplashScreen({super.key});
+  // ignore: use_super_parameters
+  const SplashScreen({Key? key}) : super(key: key);
 
   @override
   _SplashScreenState createState() => _SplashScreenState();
@@ -33,6 +36,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     // Start the fade animation
     _animationController.forward();
 
+    
+
     // Trigger the upward movement after 3 seconds
     Future.delayed(const Duration(seconds: 3), () {
       setState(() {
@@ -42,6 +47,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final authState = ref.watch(authProvider);
+
+    if (authState.user != null) {
+      Future.microtask(() {
+        Navigator.pushReplacementNamed(context, AppRoutes.home);
+      });
+    }
+  }
+
+
+  @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
@@ -49,6 +67,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+
+    ref.listen<AuthState>(authProvider, (previous, next) {
+    if (next.user != null) {
+      Navigator.pushReplacementNamed(context, AppRoutes.home);
+    }
+  });
+  
     return Scaffold(
       body: Stack(
         children: [
