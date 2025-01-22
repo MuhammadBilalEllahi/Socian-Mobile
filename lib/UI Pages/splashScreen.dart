@@ -36,8 +36,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     // Start the fade animation
     _animationController.forward();
 
-    
-
     // Trigger the upward movement after 3 seconds
     Future.delayed(const Duration(seconds: 3), () {
       setState(() {
@@ -58,7 +56,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     }
   }
 
-
   @override
   void dispose() {
     _animationController.dispose();
@@ -67,13 +64,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-
     ref.listen<AuthState>(authProvider, (previous, next) {
-    if (next.user != null) {
-      Navigator.pushReplacementNamed(context, AppRoutes.home);
-    }
-  });
-  
+      if (next.user != null) {
+        Navigator.pushReplacementNamed(context, AppRoutes.home);
+      }
+    });
+
     return Scaffold(
       body: Stack(
         children: [
@@ -113,17 +109,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  "Beyond The Class",
+                  AppConstants.appName,
                   style: TextStyle(
                     fontSize: 36,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                     letterSpacing: 1.2,
+                    fontFamily: 'sans-serif'
                   ),
                 ),
                 SizedBox(height: 10),
                 Text(
-                  "Discover New Horizons\nLook Beyond the Class",
+                  AppConstants.appSloganNewLine,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 18,
@@ -150,23 +147,27 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       children: [
                         _buildInfoContainer(
                           'assets/images/bg-splash2.jpg', // Image path
-                          'Explore the new features of our app that make your life easier.',
-                          Colors.teal,
+                          'Student - Individulas',
+                          'Love me like you do, what are you waiting for',
+                           Colors.teal,
                         ),
                         _buildInfoContainer(
                           'assets/images/anime.png', // Image path
-                          'Explore the new features of our app that make your life easier.',
-                          Colors.teal,
+                         'Teacher - Individulas',
+                          'Love me like you do, what are you waiting for',
+                           Colors.teal,
                         ),
                         _buildInfoContainer(
                           'assets/images/profilepic.jpg', // Image path
-                          'Explore the new features of our app that make your life easier.',
-                          Colors.teal,
+                         'Alumni - Individulas',
+                          'Love me like you do, what are you waiting for',
+                           Colors.teal,
                         ),
                         _buildInfoContainer(
                           'assets/images/bg-splash2.jpg', // Image path
-                          'Explore the new features of our app that make your life easier.',
-                          Colors.teal,
+                         'Organization - Individulas',
+                          'Love me like you do, what are you waiting for',
+                           Colors.teal,
                         ),
                       ],
                     ),
@@ -177,19 +178,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     children: [
                       // signup
                       GestureDetector(
-                        onTap: (){
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const RoleSelectionPage()),
-                          );
+                        onTap: () {
+                          Navigator.pushNamed(context, AppRoutes.roleSelection);
                         },
                         child: Container(
-                          width: 100,
-                          padding: const EdgeInsets.all(8.0),
+                          width: MediaQuery.of(context).size.width / 2.2,
+                          padding: const EdgeInsets.fromLTRB(4, 10, 4, 10),
+                          margin: const EdgeInsets.fromLTRB(2, 0, 2, 0),
                           decoration: BoxDecoration(
                             color: Colors.teal.shade900,
-                            borderRadius: BorderRadius.circular(12),
-
+                            borderRadius: BorderRadius.circular(4),
                           ),
                           child: const Center(
                             child: Text(
@@ -203,21 +201,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           ),
                         ),
                       ),
-                      const SizedBox(width: 10,),
+                      // const SizedBox(width: 10,),
                       // login
                       GestureDetector(
-                        onTap: (){
-                          Navigator.pushNamed(
-                            context,
-                            '/auth'
-                          );
+                        onTap: () {
+                          Navigator.pushNamed(context, '/auth');
                         },
                         child: Container(
-                          width: 100,
-                          padding: const EdgeInsets.all(8.0),
+                          width: MediaQuery.of(context).size.width / 2.2,
+                          padding: const EdgeInsets.fromLTRB(4, 10, 4, 10),
+                          margin: const EdgeInsets.fromLTRB(2, 0, 2, 0),
                           decoration: BoxDecoration(
                             color: Colors.teal.shade900,
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(4),
                           ),
                           child: const Center(
                             child: Text(
@@ -242,35 +238,42 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 
   // Helper method to build individual info containers
-  Widget _buildInfoContainer(String imagePath, String paragraph, Color color) {
+  Widget _buildInfoContainer(String imagePath,   String paragraphTitle, String paragraph,Color color,) {
     return Container(
       width: MediaQuery.of(context).size.width * 0.75,
       margin: const EdgeInsets.symmetric(horizontal: 12.0),
-      padding: const EdgeInsets.all(20.0),
+      // padding: const EdgeInsets.fromLTRB(2  ,5 ,2 ,5),
+      
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [color.withOpacity(0.8), color.withOpacity(0.6)],
+          colors: [color.withOpacity(0.5), color.withOpacity(0.4)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(20.0),
+        borderRadius: BorderRadius.circular(10.0),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.5),
-            blurRadius: 8.0,
+            color: color.withOpacity(0.2),
+            blurRadius: 7.0,
             offset: const Offset(4, 4),
           ),
         ],
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        // mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Display the image, taking half the size of the parent container
           SizedBox(
-            height: MediaQuery.of(context).size.width * 0.75 * 0.8, // 50% of the container's width
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(15.0),
+            height: MediaQuery.of(context).size.width *
+                0.75 *
+                0.8, // 50% of the container's width
+            child:  ClipRRect(
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.zero,
+                bottomRight: Radius.zero,
+                topLeft: Radius.circular(10),
+                topRight: Radius.circular(10)),
               child: Image.asset(
                 imagePath,
                 fit: BoxFit.cover,
@@ -278,22 +281,44 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             ),
           ),
           const SizedBox(height: 15),
-          // Display the promotional paragraph
-          Text(
-            paragraph,
+
+       Padding(
+        padding: const EdgeInsets.all(10),
+        child: 
+         Column(
+            
+            children: [
+        Text(
+            paragraphTitle,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 16, // Text size for the paragraph
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.bold,
               height: 1.5, // Line height for better readability
             ),
             textAlign: TextAlign.center,
           ),
-        ],
+        
+
+        
+          Text(
+            paragraph,
+            style: const TextStyle(
+              color: Colors.white54,
+              fontSize: 16, // Text size for the paragraph
+              fontWeight: FontWeight.w700,
+              height: 1.5, // Line height for better readability
+            ),
+            textAlign: TextAlign.center,
+          ),
+          // Display the promotional paragraph
+          
+            ],
+          ),) ,  
+       
+          
+          ],
       ),
     );
   }
-
-
 }
-

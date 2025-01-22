@@ -25,6 +25,7 @@ static const String auth = '/auth';
 class AppConstants {
   static const String appName = "Beyond The Class";
   static const String appSlogan = "Discover New Horizons, Look Beyond the Class";
+  static const String appSloganNewLine = "Discover New Horizons \nLook Beyond the Class";
   static const String appGreeting ="Good Day, User!";
 }
 
