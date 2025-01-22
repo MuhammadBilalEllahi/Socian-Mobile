@@ -21,9 +21,9 @@ class AuthScreen extends ConsumerWidget {
 
     if (authState.user != null) {
       Future.microtask(() {
-        Navigator.pushReplacement(
+        Navigator.pushReplacementNamed(
           context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
+          AppRoutes.home
         );
       });
     }
@@ -93,9 +93,9 @@ class AuthScreen extends ConsumerWidget {
                             ),
                             TextButton(
                               onPressed: () {
-                                Navigator.pushReplacement(
+                                Navigator.pushReplacementNamed(
                                   context,
-                                  MaterialPageRoute(builder: (context) => const RoleSelectionPage()),
+                                  AppRoutes.roleSelection
                                 );
                               },
                               child: const Text(

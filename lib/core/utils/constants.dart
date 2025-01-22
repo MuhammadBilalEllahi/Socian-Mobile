@@ -27,3 +27,18 @@ class AppConstants {
   static const String appSlogan = "Discover New Horizons, Look Beyond the Class";
   static const String appGreeting ="Good Day, User!";
 }
+
+
+
+class AppRoutes {
+  static const String authScreen = "/auth";
+  static const String signupScreenStudent = '/register/student' ;
+  static const String  login='/login';
+
+
+
+  static const String  home='/';
+  static const String  splashScreen='/splash';
+  static const String  roleSelection='/select/role';
+  static const String  otpScreen='/otp';
+}

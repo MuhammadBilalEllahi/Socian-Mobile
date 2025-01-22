@@ -1,4 +1,11 @@
+import 'package:beyondtheclass/UI%20Pages/HomePage.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:beyondtheclass/features/auth/presentation/auth_screen.dart';
+import 'package:beyondtheclass/features/auth/presentation/student_signupScreen.dart';
+import 'package:beyondtheclass/features/auth/presentation/widgets/RoleSelectionPage.dart';
+import 'package:beyondtheclass/features/auth/presentation/widgets/login_form.dart';
+import 'package:beyondtheclass/features/auth/presentation/widgets/otp_form.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shorebird_code_push/shorebird_code_push.dart';
 
@@ -8,13 +15,9 @@ import 'package:flutter/material.dart';
 import 'UI Pages/AppThemes.dart';
 
 void main() {
-    WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const ProviderScope(child: MyApp()));
 }
-
-
-
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -23,15 +26,38 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return  MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: AppConstants.appName,
       themeMode: ThemeMode.system,
       theme: AppThemes.lightTheme, // Use light theme
       darkTheme: AppThemes.darkTheme, // Use dark theme
-      home: const SplashScreen(),
+      // home: const SplashScreen(),
+
+      // Define routes here
+      initialRoute:
+          AppRoutes.splashScreen, // Start from the Home page or any other default route
+      routes: {
+        AppRoutes.splashScreen: (context) => const SplashScreen(),
+        AppRoutes.home: (context) => const HomePage(),
+        AppRoutes.authScreen: (context) => const AuthScreen(),
+        AppRoutes.login: (context) => const LoginForm(),
+        AppRoutes.signupScreenStudent: (context) => const SignUpScreen(),
+
+        AppRoutes.roleSelection: (context) => const RoleSelectionPage(),
+        AppRoutes.otpScreen: (context) => const OTPVerificationScreen(),   // Define OTP Verification Screen
+
+        // '/': (context) => const HomePage(),
+        // '/': (context) => const HomePage(),
+        // '/': (context) => const HomePage(),
+        // '/': (context) => const HomePage(),
+        // '/': (context) => const HomePage(),
+        // '/': (context) => const HomePage(),
+        // '/': (context) => const HomePage(),
+        // '/': (context) => const HomePage(),
+        // '/': (context) => const HomePage(),
+
+      },
     );
   }
 }
-
-

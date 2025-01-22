@@ -182,9 +182,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       // login
                       GestureDetector(
                         onTap: (){
-                          Navigator.push(
+                          Navigator.pushNamed(
                             context,
-                            MaterialPageRoute(builder: (context) =>  const AuthScreen()),
+                            '/auth'
                           );
                         },
                         child: Container(

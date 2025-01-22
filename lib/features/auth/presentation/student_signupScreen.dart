@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:beyondtheclass/features/auth/presentation/auth_screen.dart';
 
 
-class signup_screen extends StatefulWidget {
-  const signup_screen({super.key});
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
 
   @override
-  State<signup_screen> createState() => _signup_screenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _signup_screenState extends State<signup_screen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,7 +62,7 @@ class _signup_screenState extends State<signup_screen> {
                           ),
                         ),
                         const SizedBox(height: 40),
-                        const signup_form(),
+                        const SignUpForm(),
                         const SizedBox(height: 20),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -77,9 +77,9 @@ class _signup_screenState extends State<signup_screen> {
                             ),
                             TextButton(
                               onPressed: () {
-                                Navigator.pushReplacement(
+                                Navigator.pushReplacementNamed(
                                   context,
-                                  MaterialPageRoute(builder: (context) => const AuthScreen()),
+                                  AppRoutes.authScreen
                                 );
                               },
                               child: const Text(

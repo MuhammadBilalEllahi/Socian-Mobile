@@ -1,3 +1,4 @@
+import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/presentation/student_signupScreen.dart';
 import 'package:flutter/material.dart';
 
@@ -27,9 +28,9 @@ class RoleSelectionPage extends StatelessWidget {
               // icon: Icons.school,
               emoji: "🎓",
               onTap: () {
-                Navigator.push(
+                Navigator.pushNamed(
                   context,
-                  MaterialPageRoute(builder: (context) => const signup_screen()),
+                  AppRoutes.signupScreenStudent
                 );
                 // Handle Student selection logic
                 print("Student selected");

@@ -6,19 +6,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
+class OTPVerificationScreen extends StatefulWidget {
+  const OTPVerificationScreen({super.key});
 
+  @override
+  _OTPVerificationScreenState createState() => _OTPVerificationScreenState();
+}
 
-class OTPVerificationScreen extends StatelessWidget {
+class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
   final TextEditingController _otpController = TextEditingController();
-  
-  final String userId;
-
-  OTPVerificationScreen({super.key, required this.userId});
-  
 
   // This will receive the userId passed from the registration screen
   @override
   Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)!.settings.arguments as Map?;
+    print("DATA $args");
+    final userId = args?['userId'];
+    final email = args?['email'];
 
     return Scaffold(
       appBar: AppBar(
@@ -29,7 +33,7 @@ class OTPVerificationScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Enter OTP for User ID: $userId'),
+            Text('Enter OTP for User ID: $email'),
             const SizedBox(height: 20),
             TextField(
               controller: _otpController,
