@@ -56,18 +56,33 @@
 
 
 
+import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class StatsBoxProfile extends StatefulWidget {
+class StatsBoxProfile extends ConsumerStatefulWidget {
   const StatsBoxProfile({super.key});
 
   @override
-  State<StatsBoxProfile> createState() => _StatsBoxProfileState();
+  _StatsBoxProfileState createState() => _StatsBoxProfileState();
 }
 
-class _StatsBoxProfileState extends State<StatsBoxProfile> {
+class _StatsBoxProfileState extends ConsumerState<StatsBoxProfile> {
   @override
   Widget build(BuildContext context) {
+
+        final auth = ref.watch(authProvider);
+
+print("auth ${auth.user}");
+
+var postCredibility = auth.user?['profile']['credibility']['postCredibility'] ?? 0;
+var commentCredibility = auth.user?['profile']['credibility']['commentCredibility'] ?? 0;
+final credibilities =  postCredibility + commentCredibility ?? 0;
+print("auth credibilty }");
+print("auth credibilty ${auth.user?['profile']['credibility']['commentCredibility']}");
+
+
+
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Container(
@@ -98,17 +113,17 @@ class _StatsBoxProfileState extends State<StatsBoxProfile> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           // Connections
-          Column(
+           Column(
             children: [
               Text(
-                "500",
-                style: TextStyle(
+                "$credibilities",
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
-              Text(
+              const Text(
                 "Connects",
                 style: TextStyle(
                   fontSize: 14,
@@ -117,15 +132,15 @@ class _StatsBoxProfileState extends State<StatsBoxProfile> {
               ),
             ],
           ),
-          SizedBox(width: 5,),
+          const SizedBox(width: 5,),
           Container(
             height: 50,
             width: 3,
             color: Colors.white,
           ),
-          SizedBox(width: 5,),
+          const SizedBox(width: 5,),
           // Credibility
-          Column(
+          const Column(
             children: [
               Text(
                 "6.9",

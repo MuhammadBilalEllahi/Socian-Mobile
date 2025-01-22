@@ -113,7 +113,7 @@ class _HomePageState extends State<HomePage> {
     PostsPrimaryPage(),
     Messages(),
     Center(child: Text('Explore', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold))),
-    Map(),
+    MapsLook(),
     ProfilePage(),
   ];
 

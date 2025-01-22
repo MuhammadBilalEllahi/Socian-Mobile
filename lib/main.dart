@@ -1,4 +1,8 @@
 import 'package:beyondtheclass/UI%20Pages/HomePage.dart';
+import 'package:beyondtheclass/UI%20Pages/Map.dart';
+import 'package:beyondtheclass/UI%20Pages/Messages.dart';
+import 'package:beyondtheclass/UI%20Pages/PostsPrimaryPage.dart';
+import 'package:beyondtheclass/UI%20Pages/ProfilePage.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/presentation/auth_screen.dart';
 import 'package:beyondtheclass/features/auth/presentation/student_signupScreen.dart';
@@ -32,20 +36,23 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       theme: AppThemes.lightTheme, // Use light theme
       darkTheme: AppThemes.darkTheme, // Use dark theme
-      // home: const SplashScreen(),
-
-      // Define routes here
       initialRoute:
-          AppRoutes.splashScreen, // Start from the Home page or any other default route
+          AppRoutes.splashScreen,
       routes: {
+        // USE THIS INSTEAD OF THAT REDUNDANT SOOOOOO MUCH CODE
         AppRoutes.splashScreen: (context) => const SplashScreen(),
         AppRoutes.home: (context) => const HomePage(),
         AppRoutes.authScreen: (context) => const AuthScreen(),
         AppRoutes.login: (context) => const LoginForm(),
         AppRoutes.signupScreenStudent: (context) => const SignUpScreen(),
 
+        AppRoutes.postMainPage: (context) => const PostsPrimaryPage(),
+        AppRoutes.messagesMainPage: (context) => const Messages(),
+        AppRoutes.mapMainPage: (context) => const MapsLook(),
+        AppRoutes.profileMainPage: (context) => const ProfilePage(),
+
         AppRoutes.roleSelection: (context) => const RoleSelectionPage(),
-        AppRoutes.otpScreen: (context) => const OTPVerificationScreen(),   // Define OTP Verification Screen
+        AppRoutes.otpScreen: (context) => const OTPVerificationScreen(),
 
         // '/': (context) => const HomePage(),
         // '/': (context) => const HomePage(),

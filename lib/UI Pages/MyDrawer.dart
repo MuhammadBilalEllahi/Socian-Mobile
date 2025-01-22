@@ -1,15 +1,18 @@
 import 'package:beyondtheclass/UI%20Pages/PastPapers.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class MyDrawer extends StatefulWidget {
+class MyDrawer extends ConsumerStatefulWidget {
   const MyDrawer({super.key});
 
   @override
-  State<MyDrawer> createState() => _MyDrawerState();
+  _MyDrawerState createState() => _MyDrawerState();
 }
 
-class _MyDrawerState extends State<MyDrawer> {
+class _MyDrawerState extends ConsumerState<MyDrawer> {
+  
 
   // This is just for testing purpose
   final apiResponse = {
@@ -24,9 +27,23 @@ class _MyDrawerState extends State<MyDrawer> {
       },
     ]
   };
+  
   // ///////////////////////////////////
   @override
   Widget build(BuildContext context) {
+
+    
+    final auth = ref.watch(authProvider);
+
+// UNDERSTAND Left this for you to understand
+//     print("auh $auth");
+
+//   print('Auth data: ${auth.user ?? "No user data"}');
+
+//   print('Auth name: ${auth.user?['name'] ?? "No name"}');
+// print('Auth email: ${auth.user?['email'] ?? "No email"}');
+
+  // print('Auth email: ${auth.user?.email ?? "No email"}');
     return Drawer(
       width: MediaQuery.of(context).size.width * 0.75,
       child: Container(
@@ -75,9 +92,9 @@ class _MyDrawerState extends State<MyDrawer> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Text(
-                    AppConstants.appGreeting,
-                    style: TextStyle(
+                  Text(
+                    AppConstants.appGreeting+auth.user?['name'],
+                    style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,

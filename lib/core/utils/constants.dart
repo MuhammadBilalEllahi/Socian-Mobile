@@ -36,6 +36,12 @@ class AppRoutes {
   static const String  login='/login';
 
 
+  static const String postMainPage = '/postsMain';
+static const String messagesMainPage = '/msgMain';
+static const String mapMainPage = '/mapMain';
+static const String profileMainPage = '/profMain';
+
+
 
   static const String  home='/';
   static const String  splashScreen='/splash';

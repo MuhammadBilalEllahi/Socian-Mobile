@@ -28,15 +28,15 @@ class _SimplePostState extends State<SimplePost> {
                       Container(
                         // height: 50,
                         // width: 50,
-                        child: CircleAvatar(
+                        child: const CircleAvatar(
                           radius: 20,
                           backgroundImage: AssetImage("assets/images/profilepic2.jpg"),
                         ),
                       ),
-                      SizedBox(width: 10,),
+                      const SizedBox(width: 10,),
                       //Name & dept.
                       Container(
-                        child: Column(
+                        child: const Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -55,15 +55,15 @@ class _SimplePostState extends State<SimplePost> {
                       ),],),
 
                   ],),
-                  Column(children: [
+                  const Column(children: [
                     Icon(Icons.more_horiz,size: 24,)
                   ],),
                 ],
               ),
             ),
             // Caption row
-            Padding(
-              padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(5, 0, 5, 0),
               child: Row(
                 children: [
                   Expanded(
@@ -76,14 +76,14 @@ class _SimplePostState extends State<SimplePost> {
               ),
             ),
             // Picture
-            Container(
+            SizedBox(
               height: 250,
               child: Image.asset("assets/images/anime2.png",fit: BoxFit.fill,)
             ),
-            SizedBox(height: 5,),
+            const SizedBox(height: 5,),
             // Like comment row
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 0, 5, 0),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(10, 0, 5, 0),
               child: Column(
                 children: [
                   Row(
