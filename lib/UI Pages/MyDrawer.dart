@@ -80,7 +80,7 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    AppConstants.appGreeting+' '+auth.user?['name']+"!",
+                    "${'${AppConstants.appGreeting} '+auth.user?['name']}!",
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -174,9 +174,9 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
                     ),
                     title: GestureDetector(child: const Text("Past Papers", style: TextStyle(color: Colors.white))),
                     onTap: () {
-                      Navigator.push(
+                      Navigator.pushNamed(
                       context,
-                      MaterialPageRoute(builder: (context) =>  PastPapers()),
+                      '/pastpaper'
                       );
                       },
                   ),

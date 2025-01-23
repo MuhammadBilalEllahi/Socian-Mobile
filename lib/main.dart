@@ -1,6 +1,7 @@
 import 'package:beyondtheclass/UI%20Pages/HomePage.dart';
 import 'package:beyondtheclass/UI%20Pages/Map.dart';
 import 'package:beyondtheclass/UI%20Pages/Messages.dart';
+import 'package:beyondtheclass/UI%20Pages/PastPapers.dart';
 import 'package:beyondtheclass/UI%20Pages/PostsPrimaryPage.dart';
 import 'package:beyondtheclass/UI%20Pages/ProfilePage.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
@@ -53,6 +54,7 @@ class MyApp extends StatelessWidget {
 
         AppRoutes.roleSelection: (context) => const RoleSelectionPage(),
         AppRoutes.otpScreen: (context) => const OTPVerificationScreen(),
+        AppRoutes.pastPaperScreen : (context)=> const PastPapers()
 
         // '/': (context) => const HomePage(),
         // '/': (context) => const HomePage(),

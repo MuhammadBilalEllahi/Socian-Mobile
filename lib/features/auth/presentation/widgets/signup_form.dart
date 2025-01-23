@@ -56,9 +56,11 @@ class _SignUpFormState extends State<SignUpForm> {
 
   void fetchUniversities() async {
     try {
+      print(ApiConstants.universityAndCampusNames);
       final response =
           await apiClient.getList(ApiConstants.universityAndCampusNames);
-
+      // print("A $apiClient");
+      // print("A $response");
       setState(() {
         universities = (response)
             .map((uni) => {

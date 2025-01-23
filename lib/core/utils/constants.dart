@@ -1,11 +1,17 @@
 class ApiConstants {
-  // static const String baseUrl = "http://192.168.1.3:8080"; //my ip address
-  static const String baseUrl = "http://192.168.10.6:8080"; //my ip address
-
+  static const String baseUrl = "http://192.168.1.7:8080"; //my ip address
+  // static const String baseUrl = "http://192.168.10.6:8080"; //my ip address
+  // static const String baseUrl = "http://localhost:8080"; //my ip address
+  
   // This below is ort forwarding url from localhost:8080. create your own every time
   // static const String baseUrl = "https://backend.beyondtheclass.bilalellahi.com";
 
+
+
   static const String api = '/api';
+
+  static const String uploads = '/uploads';
+  static const String pdfBaseURl = "$baseUrl$api$uploads/";
 
 
 static const String auth = '/auth';
@@ -17,8 +23,13 @@ static const String auth = '/auth';
 
 
   static const String accessible = '/accessible';
-  static const String universityAndCampusNames = '$api$accessible/universities/grouped/campus';
-  static const String usernames = '$api$accessible/usernames';
+  static const String apiAccessible = '$api$accessible';
+  static const String universityAndCampusNames = '$apiAccessible/universities/grouped/campus';
+  static const String usernames = '$apiAccessible/usernames';
+
+
+  static const String pastpaper = '/pastpaper';
+  static const String subjectPastpapers = '$api$pastpaper/all-pastpapers-in-subject/67839bd37b4bcea6d564a5f8';
 
 
 }
@@ -49,4 +60,6 @@ static const String profileMainPage = '/profMain';
   static const String  splashScreen='/splash';
   static const String  roleSelection='/select/role';
   static const String  otpScreen='/otp';
+    static const String  pastPaperScreen='/pastpaper';
+
 }

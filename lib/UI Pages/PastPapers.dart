@@ -1,42 +1,46 @@
+
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PastPapers extends StatefulWidget {
+  const PastPapers({super.key});
+
   @override
   _PastPapersState createState() => _PastPapersState();
 }
 
 class _PastPapersState extends State<PastPapers> {
-  late Future<List<dynamic>> pastPapers;
+  late Future<Map<String, dynamic>> pastPapers = Future.value({});
+  final ApiClient apiClient = ApiClient();
 
   @override
   void initState() {
     super.initState();
-    pastPapers = fetchPastPapers();
+    fetchPastPapers();
   }
 
-  Future<List<dynamic>> fetchPastPapers() async {
-    const String url = "http://192.168.10.6:8080/api/pastpaper/all-pastpapers-in-subject/67818286a465ca0130eafafd";
-    try {
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          'x-platform': 'app', // Add the x-platform header
-          // 'Content-Type': 'application/json', // Optional, if needed by the backend
-        },
-      );
-      if (response.statusCode == 200) {
-        debugPrint("200 response");
-        final data = json.decode(response.body);
-        return data['pastPapers'] ?? [];
-      } else {
-        debugPrint("error response");
+  void fetchPastPapers() async {
+    final response = await apiClient.get(ApiConstants.subjectPastpapers);
+    setState(() {
+      pastPapers = Future.value(response);
+    });
+  }
 
-        throw Exception('Failed to load past papers exception');
+  Future<void> _launchPDF(String pdfUrl) async {
+    try {
+      final downloadUrl = "${ApiConstants.pdfBaseURl}$pdfUrl";
+      final Uri url = Uri.parse(downloadUrl);
+      if (!await launchUrl(url, mode: LaunchMode.platformDefault)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not launch $downloadUrl')),
+        );
       }
-    } catch (error) {
-      throw Exception('Error fetching data: $error');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error opening PDF: $e')),
+      );
     }
   }
 
@@ -44,67 +48,78 @@ class _PastPapersState extends State<PastPapers> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Past Papers'),
+        title: Text('Past Papers',
+            style: Theme.of(context).textTheme.headlineSmall),
+        backgroundColor: Colors.deepPurple[50],
+        elevation: 0,
       ),
-      body: FutureBuilder<List<dynamic>>(
+      body: FutureBuilder<Map<String, dynamic>>(
         future: pastPapers,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple),
+              ),
+            );
           } else if (snapshot.hasError) {
             return Center(
-              child: Text('Error: ${snapshot.error}'),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red, size: 60),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error Loading Past Papers',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  Text('${snapshot.error}',
+                      style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(
-              child: Text('No past papers available.'),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.list, color: Colors.grey, size: 60),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No Past Papers Available',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ],
+              ),
             );
           } else {
-            final papers = snapshot.data!;
+            final papers = snapshot.data!['pastPapers']!;
             return ListView.builder(
+              padding: const EdgeInsets.all(8),
               itemCount: papers.length,
               itemBuilder: (context, index) {
                 final paper = papers[index];
                 return Card(
-                  margin: EdgeInsets.all(8),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Year: ${paper['year']}',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(height: 8),
-                        if ((paper['assignments'] as List).isNotEmpty)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: (paper['assignments'] as List).map((assignment) {
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Assignment: ${assignment['name']}'),
-                                  Text('PDF Link: ${assignment['file']['pdf']}'),
-                                  SizedBox(height: 4),
-                                ],
-                              );
-                            }).toList(),
-                          )
-                        else
-                          Text('No assignments available'),
-                        Divider(),
-                        if ((paper['fall']['final']['theory'] as List).isNotEmpty)
-                          Text('Fall Final Theory Papers:',
-                              style: TextStyle(fontWeight: FontWeight.bold)),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: (paper['fall']['final']['theory'] as List).map((theory) {
-                            return Text('• ${theory['name']} (PDF: ${theory['file']['pdf']})');
-                          }).toList(),
-                        ),
-                      ],
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  child: ExpansionTile(
+                    title: Text(
+                      'Academic Year ${paper['year']}',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Colors.deepPurple,
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
+                    children: [
+                      _buildSectionTitle('Assignments'),
+                      _buildAssignmentSection(paper['assignments']),
+                      const Divider(),
+                      _buildSectionTitle('Fall Final Theory Papers'),
+                      _buildPaperSection(paper['fall']['final']['theory']),
+                    ],
                   ),
                 );
               },
@@ -112,6 +127,65 @@ class _PastPapersState extends State<PastPapers> {
           }
         },
       ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          color: Colors.deepPurple[700],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAssignmentSection(List assignments) {
+    if (assignments.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Text('No assignments available',
+            style: TextStyle(color: Colors.grey)),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: assignments.map((assignment) {
+        return ListTile(
+          leading: const Icon(Icons.assignment, color: Colors.deepPurple),
+          title: Text(assignment['name']),
+          trailing: IconButton(
+            icon: const Icon(Icons.download, color: Colors.deepPurple),
+            onPressed: () => _launchPDF(assignment['file']['pdf']),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildPaperSection(List papers) {
+    if (papers.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Text('No theory papers available',
+            style: TextStyle(color: Colors.grey)),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: papers.map((paper) {
+        return ListTile(
+          leading: const Icon(Icons.description, color: Colors.deepPurple),
+          title: Text(paper['name']),
+          trailing: IconButton(
+            icon: const Icon(Icons.download, color: Colors.deepPurple),
+            onPressed: () => _launchPDF(paper['file']['pdf']),
+          ),
+        );
+      }).toList(),
     );
   }
 }
