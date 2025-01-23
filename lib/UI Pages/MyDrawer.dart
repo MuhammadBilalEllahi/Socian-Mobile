@@ -14,21 +14,8 @@ class MyDrawer extends ConsumerStatefulWidget {
 class _MyDrawerState extends ConsumerState<MyDrawer> {
   
 
-  // This is just for testing purpose
-  final apiResponse = {
-    "pastPapers": [
-      {
-        "year": 2021,
-        "type": "MIDTERM",
-      },
-      {
-        "year": 2024,
-        "type": "FINAL",
-      },
-    ]
-  };
+
   
-  // ///////////////////////////////////
   @override
   Widget build(BuildContext context) {
 
@@ -93,7 +80,7 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    AppConstants.appGreeting+auth.user?['name'],
+                    AppConstants.appGreeting+' '+auth.user?['name']+"!",
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -189,7 +176,7 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
                     onTap: () {
                       Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) =>  PastPapers(apiResponse: apiResponse)),
+                      MaterialPageRoute(builder: (context) =>  PastPapers()),
                       );
                       },
                   ),

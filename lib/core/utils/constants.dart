@@ -1,5 +1,6 @@
 class ApiConstants {
-  static const String baseUrl = "http://192.168.1.3:8080"; //my ip address
+  // static const String baseUrl = "http://192.168.1.3:8080"; //my ip address
+  static const String baseUrl = "http://192.168.10.6:8080"; //my ip address
 
   // This below is ort forwarding url from localhost:8080. create your own every time
   // static const String baseUrl = "https://backend.beyondtheclass.bilalellahi.com";
@@ -26,7 +27,7 @@ class AppConstants {
   static const String appName = "Beyond The Class";
   static const String appSlogan = "Discover New Horizons, Look Beyond the Class";
   static const String appSloganNewLine = "Discover New Horizons \nLook Beyond the Class";
-  static const String appGreeting ="Good Day, User!";
+  static const String appGreeting ="Good Day";
 }
 
 

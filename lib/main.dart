@@ -13,10 +13,10 @@ import 'package:beyondtheclass/features/auth/presentation/widgets/otp_form.dart'
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shorebird_code_push/shorebird_code_push.dart';
 
-import 'UI Pages/SplashScreen.dart';
 import 'package:flutter/material.dart';
 
 import 'UI Pages/AppThemes.dart';
+import 'UI Pages/splashScreen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
