@@ -1,3 +1,4 @@
+import 'package:beyondtheclass/UI%20Pages/DepartmentPage.dart';
 import 'package:beyondtheclass/UI%20Pages/PastPapers.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
@@ -12,10 +13,7 @@ class MyDrawer extends ConsumerStatefulWidget {
 }
 
 class _MyDrawerState extends ConsumerState<MyDrawer> {
-  
 
-
-  
   @override
   Widget build(BuildContext context) {
 
@@ -173,12 +171,19 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
                       style: TextStyle(fontSize: 24),
                     ),
                     title: GestureDetector(child: const Text("Past Papers", style: TextStyle(color: Colors.white))),
-                    onTap: () {
-                      Navigator.pushNamed(
-                      context,
-                      '/pastpaper'
+                    // onTap: () {
+                    //   Navigator.pushNamed(
+                    //   context,
+                    //   '/pastpaper'
+                    //   );
+                    //   },
+                    onTap: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => DepartmentPage()),
                       );
-                      },
+                    },
+
                   ),
                 ],
               ),

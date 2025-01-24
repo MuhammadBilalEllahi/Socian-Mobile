@@ -1,6 +1,6 @@
 class ApiConstants {
-  static const String baseUrl = "http://192.168.1.7:8080"; //my ip address
-  // static const String baseUrl = "http://192.168.10.6:8080"; //my ip address
+  // static const String baseUrl = "http://192.168.1.7:8080"; //my ip address
+  static const String baseUrl = "http://192.168.10.6:8080"; //my ip address
   // static const String baseUrl = "http://localhost:8080"; //my ip address
   
   // This below is ort forwarding url from localhost:8080. create your own every time
@@ -29,7 +29,14 @@ static const String auth = '/auth';
 
 
   static const String pastpaper = '/pastpaper';
-  static const String subjectPastpapers = '$api$pastpaper/all-pastpapers-in-subject/67839bd37b4bcea6d564a5f8';
+  // static const String subjectPastpapers = '$api$pastpaper/all-pastpapers-in-subject/67839bd37b4bcea6d564a5f8';
+  static const String subjectPastpapers = '$api$pastpaper/all-pastpapers-in-subject';
+
+
+
+  static const String department = '/department';
+  static const String campus = '$api$department/campus';
+
 
 
 }
