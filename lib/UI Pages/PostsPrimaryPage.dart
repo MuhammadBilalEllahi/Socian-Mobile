@@ -1,5 +1,6 @@
 import 'package:beyondtheclass/UI%20Pages/MyDrawer.dart';
 import 'package:beyondtheclass/UI%20Pages/SimplePost.dart';
+import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/presentation/auth_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
@@ -22,11 +23,11 @@ class _PostsPrimaryPageState extends ConsumerState<PostsPrimaryPage> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          const SliverAppBar(
+          SliverAppBar(
             backgroundColor: Colors.transparent,
             toolbarHeight: 23.0,
             centerTitle: false,
-            title: Text("Beyond The Class"),
+            title: Text( AppConstants.appName, style: TextStyle(color: Colors.teal[800],fontWeight: FontWeight.bold)),
             automaticallyImplyLeading: false,
             pinned: false, // This line makes the app bar scroll
           ),
@@ -88,8 +89,8 @@ class _PostsPrimaryPageState extends ConsumerState<PostsPrimaryPage> {
                         ],
                       ),
                     ),
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
                       child: SizedBox(
                         height: 50,
                         // color: Colors.red,
@@ -97,12 +98,12 @@ class _PostsPrimaryPageState extends ConsumerState<PostsPrimaryPage> {
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: [
-                              Filters(color: Colors.blue, text: "Latest Feed"),
-                              Filters(color: Colors.red, text: "Ongoing"),
-                              Filters(color: Colors.greenAccent, text: "QnA"),
-                              Filters(
-                                  color: Colors.purple, text: "Lost & Found"),
-                              Filters(color: Colors.brown, text: "Polls"),
+                              Filters(color: Colors.teal.shade900, text: "Latest Feed"),
+                              Filters(color: Colors.tealAccent.shade400, text: "Ongoing"),
+                              Filters(color: Colors.teal.shade900, text: "QnA"),
+                              Filters(color: Colors.tealAccent.shade400, text: "Lost & Found"),
+                              Filters(color: Colors.teal.shade900, text: "Polls"),
+                              Filters(color: Colors.tealAccent.shade400, text: "Alerts"),
                             ],
                           ),
                         ),

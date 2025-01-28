@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 // import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
-class MyTextField extends StatelessWidget {
-  const MyTextField({
+class myTextField extends StatelessWidget {
+  const myTextField({
     super.key,
     required TextEditingController textEditingController,
     required this.label,
@@ -18,8 +18,6 @@ class MyTextField extends StatelessWidget {
     this.padZero,
     this.keybordType,
     this.validatorForm,
-    this.suffixIcon,
-    this.customKey
   }) : _textEditingController = textEditingController;
 
   final TextEditingController _textEditingController;
@@ -35,9 +33,6 @@ class MyTextField extends StatelessWidget {
   final double? width;
   final double? padZero;
   final TextInputType? keybordType;
-  final IconButton? suffixIcon;
-
-  final Key? customKey;
 
   @override
   Widget build(BuildContext context) {
@@ -46,16 +41,14 @@ class MyTextField extends StatelessWidget {
       width: width ?? 400,
       child: Padding(
         padding: EdgeInsets.fromLTRB(
-            padZero ?? 0, padZero ?? 0, padZero ?? 0, padZero ?? 0),
+            padZero ?? 25, padZero ?? 10, padZero ?? 25, padZero ?? 20),
         child: TextFormField(
-          key: customKey,
-          style: const TextStyle(color: Colors.white,),
+          style: TextStyle(color: Theme.of(context).primaryColorLight),
           controller: _textEditingController,
           autofocus: focus,
           validator: validatorForm ?? validator,
           readOnly: readOnly,
           keyboardType: keybordType,
-          
 
           // style: GoogleFonts.abel(),
 
@@ -63,18 +56,17 @@ class MyTextField extends StatelessWidget {
           // textInputAction: textInputType,
           inputFormatters: inputFormatters,
           decoration: InputDecoration(
-            fillColor: Colors.white,
+            fillColor: Theme.of(context).primaryColorLight,
             // error: ,
 
-            suffixIcon: suffixIcon ,
             errorStyle: const TextStyle(color: Colors.redAccent, fontSize: 10),
             // iconColor: Colors.blue,
 
             border: inputBorder ?? const UnderlineInputBorder(),
             label: Text(
               label,
-              style: const TextStyle(
-                  fontSize: 16, color: Colors.white),
+              style: TextStyle(
+                  fontSize: 16, color: Theme.of(context).primaryColorLight),
             ),
 
             //  focusColor: Colors.amber

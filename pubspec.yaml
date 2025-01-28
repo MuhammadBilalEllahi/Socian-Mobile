@@ -41,6 +41,8 @@ dependencies:
   jaguar_jwt: ^3.0.0
   jwt_decoder: ^2.0.1
   flutter_secure_storage: ^9.2.2
+  shorebird_code_push: ^2.0.0
+  url_launcher: ^6.3.1
   # flutter_secure_storage: ^9.2.2
   
   # path_provider: ^2.1.5
@@ -69,6 +71,7 @@ dev_dependencies:
 flutter:
   assets:
     - assets/images/
+    - shorebird.yaml
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

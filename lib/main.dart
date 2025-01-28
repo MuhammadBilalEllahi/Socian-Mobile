@@ -1,31 +1,72 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:beyondtheclass/UI%20Pages/HomePage.dart';
+import 'package:beyondtheclass/UI%20Pages/Map.dart';
+import 'package:beyondtheclass/UI%20Pages/Messages.dart';
+import 'package:beyondtheclass/UI%20Pages/PastPapers.dart';
+import 'package:beyondtheclass/UI%20Pages/PostsPrimaryPage.dart';
+import 'package:beyondtheclass/UI%20Pages/ProfilePage.dart';
+import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:beyondtheclass/features/auth/presentation/auth_screen.dart';
+import 'package:beyondtheclass/features/auth/presentation/student_signupScreen.dart';
+import 'package:beyondtheclass/features/auth/presentation/widgets/RoleSelectionPage.dart';
+import 'package:beyondtheclass/features/auth/presentation/widgets/login_form.dart';
+import 'package:beyondtheclass/features/auth/presentation/widgets/otp_form.dart';
 
-import 'UI Pages/SplashScreen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shorebird_code_push/shorebird_code_push.dart';
+
 import 'package:flutter/material.dart';
 
 import 'UI Pages/AppThemes.dart';
+import 'UI Pages/splashScreen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Beyond The Class',
+      title: AppConstants.appName,
       themeMode: ThemeMode.system,
       theme: AppThemes.lightTheme, // Use light theme
       darkTheme: AppThemes.darkTheme, // Use dark theme
-      home: const SplashScreen(),
+      initialRoute:
+          AppRoutes.splashScreen,
+      routes: {
+        // USE THIS INSTEAD OF THAT REDUNDANT SOOOOOO MUCH CODE
+        AppRoutes.splashScreen: (context) => const SplashScreen(),
+        AppRoutes.home: (context) => const HomePage(),
+        AppRoutes.authScreen: (context) => const AuthScreen(),
+        AppRoutes.login: (context) => const LoginForm(),
+        AppRoutes.signupScreenStudent: (context) => const SignUpScreen(),
+
+        AppRoutes.postMainPage: (context) => const PostsPrimaryPage(),
+        AppRoutes.messagesMainPage: (context) => const Messages(),
+        AppRoutes.mapMainPage: (context) => const MapsLook(),
+        AppRoutes.profileMainPage: (context) => const ProfilePage(),
+
+        AppRoutes.roleSelection: (context) => const RoleSelectionPage(),
+        AppRoutes.otpScreen: (context) => const OTPVerificationScreen(),
+        AppRoutes.pastPaperScreen : (context)=> const PastPapers(id: '',)
+
+        // '/': (context) => const HomePage(),
+        // '/': (context) => const HomePage(),
+        // '/': (context) => const HomePage(),
+        // '/': (context) => const HomePage(),
+        // '/': (context) => const HomePage(),
+        // '/': (context) => const HomePage(),
+        // '/': (context) => const HomePage(),
+        // '/': (context) => const HomePage(),
+        // '/': (context) => const HomePage(),
+
+      },
     );
   }
 }
-
-

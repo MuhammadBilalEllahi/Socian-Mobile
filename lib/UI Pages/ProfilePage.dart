@@ -26,20 +26,20 @@ class _ProfilePageState extends State<ProfilePage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(height: screenWidth/16,),
-              Row(mainAxisAlignment:MainAxisAlignment.end, children: [Icon(Icons.more_horiz),SizedBox(width: 5,)],),
-              ProfileIdentity(),
-              SizedBox(height: 15,),
-              Row(
+              const Row(mainAxisAlignment:MainAxisAlignment.end, children: [Icon(Icons.more_horiz),SizedBox(width: 5,)],),
+              const ProfileIdentity(),
+              const SizedBox(height: 15,),
+              const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   StatsBoxProfile(),
                 ],
               ),
           
-              SizedBox(height: 15,),
+              const SizedBox(height: 15,),
           
               // About Me
-              SingleChildScrollView(
+              const SingleChildScrollView(
           
                   scrollDirection: Axis.horizontal,
                   child: Row(
@@ -49,12 +49,12 @@ class _ProfilePageState extends State<ProfilePage> {
                   // AboutMeProfile(),
                 ],
               )),
-              Text("Highlights",style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold),),
-              CarouselProfilePage(),
-              SizedBox(height: 10,),
-              Text("Posts",style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold),),
+              const Text("Highlights",style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold),),
+              const CarouselProfilePage(),
+              const SizedBox(height: 10,),
+              const Text("Posts",style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold),),
 
-              SizedBox(height: 150,),
+              const SizedBox(height: 150,),
             ],
 
           ),

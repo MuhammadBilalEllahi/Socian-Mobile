@@ -1,86 +1,210 @@
+import 'package:beyondtheclass/UI%20Pages/DepartmentPage.dart';
+import 'package:beyondtheclass/UI%20Pages/PastPapers.dart';
+import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class MyDrawer extends StatefulWidget {
+class MyDrawer extends ConsumerStatefulWidget {
   const MyDrawer({super.key});
 
   @override
-  State<MyDrawer> createState() => _MyDrawerState();
+  _MyDrawerState createState() => _MyDrawerState();
 }
 
-class _MyDrawerState extends State<MyDrawer> {
+class _MyDrawerState extends ConsumerState<MyDrawer> {
+
   @override
   Widget build(BuildContext context) {
+
+    
+    final auth = ref.watch(authProvider);
+
+// UNDERSTAND Left this for you to understand
+//     print("auh $auth");
+
+//   print('Auth data: ${auth.user ?? "No user data"}');
+
+//   print('Auth name: ${auth.user?['name'] ?? "No name"}');
+// print('Auth email: ${auth.user?['email'] ?? "No email"}');
+
+  // print('Auth email: ${auth.user?.email ?? "No email"}');
     return Drawer(
-      width: MediaQuery.of(context).size.width,
+      width: MediaQuery.of(context).size.width * 0.75,
       child: Container(
-        color: Colors.transparent.withOpacity(0.2),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.teal.shade900, Colors.tealAccent.shade400],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Close Drawer Button
             Padding(
-              padding: const EdgeInsets.fromLTRB(5, 30, 0, 0),
+              padding: const EdgeInsets.fromLTRB(16, 40, 0, 0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   GestureDetector(
                     onTap: () {
                       Navigator.of(context).pop();
                     },
-                    child: const Icon(Icons.arrow_back_ios_sharp),
+                    child: const Icon(
+                      Icons.arrow_back_ios_sharp,
+                      color: Colors.white,
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 30),
 
-            // Drawer Options
-            ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text("Home"),
-              onTap: () {
-                // Navigate to Home Page
-                Navigator.of(context).pop();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text("All Unis"),
-              onTap: () {
-                // Navigate to Profile Page
-                Navigator.of(context).pop();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.notifications),
-              title: const Text("Alumni"),
-              onTap: () {
-                // Navigate to Notifications Page
-                Navigator.of(context).pop();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.fastfood_outlined),
-              title: const Text("Cafe Information Services"),
-              onTap: () {
-                // Navigate to Settings Page
-                Navigator.of(context).pop();
-              },
+            // Drawer Header
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    radius: 40,
+                    backgroundColor: Colors.teal.shade100,
+                    child: Icon(
+                      Icons.person,
+                      size: 50,
+                      color: Colors.teal.shade800,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    "${'${AppConstants.appGreeting} '+auth.user?['name']}!",
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  // Text(
+                  //   AppConstants.appName,
+                  //   style: TextStyle(
+                  //     fontSize: 14,
+                  //     color: Colors.white
+                  //   ),
+                  // ),
+                ],
+              ),
             ),
 
-            ListTile(
-              leading: const Icon(Icons.document_scanner_outlined),
-              title: const Text("Past Paper"),
-              onTap: () {
-                // Handle Log Out
-                Navigator.of(context).pop();
-              },
+            // const Divider(color: Colors.white70, thickness: 1),
+
+            // Drawer Options
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  ListTile(
+                    leading: const Text(
+                      '🏠', // Emoji for Home (House)
+                      style: TextStyle(fontSize: 24),
+                    ),
+                    title: const Text("Home", style: TextStyle(color: Colors.white)),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  ListTile(
+                    // leading: Icon(Icons.person, color: Colors.white),
+                    leading: const Text(
+                      '🏛️', // Emoji for All Unis (Classical Building)
+                      style: TextStyle(fontSize: 24),
+                    ),
+                    title: const Text("All Unis", style: TextStyle(color: Colors.white)),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),ListTile(
+                    // leading: Icon(Icons.person, color: Colors.white),
+                    leading: const Text(
+                      '🏫', // Emoji for All Unis (Classical Building)
+                      style: TextStyle(fontSize: 24),
+                    ),
+                    title: const Text("Inter Campuses", style: TextStyle(color: Colors.white)),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  ListTile(
+                    // leading: Icon(Icons.notifications, color: Colors.white),
+                    leading: const Text(
+                      '👨‍🎓', // Emoji for alumni
+                      style: TextStyle(fontSize: 24),
+                    ),
+                    title: const Text("Alumni", style: TextStyle(color: Colors.white)),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),ListTile(
+                    // leading: Icon(Icons.notifications, color: Colors.white),
+                    leading: const Text(
+                      '👨‍🏫', // Emoji for alumni
+                      style: TextStyle(fontSize: 24),
+                    ),
+                    title: const Text("Teacher's Reviews", style: TextStyle(color: Colors.white)),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  ListTile(
+                    leading: const Text(
+                      '☕', // Emoji for Cafe Information Services (Coffee Cup)
+                      style: TextStyle(fontSize: 24),
+                    ),
+                    title: const Text("Cafe Information Services", style: TextStyle(color: Colors.white)),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  ListTile(
+                    leading: const Text(
+                      '📄', // Emoji for Past Papers (Document)
+                      style: TextStyle(fontSize: 24),
+                    ),
+                    title: GestureDetector(child: const Text("Past Papers", style: TextStyle(color: Colors.white))),
+                    // onTap: () {
+                    //   Navigator.pushNamed(
+                    //   context,
+                    //   '/pastpaper'
+                    //   );
+                    //   },
+                    onTap: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => DepartmentPage()),
+                      );
+                    },
+
+                  ),
+                ],
+              ),
             ),
+
+            // const Divider(color: Colors.white70, thickness: 1),
+
+            // Footer
+            // Padding(
+            //   padding: const EdgeInsets.all(16.0),
+            //   child: Text(
+            //     "Version 1.0.0",
+            //     style: TextStyle(
+            //       color: Colors.teal.shade200,
+            //       fontSize: 12,
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),
     );
   }
 }
-
