@@ -147,7 +147,7 @@ class _DepartmentPageState extends State<DepartmentPage> {
                         ),
                       ),
                       onTap: () {
-                        final departmentId = department['id']?.toString();
+                        final departmentId = department['_id']?.toString();
                         if (departmentId == null || departmentId.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Invalid Department ID')),
