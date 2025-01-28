@@ -15,7 +15,7 @@ class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
 
   @override
-  State<splashScreen> createState() => _splashScreenState();
+  _SplashScreenState createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends ConsumerState<SplashScreen>
@@ -234,7 +234,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             ),
         ],
       ),
-    )
+    );
   }
 
   // Helper method to build individual info containers
