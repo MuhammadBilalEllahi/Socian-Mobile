@@ -4,6 +4,7 @@ import 'package:beyondtheclass/UI%20Pages/MyBottomNavBar.dart';
 import 'package:beyondtheclass/UI%20Pages/Map.dart';
 import 'package:shorebird_code_push/shorebird_code_push.dart';
 
+import 'CampusPosts.dart';
 import 'PostsPrimaryPage.dart';
 import 'ProfilePage.dart';
 
@@ -110,7 +111,8 @@ class _HomePageState extends State<HomePage> {
 
   // Define your pages here
   static const List<Widget> _pages = <Widget>[
-    PostsPrimaryPage(),
+    // PostsPrimaryPage(),
+    CampusPosts(),
     Messages(),
     Center(child: Text('Explore', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold))),
     MapsLook(),

@@ -24,7 +24,7 @@ class _DepartmentPageState extends State<DepartmentPage> {
     try {
       final response = await apiClient.get(ApiConstants.campus);
       setState(() {
-        departments = Future.value(response['departments']);
+        departments = Future.value(response['departments'] ?? []);
       });
     } catch (e) {
       setState(() {
@@ -40,6 +40,7 @@ class _DepartmentPageState extends State<DepartmentPage> {
       MaterialPageRoute(
 
         builder: (context) => PastPapers(id: '67818286a465ca0130eafafd'),
+        // builder: (context) => PastPapers(id: id),
       ),
     );
   }
@@ -50,8 +51,8 @@ class _DepartmentPageState extends State<DepartmentPage> {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          'Departments',
-          style: TextStyle(color: Colors.teal.shade900, fontWeight: FontWeight.bold)
+            'Departments',
+            style: TextStyle(color: Colors.teal.shade900, fontWeight: FontWeight.bold)
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -81,7 +82,12 @@ class _DepartmentPageState extends State<DepartmentPage> {
                 ],
               ),
             );
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          }
+
+          // else if (!snapshot.hasData || snapshot.data!.isEmpty)
+          else if (snapshot.data?.isEmpty ?? true)
+
+          {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -97,11 +103,15 @@ class _DepartmentPageState extends State<DepartmentPage> {
             );
           } else {
             final departmentList = snapshot.data!;
+            print("departmentList is");
+            print(departmentList);
             return ListView.builder(
               padding: const EdgeInsets.all(8),
               itemCount: departmentList.length,
               itemBuilder: (context, index) {
                 final department = departmentList[index];
+                print("department is");
+                print(department);
                 return Card(
                   elevation: 4,
                   shape: RoundedRectangleBorder(
@@ -124,10 +134,11 @@ class _DepartmentPageState extends State<DepartmentPage> {
                       leading: CircleAvatar(
                         backgroundColor: Colors.white,
                         child: Text(
-                          department['name'][0],
+                          department['name']?.isNotEmpty == true ? department['name'][0] : '?',
                           style: const TextStyle(color: Colors.teal),
                         ),
                       ),
+
                       title: Text(
                         department['name'],
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -136,9 +147,16 @@ class _DepartmentPageState extends State<DepartmentPage> {
                         ),
                       ),
                       onTap: () {
-                        // Navigate to the PastPapers page with the department id.
-                        navigateToPastPapers(department['id']);
+                        final departmentId = department['id']?.toString();
+                        if (departmentId == null || departmentId.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Invalid Department ID')),
+                          );
+                          return;
+                        }
+                        navigateToPastPapers(departmentId);
                       },
+
                     ),
                   ),
                 );
