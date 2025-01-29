@@ -22,6 +22,7 @@ class _DepartmentPageState extends State<DepartmentPage> {
 
   void fetchDepartments() async {
     try {
+    
       final response = await apiClient.get(ApiConstants.campus);
       setState(() {
         departments = Future.value(response['departments'] ?? []);
@@ -35,13 +36,10 @@ class _DepartmentPageState extends State<DepartmentPage> {
 
   void navigateToPastPapers(String id) {
 
-    Navigator.push(
+    Navigator.pushNamed(
       context,
-      MaterialPageRoute(
-
-        builder: (context) => PastPapers(id: '67818286a465ca0130eafafd'),
-        // builder: (context) => PastPapers(id: id),
-      ),
+     AppRoutes.pastPaperScreen,
+          arguments: {'id': id}
     );
   }
 

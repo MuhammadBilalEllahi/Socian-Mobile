@@ -54,7 +54,7 @@ class MyApp extends StatelessWidget {
 
         AppRoutes.roleSelection: (context) => const RoleSelectionPage(),
         AppRoutes.otpScreen: (context) => const OTPVerificationScreen(),
-        AppRoutes.pastPaperScreen : (context)=> const PastPapers(id: '',)
+        AppRoutes.pastPaperScreen : (context)=> const PastPapers()
 
         // '/': (context) => const HomePage(),
         // '/': (context) => const HomePage(),

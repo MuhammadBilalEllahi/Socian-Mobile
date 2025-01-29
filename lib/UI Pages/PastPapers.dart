@@ -4,9 +4,8 @@ import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PastPapers extends StatefulWidget {
-  final String id;
 
-  const PastPapers({super.key, required this.id});
+  const PastPapers({super.key});
 
   @override
   _PastPapersState createState() => _PastPapersState();
@@ -15,15 +14,40 @@ class PastPapers extends StatefulWidget {
 class _PastPapersState extends State<PastPapers> {
   late Future<Map<String, dynamic>> pastPapers = Future.value({}) ;
   final ApiClient apiClient = ApiClient();
+  late String id;
 
   @override
   void initState() {
     super.initState();
-    fetchPastPapers();
   }
 
-  void fetchPastPapers() async {
-    final String endpoint = "${ApiConstants.subjectPastpapers}/${widget.id}";
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // Retrieve route arguments and cast to Map<String, dynamic> or null
+    final routeArgs = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+
+print("Route $routeArgs ${routeArgs!['id']}");
+    if (routeArgs.containsKey('id')) {
+      
+      id = routeArgs['id']; 
+      print("ID HM ${routeArgs['id']}");
+      // Fetch past papers based on the retrieved id
+      fetchPastPapers(id);
+    } else {
+      // Handle error case where 'id' is missing
+      setState(() {
+        pastPapers = Future.error('Invalid route arguments or missing ID');
+      });
+    }
+  }
+
+  void fetchPastPapers(String id) async {
+      
+      print("ID $id");
+    final String endpoint = "${ApiConstants.subjectPastpapers}/$id";
     try {
       final response = await apiClient.get(endpoint);
       setState(() {
