@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
@@ -10,7 +12,7 @@ import 'package:intl/intl.dart'; // For date formatting
 class CampusPosts extends ConsumerWidget {
   const CampusPosts({super.key});
 
-  // Function to fetch posts
+
   Future<List<dynamic>> fetchPosts() async {
     final ApiClient apiClient = ApiClient();
     try {
@@ -26,8 +28,95 @@ class CampusPosts extends ConsumerWidget {
     }
   }
 
+  Widget _buildStatItem({required String emoji, required int count}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.2),
+          width: 0.5,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            emoji,
+            style: const TextStyle(fontSize: 18),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            '$count',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Colors.white.withOpacity(0.9),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDateBadge(String date,context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.3),
+          width: 0.5,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.access_time_rounded, size: 14,
+              // color: Colors.white.withOpacity(0.7)
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.black
+                  : Colors.white,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            date,
+            style: TextStyle(
+              fontSize: 12,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.black
+                  : Colors.white,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+
+    Color postsBgColor = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white//for dark mode
+        : Colors.blueGrey;//for light mode
+
+    Color postsTextColor = Theme.of(context).brightness == Brightness.dark
+        ? Colors.black
+        : Colors.white;
+
+    Color titleColor = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white
+        : Colors.black;
+
+    Color topIconsColor = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white
+        : Colors.black;
+
+    bool isDataFetched = false;
     return Scaffold(
       drawer: const MyDrawer(),
       body: CustomScrollView(
@@ -36,7 +125,7 @@ class CampusPosts extends ConsumerWidget {
             backgroundColor: Colors.transparent,
             toolbarHeight: 23.0,
             centerTitle: false,
-            title: Text(AppConstants.appName, style: TextStyle(color: Colors.teal[800], fontWeight: FontWeight.bold)),
+            title: Text(AppConstants.appName, style: TextStyle(color: titleColor, fontWeight: FontWeight.bold)),
             automaticallyImplyLeading: false,
             pinned: false,
           ),
@@ -54,13 +143,13 @@ class CampusPosts extends ConsumerWidget {
                             onTap: () {
                               Scaffold.of(context).openDrawer();
                             },
-                            child: const SizedBox(
+                            child: SizedBox(
                               width: 40,
-                              child: Icon(Icons.menu_outlined),
+                              child: Icon(Icons.menu_outlined, color: topIconsColor),
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.logout),
+                            icon: Icon(Icons.logout, color: topIconsColor),
                             onPressed: () {
                               ref.read(authProvider.notifier).logout();  // Use ref here for logout
                               Navigator.pushReplacement(
@@ -78,7 +167,8 @@ class CampusPosts extends ConsumerWidget {
             ),
           ),
           FutureBuilder<List<dynamic>>(
-            future: fetchPosts(), // Trigger fetchPosts function directly
+
+              future: fetchPosts(), // Trigger this function directly
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const SliverFillRemaining(
@@ -89,7 +179,8 @@ class CampusPosts extends ConsumerWidget {
                     ),
                   ),
                 );
-              } else if (snapshot.hasError) {
+              }
+              else if (snapshot.hasError) {
                 return SliverFillRemaining(
                   hasScrollBody: false,
                   child: Center(
@@ -108,7 +199,8 @@ class CampusPosts extends ConsumerWidget {
                     ),
                   ),
                 );
-              } else if (snapshot.data?.isEmpty ?? true) {
+              }
+              else if (snapshot.data?.isEmpty ?? true) {
                 return SliverFillRemaining(
                   hasScrollBody: false,
                   child: Center(
@@ -125,7 +217,8 @@ class CampusPosts extends ConsumerWidget {
                     ),
                   ),
                 );
-              } else {
+              }
+              else {
                 final postList = snapshot.data!;
                 return SliverList(
                   delegate: SliverChildBuilderDelegate(
@@ -145,145 +238,106 @@ class CampusPosts extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(16),
                           ),
                           margin: const EdgeInsets.symmetric(vertical: 12),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.teal.shade900,
-                                  Colors.tealAccent.shade400,
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      CircleAvatar(
-                                        backgroundColor: Colors.white,
-                                        backgroundImage: post['author'] != null && post['author']['profile'] != null
-                                            ? NetworkImage(post['author']['profile']['picture'] ?? '')
-                                            : AssetImage('assets/default_profile_picture.png'), // Default image if null
+                          child:
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Container(
+                             color: postsBgColor,
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        Colors.white.withOpacity(0.3),
+                                        Colors.grey.withOpacity(0.4),
+                                        Colors.white.withOpacity(0.1),
+                                      ],
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.white.withOpacity(0.2),
+                                        blurRadius: 10,
+                                        spreadRadius: 2,
+                                        offset: Offset(3, 3),
                                       ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Row(
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        blurRadius: 10,
+                                        spreadRadius: 2,
+                                        offset: Offset(-3, -3),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
                                           children: [
+                                            CircleAvatar(
+                                              backgroundColor: Colors.white,
+                                              backgroundImage: post['author'] != null && post['author']['profile'] != null
+                                                  ? NetworkImage(post['author']['profile']['picture'] ?? '')
+                                                  : AssetImage('assets/default_profile_picture.png') as ImageProvider,
+                                            ),
+                                            const SizedBox(width: 10),
                                             Column(
-                                              mainAxisAlignment: MainAxisAlignment.start,
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  post['author']?['name'] ?? '{Deleted}', // Null-aware operator used here
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 15,
-                                                  ),
+                                                  post['author']?['name'] ?? '{Deleted}',
+                                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15,color: postsTextColor),
                                                 ),
                                                 Text(
-                                                  '@${post['author']?['username'] ?? ''}', // Null-aware operator and null-coalescing
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 12,
-                                                  ),
+                                                  '@${post['author']?['username'] ?? ''}',
+                                                  style: TextStyle(fontSize: 12, color: postsTextColor),
                                                 ),
                                               ],
                                             ),
-                        
+                                            Spacer(),
+                                            Icon(Icons.more_vert,color: postsTextColor),
                                           ],
                                         ),
-                                      ),
-                                      const Icon(
-                                        Icons.more_vert,
-                                        color: Colors.white,
-                                      ),
-                                    ],
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          post['title'] ?? '',
+                                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold,color: postsTextColor),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+
+                                        ),
+                                        Text(
+                                          post['body'] ?? '',
+                                          style: TextStyle(fontSize: 13,color: postsTextColor),
+                                          maxLines: 4,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 10),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                _buildStatItem(emoji: '👏🏻', count: upVotesCount),
+                                                const SizedBox(width: 8),
+                                                _buildStatItem(emoji: '👎🏻', count: downVotesCount),
+                                                const SizedBox(width: 8),
+                                                _buildStatItem(emoji: '💬', count: commentsCount),
+                                              ],
+                                            ),
+                                            _buildDateBadge(formattedDate,context),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    post['title'] ?? '',
-                                    style: TextStyle(fontSize: 14,color: Colors.white,fontWeight: FontWeight.bold),
-                                    maxLines: 1,
-                        
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  Text(
-                                    post['body'] ?? '',
-                                    style: TextStyle(fontSize: 13,color: Colors.white),
-                                    maxLines: 4,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.favorite_border,
-                                            color: Colors.white,
-                                            size: 20,
-                                          ),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            '$upVotesCount', // Display upvotes count
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodySmall
-                                                ?.copyWith(color: Colors.white),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.thumb_down_alt_outlined,
-                                            color: Colors.white,
-                                            size: 20,
-                                          ),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            '$downVotesCount', // Display downvotes count
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodySmall
-                                                ?.copyWith(color: Colors.white),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.comment,
-                                            color: Colors.white,
-                                            size: 20,
-                                          ),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            '$commentsCount', // Display comments count
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodySmall
-                                                ?.copyWith(color: Colors.white),
-                                          ),
-                                        ],
-                                      ),
-                                      Text(
-                                        formattedDate, // Display formatted date
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.copyWith(color: Colors.white),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
@@ -301,5 +355,3 @@ class CampusPosts extends ConsumerWidget {
     );
   }
 }
-
-
