@@ -110,13 +110,13 @@ class _HomePageState extends State<HomePage> {
 
 
   // Define your pages here
-  static const List<Widget> _pages = <Widget>[
+  static List<Widget> _pages = <Widget>[
     // PostsPrimaryPage(),
     CampusPosts(),
-    Messages(),
-    Center(child: Text('Explore', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold))),
-    MapsLook(),
-    ProfilePage(),
+    const Messages(),
+    const Center(child: Text('Explore', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold))),
+    const MapsLook(),
+    const ProfilePage(),
   ];
 
   void _onNavBarTapped(int index) {

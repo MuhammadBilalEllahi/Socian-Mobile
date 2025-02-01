@@ -36,6 +36,7 @@ class MyApp extends StatelessWidget {
       title: AppConstants.appName,
       themeMode: ThemeMode.system,
       theme: AppThemes.lightTheme, // Use light theme
+      // theme: AppThemes.darkTheme, // Use light theme
       darkTheme: AppThemes.darkTheme, // Use dark theme
       initialRoute:
           AppRoutes.splashScreen,

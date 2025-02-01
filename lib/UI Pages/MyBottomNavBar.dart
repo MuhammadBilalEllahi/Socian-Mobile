@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 class MyBottomNavBar extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onItemTapped;
-  final double iconSize = 24;
-  final double selected_iconSize = 34;
+  final double iconSize = 30;
+  final double selected_iconSize = 22;
 
   const MyBottomNavBar({
     super.key,
