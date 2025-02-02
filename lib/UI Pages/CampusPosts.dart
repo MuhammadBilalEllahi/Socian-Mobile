@@ -83,7 +83,7 @@ class CampusPosts extends ConsumerWidget {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const AuthScreen(),
+                                 builder: (context) => const AuthScreen(),
                                 ),
                               );
                             },

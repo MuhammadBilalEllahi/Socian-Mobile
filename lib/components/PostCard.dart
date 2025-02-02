@@ -1,55 +1,65 @@
-
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // For date formatting
 
-class PostCard extends StatelessWidget {
+class PostCard extends StatefulWidget {
   final dynamic post;
   final Color postsBgColor;
   final Color postsTextColor;
 
   const PostCard({
-    super.key,
+    Key? key,
     required this.post,
     required this.postsBgColor,
     required this.postsTextColor,
-  });
+  }) : super(key: key);
 
-  Widget _buildStatItem({required String emoji, required int count, required BuildContext context}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Theme.of(context).brightness == Brightness.dark
-            ? Colors.black.withOpacity(0.1)
-            : Colors.white.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).brightness == Brightness.dark
+  @override
+  _PostCardState createState() => _PostCardState();
+}
+
+class _PostCardState extends State<PostCard> {
+  bool isLiked = false;
+  bool isDisliked = false;
+
+  Widget _buildStatItem({required String emoji, required int count, required BuildContext context, required Function onTap, required Color activeColor, required bool isActive}) {
+    return GestureDetector(
+      onTap: () => onTap(),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: isActive ? activeColor : (Theme.of(context).brightness == Brightness.dark
               ? Colors.black.withOpacity(0.1)
-              : Colors.white.withOpacity(0.2),
-          width: 0.5,
+              : Colors.white.withOpacity(0.2)),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.black.withOpacity(0.1)
+                : Colors.white.withOpacity(0.2),
+            width: 0.5,
+          ),
         ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            emoji,
-            style: const TextStyle(fontSize: 18),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            '$count',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.black
-                  : Colors.white,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              emoji,
+              style: const TextStyle(fontSize: 18),
             ),
-          ),
-        ],
+            const SizedBox(width: 6),
+            Text(
+              '$count',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.black
+                    : Colors.white,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -93,17 +103,17 @@ class PostCard extends StatelessWidget {
   }
 
   void _showFullPostDialog(BuildContext context) {
-    final createdAt = DateTime.parse(post['createdAt']);
+    final createdAt = DateTime.parse(widget.post['createdAt']);
     final formattedDate = DateFormat('MMM d, y').format(createdAt);
-    final upVotesCount = post['voteId']?['upVotesCount'] ?? 0;
-    final downVotesCount = post['voteId']?['downVotesCount'] ?? 0;
-    final commentsCount = post['commentsCount'] ?? 0;
+    final upVotesCount = widget.post['voteId']?['upVotesCount'] ?? 0;
+    final downVotesCount = widget.post['voteId']?['downVotesCount'] ?? 0;
+    final commentsCount = widget.post['commentsCount'] ?? 0;
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return Dialog(
-          backgroundColor: postsBgColor,
+          backgroundColor: widget.postsBgColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -112,6 +122,8 @@ class PostCard extends StatelessWidget {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: Container(
+                height: MediaQuery.of(context).size.height * 0.90,
+                width: MediaQuery.of(context).size.width * 0.96,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
@@ -148,8 +160,8 @@ class PostCard extends StatelessWidget {
                         children: [
                           CircleAvatar(
                             backgroundColor: Colors.white,
-                            backgroundImage: post['author'] != null && post['author']['profile'] != null
-                                ? NetworkImage(post['author']['profile']['picture'] ?? '')
+                            backgroundImage: widget.post['author'] != null && widget.post['author']['profile'] != null
+                                ? NetworkImage(widget.post['author']['profile']['picture'] ?? '')
                                 : const AssetImage('assets/default_profile_picture.png') as ImageProvider,
                           ),
                           const SizedBox(width: 10),
@@ -157,17 +169,17 @@ class PostCard extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                post['author']?['name'] ?? '{Deleted}',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: postsTextColor),
+                                widget.post['author']?['name'] ?? '{Deleted}',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: widget.postsTextColor),
                               ),
                               Row(
                                 children: [
                                   Text(
-                                    '@${post['author']?['username'] ?? ''}',
-                                    style: TextStyle(fontSize: 12, color: postsTextColor),
+                                    '@${widget.post['author']?['username'] ?? ''}',
+                                    style: TextStyle(fontSize: 12, color: widget.postsTextColor),
                                   ),
                                   const SizedBox(width: 5,),
-                                  Icon(Icons.circle, size: 5, color: postsTextColor),
+                                  Icon(Icons.circle, size: 5, color: widget.postsTextColor),
                                   const SizedBox(width: 5,),
                                   _buildDateBadge(formattedDate, context),
                                 ],
@@ -176,7 +188,7 @@ class PostCard extends StatelessWidget {
                           ),
                           const Spacer(),
                           IconButton(
-                            icon: Icon(Icons.close, color: postsTextColor),
+                            icon: Icon(Icons.close, color: widget.postsTextColor),
                             onPressed: () {
                               Navigator.of(context).pop();
                             },
@@ -185,13 +197,13 @@ class PostCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        post['title'] ?? '',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: postsTextColor),
+                        widget.post['title'] ?? '',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: widget.postsTextColor),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        post['body'] ?? '',
-                        style: TextStyle(fontSize: 14, color: postsTextColor),
+                        widget.post['body'] ?? '',
+                        style: TextStyle(fontSize: 14, color: widget.postsTextColor),
                       ),
                       const SizedBox(height: 16),
                       Row(
@@ -199,11 +211,46 @@ class PostCard extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              _buildStatItem(emoji: '👏🏻', count: upVotesCount, context: context),
+                              _buildStatItem(
+                                emoji: '👍🏻',
+                                count: upVotesCount,
+                                context: context,
+                                onTap: () {
+                                  setState(() {
+                                    isLiked = !isLiked;
+                                    if (isLiked) {
+                                      isDisliked = false;
+                                    }
+                                  });
+                                },
+                                activeColor: Colors.green,
+                                isActive: isLiked,
+                              ),
                               const SizedBox(width: 8),
-                              _buildStatItem(emoji: '👎🏻', count: downVotesCount, context: context),
+                              _buildStatItem(
+                                emoji: '👎🏻',
+                                count: downVotesCount,
+                                context: context,
+                                onTap: () {
+                                  setState(() {
+                                    isDisliked = !isDisliked;
+                                    if (isDisliked) {
+                                      isLiked = false;
+                                    }
+                                  });
+                                },
+                                activeColor: Colors.red,
+                                isActive: isDisliked,
+                              ),
                               const SizedBox(width: 8),
-                              _buildStatItem(emoji: '💬', count: commentsCount, context: context),
+                              _buildStatItem(
+                                emoji: '💬',
+                                count: commentsCount,
+                                context: context,
+                                onTap: () {},
+                                activeColor: Colors.transparent,
+                                isActive: false,
+                              ),
                             ],
                           ),
                         ],
@@ -221,119 +268,154 @@ class PostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _showFullPostDialog(context),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-        child: Card(
-          elevation: 5,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          margin: const EdgeInsets.symmetric(vertical: 12),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Container(
-              color: postsBgColor,
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Colors.white.withOpacity(0.3),
-                        Colors.grey.withOpacity(0.4),
-                        Colors.white.withOpacity(0.1),
-                      ],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.white.withOpacity(0.2),
-                        blurRadius: 10,
-                        spreadRadius: 2,
-                        offset: const Offset(3, 3),
-                      ),
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        spreadRadius: 2,
-                        offset: const Offset(-3, -3),
-                      ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+      child: Card(
+        elevation: 5,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        margin: const EdgeInsets.symmetric(vertical: 12),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            color: widget.postsBgColor,
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white.withOpacity(0.3),
+                      Colors.grey.withOpacity(0.4),
+                      Colors.white.withOpacity(0.1),
                     ],
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            CircleAvatar(
-                              backgroundColor: Colors.white,
-                              backgroundImage: post['author'] != null && post['author']['profile'] != null
-                                  ? NetworkImage(post['author']['profile']['picture'] ?? '')
-                                  : const AssetImage('assets/default_profile_picture.png') as ImageProvider,
-                            ),
-                            const SizedBox(width: 10),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  post['author']?['name'] ?? '{Deleted}',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: postsTextColor),
-                                ),
-                                Row(
-                                  children: [
-                                    Text(
-                                      '@${post['author']?['username'] ?? ''}',
-                                      style: TextStyle(fontSize: 12, color: postsTextColor),
-                                    ),
-                                    const SizedBox(width: 5,),
-                                    Icon(Icons.circle, size: 5, color: postsTextColor),
-                                    const SizedBox(width: 5,),
-                                    _buildDateBadge(DateFormat('MMM d, y').format(DateTime.parse(post['createdAt'])), context),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            const Spacer(),
-                            Icon(Icons.more_vert, color: postsTextColor),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          post['title'] ?? '',
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: postsTextColor),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          post['body'] ?? '',
-                          style: TextStyle(fontSize: 13, color: postsTextColor),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.white.withOpacity(0.2),
+                      blurRadius: 10,
+                      spreadRadius: 2,
+                      offset: const Offset(3, 3),
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      spreadRadius: 2,
+                      offset: const Offset(-3, -3),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: Colors.white,
+                            backgroundImage: widget.post['author'] != null && widget.post['author']['profile'] != null
+                                ? NetworkImage(widget.post['author']['profile']['picture'] ?? '')
+                                : const AssetImage('assets/default_profile_picture.png') as ImageProvider,
+                          ),
+                          const SizedBox(width: 10),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.post['author']?['name'] ?? '{Deleted}',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: widget.postsTextColor),
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    '@${widget.post['author']?['username'] ?? ''}',
+                                    style: TextStyle(fontSize: 12, color: widget.postsTextColor),
+                                  ),
+                                  const SizedBox(width: 5,),
+                                  Icon(Icons.circle, size: 5, color: widget.postsTextColor),
+                                  const SizedBox(width: 5,),
+                                  _buildDateBadge(DateFormat('MMM d, y').format(DateTime.parse(widget.post['createdAt'])), context),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const Spacer(),
+                          Icon(Icons.more_vert, color: widget.postsTextColor),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        widget.post['title'] ?? '',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: widget.postsTextColor),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      GestureDetector(
+                        onTap: () => _showFullPostDialog(context),
+                        child: Text(
+                          widget.post['body'] ?? '',
+                          style: TextStyle(fontSize: 13, color: widget.postsTextColor),
                           maxLines: 4,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                _buildStatItem(emoji: '👍🏼', count: post['voteId']?['upVotesCount'] ?? 0, context: context),
-                                const SizedBox(width: 8),
-                                _buildStatItem(emoji: '👎🏻', count: post['voteId']?['downVotesCount'] ?? 0, context: context),
-                                const SizedBox(width: 8),
-                                _buildStatItem(emoji: '💬', count: post['commentsCount'] ?? 0, context: context),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              _buildStatItem(
+                                emoji: '👍🏻',
+                                count: widget.post['voteId']?['upVotesCount'] ?? 0,
+                                context: context,
+                                onTap: () {
+                                  setState(() {
+                                    isLiked = !isLiked;
+                                    if (isLiked) {
+                                      isDisliked = false;
+                                    }
+                                  });
+                                },
+                                activeColor: Colors.green,
+                                isActive: isLiked,
+                              ),
+                              const SizedBox(width: 8),
+                              _buildStatItem(
+                                emoji: '👎🏻',
+                                count: widget.post['voteId']?['downVotesCount'] ?? 0,
+                                context: context,
+                                onTap: () {
+                                  setState(() {
+                                    isDisliked = !isDisliked;
+                                    if (isDisliked) {
+                                      isLiked = false;
+                                    }
+                                  });
+                                },
+                                activeColor: Colors.red,
+                                isActive: isDisliked,
+                              ),
+                              const SizedBox(width: 8),
+                              _buildStatItem(
+                                emoji: '💬',
+                                count: widget.post['commentsCount'] ?? 0,
+                                context: context,
+                                onTap: () {},
+                                activeColor: Colors.transparent,
+                                isActive: false,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),
