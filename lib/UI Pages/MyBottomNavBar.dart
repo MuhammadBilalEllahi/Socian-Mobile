@@ -17,13 +17,29 @@ class MyBottomNavBar extends StatelessWidget {
     return ClipRRect(
       borderRadius: const BorderRadius.only(),
       child: Container(
-        decoration: BoxDecoration(
+        
+        decoration: Theme.of(context).brightness == Brightness.dark 
+        
+        ? BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.teal.shade900, Colors.teal.shade400],
+            colors: [
+              Colors.teal.shade900, 
+              Colors.teal.shade400
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-        ),
+        )
+        : BoxDecoration(
+      gradient: LinearGradient(
+      colors: [
+        Colors.teal, 
+        Colors.teal.shade100
+      ],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      ),
+    ),
         child: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.transparent,

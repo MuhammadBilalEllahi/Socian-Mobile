@@ -1,4 +1,6 @@
+import 'package:beyondtheclass/UI%20Pages/CampusPosts.dart';
 import 'package:beyondtheclass/UI%20Pages/DepartmentPage.dart';
+import 'package:beyondtheclass/UI%20Pages/Teachers Page/TeachersPage.dart';
 import 'package:beyondtheclass/UI%20Pages/PastPapers.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
@@ -20,25 +22,52 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
     
     final auth = ref.watch(authProvider);
 
-// UNDERSTAND Left this for you to understand
-//     print("auh $auth");
-
-//   print('Auth data: ${auth.user ?? "No user data"}');
-
-//   print('Auth name: ${auth.user?['name'] ?? "No name"}');
-// print('Auth email: ${auth.user?['email'] ?? "No email"}');
-
-  // print('Auth email: ${auth.user?.email ?? "No email"}');
     return Drawer(
       width: MediaQuery.of(context).size.width * 0.75,
-      child: Container(
+      child:
+      Container(
+
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.teal.shade900, Colors.tealAccent.shade400],
+          gradient: Theme.of(context).brightness == Brightness.dark
+              // for dark mode
+              ? LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
+            colors: [
+              Colors.teal.shade900,
+              Colors.tealAccent.shade400
+            ],
+          )
+              // for light mode
+              : LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.teal,
+              Colors.teal.withOpacity(0.1)
+            ],
           ),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.5),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.white.withOpacity(0.2),
+              blurRadius: 10,
+              spreadRadius: 2,
+              offset: const Offset(3, 3),
+            ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              spreadRadius: 2,
+              offset: const Offset(-3, -3),
+            ),
+          ],
         ),
+
+
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -85,13 +114,7 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
                       color: Colors.white,
                     ),
                   ),
-                  // Text(
-                  //   AppConstants.appName,
-                  //   style: TextStyle(
-                  //     fontSize: 14,
-                  //     color: Colors.white
-                  //   ),
-                  // ),
+
                 ],
               ),
             ),
@@ -110,7 +133,10 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
                     ),
                     title: const Text("Home", style: TextStyle(color: Colors.white)),
                     onTap: () {
-                      Navigator.of(context).pop();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => CampusPosts()),
+                      );
                     },
                   ),
                   ListTile(
@@ -152,8 +178,11 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
                     ),
                     title: const Text("Teacher's Reviews", style: TextStyle(color: Colors.white)),
                     onTap: () {
-                      Navigator.of(context).pop();
-                    },
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => TeachersPage()),
+                      );
+                      },
                   ),
                   ListTile(
                     leading: const Text(
@@ -171,12 +200,7 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
                       style: TextStyle(fontSize: 24),
                     ),
                     title: GestureDetector(child: const Text("Past Papers", style: TextStyle(color: Colors.white))),
-                    // onTap: () {
-                    //   Navigator.pushNamed(
-                    //   context,
-                    //   '/pastpaper'
-                    //   );
-                    //   },
+
                     onTap: (){
                       Navigator.push(
                         context,
@@ -189,19 +213,6 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
               ),
             ),
 
-            // const Divider(color: Colors.white70, thickness: 1),
-
-            // Footer
-            // Padding(
-            //   padding: const EdgeInsets.all(16.0),
-            //   child: Text(
-            //     "Version 1.0.0",
-            //     style: TextStyle(
-            //       color: Colors.teal.shade200,
-            //       fontSize: 12,
-            //     ),
-            //   ),
-            // ),
           ],
         ),
       ),

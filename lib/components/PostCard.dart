@@ -112,47 +112,53 @@ class _PostCardState extends State<PostCard> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: widget.postsBgColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Container(
-                height: MediaQuery.of(context).size.height * 0.90,
-                width: MediaQuery.of(context).size.width * 0.96,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.white.withOpacity(0.3),
-                      Colors.grey.withOpacity(0.4),
-                      Colors.white.withOpacity(0.1),
-                    ],
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    Colors.white.withOpacity(0.3),
+                                    Colors.grey.withOpacity(0.4),
+                                    Colors.white.withOpacity(0.1),
+                                  ],
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.white.withOpacity(0.2),
+                                    blurRadius: 10,
+                                    spreadRadius: 2,
+                                    offset: const Offset(3, 3),
+                                  ),
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 10,
+                                    spreadRadius: 2,
+                                    offset: const Offset(-3, -3),
+                                  ),
+                                ],
+                              ),
+              child: Dialog.fullscreen(
+                backgroundColor: widget.postsBgColor,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.white.withOpacity(0.3),
+                        Colors.grey.withOpacity(0.4),
+                        Colors.white.withOpacity(0.1),
+                      ],
+                    ),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.white.withOpacity(0.2),
-                      blurRadius: 10,
-                      spreadRadius: 2,
-                      offset: const Offset(3, 3),
-                    ),
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      spreadRadius: 2,
-                      offset: const Offset(-3, -3),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(16),
-                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(10),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -178,9 +184,9 @@ class _PostCardState extends State<PostCard> {
                                     '@${widget.post['author']?['username'] ?? ''}',
                                     style: TextStyle(fontSize: 12, color: widget.postsTextColor),
                                   ),
-                                  const SizedBox(width: 5,),
+                                  const SizedBox(width: 5),
                                   Icon(Icons.circle, size: 5, color: widget.postsTextColor),
-                                  const SizedBox(width: 5,),
+                                  const SizedBox(width: 5),
                                   _buildDateBadge(formattedDate, context),
                                 ],
                               ),
@@ -196,64 +202,73 @@ class _PostCardState extends State<PostCard> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      Text(
-                        widget.post['title'] ?? '',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: widget.postsTextColor),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        widget.post['body'] ?? '',
-                        style: TextStyle(fontSize: 14, color: widget.postsTextColor),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildStatItem(
-                                emoji: '👍🏻',
-                                count: upVotesCount,
-                                context: context,
-                                onTap: () {
-                                  setState(() {
-                                    isLiked = !isLiked;
-                                    if (isLiked) {
-                                      isDisliked = false;
-                                    }
-                                  });
-                                },
-                                activeColor: Colors.green,
-                                isActive: isLiked,
+                              Text(
+                                widget.post['title'] ?? '',
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: widget.postsTextColor),
                               ),
-                              const SizedBox(width: 8),
-                              _buildStatItem(
-                                emoji: '👎🏻',
-                                count: downVotesCount,
-                                context: context,
-                                onTap: () {
-                                  setState(() {
-                                    isDisliked = !isDisliked;
-                                    if (isDisliked) {
-                                      isLiked = false;
-                                    }
-                                  });
-                                },
-                                activeColor: Colors.red,
-                                isActive: isDisliked,
+                              const SizedBox(height: 8),
+                              Text(
+                                widget.post['body'] ?? '',
+                                style: TextStyle(fontSize: 14, color: widget.postsTextColor),
                               ),
-                              const SizedBox(width: 8),
-                              _buildStatItem(
-                                emoji: '💬',
-                                count: commentsCount,
-                                context: context,
-                                onTap: () {},
-                                activeColor: Colors.transparent,
-                                isActive: false,
+                              const SizedBox(height: 16),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      _buildStatItem(
+                                        emoji: '👍🏻',
+                                        count: upVotesCount,
+                                        context: context,
+                                        onTap: () {
+                                          setState(() {
+                                            isLiked = !isLiked;
+                                            if (isLiked) {
+                                              isDisliked = false;
+                                            }
+                                          });
+                                        },
+                                        activeColor: Colors.green,
+                                        isActive: isLiked,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      _buildStatItem(
+                                        emoji: '👎🏻',
+                                        count: downVotesCount,
+                                        context: context,
+                                        onTap: () {
+                                          setState(() {
+                                            isDisliked = !isDisliked;
+                                            if (isDisliked) {
+                                              isLiked = false;
+                                            }
+                                          });
+                                        },
+                                        activeColor: Colors.red,
+                                        isActive: isDisliked,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      _buildStatItem(
+                                        emoji: '💬',
+                                        count: commentsCount,
+                                        context: context,
+                                        onTap: () {},
+                                        activeColor: Colors.transparent,
+                                        isActive: false,
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
+                        ),
                       ),
                     ],
                   ),
@@ -265,6 +280,7 @@ class _PostCardState extends State<PostCard> {
       },
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
