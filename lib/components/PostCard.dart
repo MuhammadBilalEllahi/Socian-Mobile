@@ -366,11 +366,14 @@ class _PostCardState extends State<PostCard> {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        widget.post['title'] ?? '',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: widget.postsTextColor),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      GestureDetector(
+                        onTap: () => _showFullPostDialog(context),
+                        child: Text(
+                          widget.post['title'] ?? '',
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: widget.postsTextColor),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                       GestureDetector(
                         onTap: () => _showFullPostDialog(context),

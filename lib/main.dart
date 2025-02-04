@@ -35,8 +35,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: AppConstants.appName,
       themeMode: ThemeMode.system,
-      // theme: AppThemes.lightTheme, // Use light theme
-      theme: AppThemes.darkTheme, // Use light theme
+      theme: AppThemes.lightTheme, // Use light theme
+      // theme: AppThemes.darkTheme, // Use light theme
       darkTheme: AppThemes.darkTheme, // Use dark theme
       initialRoute:
           AppRoutes.splashScreen,

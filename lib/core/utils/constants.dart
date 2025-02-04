@@ -42,6 +42,10 @@ static const String auth = '/auth';
   static const String postsCampus = '$api$posts/campus/all';
 
 
+  static const String teachers = '/teacher';
+  static const String campusTeachers = '$api$teachers/campus/teachers';
+
+
 
 
 }
