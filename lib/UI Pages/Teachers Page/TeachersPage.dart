@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../components/_buildShimmerEffect.dart';
 import '../../core/utils/constants.dart';
 import '../../shared/services/api_client.dart';
 import 'TeacherDetailsPage.dart';
@@ -14,9 +15,6 @@ class TeachersPage extends StatefulWidget {
 class _TeachersPageState extends State<TeachersPage> {
   final ApiClient apiClient = ApiClient();
   late Future<List<dynamic>> _teachersFuture;
-
-
-
 
 
   Future<List<dynamic>> fetchTeachers() async {
@@ -41,15 +39,15 @@ class _TeachersPageState extends State<TeachersPage> {
   @override
   Widget build(BuildContext context) {
 
-
-
-
+    Color textColor = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white // for dark mode
+        : Colors.teal;
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Campus Faculty',
+        title:  Text('Campus Faculty',
             style: TextStyle(
-                color: Colors.white,
+                color: textColor,
                 fontWeight: FontWeight.w600,
                 fontSize: 20)),
         backgroundColor: Colors.transparent,
@@ -61,11 +59,11 @@ class _TeachersPageState extends State<TeachersPage> {
       future: _teachersFuture,
       builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
-      return _buildShimmerEffect();
+      return buildShimmerEffect(itemCount: 10);
       } else if (snapshot.hasError) {
-      return Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.white)));
+      return Center(child: Text('Error: ${snapshot.error}', style: TextStyle(color: textColor)));
       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-      return const Center(child: Text('No teachers found', style: TextStyle(color: Colors.white)));
+      return Center(child: Text('No teachers found', style: TextStyle(color: textColor)));
       }
 
       final teachers = snapshot.data!;
@@ -96,63 +94,7 @@ class _TeachersPageState extends State<TeachersPage> {
     );
   }
 
-  Widget _buildShimmerEffect() {
-    return ListView.builder(
-      padding: const EdgeInsets.only(top: 80, bottom: 16),
-      itemCount: 5,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Card(
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: double.infinity,
-                          height: 16,
-                          color: Colors.grey[300],
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          width: 100,
-                          height: 12,
-                          color: Colors.grey[300],
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          width: 80,
-                          height: 12,
-                          color: Colors.grey[300],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
+
 
 
 }

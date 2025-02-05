@@ -4,6 +4,7 @@ import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../components/PostCard.dart';
+import '../components/_buildShimmerEffect.dart';
 import 'MyDrawer.dart';
 import 'package:beyondtheclass/features/auth/presentation/auth_screen.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
@@ -100,7 +101,10 @@ class CampusPosts extends ConsumerWidget {
             future: fetchPosts(), // Trigger this function directly
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const SliverFillRemaining(
+                return
+                  // SliverToBoxAdapter(child: buildShimmerEffect(itemCount: 10));-->not working
+
+                const SliverFillRemaining(
                   hasScrollBody: false,
                   child: Center(
                     child: CircularProgressIndicator(
@@ -108,6 +112,8 @@ class CampusPosts extends ConsumerWidget {
                     ),
                   ),
                 );
+
+
               } else if (snapshot.hasError) {
                 return SliverFillRemaining(
                   hasScrollBody: false,
@@ -161,6 +167,10 @@ class CampusPosts extends ConsumerWidget {
               }
             },
           ),
+
+
+
+
         ],
       ),
     );
