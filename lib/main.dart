@@ -3,7 +3,7 @@ import 'package:beyondtheclass/UI%20Pages/Map.dart';
 import 'package:beyondtheclass/UI%20Pages/Messages.dart';
 import 'package:beyondtheclass/UI%20Pages/PastPapers.dart';
 import 'package:beyondtheclass/UI%20Pages/PostsPrimaryPage.dart';
-import 'package:beyondtheclass/UI%20Pages/ProfilePage.dart';
+import 'package:beyondtheclass/UI%20Pages/Profile%20Page%20Widgets/ProfilePage.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/presentation/auth_screen.dart';
 import 'package:beyondtheclass/features/auth/presentation/student_signupScreen.dart';

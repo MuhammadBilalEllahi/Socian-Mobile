@@ -35,11 +35,11 @@ class _ProfileIdentityState extends ConsumerState<ProfileIdentity> {
                         as ImageProvider,
               )),
           Text(
-            auth.user?['name'],
+            auth.user?['name']??"Logged Out",
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
           ),
           Text(
-            "@${auth.user?['username']}",
+            "@${auth.user?['username']??"Logged Out"}",
             style: TextStyle(color: Colors.grey[850], fontSize: 14),
           ),
         ],

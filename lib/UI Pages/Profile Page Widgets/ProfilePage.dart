@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'Profile Page Widgets/AboutMeProfile.dart';
-import 'Profile Page Widgets/CarouselProfilePage.dart';
-import 'Profile Page Widgets/ProfileIdentity.dart';
-import 'Profile Page Widgets/StatsBoxProfile.dart';
+import 'AboutMeProfile.dart';
+import 'CarouselProfilePage.dart';
+import 'ProfileDropDown.dart';
+import 'ProfileIdentity.dart';
+import 'StatsBoxProfile.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -26,7 +27,9 @@ class _ProfilePageState extends State<ProfilePage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(height: screenWidth/16,),
-              const Row(mainAxisAlignment:MainAxisAlignment.end, children: [Icon(Icons.more_horiz),SizedBox(width: 5,)],),
+
+              ProfileDropDown(),
+
               const ProfileIdentity(),
               const SizedBox(height: 15,),
               const Row(

@@ -6,7 +6,7 @@ import 'package:shorebird_code_push/shorebird_code_push.dart';
 
 import 'CampusPosts.dart';
 import 'PostsPrimaryPage.dart';
-import 'ProfilePage.dart';
+import 'Profile Page Widgets/ProfilePage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

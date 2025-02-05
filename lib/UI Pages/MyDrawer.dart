@@ -19,8 +19,10 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
   @override
   Widget build(BuildContext context) {
 
-    
+
     final auth = ref.watch(authProvider);
+    String name = auth.user?['name'] ?? "";
+
 
     return Drawer(
       width: MediaQuery.of(context).size.width * 0.75,
@@ -107,7 +109,7 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    "${'${AppConstants.appGreeting} '+auth.user?['name']}!",
+                    "${'${AppConstants.appGreeting} ${name}!'}",
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
