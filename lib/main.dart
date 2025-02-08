@@ -10,19 +10,21 @@ import 'package:beyondtheclass/features/auth/presentation/student_signupScreen.d
 import 'package:beyondtheclass/features/auth/presentation/widgets/RoleSelectionPage.dart';
 import 'package:beyondtheclass/features/auth/presentation/widgets/login_form.dart';
 import 'package:beyondtheclass/features/auth/presentation/widgets/otp_form.dart';
-
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shorebird_code_push/shorebird_code_push.dart';
-
 import 'package:flutter/material.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'UI Pages/AppThemes.dart';
 import 'UI Pages/splashScreen.dart';
 
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -56,16 +58,6 @@ class MyApp extends StatelessWidget {
         AppRoutes.roleSelection: (context) => const RoleSelectionPage(),
         AppRoutes.otpScreen: (context) => const OTPVerificationScreen(),
         AppRoutes.pastPaperScreen : (context)=> const PastPapers()
-
-        // '/': (context) => const HomePage(),
-        // '/': (context) => const HomePage(),
-        // '/': (context) => const HomePage(),
-        // '/': (context) => const HomePage(),
-        // '/': (context) => const HomePage(),
-        // '/': (context) => const HomePage(),
-        // '/': (context) => const HomePage(),
-        // '/': (context) => const HomePage(),
-        // '/': (context) => const HomePage(),
 
       },
     );

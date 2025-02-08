@@ -583,28 +583,7 @@ class _PostCardState extends State<PostCard> {
     );
   }
 
-  // Widget _buildMedia(List<dynamic>? media) {
-  //   if (media == null || media.isEmpty) {
-  //     return const SizedBox.shrink();
-  //   }
-  //
-  //   return Column(
-  //     children: media.map((item) {
-  //       if (item['type']?.startsWith('image/') ?? false) {
-  //         return Image.network(item['url']);
-  //       } else if (item['type']?.startsWith('video/') ?? false) {
-  //         return _videoController != null && _videoController!.value.isInitialized
-  //             ? AspectRatio(
-  //           aspectRatio: _videoController!.value.aspectRatio,
-  //           child: VideoPlayer(_videoController!),
-  //         )
-  //             : const CircularProgressIndicator();
-  //       } else {
-  //         return const SizedBox.shrink();
-  //       }
-  //     }).toList(),
-  //   );
-  // }
+
 
 
   Widget _buildMedia(List<dynamic>? media) {
