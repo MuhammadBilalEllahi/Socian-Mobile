@@ -6,7 +6,7 @@ import 'package:shorebird_code_push/shorebird_code_push.dart';
 
 import 'CampusPosts.dart';
 import 'PostsPrimaryPage.dart';
-import 'ProfilePage.dart';
+import 'Profile Page Widgets/ProfilePage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -110,13 +110,13 @@ class _HomePageState extends State<HomePage> {
 
 
   // Define your pages here
-  static const List<Widget> _pages = <Widget>[
+  static List<Widget> _pages = <Widget>[
     // PostsPrimaryPage(),
     CampusPosts(),
-    Messages(),
-    Center(child: Text('Explore', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold))),
-    MapsLook(),
-    ProfilePage(),
+    const Messages(),
+    const Center(child: Text('Explore', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold))),
+    const MapsLook(),
+    const ProfilePage(),
   ];
 
   void _onNavBarTapped(int index) {

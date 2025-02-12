@@ -3,26 +3,28 @@ import 'package:beyondtheclass/UI%20Pages/Map.dart';
 import 'package:beyondtheclass/UI%20Pages/Messages.dart';
 import 'package:beyondtheclass/UI%20Pages/PastPapers.dart';
 import 'package:beyondtheclass/UI%20Pages/PostsPrimaryPage.dart';
-import 'package:beyondtheclass/UI%20Pages/ProfilePage.dart';
+import 'package:beyondtheclass/UI%20Pages/Profile%20Page%20Widgets/ProfilePage.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/presentation/auth_screen.dart';
 import 'package:beyondtheclass/features/auth/presentation/student_signupScreen.dart';
 import 'package:beyondtheclass/features/auth/presentation/widgets/RoleSelectionPage.dart';
 import 'package:beyondtheclass/features/auth/presentation/widgets/login_form.dart';
 import 'package:beyondtheclass/features/auth/presentation/widgets/otp_form.dart';
-
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shorebird_code_push/shorebird_code_push.dart';
-
 import 'package:flutter/material.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'UI Pages/AppThemes.dart';
 import 'UI Pages/splashScreen.dart';
 
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -36,6 +38,7 @@ class MyApp extends StatelessWidget {
       title: AppConstants.appName,
       themeMode: ThemeMode.system,
       theme: AppThemes.lightTheme, // Use light theme
+      // theme: AppThemes.darkTheme, // Use light theme
       darkTheme: AppThemes.darkTheme, // Use dark theme
       initialRoute:
           AppRoutes.splashScreen,
@@ -54,17 +57,7 @@ class MyApp extends StatelessWidget {
 
         AppRoutes.roleSelection: (context) => const RoleSelectionPage(),
         AppRoutes.otpScreen: (context) => const OTPVerificationScreen(),
-        AppRoutes.pastPaperScreen : (context)=> const PastPapers(id: '',)
-
-        // '/': (context) => const HomePage(),
-        // '/': (context) => const HomePage(),
-        // '/': (context) => const HomePage(),
-        // '/': (context) => const HomePage(),
-        // '/': (context) => const HomePage(),
-        // '/': (context) => const HomePage(),
-        // '/': (context) => const HomePage(),
-        // '/': (context) => const HomePage(),
-        // '/': (context) => const HomePage(),
+        AppRoutes.pastPaperScreen : (context)=> const PastPapers()
 
       },
     );

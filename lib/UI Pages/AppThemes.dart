@@ -7,7 +7,7 @@ class AppThemes{
     brightness: Brightness.light,
     // Customize other light theme properties as needed
     // primaryColor: Colors.greenAccent,
-    scaffoldBackgroundColor: Colors.white,
+    scaffoldBackgroundColor: Colors.teal.shade50,
     // bottomNavigationBarTheme: const BottomNavigationBarThemeData(
     //   backgroundColor: Colors.blue,
     //
@@ -21,11 +21,11 @@ class AppThemes{
 
   // Dark Theme
   static ThemeData darkTheme = ThemeData(
-    // useMaterial3: true,
+    useMaterial3: true,
     brightness: Brightness.dark,
     // // Customize other dark theme properties as needed
     // primaryColor: Colors.deepPurple,
-    // scaffoldBackgroundColor: Colors.indigo[900],
+    scaffoldBackgroundColor: Colors.blueGrey.shade900,
     // textTheme: const TextTheme(
     //   // bodyText1: TextStyle(color: Colors.white),
     //   // bodyText2: TextStyle(color: Colors.white),

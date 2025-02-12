@@ -1,11 +1,10 @@
-
-
 import 'package:flutter/material.dart';
 
 class MyBottomNavBar extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onItemTapped;
   final double iconSize = 30;
+  final double selected_iconSize = 22;
 
   const MyBottomNavBar({
     super.key,
@@ -16,28 +15,31 @@ class MyBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      // borderRadius: BorderRadius.circular(25),
-      // borderRadius: BorderRadius.circular(0),
-      borderRadius: const BorderRadius.only(
-        // topLeft: Radius.circular(30.0),
-        // topRight: Radius.circular(30.0),
-        // bottomRight: Radius.circular(30.0),
-        // bottomLeft: Radius.circular(40.0),
-      ),        child: Container(
-        decoration: BoxDecoration(
+      borderRadius: const BorderRadius.only(),
+      child: Container(
+        
+        decoration: Theme.of(context).brightness == Brightness.dark 
+        
+        ? BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.teal.shade900, Colors.teal.shade400],
+            colors: [
+              Colors.teal.shade900, 
+              Colors.teal.shade400
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          // boxShadow: [
-          //   BoxShadow(
-          //     color: Colors.black.withOpacity(0.2),
-          //     blurRadius: 10,
-          //     offset: const Offset(0, 5),
-          //   ),
-          // ],
-        ),
+        )
+        : BoxDecoration(
+      gradient: LinearGradient(
+      colors: [
+        Colors.teal, 
+        Colors.teal.shade100
+      ],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      ),
+    ),
         child: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.transparent,
@@ -46,28 +48,52 @@ class MyBottomNavBar extends StatelessWidget {
           unselectedItemColor: Colors.white70,
           selectedFontSize: 14,
           unselectedFontSize: 12,
-          // iconSize: 28,
           showUnselectedLabels: false,
-          showSelectedLabels: false,
+          showSelectedLabels: true,
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon: Icon(Icons.newspaper_rounded,size: iconSize,),
+              icon: Text(
+                "📰",
+                style: TextStyle(
+                  fontSize: selectedIndex == 0 ? selected_iconSize : iconSize, // Increase size when selected
+                ),
+              ),
               label: 'Feed',
             ),
-             BottomNavigationBarItem(
-              icon: Icon(Icons.messenger_outline,size: iconSize,),
+            BottomNavigationBarItem(
+              icon: Text(
+                "✉️",
+                style: TextStyle(
+                  fontSize: selectedIndex == 1 ? selected_iconSize : iconSize, // Increase size when selected
+                ),
+              ),
               label: 'Messages',
             ),
-             BottomNavigationBarItem(
-              icon: Icon(Icons.people_outline,size: iconSize,),
+            BottomNavigationBarItem(
+              icon: Text(
+                "👬🏻",
+                style: TextStyle(
+                  fontSize: selectedIndex == 2 ? selected_iconSize : iconSize, // Increase size when selected
+                ),
+              ),
               label: 'Explore',
             ),
-             BottomNavigationBarItem(
-              icon: Icon(Icons.gps_fixed_rounded,size: iconSize,),
+            BottomNavigationBarItem(
+              icon: Text(
+                "🗺️",
+                style: TextStyle(
+                  fontSize: selectedIndex == 3 ? selected_iconSize : iconSize, // Increase size when selected
+                ),
+              ),
               label: 'GPS',
             ),
-             BottomNavigationBarItem(
-              icon: Icon(Icons.manage_accounts_sharp,size: iconSize,),
+            BottomNavigationBarItem(
+              icon: Text(
+                "👦🏻",
+                style: TextStyle(
+                  fontSize: selectedIndex == 4 ? selected_iconSize : iconSize, // Increase size when selected
+                ),
+              ),
               label: 'Profile',
             ),
           ],
@@ -78,4 +104,3 @@ class MyBottomNavBar extends StatelessWidget {
     );
   }
 }
-
