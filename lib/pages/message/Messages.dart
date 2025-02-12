@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'MessageCard.dart';
+import 'widgets/MessageCard.dart';
 
 class Messages extends StatefulWidget {
   const Messages({super.key});
@@ -17,14 +17,14 @@ class _MessagesState extends State<Messages> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             Row(
               children: [
                 GestureDetector(
                   onTap: () {
                     Scaffold.of(context).openDrawer();
                   },
-                  child: Container(
+                  child: const SizedBox(
                     width: 40,
                     child: Icon(Icons.menu_outlined),
                   ),
@@ -43,73 +43,73 @@ class _MessagesState extends State<Messages> {
               ],
             ),
             // Add MessageCard widgets
-            MessageCard(
+            const MessageCard(
               picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Bilal Ellahi',
               message: 'Hey there! How are you doing today?',
               time: '2:45 PM',
             ),
-            MessageCard(
+            const MessageCard(
               picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Mohammad Bilal Ellahi',
               message: 'Hey there! How are you doing today?',
               time: '2:45 PM',
             ),
-            MessageCard(
+            const MessageCard(
               picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Muhammmad Rayyan',
               message: 'Hey there! How are you doing today?',
               time: '2:45 PM',
             ),
-            MessageCard(
+            const MessageCard(
               picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Bilal Ellahi',
               message: 'Hey there! How are you doing today?',
               time: '2:45 PM',
             ),
-            MessageCard(
+            const MessageCard(
               picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Mohammad Bilal Ellahi',
               message: 'Hey there! How are you doing today?',
               time: '2:45 PM',
             ),
-            MessageCard(
+            const MessageCard(
               picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Muhammmad Rayyan',
               message: 'Hey there! How are you doing today?',
               time: '2:45 PM',
             ),
-            MessageCard(
+            const MessageCard(
               picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Bilal Ellahi',
               message: 'Hey there! How are you doing today?',
               time: '2:45 PM',
             ),
-            MessageCard(
+            const MessageCard(
               picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Mohammad Bilal Ellahi',
               message: 'Hey there! How are you doing today?',
               time: '2:45 PM',
             ),
-            MessageCard(
+            const MessageCard(
               picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Muhammmad Rayyan',
               message: 'Hey there! How are you doing today?',
               time: '2:45 PM',
             ),
-            MessageCard(
+            const MessageCard(
               picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Bilal Ellahi',
               message: 'Hey there! How are you doing today?',
               time: '2:45 PM',
             ),
-            MessageCard(
+            const MessageCard(
               picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Mohammad Bilal Ellahi',
               message: 'Hey there! How are you doing today?',
               time: '2:45 PM',
             ),
-            MessageCard(
+            const MessageCard(
               picture: 'assets/images/anime.png', // Replace with your image URL or asset path
               name: 'Muhammmad Rayyan',
               message: 'Hey there! How are you doing today?',

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../features/auth/presentation/auth_screen.dart';
-import '../../features/auth/providers/auth_provider.dart';
+import '../../../features/auth/presentation/auth_screen.dart';
+import '../../../features/auth/providers/auth_provider.dart';
 
 class ProfileDropDown extends ConsumerWidget{
   const ProfileDropDown({super.key});
@@ -38,41 +38,41 @@ class ProfileDropDown extends ConsumerWidget{
             }
           },
           itemBuilder: (context) => [
-            PopupMenuItem(
+            const PopupMenuItem(
               value: 1,
               child: Row(
-                children: const [
+                children: [
                   Icon(Icons.person, color: Colors.teal),
                   SizedBox(width: 8),
                   Text("View Profile"),
                 ],
               ),
             ),
-            PopupMenuItem(
+            const PopupMenuItem(
               value: 2,
               child: Row(
-                children: const [
+                children: [
                   Icon(Icons.edit, color: Colors.orange),
                   SizedBox(width: 8),
                   Text("Edit Profile"),
                 ],
               ),
             ),
-            PopupMenuItem(
+            const PopupMenuItem(
               value: 3,
               child: Row(
-                children: const [
+                children: [
                   Icon(Icons.settings, color: Colors.blue),
                   SizedBox(width: 8),
                   Text("Settings"),
                 ],
               ),
             ),
-            PopupMenuItem(
+            const PopupMenuItem(
 
               value: 4,
               child: Row(
-                children: const [
+                children: [
                   Icon(Icons.logout, color: Colors.red),
                   SizedBox(width: 8),
                   Text("Logout"),

@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:beyondtheclass/features/auth/domain/auth_usecase.dart';
 import 'package:beyondtheclass/features/auth/domain/auth_state.dart';

@@ -1,14 +1,14 @@
-import 'package:beyondtheclass/UI%20Pages/MyDrawer.dart';
-import 'package:beyondtheclass/UI%20Pages/SimplePost.dart';
+import 'package:beyondtheclass/pages/drawer/MyDrawer.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/presentation/auth_screen.dart';
+import 'package:beyondtheclass/pages/home/widgets/SimplePost.dart';
 import 'package:flutter/material.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'BreakingNewsScroller.dart';
-import 'Filters.dart';
-import 'QnA Post Widgets/QnAPost.dart';
+import '../components/Filters.dart';
+import '../components/qna/QnAPost.dart';
 
 class PostsPrimaryPage extends ConsumerStatefulWidget {
   const PostsPrimaryPage({super.key});

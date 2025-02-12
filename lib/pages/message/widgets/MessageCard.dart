@@ -7,12 +7,12 @@ class MessageCard extends StatefulWidget {
   final String time;    // Time the message was sent
 
   const MessageCard({
-    Key? key,
+    super.key,
     required this.picture,
     required this.name,
     required this.message,
     required this.time,
-  }) : super(key: key);
+  });
 
   @override
   State<MessageCard> createState() => _MessageCardState();
@@ -37,7 +37,7 @@ class _MessageCardState extends State<MessageCard> {
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(15),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               color: Colors.black26,
               blurRadius: 2,
@@ -75,7 +75,7 @@ class _MessageCardState extends State<MessageCard> {
                       ),
                       Text(
                         widget.time,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           color: Colors.white,
                         ),

@@ -1,14 +1,9 @@
 import 'dart:async';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/domain/auth_state.dart';
-import 'package:beyondtheclass/features/auth/presentation/auth_screen.dart';
-import 'package:beyondtheclass/UI%20Pages/HomePage.dart';
-import 'package:beyondtheclass/features/auth/presentation/widgets/RoleSelectionPage.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../features/auth/presentation/student_signupScreen.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   // ignore: use_super_parameters

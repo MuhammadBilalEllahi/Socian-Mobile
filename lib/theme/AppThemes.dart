@@ -17,6 +17,13 @@ class AppThemes{
       // bodyText2: TextStyle(color: Colors.black),
     ),
     // colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple).copyWith(surface: Colors.white),
+
+
+
+    // Bilal from here
+    iconTheme: const IconThemeData(
+      color: Colors.black12,
+    ),
   );
 
   // Dark Theme
@@ -30,5 +37,11 @@ class AppThemes{
     //   // bodyText1: TextStyle(color: Colors.white),
     //   // bodyText2: TextStyle(color: Colors.white),
     // ), colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple).copyWith(surface: Colors.black),
+
+
+    // Bilal from here
+iconTheme: const IconThemeData(
+      color: Colors.white,
+    ),
   );
 }

@@ -1,8 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../../components/_buildShimmerEffect.dart';
-import '../../core/utils/constants.dart';
-import '../../shared/services/api_client.dart';
+import '../../../../components/_buildShimmerEffect.dart';
+import '../../../../core/utils/constants.dart';
+import '../../../../shared/services/api_client.dart';
 import 'TeacherDetailsPage.dart';
 
 class TeachersPage extends StatefulWidget {
@@ -229,12 +229,12 @@ class _TeacherCard extends StatelessWidget {
                                   ),
                                   child: Row(
                                     children: [
-                                      Icon(Icons.star_rounded,
+                                      const Icon(Icons.star_rounded,
                                           color: Colors.white, size: 16),
                                       const SizedBox(width: 4),
                                       Text(
                                         rating.toStringAsFixed(1),
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -291,7 +291,7 @@ class _Avatar extends StatelessWidget {
             ? Image.network(
           imageUrl!,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _FallbackAvatar(),
+          errorBuilder: (_, __, ___) => const _FallbackAvatar(),
         )
             : const _FallbackAvatar(),
       ),

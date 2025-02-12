@@ -79,3 +79,17 @@ static const String profileMainPage = '/profMain';
     static const String  pastPaperScreen='/pastpaper';
 
 }
+
+enum BottomNavBarRoute { home, message, search, explore, profile }
+
+extension BottomNavBarRouteMap on BottomNavBarRoute {
+  int get index => BottomNavBarRoute.values.indexOf(this);
+}
+
+// class BottomNavBarRouteMap {
+//   static const int  home=0;
+//   static const int  message=1;
+//   static const int  search=2;
+//   static const int  explore=3;
+//     static const int  profile=4;
+// }

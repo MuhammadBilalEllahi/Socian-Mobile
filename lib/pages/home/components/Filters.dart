@@ -5,10 +5,10 @@ class Filters extends StatefulWidget {
   final String text;
 
   const Filters({
-    Key? key,
+    super.key,
     required this.color,
     required this.text,
-  }) : super(key: key);
+  });
 
   @override
   State<Filters> createState() => _FiltersState();
@@ -20,7 +20,7 @@ class _FiltersState extends State<Filters> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
       child: ClipRRect(
-        borderRadius: BorderRadius.only(
+        borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(15.0), topRight: Radius.circular(15.0),
             bottomLeft: Radius.circular(15), bottomRight: Radius.circular(15)
         ),

@@ -1,9 +1,8 @@
-import 'package:beyondtheclass/UI Pages/HomePage.dart';
+import 'package:beyondtheclass/pages/home/HomePage.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:beyondtheclass/shared/services/secure_storage_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
 class OTPVerificationScreen extends StatefulWidget {

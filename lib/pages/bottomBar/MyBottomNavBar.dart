@@ -4,7 +4,7 @@ class MyBottomNavBar extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onItemTapped;
   final double iconSize = 30;
-  final double selected_iconSize = 22;
+  final double selectedIconSize = 22;
 
   const MyBottomNavBar({
     super.key,
@@ -20,21 +20,21 @@ class MyBottomNavBar extends StatelessWidget {
         
         decoration: Theme.of(context).brightness == Brightness.dark 
         
-        ? BoxDecoration(
+        ? const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Colors.teal.shade900, 
-              Colors.teal.shade400
+              Color.fromARGB(255, 27, 27, 27), 
+              Color.fromARGB(255, 29, 29, 29)
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
         )
-        : BoxDecoration(
+        : const BoxDecoration(
       gradient: LinearGradient(
       colors: [
-        Colors.teal, 
-        Colors.teal.shade100
+        Color.fromARGB(255, 219, 219, 219), 
+        Colors.white
       ],
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
@@ -44,55 +44,45 @@ class MyBottomNavBar extends StatelessWidget {
           type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.transparent,
           elevation: 0,
-          selectedItemColor: Colors.white,
-          unselectedItemColor: Colors.white70,
+          selectedItemColor: Theme.of(context).iconTheme.color,
+          unselectedItemColor: Theme.of(context).iconTheme.color,
           selectedFontSize: 14,
           unselectedFontSize: 12,
           showUnselectedLabels: false,
           showSelectedLabels: true,
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon: Text(
-                "📰",
-                style: TextStyle(
-                  fontSize: selectedIndex == 0 ? selected_iconSize : iconSize, // Increase size when selected
-                ),
+              icon: Icon(
+                Icons.home_filled,
+                size:  selectedIndex == 0 ? selectedIconSize : iconSize, // Increase size when selected
               ),
               label: 'Feed',
             ),
             BottomNavigationBarItem(
-              icon: Text(
-                "✉️",
-                style: TextStyle(
-                  fontSize: selectedIndex == 1 ? selected_iconSize : iconSize, // Increase size when selected
-                ),
+              icon: Icon(
+                Icons.messenger_outline_sharp,
+                size:  selectedIndex == 1 ? selectedIconSize : iconSize, // Increase size when selected
               ),
               label: 'Messages',
             ),
             BottomNavigationBarItem(
-              icon: Text(
-                "👬🏻",
-                style: TextStyle(
-                  fontSize: selectedIndex == 2 ? selected_iconSize : iconSize, // Increase size when selected
-                ),
+              icon: Icon(
+                Icons.search,
+                size:  selectedIndex == 2 ? selectedIconSize : iconSize, // Increase size when selected
               ),
               label: 'Explore',
             ),
             BottomNavigationBarItem(
-              icon: Text(
-                "🗺️",
-                style: TextStyle(
-                  fontSize: selectedIndex == 3 ? selected_iconSize : iconSize, // Increase size when selected
-                ),
+              icon: Icon(
+                Icons.explore_outlined,
+                size:  selectedIndex == 3 ? selectedIconSize : iconSize, // Increase size when selected
               ),
               label: 'GPS',
             ),
             BottomNavigationBarItem(
-              icon: Text(
-                "👦🏻",
-                style: TextStyle(
-                  fontSize: selectedIndex == 4 ? selected_iconSize : iconSize, // Increase size when selected
-                ),
+              icon: Icon(
+                Icons.person_outline_outlined,
+                size:  selectedIndex == 4 ? selectedIconSize : iconSize, // Increase size when selected
               ),
               label: 'Profile',
             ),

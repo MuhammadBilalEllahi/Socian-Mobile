@@ -1,20 +1,19 @@
-import 'package:beyondtheclass/UI%20Pages/HomePage.dart';
-import 'package:beyondtheclass/UI%20Pages/Map.dart';
-import 'package:beyondtheclass/UI%20Pages/Messages.dart';
-import 'package:beyondtheclass/UI%20Pages/PastPapers.dart';
-import 'package:beyondtheclass/UI%20Pages/PostsPrimaryPage.dart';
-import 'package:beyondtheclass/UI%20Pages/Profile%20Page%20Widgets/ProfilePage.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/presentation/auth_screen.dart';
 import 'package:beyondtheclass/features/auth/presentation/student_signupScreen.dart';
 import 'package:beyondtheclass/features/auth/presentation/widgets/RoleSelectionPage.dart';
 import 'package:beyondtheclass/features/auth/presentation/widgets/login_form.dart';
 import 'package:beyondtheclass/features/auth/presentation/widgets/otp_form.dart';
+import 'package:beyondtheclass/pages/SplashScreen.dart';
+import 'package:beyondtheclass/pages/drawer/pages/pastPaper/PastPapers.dart';
+import 'package:beyondtheclass/pages/explore/MapsPage.dart';
+import 'package:beyondtheclass/pages/home/HomePage.dart';
+import 'package:beyondtheclass/pages/home/widgets/PostsPrimaryPage.dart';
+import 'package:beyondtheclass/pages/message/Messages.dart';
+import 'package:beyondtheclass/pages/profile/ProfilePage.dart';
+import 'package:beyondtheclass/theme/AppThemes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'UI Pages/AppThemes.dart';
-import 'UI Pages/splashScreen.dart';
-
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
