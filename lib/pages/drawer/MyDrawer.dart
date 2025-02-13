@@ -234,7 +234,7 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
                   ),
                   onPressed: () {
                     ref.watch(authProvider.notifier).logout();
-                        Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (route) => false);
+                        Navigator.pushNamedAndRemoveUntil(context, AppRoutes.authScreen, (route) => false);
                   },
                 ),
               ],

@@ -11,6 +11,16 @@ class AuthState {
     this.user,
   });
 
+    factory AuthState.initial() {
+    return const AuthState(
+      token: null,
+      error: null,
+      isLoading: false,
+      user: null,
+    );
+  }
+
+
 
   AuthState copyWith({
     String? token,

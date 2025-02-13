@@ -41,6 +41,10 @@
          <meta-data
             android:name="io.flutter.embedding.android.EnableImpeller"
             android:value="false" />
+        <meta-data
+    android:name="com.google.android.gms.auth.api.signin"
+    android:value="1076027750526-li5gkit9klq06mmocutusfb6ta8e1etc.apps.googleusercontent.com" />
+
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

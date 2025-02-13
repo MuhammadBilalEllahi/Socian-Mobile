@@ -4,7 +4,7 @@ import 'package:beyondtheclass/features/auth/presentation/student_signupScreen.d
 import 'package:beyondtheclass/features/auth/presentation/widgets/RoleSelectionPage.dart';
 import 'package:beyondtheclass/features/auth/presentation/widgets/login_form.dart';
 import 'package:beyondtheclass/features/auth/presentation/widgets/otp_form.dart';
-import 'package:beyondtheclass/pages/SplashScreen.dart';
+import 'package:beyondtheclass/pages/splashScreen/SplashScreen.dart';
 import 'package:beyondtheclass/pages/drawer/pages/pastPaper/PastPapers.dart';
 import 'package:beyondtheclass/pages/explore/MapsPage.dart';
 import 'package:beyondtheclass/pages/home/HomePage.dart';
@@ -13,9 +13,12 @@ import 'package:beyondtheclass/pages/message/Messages.dart';
 import 'package:beyondtheclass/pages/profile/ProfilePage.dart';
 import 'package:beyondtheclass/theme/AppThemes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void main() {
+void main() async{
+
+  await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
     const ProviderScope(
