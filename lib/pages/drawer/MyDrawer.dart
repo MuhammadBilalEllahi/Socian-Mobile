@@ -64,76 +64,28 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 20),
+            const SizedBox(height: 50),
             // Close Drawer Button
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 40, 0, 0),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Icon(
-                      Icons.arrow_back_ios_sharp,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Drawer Header
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-             child: GestureDetector(
-              onTap: () => ref.read(pageIndexProvider.notifier).state = BottomNavBarRoute.profile,
-               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const CircleAvatar(
-                    radius: 20,
-                    backgroundColor: Color.fromARGB(160, 10, 10, 10),
-                    child: Icon(
-                      Icons.person,
-                      size: 25,
-                      color: Color.fromARGB(239, 238, 238, 238),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          name ?? 'user',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(227, 244, 244, 244),
-                          ),
-                        ),
-                        Text(
-                          '@$username' ?? '@username',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(243, 227, 227, 227),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            
-             ),),
-
-            // const Divider(color: Colors.white70, thickness: 1),
+            // Padding(
+            //   padding: const EdgeInsets.fromLTRB(15, 40, 15, 0),
+            //   child: Row(
+            //     // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //     crossAxisAlignment: CrossAxisAlignment.center,
+            //     children: [
+            //       GestureDetector(
+            //         onTap: () {
+            //           Navigator.of(context).pop();
+            //         },
+            //         child: const Icon(
+            //           Icons.arrow_back_ios_sharp,
+            //           color: Colors.white60,
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
+           
+            // const SizedBox(height: 20),
 
             // Drawer Options
             Expanded(
@@ -204,7 +156,8 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
                     leading: const Icon(Icons.insert_drive_file_outlined),
                     title: GestureDetector(
                         child: const Text("Past Papers",
-                            style: TextStyle(color: Colors.white70, fontSize: 15))),
+                            style: TextStyle(
+                                color: Colors.white70, fontSize: 15))),
                     onTap: () {
                       Navigator.push(
                         context,
@@ -216,7 +169,77 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
                 ],
               ),
             ),
-          ],
+
+            const Divider(),
+
+            Padding(
+              padding: const EdgeInsets.only(bottom: 60.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 1, 8, 15),
+                  child: GestureDetector(
+                    onTap: () => ref.read(pageIndexProvider.notifier).state =
+                        BottomNavBarRoute.profile,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const CircleAvatar(
+                          radius: 20,
+                          backgroundColor: Color.fromARGB(160, 10, 10, 10),
+                          child: Icon(
+                            Icons.person,
+                            size: 25,
+                            color: Color.fromARGB(239, 238, 238, 238),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                name ?? 'user',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromARGB(227, 244, 244, 244),
+                                ),
+                              ),
+                              Text(
+                                '@$username' ?? '@username',
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromARGB(243, 227, 227, 227),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.logout,
+                    color: Colors.white54,
+                    size: 22,
+                  ),
+                  onPressed: () {
+                    ref.watch(authProvider.notifier).logout();
+                        Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (route) => false);
+                  },
+                ),
+              ],
+            )
+          ),]
         ),
       ),
     );

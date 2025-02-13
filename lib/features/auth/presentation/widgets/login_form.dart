@@ -37,18 +37,6 @@ class _LoginFormState extends ConsumerState<LoginForm> {
     }
   });
 
-    // final authState = ref.watch(authProvider);
-    // final authController = ref.watch(authProvider.notifier);
-
-    // print("authController ${authController.authUseCases}");
-    // if (authState.user != null) {
-    //   Future.microtask(() {
-    //     Navigator.pushReplacement(
-    //       context,
-    //       MaterialPageRoute(builder: (context) => const HomePage()),
-    //     );
-    //   });
-    // }
 
     return Padding(
       padding: const EdgeInsets.all(16.0),

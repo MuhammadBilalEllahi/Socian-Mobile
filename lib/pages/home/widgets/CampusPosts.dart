@@ -66,12 +66,6 @@ class CampusPosts extends ConsumerWidget { // Use ConsumerWidget instead of Stat
                                 child: Icon(Icons.menu_outlined, color: topIconsColor),
                               ),
                             ),
-                            IconButton(
-                              icon: Icon(Icons.logout, color: topIconsColor),
-                              onPressed: () {
-                                // Handle logout
-                              },
-                            ),
                           ],
                         ),
                       ),

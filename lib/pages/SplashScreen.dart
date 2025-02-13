@@ -69,16 +69,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       body: Stack(
         children: [
           // Background Image
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/bg-splash2.jpg'),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
+          // Container(
+          //   width: double.infinity,
+          //   height: double.infinity,
+          //   decoration: const BoxDecoration(
+          //     image: DecorationImage(
+          //       image: AssetImage(AppAssets.splashBackground2),
+          //       fit: BoxFit.cover,
+          //     ),
+          //   ),
+          // ),
           // Gradient Overlay
           Container(
             width: double.infinity,
@@ -86,8 +86,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Colors.teal.withOpacity(0.2),
-                  Colors.black.withOpacity(0.1),
+                  const Color.fromARGB(255, 19, 19, 19).withValues(alpha: 0.9),
+                  const Color.fromARGB(255, 26, 26, 26).withValues(alpha: 1),
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -97,7 +97,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
           // Animated Column
           AnimatedPositioned(
             duration: const Duration(seconds: 2),
-            top: _moveToTop ? 50 : MediaQuery.of(context).size.height / 2 - 100,
+            top:
+                _moveToTop ? 120 : MediaQuery.of(context).size.height / 2 - 100,
             left: 0,
             right: 0,
             child: const Column(
@@ -106,12 +107,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 Text(
                   AppConstants.appName,
                   style: TextStyle(
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 1.2,
-                    fontFamily: 'sans-serif'
-                  ),
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(234, 255, 255, 255),
+                      letterSpacing: 1.2,
+                      fontFamily: 'sans-serif'),
                 ),
                 SizedBox(height: 10),
                 Text(
@@ -129,103 +129,149 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
           // Horizontal Scrolling Containers
           if (_moveToTop)
             Positioned(
-              top: MediaQuery.of(context).size.height / 2 - 50,
+              top: MediaQuery.of(context).size.height / 2 - 120,
               left: 0,
               right: 0,
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.45,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      children: [
-                        _buildInfoContainer(
-                          'assets/images/bg-splash2.jpg', // Image path
-                          'Student - Individulas',
-                          'Love me like you do, what are you waiting for',
-                           Colors.teal,
-                        ),
-                        _buildInfoContainer(
-                          'assets/images/anime.png', // Image path
-                         'Teacher - Individulas',
-                          'Love me like you do, what are you waiting for',
-                           Colors.teal,
-                        ),
-                        _buildInfoContainer(
-                          'assets/images/profilepic.jpg', // Image path
-                         'Alumni - Individulas',
-                          'Love me like you do, what are you waiting for',
-                           Colors.teal,
-                        ),
-                        _buildInfoContainer(
-                          'assets/images/bg-splash2.jpg', // Image path
-                         'Organization - Individulas',
-                          'Love me like you do, what are you waiting for',
-                           Colors.teal,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+              child: Column(children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.45,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     children: [
-                      // signup
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, AppRoutes.roleSelection);
-                        },
-                        child: Container(
-                          width: MediaQuery.of(context).size.width / 2.2,
-                          padding: const EdgeInsets.fromLTRB(4, 10, 4, 10),
-                          margin: const EdgeInsets.fromLTRB(2, 0, 2, 0),
-                          decoration: BoxDecoration(
-                            color: Colors.teal.shade900,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              "Sign Up",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
+                      _buildInfoContainer(
+                        AppAssets.splashBackground2, // Image path
+                        'Student - Individulas',
+                        'Love me like you do, what are you waiting for',
+                        const Color.fromARGB(255, 31, 31, 31),
                       ),
-                      // const SizedBox(width: 10,),
-                      // login
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, '/auth');
-                        },
-                        child: Container(
-                          width: MediaQuery.of(context).size.width / 2.2,
-                          padding: const EdgeInsets.fromLTRB(4, 10, 4, 10),
-                          margin: const EdgeInsets.fromLTRB(2, 0, 2, 0),
-                          decoration: BoxDecoration(
-                            color: Colors.teal.shade900,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              "Login",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
+                      _buildInfoContainer(
+                        AppAssets.anime, // Image path
+                        'Teacher - Individulas',
+                        'Love me like you do, what are you waiting for',
+                        const Color.fromARGB(255, 31, 31, 31),
+                      ),
+                      _buildInfoContainer(
+                        AppAssets.profilePic, // Image path
+                        'Alumni - Individulas',
+                        'Love me like you do, what are you waiting for',
+                        const Color.fromARGB(255, 31, 31, 31),
+                      ),
+                      _buildInfoContainer(
+                        AppAssets.splashBackground2, // Image path
+                        'Organization - Individulas',
+                        'Love me like you do, what are you waiting for',
+                        const Color.fromARGB(255, 31, 31, 31),
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 20),
+                Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // signup
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(
+                                context, AppRoutes.roleSelection);
+                          },
+                          child: Container(
+                            width: MediaQuery.of(context).size.width / 2.2,
+                            padding: const EdgeInsets.fromLTRB(4, 10, 4, 10),
+                            margin: const EdgeInsets.fromLTRB(2, 0, 2, 0),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                  color: const Color.fromRGBO(255, 255, 255, 1),
+                                  width: 0.6),
+                              // color: Colors.black.withValues(alpha: 0.88),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                AppConstants.signUp,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        // const SizedBox(width: 10,),
+                        // login
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(context, AppRoutes.authScreen);
+                          },
+                          child: Container(
+                            width: MediaQuery.of(context).size.width / 2.2,
+                            padding: const EdgeInsets.fromLTRB(4, 10, 4, 10),
+                            margin: const EdgeInsets.fromLTRB(2, 0, 2, 0),
+                            decoration: BoxDecoration(
+                              color: const Color.fromARGB(255, 244, 244, 244)
+                                  .withValues(alpha: 0.88),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                AppConstants.login,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color(0xFF121212),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, AppRoutes.authScreen);
+                        },
+                        child: Container(
+                          width: MediaQuery.of(context).size.width / 1.1,
+                          padding: const EdgeInsets.fromLTRB(4, 10, 4, 10),
+                          margin: const EdgeInsets.fromLTRB(2, 0, 2, 0),
+                          decoration: BoxDecoration(
+                            color: const Color.fromARGB(255, 244, 244, 244)
+                                .withValues(alpha: 0.88),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Image.asset(
+                                AppAssets.googleAuth,
+                                width: 25,
+                                height: 25,
+                              ),
+                              const Padding(padding:EdgeInsets.only(left:10) , 
+                              child:  Text(
+                                AppConstants.googleAuth,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color(0xFF121212),
+                                ),
+                              ),)
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                )
+              ]),
             ),
         ],
       ),
@@ -233,22 +279,27 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 
   // Helper method to build individual info containers
-  Widget _buildInfoContainer(String imagePath,   String paragraphTitle, String paragraph,Color color,) {
+  Widget _buildInfoContainer(
+    String imagePath,
+    String paragraphTitle,
+    String paragraph,
+    Color color,
+  ) {
     return Container(
-      width: MediaQuery.of(context).size.width * 0.75,
-      margin: const EdgeInsets.symmetric(horizontal: 12.0),
+      width: MediaQuery.of(context).size.width * 0.9,
+      margin: const EdgeInsets.symmetric(horizontal: 10.0),
       // padding: const EdgeInsets.fromLTRB(2  ,5 ,2 ,5),
-      
+
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [color.withOpacity(0.5), color.withOpacity(0.4)],
+          colors: [color.withValues(alpha: 0.5), color.withValues(alpha: 0.4)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(10.0),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.2),
+            color: color.withValues(alpha: 0.2),
             blurRadius: 7.0,
             offset: const Offset(4, 4),
           ),
@@ -260,59 +311,54 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         children: [
           // Display the image, taking half the size of the parent container
           SizedBox(
+            width: double.infinity,
             height: MediaQuery.of(context).size.width *
-                0.75 *
+                0.70 *
                 0.8, // 50% of the container's width
-            child:  ClipRRect(
+            child: ClipRRect(
               borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.zero,
-                bottomRight: Radius.zero,
-                topLeft: Radius.circular(10),
-                topRight: Radius.circular(10)),
+                  bottomLeft: Radius.zero,
+                  bottomRight: Radius.zero,
+                  topLeft: Radius.circular(10),
+                  topRight: Radius.circular(10)),
               child: Image.asset(
                 imagePath,
                 fit: BoxFit.cover,
               ),
             ),
           ),
-          const SizedBox(height: 15),
+          const SizedBox(height: 5),
 
-       Padding(
-        padding: const EdgeInsets.all(10),
-        child: 
-         Column(
-            
-            children: [
-        Text(
-            paragraphTitle,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16, // Text size for the paragraph
-              fontWeight: FontWeight.bold,
-              height: 1.5, // Line height for better readability
-            ),
-            textAlign: TextAlign.center,
-          ),
-        
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              children: [
+                Text(
+                  paragraphTitle,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16, // Text size for the paragraph
+                    fontWeight: FontWeight.bold,
+                    height: 1.5, // Line height for better readability
+                  ),
+                  textAlign: TextAlign.center,
+                ),
 
-        
-          Text(
-            paragraph,
-            style: const TextStyle(
-              color: Colors.white54,
-              fontSize: 16, // Text size for the paragraph
-              fontWeight: FontWeight.w700,
-              height: 1.5, // Line height for better readability
+                Text(
+                  paragraph,
+                  style: const TextStyle(
+                    color: Colors.white54,
+                    fontSize: 16, // Text size for the paragraph
+                    fontWeight: FontWeight.w700,
+                    height: 1.5, // Line height for better readability
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                // Display the promotional paragraph
+              ],
             ),
-            textAlign: TextAlign.center,
           ),
-          // Display the promotional paragraph
-          
-            ],
-          ),) ,  
-       
-          
-          ],
+        ],
       ),
     );
   }
