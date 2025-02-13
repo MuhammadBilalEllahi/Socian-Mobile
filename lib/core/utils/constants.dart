@@ -1,11 +1,11 @@
 class ApiConstants {
-  static const String baseUrl = "http://192.168.1.2:8080"; //my ip address
+  // static const String baseUrl = "http://192.168.1.2:8080"; //my ip address
   // static const String baseUrl = "http://192.168.10.6:8080"; //my ip address
   // static const String baseUrl = "http://localhost:8080"; //my ip address
 
   // This below is ort forwarding url from localhost:8080. create your own every time
 
-  // static const String baseUrl = "https://backend.beyondtheclass.bilalellahi.com";
+  static const String baseUrl = "https://backend.beyondtheclass.bilalellahi.com";
 
   static const String api = '/api';
 
