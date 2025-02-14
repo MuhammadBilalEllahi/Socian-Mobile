@@ -1,5 +1,6 @@
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/domain/auth_state.dart';
+import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:beyondtheclass/pages/splashScreen/components/GoogleService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,6 +25,13 @@ class _GoogleButtonState extends ConsumerState<GoogleButton> {
   Widget build(BuildContext context) {
         final authState = ref.watch(googleSignInProvider);
 
+
+        ref.listen<AuthState>(authProvider, (previous, next) {
+    if (next.user != null) {
+      Navigator.pushReplacementNamed(context, AppRoutes.home);
+    }
+  });
+
     return Padding(
       padding: const EdgeInsets.all(10),
       child: GestureDetector(
@@ -40,6 +48,7 @@ onTap: authState.isLoading
             : () => ref.read(googleSignInProvider.notifier).signInWithGoogle(context),
         child: Container(
           width: MediaQuery.of(context).size.width / 1.1,
+          height: 45,
           padding: const EdgeInsets.fromLTRB(4, 10, 4, 10),
           margin: const EdgeInsets.fromLTRB(2, 0, 2, 0),
           decoration: BoxDecoration(
@@ -47,7 +56,17 @@ onTap: authState.isLoading
                 .withValues(alpha: 0.88),
             borderRadius: BorderRadius.circular(4),
           ),
-          child: Row(
+          
+          child:  authState.isLoading ?   const Center(
+            
+            child: SizedBox(
+              height: 30,
+              width: 30,
+              child: CircularProgressIndicator(
+            color: Colors.black87,
+            strokeWidth: 2.0,
+          ),
+            )) : Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [

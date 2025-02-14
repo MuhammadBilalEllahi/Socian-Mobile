@@ -18,8 +18,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() async{
 
-  await dotenv.load(fileName: ".env");
+  
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   runApp(
     const ProviderScope(
       child: MyApp(),
