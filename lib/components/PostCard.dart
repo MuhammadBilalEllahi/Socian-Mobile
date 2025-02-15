@@ -61,13 +61,13 @@ class _PostCardState extends State<PostCard> {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
           color: isActive ? activeColor : (Theme.of(context).brightness == Brightness.dark
-              ? Colors.black.withOpacity(0.1)
-              : Colors.white.withOpacity(0.2)),
+              ? const Color.fromARGB(255, 131, 131, 131).withOpacity(0.1)
+              : const Color.fromARGB(255, 62, 62, 62).withOpacity(0.2)),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.black.withOpacity(0.1)
-                : Colors.white.withOpacity(0.2),
+                ? const Color.fromARGB(255, 195, 195, 195).withOpacity(0.1)
+                : const Color.fromARGB(255, 229, 229, 229).withOpacity(0.2),
             width: 0.5,
           ),
         ),
@@ -84,10 +84,10 @@ class _PostCardState extends State<PostCard> {
               '$count',
               style: TextStyle(
                 fontSize: 14,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w400,
                 color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.black
-                    : Colors.white,
+                    ? const Color.fromARGB(255, 138, 138, 138)
+                    : const Color.fromARGB(255, 44, 44, 44),
               ),
             ),
           ],
@@ -99,24 +99,24 @@ class _PostCardState extends State<PostCard> {
   Widget _buildDateBadge(String date, BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Theme.of(context).brightness == Brightness.dark
-            ? Colors.black.withOpacity(0.1)
-            : Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.black.withOpacity(0.1)
-              : Colors.white.withOpacity(0.1),
-          width: 0.5,
-        ),
-      ),
+      // decoration: BoxDecoration(
+      //   color: Theme.of(context).brightness == Brightness.dark
+      //       ? const Color.fromARGB(0, 232, 232, 232)
+      //       : const Color.fromARGB(255, 57, 57, 57),
+      //   borderRadius: BorderRadius.circular(12),
+      //   border: Border.all(
+      //     color: Theme.of(context).brightness == Brightness.dark
+      //         ? Colors.black.withOpacity(0.1)
+      //         : Colors.white.withOpacity(0.1),
+      //     width: 0.5,
+      //   ),
+      // ),
       child: Row(
         children: [
           Icon(Icons.access_time_rounded, size: 10,
             color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.black
-                : Colors.white,
+                ? const Color.fromARGB(255, 219, 219, 219)
+                : const Color.fromARGB(255, 65, 65, 65),
           ),
           const SizedBox(width: 4),
           Text(
@@ -124,8 +124,8 @@ class _PostCardState extends State<PostCard> {
             style: TextStyle(
               fontSize: 10,
               color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.black
-                  : Colors.white,
+                  ? const Color.fromARGB(255, 207, 207, 207)
+                  : const Color.fromARGB(255, 41, 41, 41),
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -397,14 +397,14 @@ class _PostCardState extends State<PostCard> {
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
-                  gradient: LinearGradient(
+                  border: Border.all(color: const Color.fromARGB(255, 117, 117, 117).withOpacity(0.5), width: 1.5),
+                  gradient: const LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      const Color.fromARGB(255, 61, 61, 61).withOpacity(0.3),
-                      const Color.fromARGB(255, 35, 35, 35).withOpacity(0.4),
-                      const Color.fromARGB(255, 50, 50, 50).withOpacity(0.1),
+                      Color.fromARGB(255, 39, 39, 39),
+                      Color.fromARGB(255, 36, 36, 36),
+                      Color.fromARGB(255, 45, 45, 45),
                     ],
                   ),
                   boxShadow: [
@@ -500,7 +500,7 @@ class _PostCardState extends State<PostCard> {
                                     }
                                   });
                                 },
-                                activeColor: Colors.green,
+                                activeColor: const Color.fromARGB(211, 252, 143, 1),
                                 isActive: isLiked,
                               ),
                               const SizedBox(width: 8),

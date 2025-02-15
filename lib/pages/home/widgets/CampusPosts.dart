@@ -35,20 +35,20 @@ class _CampusPostsState extends ConsumerState<CampusPosts> {
     final postState = ref.watch(postProvider); // Rename the variable to avoid conflict
 
     Color postsBgColor = Theme.of(context).brightness == Brightness.dark
-        ? Colors.white // for dark mode
-        : const Color.fromARGB(255, 41, 41, 41); // for light mode
+        ? const Color.fromARGB(255, 203, 203, 203) // for dark mode
+        : const Color.fromARGB(255, 61, 61, 61); // for light mode
 
     Color postsTextColor = Theme.of(context).brightness == Brightness.dark
-        ? Colors.black
-        : Colors.white;
+        ? const Color.fromARGB(255, 221, 221, 221)
+        : const Color.fromARGB(255, 70, 70, 70);
 
     Color titleColor = Theme.of(context).brightness == Brightness.dark
-        ? Colors.white
+        ? const Color.fromARGB(255, 210, 210, 210)
         : const Color.fromARGB(255, 56, 56, 56);
 
     Color topIconsColor = Theme.of(context).brightness == Brightness.dark
-        ? Colors.white
-        : Colors.black;
+        ? const Color.fromARGB(255, 219, 219, 219)
+        : const Color.fromARGB(255, 43, 43, 43);
 
     return Scaffold(
       drawer: const MyDrawer(),
