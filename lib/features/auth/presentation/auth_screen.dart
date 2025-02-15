@@ -28,9 +28,9 @@ class AuthScreen extends ConsumerWidget {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.teal.shade900, Colors.tealAccent.shade400],
+            colors: [Color.fromARGB(255, 0, 0, 0), Color.fromARGB(255, 48, 48, 48)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),

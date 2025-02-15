@@ -10,9 +10,9 @@ class RoleSelectionPage extends StatelessWidget {
     return Scaffold(
 
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.teal.shade900, Colors.tealAccent.shade400],
+            colors: [Color.fromARGB(255, 0, 0, 0), Color.fromARGB(255, 48, 48, 48)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -76,8 +76,15 @@ class RoleSelectionPage extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 20),
         padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
-          color: Colors.white,
+          // color: Colors.white,
+          gradient: const LinearGradient(
+                  colors: [Color.fromARGB(255, 42, 40, 40), Color.fromARGB(255, 69, 69, 69)],
+                ),
           borderRadius: BorderRadius.circular(15),
+          border: Border.all(
+            color: const Color.fromARGB(65, 255, 255, 255), 
+          width: 0.6
+          ),
           boxShadow: const [
             BoxShadow(
               color: Colors.black26,
@@ -90,10 +97,10 @@ class RoleSelectionPage extends StatelessWidget {
           children: [
             // Emoji or Icon
             Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
-                  colors: [Colors.teal[300]!, Colors.teal],
+                  colors: [Color.fromARGB(255, 32, 32, 32), Color.fromARGB(255, 69, 69, 69)],
                 ),
               ),
               padding: const EdgeInsets.all(10),
@@ -113,15 +120,15 @@ class RoleSelectionPage extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Colors.teal,
+                      color: Color.fromARGB(255, 255, 255, 255),
                     ),
                   ),
                   const SizedBox(height: 5),
                   Text(
                     "Select this if you are a $role.",
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[700],
+                      color: Color.fromARGB(255, 170, 170, 170),
                     ),
                   ),
                 ],

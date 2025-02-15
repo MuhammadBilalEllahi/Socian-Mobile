@@ -34,18 +34,18 @@ class MyDropdownField<T> extends StatelessWidget {
         labelText: label,
         labelStyle: const TextStyle(color: Colors.white),
         filled: true,
-        fillColor: Colors.teal.shade800.withOpacity(0.2),
+        fillColor: const Color.fromARGB(255, 42, 42, 42).withValues(alpha: 0.15),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.teal.shade800, width: 2),
+          borderSide: const BorderSide(color: Color.fromARGB(158, 255, 255, 255), width: 0.6),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.teal.shade400, width: 2),
+          borderSide: const BorderSide(color: Color.fromARGB(255, 37, 37, 37), width: 2),
         ),
       ),
       style: const TextStyle(color: Colors.white),
-      dropdownColor: Colors.teal.shade800, // Dropdown menu color
+      dropdownColor: const Color.fromARGB(255, 19, 18, 18), // Dropdown menu color
     );
   }
 }

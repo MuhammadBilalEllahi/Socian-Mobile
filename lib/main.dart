@@ -53,7 +53,7 @@ class MyApp extends StatelessWidget {
         AppRoutes.login: (context) => const LoginForm(),
         AppRoutes.signupScreenStudent: (context) => const SignUpScreen(),
 
-        AppRoutes.postMainPage: (context) => const PostsPrimaryPage(),
+        // AppRoutes.postMainPage: (context) => const PostsPrimaryPage(),
         AppRoutes.messagesMainPage: (context) => const Messages(),
         AppRoutes.mapMainPage: (context) => const MapsLook(),
         AppRoutes.profileMainPage: (context) => const ProfilePage(),

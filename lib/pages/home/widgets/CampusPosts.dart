@@ -6,17 +6,37 @@ import '../../../components/PostCard.dart';
 import '../../drawer/MyDrawer.dart';
 import 'package:beyondtheclass/core/usecases/PostProvider.dart'; // Import your PostProvider
 
-class CampusPosts extends ConsumerWidget { // Use ConsumerWidget instead of StatefulWidget
+class CampusPosts extends ConsumerStatefulWidget {
   const CampusPosts({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CampusPosts> createState() => _CampusPostsState();
+}
+
+class _CampusPostsState extends ConsumerState<CampusPosts> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(postProvider.notifier).fetchPosts(); // Ensures this runs only once
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // Access the PostProvider instance correctly
+
+    // ref.listen(postProvider, (previous, next) {
+    //   if (previous == null) {
+    //     ref.read(postProvider.notifier).fetchPosts(); // Fetch only once when initialized
+    //   }
+    // });
+
     final postState = ref.watch(postProvider); // Rename the variable to avoid conflict
 
     Color postsBgColor = Theme.of(context).brightness == Brightness.dark
         ? Colors.white // for dark mode
-        : Colors.tealAccent.shade700; // for light mode
+        : const Color.fromARGB(255, 41, 41, 41); // for light mode
 
     Color postsTextColor = Theme.of(context).brightness == Brightness.dark
         ? Colors.black
@@ -24,7 +44,7 @@ class CampusPosts extends ConsumerWidget { // Use ConsumerWidget instead of Stat
 
     Color titleColor = Theme.of(context).brightness == Brightness.dark
         ? Colors.white
-        : Colors.teal;
+        : const Color.fromARGB(255, 56, 56, 56);
 
     Color topIconsColor = Theme.of(context).brightness == Brightness.dark
         ? Colors.white
@@ -79,7 +99,7 @@ class CampusPosts extends ConsumerWidget { // Use ConsumerWidget instead of Stat
                 hasScrollBody: false,
                 child: Center(
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.teal),
+                    valueColor: AlwaysStoppedAnimation<Color>(Color.fromARGB(255, 24, 24, 24)),
                   ),
                 ),
               )

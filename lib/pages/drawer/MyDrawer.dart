@@ -154,7 +154,7 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
                 ),
               ],
             ),
-            // const Divider(),
+            const Divider(),
 
             // Drawer Options
             Expanded(
@@ -162,49 +162,46 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
                 padding: EdgeInsets.zero,
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.home_filled),
+                    leading: const Icon(Icons.home_filled,color: Color.fromARGB(223, 178, 178, 178),),
                     title: const Text("Home",
-                        style: TextStyle(color: Colors.white70, fontSize: 15)),
+                        style: TextStyle(color: Color.fromARGB(223, 255, 255, 255), fontSize: 14)),
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const CampusPosts()),
-                      );
+                      () => ref.read(pageIndexProvider.notifier).state =
+                        BottomNavBarRoute.home;
                     },
                   ),
                   ListTile(
-                    // leading: Icon(Icons.person, color: Colors.white),
-                    leading: const Icon(Icons.workspaces_outline),
+                    // leading: Icon(Icons.person, color: Colors.white,color: Color.fromARGB(223, 178, 178, 178),),
+                    leading: const Icon(Icons.workspaces_outline,color: Color.fromARGB(223, 178, 178, 178),),
                     title: const Text("All Unis",
-                        style: TextStyle(color: Colors.white70, fontSize: 15)),
+                        style: TextStyle(color: Color.fromARGB(223, 255, 255, 255), fontSize: 14)),
                     onTap: () {
                       Navigator.of(context).pop();
                     },
                   ),
                   ListTile(
-                    // leading: Icon(Icons.person, color: Colors.white),
-                    leading: const Icon(Icons.home_work_outlined),
+                    // leading: Icon(Icons.person, color: Colors.white,color: Color.fromARGB(223, 178, 178, 178),),
+                    leading: const Icon(Icons.home_work_outlined,color: Color.fromARGB(223, 178, 178, 178),),
                     title: const Text("Inter Campuses",
-                        style: TextStyle(color: Colors.white70, fontSize: 15)),
+                        style: TextStyle(color: Color.fromARGB(223, 255, 255, 255), fontSize: 14)),
                     onTap: () {
                       Navigator.of(context).pop();
                     },
                   ),
                   ListTile(
-                    // leading: Icon(Icons.notifications, color: Colors.white),
-                    leading: const Icon(Icons.emoji_people),
+                    // leading: Icon(Icons.notifications, color: Colors.white,color: Color.fromARGB(223, 178, 178, 178),),
+                    leading: const Icon(Icons.emoji_people,color: Color.fromARGB(223, 178, 178, 178),),
                     title: const Text("Alumni",
-                        style: TextStyle(color: Colors.white70, fontSize: 15)),
+                        style: TextStyle(color: Color.fromARGB(223, 255, 255, 255), fontSize: 14)),
                     onTap: () {
                       Navigator.of(context).pop();
                     },
                   ),
                   ListTile(
-                    // leading: Icon(Icons.notifications, color: Colors.white),
-                    leading: const Icon(Icons.rate_review_rounded),
+                    // leading: Icon(Icons.notifications, color: Colors.white,color: Color.fromARGB(223, 178, 178, 178),),
+                    leading: const Icon(Icons.rate_review_rounded,color: Color.fromARGB(223, 178, 178, 178),),
                     title: const Text("Teacher's Reviews",
-                        style: TextStyle(color: Colors.white70, fontSize: 15)),
+                        style: TextStyle(color: Color.fromARGB(223, 255, 255, 255), fontSize: 14)),
                     onTap: () {
                       Navigator.push(
                         context,
@@ -214,19 +211,19 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.home_filled),
+                    leading: const Icon(Icons.home_filled,color: Color.fromARGB(223, 178, 178, 178),),
                     title: const Text("Cafe Information Services",
-                        style: TextStyle(color: Colors.white70, fontSize: 15)),
+                        style: TextStyle(color: Color.fromARGB(223, 255, 255, 255), fontSize: 14)),
                     onTap: () {
                       Navigator.of(context).pop();
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.insert_drive_file_outlined),
+                    leading: const Icon(Icons.insert_drive_file_outlined,color: Color.fromARGB(223, 178, 178, 178),),
                     title: GestureDetector(
                         child: const Text("Past Papers",
                             style: TextStyle(
-                                color: Colors.white70, fontSize: 15))),
+                                color: Color.fromARGB(223, 255, 255, 255), fontSize: 14))),
                     onTap: () {
                       Navigator.push(
                         context,

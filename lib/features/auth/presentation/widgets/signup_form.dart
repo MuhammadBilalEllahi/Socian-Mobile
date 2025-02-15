@@ -192,7 +192,7 @@ class _SignUpFormState extends State<SignUpForm> {
     }
   }
 
-  void signup() {
+  void _signup() {
     if (_formKey.currentState?.validate() ?? false) {
       signupStudent();
 
@@ -310,30 +310,69 @@ class _SignUpFormState extends State<SignUpForm> {
                   ),
                   validator: passwordValidator()),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
 
               // Sign Up Button
+              //   Center(
+              //     child: ElevatedButton(
+              //       onPressed: signup,
+              //       style: ButtonStyle(
+              //         backgroundColor: WidgetStatePropertyAll<Color>(
+              //           Colors.teal.shade800,
+              //         ),
+              //         foregroundColor:
+              //             const WidgetStatePropertyAll<Color>(Colors.white),
+              //         padding: const WidgetStatePropertyAll<EdgeInsets>(
+              //           EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+              //         ),
+              //         shape: WidgetStatePropertyAll<OutlinedBorder>(
+              //           RoundedRectangleBorder(
+              //             borderRadius: BorderRadius.circular(12),
+              //           ),
+              //         ),
+              //       ),
+              //       child: const Text(
+              //         "Sign Up",
+              //         style: TextStyle(fontWeight: FontWeight.bold),
+              //       ),
+              //     ),
+              //   ),
+
               Center(
-                child: ElevatedButton(
-                  onPressed: signup,
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStatePropertyAll<Color>(
-                      Colors.teal.shade800,
+                child: GestureDetector(
+                  onTap: _signup,
+                  child: Container(
+                    width: MediaQuery.of(context).size.width / 2.2,
+                    padding: const EdgeInsets.fromLTRB(4, 10, 4, 10),
+                    margin: const EdgeInsets.fromLTRB(2, 0, 2, 0),
+                    decoration: BoxDecoration(
+                      // color: const Color.fromARGB(255, 31, 31, 31),
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color.fromARGB(255, 18, 18, 18),
+                          Color.fromARGB(255, 0, 0, 0),
+                          Color.fromARGB(255, 31, 31, 31)
+                        ],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.bottomRight,
+                      ),
+
+                      border: Border.all(
+                          color: const Color.fromRGBO(255, 255, 255, 1),
+                          width: 0.6),
+                      // color: Colors.black.withValues(alpha: 0.88),
+                      borderRadius: BorderRadius.circular(4),
                     ),
-                    foregroundColor:
-                        const WidgetStatePropertyAll<Color>(Colors.white),
-                    padding: const WidgetStatePropertyAll<EdgeInsets>(
-                      EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                    ),
-                    shape: WidgetStatePropertyAll<OutlinedBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                    child: const Center(
+                      child: Text(
+                        AppConstants.signUp,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
-                  ),
-                  child: const Text(
-                    "Sign Up",
-                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
