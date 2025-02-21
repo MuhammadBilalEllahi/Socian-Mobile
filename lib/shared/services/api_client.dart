@@ -44,6 +44,45 @@ class ApiClient {
     }
   }
 
+
+  Future<Map<String, dynamic>> postFormData(
+  String endpoint,
+  Map<String, dynamic> data, {
+  Map<String, String>? headers,
+}) async {
+  try {
+    final defaultHeaders = {
+      "x-platform": "app",
+      "Content-Type": "multipart/form-data",
+    };
+
+    
+          final token = await SecureStorageService.instance.getToken();
+
+    final mergedHeaders = {
+      ...defaultHeaders,
+      if (token != null) "Authorization": "Bearer $token",
+      if (headers != null) ...headers,
+    };
+
+    // Convert data into `FormData`
+    FormData formData = FormData.fromMap(data);
+
+    final response = await _dio.post(
+      endpoint,
+      data: formData,
+      options: Options(headers: mergedHeaders),
+    );
+
+    return response.data as Map<String, dynamic>;
+  } catch (e) {
+    throw ApiException.fromDioError(e);
+  }
+}
+
+
+
+
   Future<T> get<T>(
     String endpoint, {
     Map<String, String>? headers,

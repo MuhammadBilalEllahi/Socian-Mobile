@@ -1,11 +1,13 @@
 import 'dart:convert';
 
+import 'package:beyondtheclass/components/customSnackBar.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/presentation/widgets/otp_form.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:beyondtheclass/shared/widgets/my_dropdown.dart';
 import 'package:beyondtheclass/shared/widgets/my_textfield.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class SignUpForm extends StatefulWidget {
   const SignUpForm({super.key});
@@ -188,11 +190,16 @@ class _SignUpFormState extends State<SignUpForm> {
       Navigator.pushNamed(context, AppRoutes.otpScreen,
           arguments: {'userId': userId, 'email': email});
     } catch (e) {
+      final error = e;
+      showCustomSnackbar(title: 'Info', message: error.toString(), isError: true);
+
+
       print("ERROR WHILE SIGNING UP $e");
     }
   }
 
   void _signup() {
+    print("FT ");
     if (_formKey.currentState?.validate() ?? false) {
       signupStudent();
 
