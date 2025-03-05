@@ -2,7 +2,7 @@
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/pages/bottomBar/MyBottomNavBar.dart';
 import 'package:beyondtheclass/pages/explore/MapsPage.dart';
-import 'package:beyondtheclass/pages/home/widgets/CampusPosts.dart';
+import 'package:beyondtheclass/pages/home/widgets/campus/CampusPosts.dart';
 import 'package:beyondtheclass/pages/message/Messages.dart';
 import 'package:beyondtheclass/pages/profile/ProfilePage.dart';
 import 'package:beyondtheclass/providers/page_provider.dart';
@@ -327,6 +327,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     return Scaffold(
       extendBody: true,
+      backgroundColor: Colors.black,
       body: _pages[selectedRoute] ?? const Center(child: Text("Page Not Found")),
       bottomNavigationBar: MyBottomNavBar(
         selectedIndex: selectedRoute.index,

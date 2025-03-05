@@ -32,7 +32,7 @@ class AppThemes{
     brightness: Brightness.dark,
     // // Customize other dark theme properties as needed
     // primaryColor: Colors.deepPurple,
-    scaffoldBackgroundColor: Colors.blueGrey.shade900,
+    scaffoldBackgroundColor: const Color.fromARGB(246, 37, 37, 37),
     // textTheme: const TextTheme(
     //   // bodyText1: TextStyle(color: Colors.white),
     //   // bodyText2: TextStyle(color: Colors.white),

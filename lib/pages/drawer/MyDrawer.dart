@@ -1,5 +1,5 @@
 import 'package:beyondtheclass/core/utils/constants.dart';
-import 'package:beyondtheclass/pages/home/widgets/CampusPosts.dart';
+import 'package:beyondtheclass/pages/home/widgets/campus/CampusPosts.dart';
 import 'package:beyondtheclass/pages/drawer/pages/pastPaper/DepartmentPage.dart';
 import 'package:beyondtheclass/pages/drawer/pages/teachersReviews/TeachersPage.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
