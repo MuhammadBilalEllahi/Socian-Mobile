@@ -1,9 +1,9 @@
-
 import 'package:beyondtheclass/features/auth/domain/auth_usecase.dart';
 import 'package:beyondtheclass/features/auth/domain/auth_state.dart';
 import 'package:beyondtheclass/shared/services/secure_storage_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:beyondtheclass/core/utils/constants.dart';
 
 class AuthController extends StateNotifier<AuthState> {
   final AuthUseCases authUseCases;
@@ -16,7 +16,11 @@ class AuthController extends StateNotifier<AuthState> {
     final token = await SecureStorageService.instance.getToken();
     if (token != null && !JwtDecoder.isExpired(token)) {
       final user = JwtDecoder.decode(token);
-      state = state.copyWith(user: user, token: token);
+      state = state.copyWith(
+        user: user,
+        token: token,
+        role: user['role'] ?? AppRoles.student
+      );
     }
   }
 
@@ -32,12 +36,29 @@ class AuthController extends StateNotifier<AuthState> {
       final token = response['access_token'];
       final user = JwtDecoder.decode(token);
       if (user.isNotEmpty) {
-        state = state.copyWith(user: user, token: token, isLoading: false, error: null);
+        state = state.copyWith(
+          user: user,
+          token: token,
+          isLoading: false,
+          error: null,
+          role: user['role'] ?? AppRoles.student
+        );
         await SecureStorageService.instance.saveToken(token);
       }
     } catch (e) {
       state = state.copyWith(error: e.toString(), isLoading: false);
     }
+  }
+
+  Future<void> updateAuthState(Map<String, dynamic> user, String token) async {
+    await SecureStorageService.instance.saveToken(token);
+    state = state.copyWith(
+      user: user,
+      token: token,
+      isLoading: false,
+      error: null,
+      role: user['role'] ?? AppRoles.student
+    );
   }
 }
 

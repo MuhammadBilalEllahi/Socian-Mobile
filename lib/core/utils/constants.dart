@@ -5,7 +5,7 @@ class ApiConstants {
 
   // This below is ort forwarding url from localhost:8080. create your own every time
 
-  static const String baseUrl = "https://backend.beyondtheclass.bilalellahi.com";
+  static const String baseUrl = "https://api.beyondtheclass.me";
 
   static const String api = '/api';
 
@@ -54,21 +54,48 @@ class AppConstants {
   static const String googleAuth = "Continue with Google";
 }
 
+
+class AppRoles {
+  static const String teacher = "teacher";
+  static const String student = "student";
+  static const String alumni = "alumni";
+  static const String extOrg = "ext_org";
+  static const String noAccess = "no_access";
+  }
+class AppSuperRoles {
+  static const String superAdmin = "super";
+  static const String admin = "admin";
+  static const String moderator = "mod";
+  // static const String none = "none";
+
+}
+
 class AppRoutes {
-  static const String authScreen = "/auth";
-  static const String signupScreenStudent = '/register/student';
+  // Auth routes
+  static const String splashScreen = '/';
+  static const String authScreen = '/auth';
   static const String login = '/login';
-
-  static const String postMainPage = '/postsMain';
-  static const String messagesMainPage = '/msgMain';
-  static const String mapMainPage = '/mapMain';
-  static const String profileMainPage = '/profMain';
-
-  static const String home = '/';
-  static const String splashScreen = '/splash';
-  static const String roleSelection = '/select/role';
+  static const String signupScreen = '/signup';
+  static const String roleSelection = '/role-selection';
   static const String otpScreen = '/otp';
-  static const String pastPaperScreen = '/pastpaper';
+
+  // Student routes
+  static const String home = '/home';
+  static const String messagesMainPage = '/messages';
+  static const String mapMainPage = '/map';
+  static const String profileMainPage = '/profile';
+  static const String pastPaperScreen = '/past-papers';
+  static const String settings = '/settings';
+
+  // Teacher routes
+  static const String teacherHome = '/teacher/home';
+  static const String teacherProfile = '/teacher/profile';
+  static const String teacherFeedbacks = '/teacher/feedbacks';
+
+  // Alumni routes
+  static const String alumniHome = '/alumni/home';
+  static const String alumniProfile = '/alumni/profile';
+  static const String alumniJobs = '/alumni/jobs';
 }
 
 class AppAssets {

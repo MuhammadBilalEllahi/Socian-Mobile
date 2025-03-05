@@ -1,0 +1,119 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
+import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:beyondtheclass/features/auth/presentation/auth_screen.dart';
+import 'package:beyondtheclass/pages/home/HomePage.dart';
+import 'package:beyondtheclass/pages/message/Messages.dart';
+import 'package:beyondtheclass/pages/explore/MapsPage.dart';
+import 'package:beyondtheclass/pages/profile/ProfilePage.dart';
+import 'package:beyondtheclass/pages/drawer/pages/pastPaper/PastPapers.dart';
+import 'package:beyondtheclass/pages/TeacherPages/TeacherHome.dart';
+import 'package:beyondtheclass/pages/TeacherPages/TeacherProfile.dart';
+import 'package:beyondtheclass/pages/TeacherPages/TeacherFeedbacks.dart';
+import 'package:beyondtheclass/pages/AlumniPages/AlumniHome.dart';
+import 'package:beyondtheclass/pages/AlumniPages/AlumniProfile.dart';
+import 'package:beyondtheclass/pages/AlumniPages/AlumniJobs.dart';
+import 'package:beyondtheclass/pages/profile/settings/SettingsPage.dart';
+
+class RouteGuard {
+  static Route<dynamic>? onGenerateRoute(RouteSettings settings, WidgetRef ref) {
+    final auth = ref.read(authProvider);
+    final userRole = auth.role;
+
+    // If not authenticated and not trying to access auth routes, redirect to login
+    if (auth.token == null && !_isAuthRoute(settings.name)) {
+      return MaterialPageRoute(
+        builder: (_) => const AuthScreen(),
+        settings: const RouteSettings(name: AppRoutes.authScreen),
+      );
+    }
+
+    // Get the route configuration based on the user's role
+    final availableRoutes = _getRoutesForRole(userRole);
+    
+    // If the requested route is not available for the user's role, redirect to appropriate home
+    if (!availableRoutes.containsKey(settings.name)) {
+      return MaterialPageRoute(
+        builder: (_) => _getHomePageForRole(userRole),
+        settings: RouteSettings(name: _getHomeRouteForRole(userRole)),
+      );
+    }
+
+    // Route is allowed, proceed with navigation
+    return MaterialPageRoute(
+      builder: (_) => availableRoutes[settings.name]!,
+      settings: settings,
+    );
+  }
+
+  static bool _isAuthRoute(String? routeName) {
+    return [
+      AppRoutes.authScreen,
+      AppRoutes.login,
+      AppRoutes.signupScreen,
+      AppRoutes.roleSelection,
+      AppRoutes.otpScreen,
+    ].contains(routeName);
+  }
+
+  static Map<String, Widget> _getRoutesForRole(String? role) {
+    final commonRoutes = {
+      AppRoutes.settings: const SettingsPage(),
+    };
+
+    switch (role) {
+      case AppRoles.student:
+        return {
+          AppRoutes.home: const HomePage(),
+          AppRoutes.messagesMainPage: const Messages(),
+          AppRoutes.mapMainPage: const MapsLook(),
+          AppRoutes.profileMainPage: const ProfilePage(),
+          AppRoutes.pastPaperScreen: const PastPapers(),
+          ...commonRoutes,
+        };
+      case AppRoles.teacher:
+        return {
+          AppRoutes.teacherHome: const TeacherHome(),
+          AppRoutes.teacherProfile: const TeacherProfile(),
+          AppRoutes.teacherFeedbacks: const TeacherFeedbacks(),
+          ...commonRoutes,
+        };
+      case AppRoles.alumni:
+        return {
+          AppRoutes.alumniHome: const AlumniHome(),
+          AppRoutes.alumniProfile: const AlumniProfile(),
+          AppRoutes.alumniJobs: const AlumniJobs(),
+          ...commonRoutes,
+        };
+      default:
+        return {};
+    }
+  }
+
+  static Widget _getHomePageForRole(String? role) {
+    switch (role) {
+      case AppRoles.student:
+        return const HomePage();
+      case AppRoles.teacher:
+        return const TeacherHome();
+      case AppRoles.alumni:
+        return const AlumniHome();
+      default:
+        return const AuthScreen();
+    }
+  }
+
+  static String _getHomeRouteForRole(String? role) {
+    switch (role) {
+      case AppRoles.student:
+        return AppRoutes.home;
+      case AppRoles.teacher:
+        return AppRoutes.teacherHome;
+      case AppRoles.alumni:
+        return AppRoutes.alumniHome;
+      default:
+        return AppRoutes.authScreen;
+    }
+  }
+} 

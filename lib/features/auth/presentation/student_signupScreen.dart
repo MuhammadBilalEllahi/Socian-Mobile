@@ -11,8 +11,13 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+  
   @override
   Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)!.settings.arguments as Map?;
+
+    final role = args?['role'];
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -53,15 +58,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        const Text(
-                          "Student Sign Up",
-                          style: TextStyle(
+                         Text(
+                          "${role == AppRoles.student ? "Student" : role == AppRoles.teacher ? "Teacher" : role == AppRoles.alumni ? "Alumni" : ""} Sign Up",
+                          style: const TextStyle(
                             fontSize: 18,
                             color: Colors.white,
                           ),
                         ),
                         const SizedBox(height: 15),
-                        const SignUpForm(),
+                         SignUpForm(role),
                         const SizedBox(height: 5),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,

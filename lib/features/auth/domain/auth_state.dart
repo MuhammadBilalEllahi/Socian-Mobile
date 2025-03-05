@@ -3,12 +3,14 @@ class AuthState {
   final String? error;
   final bool isLoading;
   final Map<String, dynamic>? user;
+  final String? role;
 
   const AuthState({
     this.token,
     this.error,
     this.isLoading = false,
     this.user,
+    this.role,
   });
 
     factory AuthState.initial() {
@@ -17,6 +19,7 @@ class AuthState {
       error: null,
       isLoading: false,
       user: null,
+      role: null,
     );
   }
 
@@ -27,6 +30,7 @@ class AuthState {
     String? error,
     bool? isLoading,
     Map<String, dynamic>? user,
+    String? role,
   }) {
     print("user inn state $user");
     return AuthState(
@@ -34,6 +38,7 @@ class AuthState {
       error: error ?? this.error,
       isLoading: isLoading ?? this.isLoading,
       user: user ?? this.user,
+      role: role ?? this.role,
     );
   }
 }

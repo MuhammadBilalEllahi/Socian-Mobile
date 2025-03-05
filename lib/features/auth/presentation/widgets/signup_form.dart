@@ -10,7 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SignUpForm extends StatefulWidget {
-  const SignUpForm({super.key});
+  final String role;
+  const SignUpForm(this.role, {super.key});
 
   @override
   State<SignUpForm> createState() => _SignUpFormState();
@@ -130,24 +131,43 @@ class _SignUpFormState extends State<SignUpForm> {
       print("Error checking username: $e");
     }
   }
-
   FormFieldValidator<dynamic> usernameValidator() {
     return (value) {
+      // Check for empty value
       if (value == null || value.isEmpty) {
         return 'Username cannot be empty';
       }
+
+      // Check for minimum length
       if (value.length < 8) {
         return 'Username must be at least 8 characters long';
       }
-      // Ensure username is lowercase and only contains letters, numbers, or underscores
-      final usernameRegex = RegExp(r'^[a-z0-9_]+$');
-      if (!usernameRegex.hasMatch(value)) {
-        return 'Username must be lowercase and can only contain letters, numbers, and underscores';
+
+      // Check for whitespace
+      if (value.contains(' ')) {
+        return 'Username cannot contain spaces';
       }
 
+      // Check for lowercase
+      if (value.contains(RegExp(r'[A-Z]'))) {
+        return 'Username must be lowercase';
+      }
+
+      // Check for numbers
+      if (!value.contains(RegExp(r'[0-9]'))) {
+        return 'Username must contain at least one number';
+      }
+
+      // Check for valid characters
+      if (!RegExp(r'^[a-z0-9_]+$').hasMatch(value)) {
+        return 'Username can only contain lowercase letters, numbers, and underscores';
+      }
+
+      // Check if username is taken
       if (isUsernameTaken) {
         return 'Username is already taken';
       }
+
       return null;
     };
   }
@@ -165,7 +185,7 @@ class _SignUpFormState extends State<SignUpForm> {
         'username': _usernameController.text,
         'universityId': universityId,
         'campusId': campusId,
-        'role': 'student', // Change when needed (this is just an example rolee)
+        'role': widget.role, // Change when needed (this is just an example rolee)
         'departmentId': selectedDepartment,
       };
 
@@ -412,10 +432,20 @@ FormFieldValidator<dynamic> passwordValidator() {
     if (value == null || value.isEmpty) {
       return 'Password cannot be empty';
     }
-    final passwordRegex = RegExp(
-        r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$');
-    if (!passwordRegex.hasMatch(value)) {
-      return 'Password must contain at least one uppercase letter, one lowercase letter, one number, one special character, and be at least 8 characters long';
+    if (value.length < 8) {
+      return 'Password must be at least 8 characters long';
+    }
+    if (!value.contains(RegExp(r'[A-Z]'))) {
+      return 'Password must contain at least one uppercase letter';
+    }
+    if (!value.contains(RegExp(r'[a-z]'))) {
+      return 'Password must contain at least one lowercase letter'; 
+    }
+    if (!value.contains(RegExp(r'[0-9]'))) {
+      return 'Password must contain at least one number';
+    }
+    if (!value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
+      return 'Password must contain at least one special character';
     }
     return null;
   };

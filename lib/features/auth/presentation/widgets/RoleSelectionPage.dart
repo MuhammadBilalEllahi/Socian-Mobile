@@ -30,10 +30,13 @@ class RoleSelectionPage extends StatelessWidget {
               onTap: () {
                 Navigator.pushNamed(
                   context,
-                  AppRoutes.signupScreenStudent
+                  AppRoutes.signupScreen,
+                  arguments: {
+                    "role":AppRoles.student,
+                  },
                 );
                 // Handle Student selection logic
-                print("Student selected");
+                debugPrint("Student selected");
               },
             ),
             const SizedBox(height: 20),
@@ -43,8 +46,15 @@ class RoleSelectionPage extends StatelessWidget {
               // icon: Icons.person,
               emoji: "👩‍🏫",
               onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.signupScreen,
+                  arguments: {
+                    "role":AppRoles.teacher,
+                  },
+                );
                 // Handle Faculty Member selection logic
-                print("Faculty Member selected");
+                debugPrint("Faculty Member selected");
               },
             ),
             const SizedBox(height: 20),
@@ -54,8 +64,15 @@ class RoleSelectionPage extends StatelessWidget {
               // icon: Icons.group,
               emoji: "🧑‍🎓",
               onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.signupScreen,
+                  arguments: {
+                    "role":AppRoles.alumni,
+                  },
+                );
                 // Handle Alumni selection logic
-                print("Alumni selected");
+                debugPrint("Alumni selected");
               },
             ),
           ],

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
 class MessageCard extends StatefulWidget {
-  final String picture; // URL or asset path for the picture
-  final String name;    // Sender's name
-  final String message; // The message content
-  final String time;    // Time the message was sent
+  final String picture;
+  final String name;   
+  final String message;
+  final String time;   
+  final bool isOnline;
 
   const MessageCard({
     super.key,
@@ -12,6 +13,7 @@ class MessageCard extends StatefulWidget {
     required this.name,
     required this.message,
     required this.time,
+    this.isOnline = true,
   });
 
   @override
@@ -21,86 +23,102 @@ class MessageCard extends StatefulWidget {
 class _MessageCardState extends State<MessageCard> {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Colors.teal.shade900, Colors.tealAccent.shade400
-            ],
-            // colors: [
-            //   Colors.blue.shade700,
-            //   Colors.purple.shade300
-            // ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 2,
-              offset: Offset(4, 4),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Profile Picture
-            CircleAvatar(
-              radius: 28,
-              backgroundImage: AssetImage(widget.picture),
-            ),
-            const SizedBox(width: 12), // Space between avatar and text
+    // Helper function to determine message type icon
+    Widget getMessageTypeIcon() {
+      if (widget.message.contains('sent a GIF')) {
+        return const Icon(Icons.gif_box_outlined, size: 18, color: Colors.grey);
+      } else if (widget.message.contains('sent an image')) {
+        return const Icon(Icons.image_outlined, size: 18, color: Colors.grey);
+      } else if (widget.message.contains('sent a voice message')) {
+        return const Icon(Icons.mic_outlined, size: 18, color: Colors.grey);
+      } else {
+        return const Icon(Icons.done_all, size: 18, color: Colors.blue);
+      }
+    }
 
-            // Text Content
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Name and Time
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      children: [
+        InkWell(
+          onTap: () {
+            // Handle message tap
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                // Profile Picture with Story Ring
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: widget.isOnline ? const LinearGradient(
+                      colors: [Colors.purple, Colors.black],
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomLeft,
+                    ) : null,
+                  ),
+                  padding: const EdgeInsets.all(1),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    padding: const EdgeInsets.all(1),
+                    child: CircleAvatar(
+                      backgroundImage: AssetImage(widget.picture),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                
+                // Message Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         widget.name,
                         style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
                         ),
                       ),
-                      Text(
-                        widget.time,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.white,
-                        ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          getMessageTypeIcon(), // Now returns Widget instead of Widget?
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              widget.message,
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 14,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const Text(" • "),
+                          Text(
+                            widget.time,
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6), // Space between name/time and message
-
-                  // Message Content
-                  Text(
-                    widget.message,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                      height: 1.3, // Line height for better readability
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
+        const Divider(height: 1),
+      ],
     );
   }
 }
