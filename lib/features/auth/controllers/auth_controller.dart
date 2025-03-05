@@ -7,58 +7,100 @@ import 'package:beyondtheclass/core/utils/constants.dart';
 
 class AuthController extends StateNotifier<AuthState> {
   final AuthUseCases authUseCases;
+  bool _isDisposed = false;
 
-  AuthController({required this.authUseCases}) : super(const AuthState()) {
-    _loadToken();
+  AuthController({required this.authUseCases}) : super(const AuthState(isLoading: true)) {
+    // Initialize token loading after the widget tree is built
+    Future.microtask(() => _loadToken());
   }
 
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
+  }
+
+  @override
+  bool get mounted => !_isDisposed;
+
   Future<void> _loadToken() async {
-    final token = await SecureStorageService.instance.getToken();
-    if (token != null && !JwtDecoder.isExpired(token)) {
-      final user = JwtDecoder.decode(token);
-      state = state.copyWith(
-        user: user,
-        token: token,
-        role: user['role'] ?? AppRoles.student
-      );
+    if (!mounted) return;
+    try {
+      final token = await SecureStorageService.instance.getToken();
+      if (!mounted) return;
+      
+      if (token != null && !JwtDecoder.isExpired(token)) {
+        final user = JwtDecoder.decode(token);
+        if (!mounted) return;
+        state = state.copyWith(
+          user: user,
+          token: token,
+          role: user['role'] ?? AppRoles.student,
+          isLoading: false,
+        );
+      } else {
+        // If token is expired or invalid, clear it
+        await SecureStorageService.instance.deleteToken();
+        if (!mounted) return;
+        state = const AuthState(isLoading: false);
+      }
+    } catch (e) {
+      // If there's any error loading the token, clear it
+      await SecureStorageService.instance.deleteToken();
+      if (!mounted) return;
+      state = const AuthState(isLoading: false);
     }
   }
 
   Future<void> logout() async {
+    if (!mounted) return;
+    state = state.copyWith(isLoading: true);
     await SecureStorageService.instance.deleteToken();
-    state = const AuthState(); // Reset state
+    if (!mounted) return;
+    state = const AuthState(isLoading: false);
   }
 
   Future<void> login(String email, String password) async {
+    if (!mounted) return;
     state = state.copyWith(isLoading: true);
     try {
       final response = await authUseCases.login(email, password);
+      if (!mounted) return;
+      
       final token = response['access_token'];
       final user = JwtDecoder.decode(token);
-      if (user.isNotEmpty) {
+      if (user.isNotEmpty && mounted) {
         state = state.copyWith(
           user: user,
           token: token,
+          role: user['role'] ?? AppRoles.student,
           isLoading: false,
-          error: null,
-          role: user['role'] ?? AppRoles.student
         );
         await SecureStorageService.instance.saveToken(token);
       }
     } catch (e) {
+      if (!mounted) return;
       state = state.copyWith(error: e.toString(), isLoading: false);
     }
   }
 
   Future<void> updateAuthState(Map<String, dynamic> user, String token) async {
-    await SecureStorageService.instance.saveToken(token);
-    state = state.copyWith(
-      user: user,
-      token: token,
-      isLoading: false,
-      error: null,
-      role: user['role'] ?? AppRoles.student
-    );
+    if (!mounted) return;
+    state = state.copyWith(isLoading: true);
+    try {
+      await SecureStorageService.instance.saveToken(token);
+      if (!mounted) return;
+      state = state.copyWith(
+        user: user,
+        token: token,
+        isLoading: false,
+        error: null,
+        role: user['role'] ?? AppRoles.student
+      );
+    } catch (e) {
+      if (!mounted) return;
+      state = state.copyWith(error: e.toString(), isLoading: false);
+    }
   }
 }
 

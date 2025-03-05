@@ -14,24 +14,67 @@ class LoginForm extends ConsumerStatefulWidget {
 class _LoginFormState extends ConsumerState<LoginForm> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  bool isLoading = false;
 
   // State for toggling password visibility
   bool isPasswordVisible = false;
 
-  void _login() {
-    print(
-        "1 - File: login_form.dart - This is credentials: ${emailController.text} and ${passwordController.text}");
-    ref.read(authProvider.notifier).login(
-          emailController.text,
-          passwordController.text,
-        );
+  void _login() async {
+    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter both email and password'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      await ref.read(authProvider.notifier).login(
+            emailController.text,
+            passwordController.text,
+          );
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Login successful!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     ref.listen<AuthState>(authProvider, (previous, next) {
+      if (next.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.error!),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       if (next.user != null) {
-        Navigator.pushReplacementNamed(context, AppRoutes.home);
+        Navigator.pushNamedAndRemoveUntil(context, AppRoutes.home, (route) => false);
       }
     });
 
@@ -67,13 +110,12 @@ class _LoginFormState extends ConsumerState<LoginForm> {
           ),
           const SizedBox(height: 20),
           GestureDetector(
-            onTap: _login,
+            onTap: isLoading ? null : _login,
             child: Container(
               width: MediaQuery.of(context).size.width / 2.2,
               padding: const EdgeInsets.fromLTRB(4, 10, 4, 10),
               margin: const EdgeInsets.fromLTRB(2, 0, 2, 0),
               decoration: BoxDecoration(
-                // color: const Color.fromARGB(255, 31, 31, 31),
                 gradient: const LinearGradient(
                   colors: [
                     Color.fromARGB(255, 18, 18, 18),
@@ -83,21 +125,28 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                   begin: Alignment.centerLeft,
                   end: Alignment.bottomRight,
                 ),
-
                 border: Border.all(
                     color: const Color.fromRGBO(255, 255, 255, 1), width: 0.6),
-                // color: Colors.black.withValues(alpha: 0.88),
                 borderRadius: BorderRadius.circular(4),
               ),
-              child: const Center(
-                child: Text(
-                  AppConstants.login,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.white,
-                  ),
-                ),
+              child: Center(
+                child: isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Text(
+                        AppConstants.login,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ),
           ),

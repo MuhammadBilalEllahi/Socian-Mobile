@@ -35,6 +35,7 @@ class _SignUpFormState extends State<SignUpForm> {
   List<Map<String, dynamic>> universities = [];
   List<Map<String, dynamic>> departmentsInSelectedUniversity = [];
   bool isLoading = true;
+  bool isSigningUp = false;
   final ApiClient apiClient = ApiClient();
 
   bool isUsernameTaken = false; // Flag to track if username is taken
@@ -172,7 +173,13 @@ class _SignUpFormState extends State<SignUpForm> {
     };
   }
 
-  void signupStudent() async {
+  Future<void> signupStudent() async {
+    if (isSigningUp) return;
+
+    setState(() {
+      isSigningUp = true;
+    });
+
     try {
       final universityDetails = selectedUniversity?.split('-');
       final universityId = universityDetails?[0];
@@ -185,62 +192,50 @@ class _SignUpFormState extends State<SignUpForm> {
         'username': _usernameController.text,
         'universityId': universityId,
         'campusId': campusId,
-        'role': widget.role, // Change when needed (this is just an example rolee)
+        'role': widget.role,
         'departmentId': selectedDepartment,
       };
 
       final response =
           await apiClient.post(ApiConstants.registerEndpoint, requestBody);
 
-      print("Signup response: $response");
-
       final data = response;
-
-// Extract userId from the redirectUrl
       final redirectUrl = data['redirectUrl'];
       final userId = redirectUrl.split('/otp/')[1].split('?')[0];
-
       final email = redirectUrl.split('/otp/')[1].split('?')[1].split('=')[1];
 
-      print("object $email");
-      // final data = response  ;
-      // final userId = data['redirectUrl'].split('/otp/')[1].split('?')[0]; // Extract userId from URL
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sign up successful! Please verify your email.'),
+          backgroundColor: Colors.green,
+        ),
+      );
 
-      // Navigate to OTP verification page
-      Navigator.pushNamed(context, AppRoutes.otpScreen,
-          arguments: {'userId': userId, 'email': email});
+      Navigator.pushNamed(
+        context, 
+        AppRoutes.otpScreen,
+        arguments: {'userId': userId, 'email': email}
+      );
+
     } catch (e) {
-      final error = e;
-      showCustomSnackbar(title: 'Info', message: error.toString(), isError: true);
-
-
-      print("ERROR WHILE SIGNING UP $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isSigningUp = false;
+        });
+      }
     }
   }
 
   void _signup() {
-    print("FT ");
     if (_formKey.currentState?.validate() ?? false) {
       signupStudent();
-
-      // Form is valid, proceed with signup logic
-      print("Signing up with:");
-      print("Name: ${_nameController.text}");
-      print("Username: ${_usernameController.text}");
-      print("Email: ${_emailController.text}");
-      print("Password: ${_passwordController.text}");
-      print("University: $selectedUniversity");
-      print("Department: $selectedDepartment");
-    } else {
-      // If form is not valid, show an error or message
-      print("Form is invalid");
-      print("Signing up with:");
-      print("Name: ${_nameController.text}");
-      print("Username: ${_usernameController.text}");
-      print("Email: ${_emailController.text}");
-      print("Password: ${_passwordController.text}");
-      print("University: $selectedUniversity");
-      print("Department: $selectedDepartment");
     }
   }
 
@@ -339,66 +334,52 @@ class _SignUpFormState extends State<SignUpForm> {
 
               const SizedBox(height: 10),
 
-              // Sign Up Button
-              //   Center(
-              //     child: ElevatedButton(
-              //       onPressed: signup,
-              //       style: ButtonStyle(
-              //         backgroundColor: WidgetStatePropertyAll<Color>(
-              //           Colors.teal.shade800,
-              //         ),
-              //         foregroundColor:
-              //             const WidgetStatePropertyAll<Color>(Colors.white),
-              //         padding: const WidgetStatePropertyAll<EdgeInsets>(
-              //           EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-              //         ),
-              //         shape: WidgetStatePropertyAll<OutlinedBorder>(
-              //           RoundedRectangleBorder(
-              //             borderRadius: BorderRadius.circular(12),
-              //           ),
-              //         ),
-              //       ),
-              //       child: const Text(
-              //         "Sign Up",
-              //         style: TextStyle(fontWeight: FontWeight.bold),
-              //       ),
-              //     ),
-              //   ),
-
               Center(
                 child: GestureDetector(
-                  onTap: _signup,
+                  onTap: isSigningUp ? null : _signup,
                   child: Container(
                     width: MediaQuery.of(context).size.width / 2.2,
                     padding: const EdgeInsets.fromLTRB(4, 10, 4, 10),
                     margin: const EdgeInsets.fromLTRB(2, 0, 2, 0),
                     decoration: BoxDecoration(
-                      // color: const Color.fromARGB(255, 31, 31, 31),
-                      gradient: const LinearGradient(
+                      gradient: LinearGradient(
                         colors: [
-                          Color.fromARGB(255, 18, 18, 18),
-                          Color.fromARGB(255, 0, 0, 0),
-                          Color.fromARGB(255, 31, 31, 31)
+                          isSigningUp 
+                            ? Colors.grey 
+                            : const Color.fromARGB(255, 18, 18, 18),
+                          isSigningUp 
+                            ? Colors.grey.shade700
+                            : const Color.fromARGB(255, 0, 0, 0),
+                          isSigningUp
+                            ? Colors.grey.shade600
+                            : const Color.fromARGB(255, 31, 31, 31)
                         ],
                         begin: Alignment.centerLeft,
                         end: Alignment.bottomRight,
                       ),
-
                       border: Border.all(
                           color: const Color.fromRGBO(255, 255, 255, 1),
                           width: 0.6),
-                      // color: Colors.black.withValues(alpha: 0.88),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Center(
-                      child: Text(
-                        AppConstants.signUp,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.white,
-                        ),
-                      ),
+                    child: Center(
+                      child: isSigningUp
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Text(
+                              AppConstants.signUp,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                   ),
                 ),

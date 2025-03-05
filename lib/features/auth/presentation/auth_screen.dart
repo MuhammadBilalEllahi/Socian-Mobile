@@ -17,9 +17,10 @@ class AuthScreen extends ConsumerWidget {
 
     if (authState.user != null) {
       Future.microtask(() {
-        Navigator.pushReplacementNamed(
+        Navigator.pushNamedAndRemoveUntil(
           context,
-          AppRoutes.home
+          AppRoutes.home,
+          (route) => false,
         );
       });
     }
@@ -35,9 +36,11 @@ class AuthScreen extends ConsumerWidget {
             end: Alignment.bottomCenter,
           ),
         ),
-        child: authState.isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : LayoutBuilder(
+        child: 
+        // authState.isLoading
+        //     ? const Center(child: CircularProgressIndicator())
+        //     : 
+            LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
               child: ConstrainedBox(

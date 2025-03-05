@@ -13,7 +13,7 @@ class AuthState {
     this.role,
   });
 
-    factory AuthState.initial() {
+  factory AuthState.initial() {
     return const AuthState(
       token: null,
       error: null,
@@ -23,8 +23,6 @@ class AuthState {
     );
   }
 
-
-
   AuthState copyWith({
     String? token,
     String? error,
@@ -32,7 +30,6 @@ class AuthState {
     Map<String, dynamic>? user,
     String? role,
   }) {
-    print("user inn state $user");
     return AuthState(
       token: token ?? this.token,
       error: error ?? this.error,
@@ -41,6 +38,31 @@ class AuthState {
       role: role ?? this.role,
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is AuthState &&
+        other.token == token &&
+        other.error == error &&
+        other.isLoading == isLoading &&
+        other.role == role &&
+        mapEquals(other.user, user);
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(token, error, isLoading, role, user);
+  }
+}
+
+bool mapEquals(Map<String, dynamic>? a, Map<String, dynamic>? b) {
+  if (a == null) return b == null;
+  if (b == null || a.length != b.length) return false;
+  for (var key in a.keys) {
+    if (!b.containsKey(key) || b[key] != a[key]) return false;
+  }
+  return true;
 }
 
 // // class AuthState {

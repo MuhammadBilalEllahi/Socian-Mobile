@@ -3,6 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/presentation/auth_screen.dart';
+import 'package:beyondtheclass/features/auth/presentation/student_signupScreen.dart';
+import 'package:beyondtheclass/features/auth/presentation/widgets/RoleSelectionPage.dart';
+import 'package:beyondtheclass/features/auth/presentation/widgets/login_form.dart';
+import 'package:beyondtheclass/features/auth/presentation/widgets/otp_form.dart';
+import 'package:beyondtheclass/pages/splashScreen/SplashScreen.dart';
 import 'package:beyondtheclass/pages/home/HomePage.dart';
 import 'package:beyondtheclass/pages/message/Messages.dart';
 import 'package:beyondtheclass/pages/explore/MapsPage.dart';
@@ -21,8 +26,42 @@ class RouteGuard {
     final auth = ref.read(authProvider);
     final userRole = auth.role;
 
-    // If not authenticated and not trying to access auth routes, redirect to login
-    if (auth.token == null && !_isAuthRoute(settings.name)) {
+    // List of routes that don't require authentication
+    final publicRoutes = [
+      AppRoutes.splashScreen,
+      AppRoutes.authScreen,
+      AppRoutes.login,
+      AppRoutes.signupScreen,
+      AppRoutes.roleSelection,
+      AppRoutes.otpScreen,
+    ];
+
+    // If trying to access splash screen, always allow it
+    if (settings.name == AppRoutes.splashScreen) {
+      return MaterialPageRoute(
+        builder: (_) => const SplashScreen(),
+        settings: settings,
+      );
+    }
+
+    // If user is authenticated and trying to access auth routes, redirect to appropriate home
+    if (auth.token != null && publicRoutes.contains(settings.name)) {
+      return MaterialPageRoute(
+        builder: (_) => _getHomePageForRole(userRole),
+        settings: RouteSettings(name: _getHomeRouteForRole(userRole)),
+      );
+    }
+
+    // Allow access to other public routes without authentication
+    if (publicRoutes.contains(settings.name)) {
+      return MaterialPageRoute(
+        builder: (_) => _getPublicRoute(settings.name!),
+        settings: settings,
+      );
+    }
+
+    // If not authenticated and trying to access protected routes, redirect to login
+    if (auth.token == null) {
       return MaterialPageRoute(
         builder: (_) => const AuthScreen(),
         settings: const RouteSettings(name: AppRoutes.authScreen),
@@ -47,14 +86,23 @@ class RouteGuard {
     );
   }
 
-  static bool _isAuthRoute(String? routeName) {
-    return [
-      AppRoutes.authScreen,
-      AppRoutes.login,
-      AppRoutes.signupScreen,
-      AppRoutes.roleSelection,
-      AppRoutes.otpScreen,
-    ].contains(routeName);
+  static Widget _getPublicRoute(String routeName) {
+    switch (routeName) {
+      case AppRoutes.splashScreen:
+        return const SplashScreen();
+      case AppRoutes.authScreen:
+        return const AuthScreen();
+      case AppRoutes.login:
+        return const LoginForm();
+      case AppRoutes.signupScreen:
+        return const SignUpScreen();
+      case AppRoutes.roleSelection:
+        return const RoleSelectionPage();
+      case AppRoutes.otpScreen:
+        return const OTPVerificationScreen();
+      default:
+        return const AuthScreen();
+    }
   }
 
   static Map<String, Widget> _getRoutesForRole(String? role) {

@@ -22,292 +22,264 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
     String username = auth.user?['username'] ?? "";
 
     return Drawer(
-      width: MediaQuery.of(context).size.width * 0.75,
+      width: MediaQuery.of(context).size.width * 0.85,
       child: Container(
-          decoration: BoxDecoration(
-            gradient: Theme.of(context).brightness == Brightness.dark
-                // for dark mode
-                ? const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Colors.black12, Colors.black38],
-                  )
-                // for light mode
-                : LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      const Color.fromARGB(255, 12, 12, 12),
-                      const Color.fromARGB(255, 32, 32, 32)
-                          .withValues(alpha: 0.1)
-                    ],
-                  ),
-            border: Border.all(
-              color:
-                  const Color.fromARGB(255, 22, 22, 22).withValues(alpha: 0.5),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color.fromARGB(255, 31, 31, 31)
-                    .withValues(alpha: 0.2),
-                blurRadius: 10,
-                spreadRadius: 2,
-                offset: const Offset(3, 3),
-              ),
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 10,
-                spreadRadius: 2,
-                offset: const Offset(-3, -3),
-              ),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF1A1A1A),
+              Color(0xFF2D2D2D),
             ],
           ),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const SizedBox(height: 20),
-            // Close Drawer Button
-            Padding(
-              padding: const EdgeInsets.fromLTRB(15, 40, 15, 0),
-              child: Row(
-                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Icon(
-                      Icons.arrow_back_ios_sharp,
-                      color: Colors.white60,
-                    ),
-                  ),
-                ],
-              ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha:0.2),
+              blurRadius: 20,
+              spreadRadius: 5,
             ),
-
-            const SizedBox(height: 15),
-            const Divider(thickness: 0.5,),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 5, 8, 15),
-                  child: GestureDetector(
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header Section
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 48, 16, 16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.white.withValues(alpha:0.1),
+                    Colors.white.withValues(alpha:0.05),
+                  ],
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.arrow_back_ios_new,
+                          color: Colors.white70,
+                          size: 20,
+                        ),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.logout,
+                          color: Colors.white70,
+                          size: 20,
+                        ),
+                        onPressed: () {
+                          ref.watch(authProvider.notifier).logout();
+                          Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            AppRoutes.authScreen,
+                            (route) => false,
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  // Profile Section
+                  GestureDetector(
                     onTap: () => ref.read(pageIndexProvider.notifier).state =
                         BottomNavBarRoute.profile,
                     child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        const CircleAvatar(
-                          radius: 20,
-                          backgroundColor: Color.fromARGB(160, 10, 10, 10),
-                          child: Icon(
-                            Icons.person,
-                            size: 25,
-                            color: Color.fromARGB(239, 238, 238, 238),
+                        Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.white.withValues(alpha:0.2),
+                                Colors.white.withValues(alpha:0.1),
+                              ],
+                            ),
+                          ),
+                          child: const CircleAvatar(
+                            radius: 24,
+                            backgroundColor: Color(0xFF2A2A2A),
+                            child: Icon(
+                              Icons.person,
+                              size: 28,
+                              color: Colors.white70,
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 10),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 10),
+                        const SizedBox(width: 16),
+                        Expanded(
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                name ?? 'user',
+                                name,
                                 style: const TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 15,
                                   fontWeight: FontWeight.bold,
-                                  color: Color.fromARGB(227, 244, 244, 244),
+                                  color: Colors.white,
                                 ),
                               ),
-                              Text(
-                                '@$username' ?? '@username',
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color.fromARGB(243, 227, 227, 227),
-                                ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Text(
+                                    '@$username',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.white.withValues(alpha:0.7),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.amber,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Text(
+                                      'PREMIUM',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.logout,
-                    color: Colors.white54,
-                    size: 22,
-                  ),
-                  onPressed: () {
-                    ref.watch(authProvider.notifier).logout();
-                    Navigator.pushNamedAndRemoveUntil(
-                        context, AppRoutes.authScreen, (route) => false);
-                  },
-                ),
-              ],
+                ],
+              ),
             ),
-            const Divider(),
-
-            // Drawer Options
+            const Divider(color: Colors.white24, height: 1),
+            // Menu Items
             Expanded(
               child: ListView(
-                padding: EdgeInsets.zero,
+                padding: const EdgeInsets.symmetric(vertical: 8),
                 children: [
-                  ListTile(
-                    leading: const Icon(Icons.home_filled,color: Color.fromARGB(223, 178, 178, 178),),
-                    title: const Text("Home",
-                        style: TextStyle(color: Color.fromARGB(223, 255, 255, 255), fontSize: 14)),
-                    onTap: () {
-                      () => ref.read(pageIndexProvider.notifier).state =
-                        BottomNavBarRoute.home;
-                    },
+                  _buildDrawerItem(
+                    icon: Icons.home_filled,
+                    title: "Home",
+                    onTap: () => ref.read(pageIndexProvider.notifier).state =
+                        BottomNavBarRoute.home,
                   ),
-                  ListTile(
-                    // leading: Icon(Icons.person, color: Colors.white,color: Color.fromARGB(223, 178, 178, 178),),
-                    leading: const Icon(Icons.workspaces_outline,color: Color.fromARGB(223, 178, 178, 178),),
-                    title: const Text("All Unis",
-                        style: TextStyle(color: Color.fromARGB(223, 255, 255, 255), fontSize: 14)),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
+                  _buildDrawerItem(
+                    icon: Icons.school,
+                    title: "All Universities",
+                    onTap: () => Navigator.of(context).pop(),
                   ),
-                  ListTile(
-                    // leading: Icon(Icons.person, color: Colors.white,color: Color.fromARGB(223, 178, 178, 178),),
-                    leading: const Icon(Icons.home_work_outlined,color: Color.fromARGB(223, 178, 178, 178),),
-                    title: const Text("Inter Campuses",
-                        style: TextStyle(color: Color.fromARGB(223, 255, 255, 255), fontSize: 14)),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
+                  _buildDrawerItem(
+                    icon: Icons.location_city,
+                    title: "Inter Campuses",
+                    onTap: () => Navigator.of(context).pop(),
                   ),
-                  ListTile(
-                    // leading: Icon(Icons.notifications, color: Colors.white,color: Color.fromARGB(223, 178, 178, 178),),
-                    leading: const Icon(Icons.emoji_people,color: Color.fromARGB(223, 178, 178, 178),),
-                    title: const Text("Alumni",
-                        style: TextStyle(color: Color.fromARGB(223, 255, 255, 255), fontSize: 14)),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
+                  _buildDrawerItem(
+                    icon: Icons.people,
+                    title: "Alumni",
+                    onTap: () => Navigator.of(context).pop(),
                   ),
-                  ListTile(
-                    // leading: Icon(Icons.notifications, color: Colors.white,color: Color.fromARGB(223, 178, 178, 178),),
-                    leading: const Icon(Icons.rate_review_rounded,color: Color.fromARGB(223, 178, 178, 178),),
-                    title: const Text("Teacher's Reviews",
-                        style: TextStyle(color: Color.fromARGB(223, 255, 255, 255), fontSize: 14)),
+                  _buildDrawerItem(
+                    icon: Icons.rate_review,
+                    title: "Teacher's Reviews",
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const TeachersPage()),
+                          builder: (context) => const TeachersPage(),
+                        ),
                       );
                     },
                   ),
-                  ListTile(
-                    leading: const Icon(Icons.home_filled,color: Color.fromARGB(223, 178, 178, 178),),
-                    title: const Text("Cafe Information Services",
-                        style: TextStyle(color: Color.fromARGB(223, 255, 255, 255), fontSize: 14)),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
+                  _buildDrawerItem(
+                    icon: Icons.restaurant,
+                    title: "Cafe Information Services",
+                    onTap: () => Navigator.of(context).pop(),
                   ),
-                  ListTile(
-                    leading: const Icon(Icons.insert_drive_file_outlined,color: Color.fromARGB(223, 178, 178, 178),),
-                    title: GestureDetector(
-                        child: const Text("Past Papers",
-                            style: TextStyle(
-                                color: Color.fromARGB(223, 255, 255, 255), fontSize: 14))),
+                  _buildDrawerItem(
+                    icon: Icons.description,
+                    title: "Past Papers",
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const DepartmentPage()),
+                          builder: (context) => const DepartmentPage(),
+                        ),
                       );
                     },
                   ),
                 ],
               ),
             ),
+            // Footer
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.white.withValues(alpha:0.05),
+                    Colors.white.withValues(alpha:0.02),
+                  ],
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Beyond The Class',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white.withValues(alpha:0.5),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-            const Divider(),
-
-            //     Padding(
-            //       padding: const EdgeInsets.only(bottom: 60.0),
-            //       child: Row(
-            //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //         crossAxisAlignment: CrossAxisAlignment.start,
-            //       children: [
-            //         Padding(
-            //           padding: const EdgeInsets.fromLTRB(8, 1, 8, 15),
-            //           child: GestureDetector(
-            //             onTap: () => ref.read(pageIndexProvider.notifier).state =
-            //                 BottomNavBarRoute.profile,
-            //             child: Row(
-            //               crossAxisAlignment: CrossAxisAlignment.center,
-            //               mainAxisAlignment: MainAxisAlignment.start,
-            //               children: [
-            //                 const CircleAvatar(
-            //                   radius: 20,
-            //                   backgroundColor: Color.fromARGB(160, 10, 10, 10),
-            //                   child: Icon(
-            //                     Icons.person,
-            //                     size: 25,
-            //                     color: Color.fromARGB(239, 238, 238, 238),
-            //                   ),
-            //                 ),
-            //                 const SizedBox(height: 10),
-            //                 Padding(
-            //                   padding: const EdgeInsets.only(left: 10),
-            //                   child: Column(
-            //                     mainAxisAlignment: MainAxisAlignment.center,
-            //                     crossAxisAlignment: CrossAxisAlignment.start,
-            //                     children: [
-            //                       Text(
-            //                         name ?? 'user',
-            //                         style: const TextStyle(
-            //                           fontSize: 11,
-            //                           fontWeight: FontWeight.bold,
-            //                           color: Color.fromARGB(227, 244, 244, 244),
-            //                         ),
-            //                       ),
-            //                       Text(
-            //                         '@$username' ?? '@username',
-            //                         style: const TextStyle(
-            //                           fontSize: 10,
-            //                           fontWeight: FontWeight.bold,
-            //                           color: Color.fromARGB(243, 227, 227, 227),
-            //                         ),
-            //                       ),
-            //                     ],
-            //                   ),
-            //                 )
-            //               ],
-            //             ),
-            //           ),
-            //         ),
-            //         IconButton(
-            //           icon: const Icon(
-            //             Icons.logout,
-            //             color: Colors.white54,
-            //             size: 22,
-            //           ),
-            //           onPressed: () {
-            //             ref.watch(authProvider.notifier).logout();
-            //                 Navigator.pushNamedAndRemoveUntil(context, AppRoutes.authScreen, (route) => false);
-            //           },
-            //         ),
-            //       ],
-            //     )
-            //   ),]
-            // ),
-          ])),
+  Widget _buildDrawerItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: Colors.white70,
+        size: 22,
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      onTap: onTap,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+      dense: true,
+      visualDensity: const VisualDensity(vertical: 0),
     );
   }
 }
