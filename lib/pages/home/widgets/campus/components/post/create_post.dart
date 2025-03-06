@@ -1,18 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:record/record.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:video_player/video_player.dart';
+import 'package:record/record.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
+import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-import 'dart:math' as math;
+import 'widgets/user_info_section.dart';
+import 'widgets/post_type_selector.dart';
+import 'widgets/society_selector.dart';
+import 'widgets/location_section.dart';
+import 'widgets/media_preview.dart';
+import 'widgets/voice_note_section.dart';
+import 'widgets/media_controls.dart';
+import 'widgets/full_screen_media_view.dart';
+import 'dart:async';
 
 enum PostType { personal, society }
 
 class CreatePost extends ConsumerStatefulWidget {
-  final List<Map<String, dynamic>> societies; // List of societies with id and name
+  final List<Map<String, dynamic>> societies;
 
   const CreatePost({
     super.key,
@@ -27,83 +37,113 @@ class _CreatePostState extends ConsumerState<CreatePost> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _bodyController = TextEditingController();
-  final _locationController = TextEditingController();
+  final _locationSearchController = TextEditingController();
   
-  final List<File> _selectedMedia = [];
-  File? _voiceNote;
-  Position? _currentPosition;
-  bool _isRecording = false;
-  final _audioRecorder = AudioRecorder();
   PostType _postType = PostType.personal;
   String? _selectedSocietyId;
-  List<double> _audioWaveform = [];
+  final List<File> _mediaFiles = [];
+  final Map<String, VideoPlayerController> _videoControllers = {};
+  File? _voiceNote;
+  bool _isRecording = false;
+  bool _isPlaying = false;
   bool _showMap = false;
+  bool _isVoiceSelected = false;
+  List<double> _waveform = [];
+  late final AudioRecorder _audioRecorder;
+  final _audioPlayer = AudioPlayer();
+  Position? _currentPosition;
+  String? _selectedLocation;
   Set<Marker> _markers = {};
-  GoogleMapController? _mapController;
+  List<String> _searchResults = [];
+  Duration _recordingDuration = Duration.zero;
+  Timer? _recordingTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _audioRecorder = AudioRecorder();
+  }
 
   @override
   void dispose() {
     _titleController.dispose();
     _bodyController.dispose();
-    _locationController.dispose();
+    _locationSearchController.dispose();
+    for (var controller in _videoControllers.values) {
+      controller.dispose();
+    }
+    _audioPlayer.dispose();
     _audioRecorder.dispose();
-    _mapController?.dispose();
+    _recordingTimer?.cancel();
     super.dispose();
   }
 
-  Future<void> _pickMedia() async {
-    final ImagePicker picker = ImagePicker();
-    final List<XFile> media = await picker.pickMultiImage();
-    if (media.isNotEmpty) {
-      setState(() {
-        _selectedMedia.addAll(media.map((m) => File(m.path)));
-      });
-    }
-  }
-
-  Future<void> _pickVideo() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? video = await picker.pickVideo(
-      source: ImageSource.gallery,
-      maxDuration: const Duration(minutes: 5), // Limit video duration to 5 minutes
-    );
-    if (video != null) {
-      setState(() {
-        _selectedMedia.add(File(video.path));
-      });
-    }
-  }
-
-  Future<void> _getCurrentLocation() async {
+  Future<void> _pickMedia(ImageSource source, bool isVideo) async {
     try {
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
+      final picker = ImagePicker();
+      final XFile? pickedFile;
+      
+      if (isVideo) {
+        pickedFile = await picker.pickVideo(source: source);
+      } else {
+        pickedFile = await picker.pickImage(source: source);
+      }
+
+      if (pickedFile != null) {
+        final file = File(pickedFile.path);
+        setState(() {
+          _mediaFiles.add(file);
+          if (isVideo) {
+            _initializeVideoController(file);
+          }
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error picking media: $e')),
+      );
+    }
+  }
+
+  Future<void> _initializeVideoController(File file) async {
+    final controller = VideoPlayerController.file(file);
+    await controller.initialize();
+    setState(() {
+      _videoControllers[file.path] = controller;
+    });
+  }
+
+  Future<void> _selectVoice() async {
+    try {
+      // Stop playback if playing
+      if (_isPlaying) {
+        await _audioPlayer.stop();
       }
       
-      if (permission == LocationPermission.denied) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location permissions are denied')),
-        );
-        return;
+      // Delete the previous voice note if it exists
+      if (_voiceNote != null) {
+        await _voiceNote!.delete();
       }
 
-      Position position = await Geolocator.getCurrentPosition();
       setState(() {
-        _currentPosition = position;
-        _locationController.text = '${position.latitude}, ${position.longitude}';
-        _showMap = true;
-        _markers = {
-          Marker(
-            markerId: const MarkerId('current_location'),
-            position: LatLng(position.latitude, position.longitude),
-            infoWindow: const InfoWindow(title: 'Selected Location'),
-          ),
-        };
+        _mediaFiles.clear();
+        for (var controller in _videoControllers.values) {
+          controller.dispose();
+        }
+        _videoControllers.clear();
+        _showMap = false;
+        _selectedLocation = null;
+        _currentPosition = null;
+        _markers = {};
+        _isVoiceSelected = true;
+        _voiceNote = null;
+        _isPlaying = false;
+        _recordingDuration = Duration.zero;
+        _waveform = [];
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error getting location: $e')),
+        SnackBar(content: Text('Error preparing voice recording: $e')),
       );
     }
   }
@@ -114,14 +154,48 @@ class _CreatePostState extends ConsumerState<CreatePost> {
         final tempDir = await getTemporaryDirectory();
         final path = '${tempDir.path}/audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
         await _audioRecorder.start(
-          const RecordConfig(encoder: AudioEncoder.aacLc),
+          const RecordConfig(
+            encoder: AudioEncoder.aacLc,
+            bitRate: 128000,
+            sampleRate: 44100,
+          ),
           path: path,
         );
         setState(() {
           _isRecording = true;
+          _waveform = [];
+          _recordingDuration = Duration.zero;
         });
-        // Simulate waveform data
-        _generateWaveformData();
+        
+        // Start the timer
+        _recordingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+          setState(() {
+            _recordingDuration += const Duration(seconds: 1);
+          });
+        });
+
+        // Listen to amplitude changes
+        _audioRecorder.onAmplitudeChanged(const Duration(milliseconds: 100)).listen(
+          (amp) {
+            if (_isRecording) {
+              setState(() {
+                // Convert amplitude to a value between 0 and 1
+                // amp.current is typically between -160 and 0 dB
+                // We'll normalize it to 0-1 range where louder sounds = higher values
+                final normalizedValue = (amp.current + 160) / 160;
+                _waveform.add(normalizedValue);
+                
+                // Keep only the last 50 values to maintain a consistent width
+                if (_waveform.length > 50) {
+                  _waveform.removeAt(0);
+                }
+              });
+            }
+          },
+          onError: (error) {
+            print('Error listening to amplitude: $error');
+          },
+        );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -130,20 +204,15 @@ class _CreatePostState extends ConsumerState<CreatePost> {
     }
   }
 
-  void _generateWaveformData() {
-    // Simulate real-time waveform data
-    setState(() {
-      _audioWaveform = List.generate(50, (index) => math.Random().nextDouble());
-    });
-  }
-
   Future<void> _stopRecording() async {
     try {
+      _recordingTimer?.cancel();
       final path = await _audioRecorder.stop();
       if (path != null) {
         setState(() {
           _voiceNote = File(path);
           _isRecording = false;
+          _isVoiceSelected = false;
         });
       }
     } catch (e) {
@@ -153,48 +222,164 @@ class _CreatePostState extends ConsumerState<CreatePost> {
     }
   }
 
-  void _showFullScreenMedia(int initialIndex) {
+  Future<void> _playPauseVoiceNote() async {
+    if (_voiceNote == null) return;
+
+    try {
+      if (_isPlaying) {
+        await _audioPlayer.pause();
+      } else {
+        await _audioPlayer.play(DeviceFileSource(_voiceNote!.path));
+      }
+      setState(() {
+        _isPlaying = !_isPlaying;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error playing voice note: $e')),
+      );
+    }
+  }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      final permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        final request = await Geolocator.requestPermission();
+        if (request == LocationPermission.denied) {
+          return;
+        }
+      }
+
+      final position = await Geolocator.getCurrentPosition();
+      setState(() {
+        _currentPosition = position;
+        _markers = {
+          Marker(
+            markerId: const MarkerId('current_location'),
+            position: LatLng(position.latitude, position.longitude),
+            infoWindow: const InfoWindow(title: 'Current Location'),
+          ),
+        };
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error getting location: $e')),
+      );
+    }
+  }
+
+  Future<void> _searchLocations(String query) async {
+    // Implement location search using Google Places API
+    // For now, using dummy data
+    setState(() {
+      _searchResults = [
+        'Location 1',
+        'Location 2',
+        'Location 3',
+      ];
+    });
+  }
+
+  void _selectLocation(String? location) {
+    setState(() {
+      _selectedLocation = location;
+      _searchResults = [];
+    });
+  }
+
+  void _removeMedia(int index) {
+    final file = _mediaFiles[index];
+    final controller = _videoControllers[file.path];
+    controller?.dispose();
+    _videoControllers.remove(file.path);
+    setState(() {
+      _mediaFiles.removeAt(index);
+    });
+  }
+
+  void _showFullScreenMedia(int index) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => FullScreenMediaView(
-          mediaFiles: _selectedMedia,
-          initialIndex: initialIndex,
+          mediaFiles: _mediaFiles,
+          initialIndex: index,
+          videoControllers: _videoControllers,
         ),
       ),
     );
   }
 
+  Future<void> _deleteVoiceNote() async {
+    try {
+      // Stop playback if playing
+      if (_isPlaying) {
+        await _audioPlayer.stop();
+      }
+      
+      // Delete the file if it exists
+      if (_voiceNote != null) {
+        await _voiceNote!.delete();
+      }
+
+      setState(() {
+        _voiceNote = null;
+        _isPlaying = false;
+        _recordingDuration = Duration.zero;
+        _waveform = [];
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error deleting voice note: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final backgroundColor = isDark ? Colors.black : Colors.white;
-    final textColor = isDark ? Colors.white : Colors.black;
-    final authState = ref.watch(authProvider);
-    final user = authState.user;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: isDark ? Colors.black : Colors.white,
       appBar: AppBar(
-        backgroundColor: backgroundColor,
+        backgroundColor: isDark ? Colors.black : Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.close, color: textColor),
+          icon: Icon(
+            Icons.close,
+            color: isDark ? Colors.white : Colors.black,
+          ),
           onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'New Post',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.5,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () {
-              if (_formKey.currentState!.validate()) {
+              if (_formKey.currentState?.validate() ?? false) {
                 // TODO: Implement post creation
                 Navigator.pop(context);
               }
             },
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              backgroundColor: isDark ? Colors.white : Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             child: Text(
               'Post',
-              style: TextStyle(
-                color: _bodyController.text.isNotEmpty ? Colors.blue : Colors.grey,
-                fontWeight: FontWeight.bold,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: isDark ? Colors.black : Colors.white,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -203,489 +388,175 @@ class _CreatePostState extends ConsumerState<CreatePost> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.zero,
           children: [
-            // User Info with Profile Picture
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: isDark ? Colors.grey[900] : Colors.grey[100],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [Colors.blue[400]!, Colors.blue[600]!],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        user?['name']?[0].toUpperCase() ?? '?',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          user?['name'] ?? 'Unknown User',
-                          style: TextStyle(
-                            color: textColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        Text(
-                          '@${user?['username'] ?? 'username'}',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+            UserInfoSection(
+              postType: _postType,
+              selectedLocation: _selectedLocation,
+              onLocationSelected: _selectLocation,
+              onLocationCleared: () {
+                setState(() {
+                  _selectedLocation = null;
+                  _currentPosition = null;
+                  _markers = {};
+                  _showMap = false;
+                });
+              },
             ),
-            const SizedBox(height: 16),
-
-            // Post Type Selection with Modern Design
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: isDark ? Colors.grey[900] : Colors.grey[100],
-                borderRadius: BorderRadius.circular(12),
+            PostTypeSelector(
+              selectedType: _postType,
+              onTypeChanged: (type) {
+                setState(() {
+                  _postType = type;
+                  _selectedSocietyId = null;
+                  if (type == PostType.personal) {
+                    _showMap = false;
+                  }
+                });
+              },
+            ),
+            if (_postType == PostType.society)
+              SocietySelector(
+                societies: widget.societies,
+                selectedSocietyId: _selectedSocietyId,
+                onSocietySelected: (id) {
+                  setState(() {
+                    _selectedSocietyId = id;
+                  });
+                },
               ),
+            Padding(
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Post Type',
-                    style: TextStyle(
-                      color: textColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildPostTypeButton(
-                          type: PostType.personal,
-                          icon: Icons.person_outline,
-                          label: 'Personal',
-                          isSelected: _postType == PostType.personal,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildPostTypeButton(
-                          type: PostType.society,
-                          icon: Icons.groups_outlined,
-                          label: 'Society',
-                          isSelected: _postType == PostType.society,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            // Society Selection with Modern Design
-            if (_postType == PostType.society) ...[
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.grey[900] : Colors.grey[100],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Select Society',
-                      style: TextStyle(
-                        color: textColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<String>(
-                      value: _selectedSocietyId,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        filled: true,
-                        fillColor: isDark ? Colors.grey[800] : Colors.white,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      ),
-                      items: widget.societies.map((society) {
-                        return DropdownMenuItem<String>(
-                          value: society['id'] as String,
-                          child: Text(society['name'] as String),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedSocietyId = value;
-                        });
-                      },
-                      validator: (value) {
-                        if (_postType == PostType.society && value == null) {
-                          return 'Please select a society';
-                        }
-                        return null;
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-
-            const SizedBox(height: 16),
-
-            // Title Field with Modern Design
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: isDark ? Colors.grey[900] : Colors.grey[100],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Title',
-                    style: TextStyle(
-                      color: textColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
                   TextFormField(
                     controller: _titleController,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.5,
+                    ),
                     decoration: InputDecoration(
-                      hintText: "Enter post title",
-                      hintStyle: TextStyle(color: Colors.grey[600]),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                      hintText: 'What\'s on your mind?',
+                      border: InputBorder.none,
+                      hintStyle: theme.textTheme.titleLarge?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.5,
                       ),
-                      filled: true,
-                      fillColor: isDark ? Colors.grey[800] : Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
-                    style: TextStyle(color: textColor),
-                    validator: (value) => value?.isEmpty ?? true ? 'Please enter a title' : null,
+                    maxLines: null,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a title';
+                      }
+                      return null;
+                    },
                   ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Body Field with Modern Design
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: isDark ? Colors.grey[900] : Colors.grey[100],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Content',
-                    style: TextStyle(
-                      color: textColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   TextFormField(
                     controller: _bodyController,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      letterSpacing: -0.2,
+                    ),
                     decoration: InputDecoration(
-                      hintText: "What's on your mind?",
-                      hintStyle: TextStyle(color: Colors.grey[600]),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                      hintText: 'Add more details...',
+                      border: InputBorder.none,
+                      hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        letterSpacing: -0.2,
                       ),
-                      filled: true,
-                      fillColor: isDark ? Colors.grey[800] : Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
-                    maxLines: 5,
-                    style: TextStyle(color: textColor),
-                    validator: (value) => value?.isEmpty ?? true ? 'Please enter some content' : null,
+                    maxLines: null,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter some content';
+                      }
+                      return null;
+                    },
                   ),
                 ],
               ),
             ),
-
-            // Media Preview
-            if (_selectedMedia.isNotEmpty)
-              Container(
-                height: 200,
-                margin: const EdgeInsets.symmetric(vertical: 16),
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: _selectedMedia.length,
-                  itemBuilder: (context, index) {
-                    final isImage = _selectedMedia[index].path.toLowerCase().endsWith('.jpg') ||
-                        _selectedMedia[index].path.toLowerCase().endsWith('.png') ||
-                        _selectedMedia[index].path.toLowerCase().endsWith('.jpeg');
-                    
-                    return GestureDetector(
-                      onTap: () => _showFullScreenMedia(index),
-                      child: Stack(
-                        children: [
-                          Container(
-                            margin: const EdgeInsets.only(right: 8),
-                            width: 200,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              image: isImage
-                                  ? DecorationImage(
-                                      image: FileImage(_selectedMedia[index]),
-                                      fit: BoxFit.cover,
-                                    )
-                                  : null,
-                              color: Colors.grey[300],
-                            ),
-                            child: !isImage
-                                ? const Center(
-                                    child: Icon(Icons.video_library, size: 48),
-                                  )
-                                : null,
-                          ),
-                          Positioned(
-                            top: 8,
-                            right: 16,
-                            child: CircleAvatar(
-                              radius: 12,
-                              backgroundColor: Colors.black54,
-                              child: IconButton(
-                                padding: EdgeInsets.zero,
-                                icon: const Icon(Icons.close, size: 16, color: Colors.white),
-                                onPressed: () {
-                                  setState(() {
-                                    _selectedMedia.removeAt(index);
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+            if (_mediaFiles.isNotEmpty)
+              MediaPreview(
+                mediaFiles: _mediaFiles,
+                videoControllers: _videoControllers,
+                onMediaTap: _showFullScreenMedia,
+                onMediaRemove: _removeMedia,
               ),
-
-            // Voice Note Waveform
-            if (_isRecording || _voiceNote != null)
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 16),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    if (_isRecording)
-                      SizedBox(
-                        height: 60,
-                        child: CustomPaint(
-                          painter: WaveformPainter(
-                            waveform: _audioWaveform,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      ),
-                    if (_voiceNote != null)
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.play_arrow),
-                            onPressed: () {
-                              // TODO: Implement audio playback
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () {
-                              setState(() {
-                                _voiceNote = null;
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                  ],
-                ),
-              ),
-
-            // Location Section
-            if (_postType == PostType.society)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Location',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          icon: const Icon(Icons.map),
-                          label: const Text('Show Map'),
-                          onPressed: () {
-                            setState(() {
-                              _showMap = !_showMap;
-                            });
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          icon: const Icon(Icons.location_on),
-                          label: const Text('Current Location'),
-                          onPressed: _getCurrentLocation,
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (_showMap && _currentPosition != null)
-                    Container(
-                      height: 200,
-                      margin: const EdgeInsets.only(top: 16),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: GoogleMap(
-                          initialCameraPosition: CameraPosition(
-                            target: LatLng(
-                              _currentPosition!.latitude,
-                              _currentPosition!.longitude,
-                            ),
-                            zoom: 15,
-                          ),
-                          markers: _markers,
-                          onMapCreated: (controller) {
-                            _mapController = controller;
-                          },
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-
-            // Bottom Actions
-            Row(
-              children: [
-                IconButton(
-                  icon: Icon(Icons.photo_library_outlined, color: textColor),
-                  onPressed: _pickMedia,
-                ),
-                IconButton(
-                  icon: Icon(Icons.videocam_outlined, color: textColor),
-                  onPressed: _pickVideo,
-                ),
-                IconButton(
-                  icon: Icon(_isRecording ? Icons.stop : Icons.mic_none, color: textColor),
-                  onPressed: _isRecording ? _stopRecording : _startRecording,
-                ),
-                if (_postType == PostType.society)
-                  IconButton(
-                    icon: Icon(Icons.location_on_outlined, color: textColor),
-                    onPressed: _getCurrentLocation,
-                  ),
-              ],
+            MediaControls(
+              onImagePick: () => _pickMedia(ImageSource.gallery, false),
+              onVideoPick: () => _pickMedia(ImageSource.gallery, true),
+              onVoiceNoteStart: _isVoiceSelected ? _startRecording : _selectVoice,
+              onVoiceNoteStop: _stopRecording,
+              isRecording: _isRecording,
+              showMap: _showMap,
+              onMapToggle: () {
+                if (_postType == PostType.society) {
+                  setState(() {
+                    if (!_showMap) {
+                      // Clear media when enabling map
+                      _mediaFiles.clear();
+                      for (var controller in _videoControllers.values) {
+                        controller.dispose();
+                      }
+                      _videoControllers.clear();
+                      _voiceNote = null;
+                      _isPlaying = false;
+                      _isVoiceSelected = false;
+                    }
+                    _showMap = !_showMap;
+                  });
+                }
+              },
+              postType: _postType,
+              mediaFiles: _mediaFiles,
+              voiceNote: _voiceNote,
+              isVoiceSelected: _isVoiceSelected,
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPostTypeButton({
-    required PostType type,
-    required IconData icon,
-    required String label,
-    required bool isSelected,
-  }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark ? Colors.white : Colors.black;
-
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _postType = type;
-          if (type == PostType.personal) {
-            _selectedSocietyId = null;
-          }
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? Colors.blue.withOpacity(0.1)
-              : isDark
-                  ? Colors.grey[800]
-                  : Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? Colors.blue : Colors.transparent,
-            width: 2,
-          ),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? Colors.blue : Colors.grey[600],
-              size: 24,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? Colors.blue : Colors.grey[600],
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            if (_voiceNote != null || _isRecording)
+              VoiceNoteSection(
+                isRecording: _isRecording,
+                isPlaying: _isPlaying,
+                voiceNote: _voiceNote,
+                waveform: _waveform,
+                onPlayPause: _playPauseVoiceNote,
+                onDelete: _deleteVoiceNote,
+                recordingDuration: _recordingDuration,
               ),
-            ),
+            if (_showMap)
+              LocationSection(
+                postType: _postType,
+                selectedLocation: _selectedLocation,
+                currentPosition: _currentPosition,
+                onLocationSelected: _selectLocation,
+                onLocationCleared: () {
+                  setState(() {
+                    _selectedLocation = null;
+                    _currentPosition = null;
+                    _markers = {};
+                    _showMap = false;
+                  });
+                },
+                onSearchQueryChanged: _searchLocations,
+                onMapLocationSelected: (position) {
+                  setState(() {
+                    _currentPosition = position;
+                    _markers = {
+                      Marker(
+                        markerId: const MarkerId('selected_location'),
+                        position: LatLng(
+                          position!.latitude,
+                          position.longitude,
+                        ),
+                        infoWindow: const InfoWindow(title: 'Selected Location'),
+                      ),
+                    };
+                  });
+                },
+              ),
+            const SizedBox(height: 8),
           ],
         ),
       ),
@@ -733,11 +604,13 @@ class WaveformPainter extends CustomPainter {
 
 class FullScreenMediaView extends StatefulWidget {
   final List<File> mediaFiles;
+  final Map<String, VideoPlayerController> videoControllers;
   final int initialIndex;
 
   const FullScreenMediaView({
     super.key,
     required this.mediaFiles,
+    required this.videoControllers,
     required this.initialIndex,
   });
 
@@ -762,6 +635,8 @@ class _FullScreenMediaViewState extends State<FullScreenMediaView> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -780,6 +655,37 @@ class _FullScreenMediaViewState extends State<FullScreenMediaView> {
           final isImage = file.path.toLowerCase().endsWith('.jpg') ||
               file.path.toLowerCase().endsWith('.png') ||
               file.path.toLowerCase().endsWith('.jpeg');
+          final isVideo = widget.videoControllers.containsKey(file.path);
+
+          if (isVideo) {
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                AspectRatio(
+                  aspectRatio: widget.videoControllers[file.path]!.value.aspectRatio,
+                  child: VideoPlayer(widget.videoControllers[file.path]!),
+                ),
+                IconButton(
+                  icon: Icon(
+                    widget.videoControllers[file.path]!.value.isPlaying
+                        ? Icons.pause
+                        : Icons.play_arrow,
+                    color: Colors.white,
+                    size: 48,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      if (widget.videoControllers[file.path]!.value.isPlaying) {
+                        widget.videoControllers[file.path]!.pause();
+                      } else {
+                        widget.videoControllers[file.path]!.play();
+                      }
+                    });
+                  },
+                ),
+              ],
+            );
+          }
 
           return Center(
             child: isImage
@@ -787,10 +693,10 @@ class _FullScreenMediaViewState extends State<FullScreenMediaView> {
                     file,
                     fit: BoxFit.contain,
                   )
-                : const Icon(
+                : Icon(
                     Icons.video_library,
                     size: 64,
-                    color: Colors.white,
+                    color: theme.colorScheme.primary,
                   ),
           );
         },
