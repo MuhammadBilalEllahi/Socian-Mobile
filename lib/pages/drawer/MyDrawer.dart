@@ -24,23 +24,23 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
     return Drawer(
       width: MediaQuery.of(context).size.width * 0.85,
       child: Container(
-        decoration: BoxDecoration(
+          decoration: BoxDecoration(
           gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
               Color(0xFF1A1A1A),
               Color(0xFF2D2D2D),
-            ],
-          ),
-          boxShadow: [
-            BoxShadow(
+                    ],
+            ),
+            boxShadow: [
+              BoxShadow(
               color: Colors.black.withValues(alpha:0.2),
               blurRadius: 20,
               spreadRadius: 5,
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -85,9 +85,9 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
                             (route) => false,
                           );
                         },
-                      ),
-                    ],
                   ),
+                ],
+              ),
                   const SizedBox(height: 16),
                   // Profile Section
                   GestureDetector(
@@ -109,8 +109,8 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
                           child: const CircleAvatar(
                             radius: 24,
                             backgroundColor: Color(0xFF2A2A2A),
-                            child: Icon(
-                              Icons.person,
+                          child: Icon(
+                            Icons.person,
                               size: 28,
                               color: Colors.white70,
                             ),
@@ -132,7 +132,7 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
                               const SizedBox(height: 4),
                               Row(
                                 children: [
-                                  Text(
+                              Text(
                                     '@$username',
                                     style: TextStyle(
                                       fontSize: 14,
@@ -149,12 +149,12 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
                                     child: const Text(
                                       'PREMIUM',
                                       style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
                                         color: Colors.black,
                                       ),
                                     ),
-                                  ),
+                                ),
                                 ],
                               ),
                             ],
@@ -178,11 +178,11 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
                     onTap: () => ref.read(pageIndexProvider.notifier).state =
                         BottomNavBarRoute.home,
                   ),
-                  _buildDrawerItem(
-                    icon: Icons.school,
-                    title: "All Universities",
-                    onTap: () => Navigator.of(context).pop(),
-                  ),
+                  // _buildDrawerItem(
+                  //   icon: Icons.school,
+                  //   title: "All Universities",
+                  //   onTap: () => Navigator.of(context).pop(),
+                  // ),
                   _buildDrawerItem(
                     icon: Icons.location_city,
                     title: "Inter Campuses",

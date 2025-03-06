@@ -45,6 +45,11 @@
     android:name="com.google.android.gms.auth.api.signin"
     android:value="1076027750526-li5gkit9klq06mmocutusfb6ta8e1etc.apps.googleusercontent.com" />
 
+        <!-- Add Google Maps API Key -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="YOUR_GOOGLE_MAPS_API_KEY"/>
+
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
