@@ -1,4 +1,4 @@
-// import 'package:beyondtheclass/pages/drawer/MyDrawer.dart';
+// import 'package:beyondtheclass/pages/drawer/StudentDrawer.dart';
 // import 'package:beyondtheclass/core/utils/constants.dart';
 // import 'package:beyondtheclass/features/auth/presentation/auth_screen.dart';
 // import 'package:beyondtheclass/pages/home/widgets/SimplePost.dart';
@@ -122,7 +122,7 @@
 //           ),
 //         ],
 //       ),
-//       drawer: const MyDrawer(),
+//       drawer: const StudentDrawer(),
 //       floatingActionButton: Padding(
 //         padding: const EdgeInsets.fromLTRB(0, 0, 0, 60),
 //         child: Container(

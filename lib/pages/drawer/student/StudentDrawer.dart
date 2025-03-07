@@ -1,20 +1,20 @@
 import 'package:beyondtheclass/core/utils/constants.dart';
-import 'package:beyondtheclass/pages/home/widgets/campus/CampusPosts.dart';
-import 'package:beyondtheclass/pages/drawer/pages/pastPaper/DepartmentPage.dart';
-import 'package:beyondtheclass/pages/drawer/pages/teachersReviews/TeachersPage.dart';
+import 'package:beyondtheclass/pages/StudentPages/home/widgets/campus/CampusPosts.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
+import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/DepartmentPage.dart';
+import 'package:beyondtheclass/pages/drawer/student/pages/teachersReviews/TeachersPage.dart';
 import 'package:beyondtheclass/providers/page_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class MyDrawer extends ConsumerStatefulWidget {
-  const MyDrawer({super.key});
+class StudentDrawer extends ConsumerStatefulWidget {
+  const StudentDrawer({super.key});
 
   @override
-  _MyDrawerState createState() => _MyDrawerState();
+  _StudentDrawerState createState() => _StudentDrawerState();
 }
 
-class _MyDrawerState extends ConsumerState<MyDrawer> {
+class _StudentDrawerState extends ConsumerState<StudentDrawer> {
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);

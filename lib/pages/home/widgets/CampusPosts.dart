@@ -1,4 +1,4 @@
-// import 'package:beyondtheclass/pages/drawer/MyDrawer.dart';
+// import 'package:beyondtheclass/pages/drawer/StudentDrawer.dart';
 // import 'package:flutter/material.dart';
 // import 'package:flutter_riverpod/flutter_riverpod.dart';
 // import 'package:beyondtheclass/core/utils/constants.dart';
@@ -40,7 +40,7 @@
 
 //     return Scaffold(
 //       backgroundColor: isDark ? Colors.black : Colors.white,
-//       drawer: const MyDrawer(),
+//       drawer: const StudentDrawer(),
 //       body: NestedScrollView(
 //         headerSliverBuilder: (context, innerBoxIsScrolled) {
 //           return [

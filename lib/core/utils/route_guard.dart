@@ -1,3 +1,4 @@
+import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/PastPapers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
@@ -12,10 +13,10 @@ import 'package:beyondtheclass/pages/home/HomePage.dart';
 import 'package:beyondtheclass/pages/message/Messages.dart';
 import 'package:beyondtheclass/pages/explore/MapsPage.dart';
 import 'package:beyondtheclass/pages/profile/ProfilePage.dart';
-import 'package:beyondtheclass/pages/drawer/pages/pastPaper/PastPapers.dart';
-import 'package:beyondtheclass/pages/TeacherPages/TeacherHome.dart';
-import 'package:beyondtheclass/pages/TeacherPages/TeacherProfile.dart';
-import 'package:beyondtheclass/pages/TeacherPages/TeacherFeedbacks.dart';
+
+import 'package:beyondtheclass/pages/TeacherMod/TeacherHome.dart';
+import 'package:beyondtheclass/pages/TeacherMod/TeacherProfile.dart';
+import 'package:beyondtheclass/pages/TeacherMod/TeacherFeedbacks.dart';
 import 'package:beyondtheclass/pages/AlumniPages/AlumniHome.dart';
 import 'package:beyondtheclass/pages/AlumniPages/AlumniProfile.dart';
 import 'package:beyondtheclass/pages/AlumniPages/AlumniJobs.dart';

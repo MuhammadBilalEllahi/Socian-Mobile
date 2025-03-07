@@ -1,0 +1,2 @@
+D:/Projects/Final Year Project/Mobile App/BeyondTheClass_mobile/android/app/.cxx/RelWithDebInfo/41442a2v/x86_64/CMakeFiles/edit_cache.dir
+D:/Projects/Final Year Project/Mobile App/BeyondTheClass_mobile/android/app/.cxx/RelWithDebInfo/41442a2v/x86_64/CMakeFiles/rebuild_cache.dir

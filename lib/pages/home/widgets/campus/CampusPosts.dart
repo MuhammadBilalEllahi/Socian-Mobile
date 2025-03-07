@@ -1,11 +1,11 @@
 import 'package:beyondtheclass/components/loader.dart';
+import 'package:beyondtheclass/pages/drawer/student/StudentDrawer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'components/post/post.dart';
 import 'components/post/create_post.dart';
-import '../../../drawer/MyDrawer.dart';
 import 'package:beyondtheclass/core/usecases/PostProvider.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -41,7 +41,7 @@ class _CampusPostsState extends ConsumerState<CampusPosts> with SingleTickerProv
 
     return Scaffold(
       backgroundColor: isDark ? Colors.black : Colors.white,
-      drawer: const MyDrawer(),
+      drawer: const StudentDrawer(),
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [

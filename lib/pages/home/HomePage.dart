@@ -2,7 +2,7 @@
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/pages/bottomBar/MyBottomNavBar.dart';
 import 'package:beyondtheclass/pages/explore/MapsPage.dart';
-import 'package:beyondtheclass/pages/home/widgets/campus/CampusPosts.dart';
+import 'package:beyondtheclass/pages/StudentPages/home/widgets/campus/CampusPosts.dart';
 import 'package:beyondtheclass/pages/message/Messages.dart';
 import 'package:beyondtheclass/pages/profile/ProfilePage.dart';
 import 'package:beyondtheclass/providers/page_provider.dart';

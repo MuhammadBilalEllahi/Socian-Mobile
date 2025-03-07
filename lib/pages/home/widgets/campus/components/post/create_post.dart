@@ -153,14 +153,19 @@ class _CreatePostState extends ConsumerState<CreatePost> {
       if (await _audioRecorder.hasPermission()) {
         final tempDir = await getTemporaryDirectory();
         final path = '${tempDir.path}/audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
+        
+        // Optimize recording configuration for better performance
         await _audioRecorder.start(
           const RecordConfig(
             encoder: AudioEncoder.aacLc,
-            bitRate: 128000,
-            sampleRate: 44100,
+            bitRate: 64000, // Reduced from 128000 for better buffer handling
+            sampleRate: 22050, // Reduced from 44100 for better performance
+            numChannels: 1, // Mono recording for smaller file size
+            autoGain: true, // Enable auto gain control
           ),
           path: path,
         );
+
         setState(() {
           _isRecording = true;
           _waveform = [];
@@ -174,15 +179,21 @@ class _CreatePostState extends ConsumerState<CreatePost> {
           });
         });
 
-        // Listen to amplitude changes
-        _audioRecorder.onAmplitudeChanged(const Duration(milliseconds: 100)).listen(
+        // Listen to amplitude changes with optimized interval
+        _audioRecorder.onAmplitudeChanged(const Duration(milliseconds: 50)).listen(
           (amp) {
             if (_isRecording) {
               setState(() {
-                // Convert amplitude to a value between 0 and 1
-                // amp.current is typically between -160 and 0 dB
-                // We'll normalize it to 0-1 range where louder sounds = higher values
-                final normalizedValue = (amp.current + 160) / 160;
+                // Normalize and scale the amplitude for better visualization
+                // amp.current is in dB, typically between -160 and 0
+                double normalizedValue = (amp.current + 160) / 160;
+                
+                // Apply non-linear scaling to make the waveform more dynamic
+                normalizedValue = normalizedValue * normalizedValue;
+                
+                // Ensure the value is between 0.1 and 1.0 for better visibility
+                normalizedValue = normalizedValue.clamp(0.1, 1.0);
+                
                 _waveform.add(normalizedValue);
                 
                 // Keep only the last 50 values to maintain a consistent width
@@ -195,6 +206,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
           onError: (error) {
             print('Error listening to amplitude: $error');
           },
+          cancelOnError: true, // Stop listening on error to prevent buffer issues
         );
       }
     } catch (e) {
@@ -207,6 +219,10 @@ class _CreatePostState extends ConsumerState<CreatePost> {
   Future<void> _stopRecording() async {
     try {
       _recordingTimer?.cancel();
+      
+      // Add a small delay before stopping to ensure all buffers are processed
+      await Future.delayed(const Duration(milliseconds: 100));
+      
       final path = await _audioRecorder.stop();
       if (path != null) {
         setState(() {

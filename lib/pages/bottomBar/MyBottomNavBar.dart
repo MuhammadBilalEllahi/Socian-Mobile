@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 class MyBottomNavBar extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onItemTapped;
-  final double iconSize = 30;
-  final double selectedIconSize = 22;
+  final double iconSize = 26;
+  final double selectedIconSize = 26;
 
   const MyBottomNavBar({
     super.key,
@@ -14,75 +14,70 @@ class MyBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: const BorderRadius.only(),
-      child: Container(
-        
-        decoration: Theme.of(context).brightness == Brightness.dark 
-        
-        ? const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color.fromARGB(255, 27, 27, 27), 
-              Color.fromARGB(255, 29, 29, 29)
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1C1C1C) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: isDark ? Colors.black.withOpacity(0.3) : Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-        )
-        : const BoxDecoration(
-      gradient: LinearGradient(
-      colors: [
-        Color.fromARGB(255, 219, 219, 219), 
-        Colors.white
-      ],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
+        ],
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
+          width: 1,
+        ),
       ),
-    ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
         child: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.transparent,
           elevation: 0,
-          selectedItemColor: Theme.of(context).iconTheme.color,
-          unselectedItemColor: Theme.of(context).iconTheme.color,
-          selectedFontSize: 14,
+          selectedItemColor: isDark ? Colors.white : Colors.black,
+          unselectedItemColor: isDark ? Colors.white.withOpacity(0.5) : Colors.black.withOpacity(0.5),
+          selectedFontSize: 12,
           unselectedFontSize: 12,
-          showUnselectedLabels: false,
+          showUnselectedLabels: true,
           showSelectedLabels: true,
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(
-                Icons.home_filled,
-                size:  selectedIndex == 0 ? selectedIconSize : iconSize, // Increase size when selected
+                Icons.home_rounded,
+                size: selectedIndex == 0 ? selectedIconSize : iconSize,
               ),
               label: 'Feed',
             ),
             BottomNavigationBarItem(
               icon: Icon(
-                Icons.messenger_outline_sharp,
-                size:  selectedIndex == 1 ? selectedIconSize : iconSize, // Increase size when selected
+                Icons.chat_bubble_rounded,
+                size: selectedIndex == 1 ? selectedIconSize : iconSize,
               ),
               label: 'Messages',
             ),
             BottomNavigationBarItem(
               icon: Icon(
-                Icons.search,
-                size:  selectedIndex == 2 ? selectedIconSize : iconSize, // Increase size when selected
+                Icons.search_rounded,
+                size: selectedIndex == 2 ? selectedIconSize : iconSize,
               ),
               label: 'Explore',
             ),
             BottomNavigationBarItem(
               icon: Icon(
-                Icons.explore_outlined,
-                size:  selectedIndex == 3 ? selectedIconSize : iconSize, // Increase size when selected
+                Icons.explore_rounded,
+                size: selectedIndex == 3 ? selectedIconSize : iconSize,
               ),
               label: 'GPS',
             ),
             BottomNavigationBarItem(
               icon: Icon(
-                Icons.person_outline_outlined,
-                size:  selectedIndex == 4 ? selectedIconSize : iconSize, // Increase size when selected
+                Icons.person_rounded,
+                size: selectedIndex == 4 ? selectedIconSize : iconSize,
               ),
               label: 'Profile',
             ),

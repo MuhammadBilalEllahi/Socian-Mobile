@@ -35,6 +35,9 @@ class ApiConstants {
   static const String posts = '/posts';
   static const String postsCampus = '$api$posts/campus/all';
 
+  static const String users = '/users';
+  static const String searchUsers = '$api$users/search';
+
   static const String teachers = '/teacher';
   static const String campusTeachers = '$api$teachers/campus/teachers';
 }
