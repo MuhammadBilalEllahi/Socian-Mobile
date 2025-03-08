@@ -142,8 +142,10 @@ class _ReplyReplyItemState extends State<ReplyReplyItem> {
             ],
             
             
+
             const SizedBox(height: 8),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Wrap(
                   spacing: 8,
@@ -173,7 +175,12 @@ class _ReplyReplyItemState extends State<ReplyReplyItem> {
                       debugPrint('replyTo: $_replyTo ${widget.reply['user']['name']}');
                     });
                   },
-                  icon: const Icon(Icons.reply_rounded),
+                  style: IconButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    iconSize: 20,
+                  ),
+                  icon: const Icon(Icons.reply_outlined),
                 ),
              
               ],

@@ -154,6 +154,7 @@ class _ReplyItemState extends State<ReplyItem> {
                       child: Icon(
                         Icons.broken_image_outlined,
                         color: theme.colorScheme.onSurface.withOpacity(0.5),
+
                       ),
                     ),
                   ),
@@ -162,6 +163,7 @@ class _ReplyItemState extends State<ReplyItem> {
             ],
             const SizedBox(height: 8),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Wrap(
                   spacing: 8,
@@ -182,7 +184,11 @@ class _ReplyItemState extends State<ReplyItem> {
                       ),
                   ],
                 ),
-                IconButton(
+                
+                Wrap(
+                  spacing: -10,
+                  children: [
+                    IconButton(
                   onPressed: () {
                     setState(() {
                       _showReplyReplies = !_showReplyReplies;
@@ -191,7 +197,12 @@ class _ReplyItemState extends State<ReplyItem> {
                       }
                     });
                   },
-                  icon: const Icon(Icons.reply_rounded),
+                   style: IconButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    iconSize: 20,
+                  ),
+                  icon: const Icon(Icons.add_rounded),
                 ),
                 IconButton(
                   onPressed: () {
@@ -199,9 +210,15 @@ class _ReplyItemState extends State<ReplyItem> {
                       _showReplyBox = !_showReplyBox;
                     });
                   },
+                  style: IconButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    iconSize: 20,
+                  ),
                   icon: const Icon(Icons.reply_rounded),
                 ),
-              ],
+              ])
+                ],
             ),
             
             const SizedBox(height: 8),
