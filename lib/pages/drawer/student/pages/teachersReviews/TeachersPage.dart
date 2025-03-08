@@ -39,7 +39,7 @@ class _TeachersPageState extends State<TeachersPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Scaffold(
       backgroundColor: isDark ? Colors.black : Colors.white,
       appBar: AppBar(
@@ -49,7 +49,7 @@ class _TeachersPageState extends State<TeachersPage> {
         title: Text(
           'Campus Faculty',
           style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w600,
             letterSpacing: -0.5,
           ),
         ),
@@ -58,11 +58,11 @@ class _TeachersPageState extends State<TeachersPage> {
         ),
       ),
       body: FutureBuilder<List<dynamic>>(
-        future: _teachersFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return buildShimmerEffect(itemCount: 10);
-          } else if (snapshot.hasError) {
+      future: _teachersFuture,
+      builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+      return buildShimmerEffect(itemCount: 10);
+      } else if (snapshot.hasError) {
             return Center(
               child: Text(
                 'Error: ${snapshot.error}',
@@ -71,7 +71,7 @@ class _TeachersPageState extends State<TeachersPage> {
                 ),
               ),
             );
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(
               child: Text(
                 'No teachers found',
@@ -80,30 +80,30 @@ class _TeachersPageState extends State<TeachersPage> {
                 ),
               ),
             );
-          }
+      }
 
-          final teachers = snapshot.data!;
+      final teachers = snapshot.data!;
 
-          return ListView.builder(
+      return ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            itemCount: teachers.length,
-            itemBuilder: (context, index) {
-              final teacher = teachers[index];
-              return Padding(
+        itemCount: teachers.length,
+        itemBuilder: (context, index) {
+          final teacher = teachers[index];
+          return Padding(
                 padding: const EdgeInsets.only(bottom: 16),
-                child: _TeacherCard(
-                  teacher: teacher,
-                  name: teacher['name'] ?? 'N/A',
-                  department: teacher['department']['name'] ?? 'N/A',
-                  imageUrl: teacher['imageUrl'],
-                  rating: teacher['rating']?.toDouble() ?? 0.0,
-                  topFeedback: teacher['topFeedback'],
+            child: _TeacherCard(
+              teacher: teacher,
+              name: teacher['name'] ?? 'N/A',
+              department: teacher['department']['name'] ?? 'N/A',
+              imageUrl: teacher['imageUrl'],
+              rating: teacher['rating']?.toDouble() ?? 0.0,
+              topFeedback: teacher['topFeedback'],
                   subjects: List<String>.from(teacher['subjectsTaught'] ?? []),
-                ),
-              );
-            },
+            ),
           );
         },
+      );
+      },
       ),
     );
   }
@@ -149,61 +149,61 @@ class _TeacherCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => TeacherDetailsPage(teacher: teacher),
-              ),
-            );
-          },
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TeacherDetailsPage(teacher: teacher),
+                    ),
+                  );
+                },
           borderRadius: BorderRadius.circular(16),
-          child: Padding(
+                child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _Avatar(imageUrl: imageUrl),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        name,
+                      _Avatar(imageUrl: imageUrl),
+                const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              name,
                         style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w600,
                           letterSpacing: -0.2,
-                        ),
-                      ),
+                              ),
+                            ),
                       const SizedBox(height: 4),
-                      Text(
-                        department,
+                            Text(
+                              department,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurface.withOpacity(0.7),
-                        ),
-                      ),
-                      if (subjects.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 4,
+                              ),
+                            ),
+                            if (subjects.isNotEmpty) ...[
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 4,
                           children: subjects.map((subject) => Container(
-                            padding: const EdgeInsets.symmetric(
+                                  padding: const EdgeInsets.symmetric(
                               horizontal: 8,
                               vertical: 4,
                             ),
-                            decoration: BoxDecoration(
+                                  decoration: BoxDecoration(
                               color: isDark 
                                 ? Colors.white.withOpacity(0.1)
                                 : Colors.black.withOpacity(0.05),
                               borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              subject,
+                                  ),
+                                  child: Text(
+                                    subject,
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: isDark 
                                   ? Colors.white.withOpacity(0.7)
@@ -211,56 +211,56 @@ class _TeacherCard extends StatelessWidget {
                               ),
                             ),
                           )).toList(),
-                        ),
-                      ],
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
+                              ),
+                            ],
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
                               horizontal: 12,
                               vertical: 6,
                             ),
-                            decoration: BoxDecoration(
+                                  decoration: BoxDecoration(
                               color: isDark ? Colors.white.withOpacity(0.1) : Colors.black,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              children: [
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    children: [
                                 Icon(
                                   Icons.star_rounded,
                                   size: 16,
                                   color: isDark ? Colors.white : Colors.white,
                                 ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  rating.toStringAsFixed(1),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        rating.toStringAsFixed(1),
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     color: isDark ? Colors.white : Colors.white,
-                                    fontWeight: FontWeight.w600,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                        ],
-                      ),
-                      if (topFeedback != null) ...[
-                        const SizedBox(height: 12),
-                        Text(
-                          '"$topFeedback"',
+                            if (topFeedback != null) ...[
+                              const SizedBox(height: 12),
+                              Text(
+                                '"$topFeedback"',
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurface.withOpacity(0.7),
-                            fontStyle: FontStyle.italic,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ],
                         ),
-                      ],
+                      ),
                     ],
-                  ),
-                ),
-              ],
             ),
           ),
         ),
@@ -292,10 +292,10 @@ class _Avatar extends StatelessWidget {
       child: ClipOval(
         child: imageUrl != null && imageUrl!.isNotEmpty
             ? Image.network(
-                imageUrl!,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const _FallbackAvatar(),
-              )
+          imageUrl!,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => const _FallbackAvatar(),
+        )
             : const _FallbackAvatar(),
       ),
     );

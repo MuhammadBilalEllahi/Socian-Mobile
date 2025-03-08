@@ -120,8 +120,7 @@ class TeacherDetailsPage extends StatelessWidget {
             ],
 
             TeacherComments(
-              comments: comments,
-              teacherId: teacher['_id'] as String,
+              teacherId: teacher['_id'],
             ),
             const SizedBox(height: 24),
           ],

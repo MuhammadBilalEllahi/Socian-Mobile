@@ -1,7 +1,6 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class GifPicker extends StatefulWidget {
   final bool isDark;
@@ -19,33 +18,37 @@ class GifPicker extends StatefulWidget {
 
 class _GifPickerState extends State<GifPicker> {
   final TextEditingController _searchController = TextEditingController();
+  final ExternalApiClient _apiClient = ExternalApiClient();
   List<Map<String, dynamic>> _gifs = [];
   bool _isLoading = false;
-  String _searchQuery = '';
-  Timer? _debounceTimer;
+  String? _currentQuery;
 
   @override
   void initState() {
     super.initState();
-    _fetchTrendingGifs();
+    _loadTrendingGifs();
   }
 
   @override
   void dispose() {
     _searchController.dispose();
-    _debounceTimer?.cancel();
     super.dispose();
   }
 
-  Future<void> _fetchTrendingGifs() async {
+  Future<void> _loadTrendingGifs() async {
+    if (_isLoading) return;
     setState(() {
       _isLoading = true;
+      _gifs = [];
     });
 
     try {
-      final ApiClient apiClient = ApiClient();
-      final response = await apiClient.get(
-        '/api/giphy/trending',
+      final response = await _apiClient.get(
+        'https://api.giphy.com/v1/gifs/trending',
+        queryParameters: {
+          'api_key': dotenv.env['GIPHY_API_KEY'] ?? "", // Replace with your actual Giphy API key
+          'limit': 20,
+        },
       );
 
       setState(() {
@@ -68,20 +71,21 @@ class _GifPickerState extends State<GifPicker> {
   }
 
   Future<void> _searchGifs(String query) async {
-    if (query.isEmpty) {
-      _fetchTrendingGifs();
-      return;
-    }
-
+    if (_isLoading) return;
     setState(() {
       _isLoading = true;
+      _gifs = [];
+      _currentQuery = query;
     });
 
     try {
-      final ApiClient apiClient = ApiClient();
-      final response = await apiClient.get(
-        '/api/giphy/search',
-        queryParameters: {'q': query},
+      final response = await _apiClient.get(
+        'https://api.giphy.com/v1/gifs/search',
+        queryParameters: {
+          'api_key': dotenv.env['GIPHY_API_KEY'] ?? "",
+          'q': query,
+          'limit': 20,
+        },
       );
 
       setState(() {
@@ -103,16 +107,6 @@ class _GifPickerState extends State<GifPicker> {
     }
   }
 
-  void _onSearchChanged(String value) {
-    _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
-      if (value != _searchQuery) {
-        _searchQuery = value;
-        _searchGifs(value);
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -123,76 +117,101 @@ class _GifPickerState extends State<GifPicker> {
           padding: const EdgeInsets.all(8.0),
           child: TextField(
             controller: _searchController,
-            onChanged: _onSearchChanged,
             decoration: InputDecoration(
               hintText: 'Search GIFs...',
               hintStyle: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurface.withOpacity(0.5),
               ),
-              prefixIcon: Icon(
-                Icons.search,
-                color: widget.isDark ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7),
-              ),
+              prefixIcon: const Icon(Icons.search),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                  color: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
+                  color: widget.isDark
+                      ? Colors.white.withOpacity(0.1)
+                      : Colors.black.withOpacity(0.1),
                 ),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                  color: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
+                  color: widget.isDark
+                      ? Colors.white.withOpacity(0.1)
+                      : Colors.black.withOpacity(0.1),
                 ),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                  color: widget.isDark ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.2),
+                  color: widget.isDark
+                      ? Colors.white.withOpacity(0.2)
+                      : Colors.black.withOpacity(0.2),
                 ),
               ),
+              filled: true,
+              fillColor: widget.isDark
+                  ? Colors.white.withOpacity(0.05)
+                  : Colors.black.withOpacity(0.05),
             ),
+            onChanged: (value) {
+              if (value.trim().isEmpty) {
+                _loadTrendingGifs();
+              } else {
+                _searchGifs(value.trim());
+              }
+            },
           ),
         ),
         Expanded(
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
+          child: _isLoading && _gifs.isEmpty
+              ? Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      widget.isDark ? Colors.white : Colors.black,
+                    ),
+                  ),
+                )
               : GridView.builder(
                   padding: const EdgeInsets.all(8),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    childAspectRatio: 4/3,
+                    childAspectRatio: 1,
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 8,
                   ),
                   itemCount: _gifs.length,
                   itemBuilder: (context, index) {
                     final gif = _gifs[index];
+                    final originalUrl = gif['images']['original']['url'] as String;
+                    final previewUrl = gif['images']['preview_gif']['url'] as String;
+
                     return InkWell(
-                      onTap: () => widget.onGifSelected(gif['images']['fixed_height']['url']),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
-                          ),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            gif['images']['fixed_height_still']['url'],
-                            fit: BoxFit.cover,
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Center(
+                      onTap: () {
+                        widget.onGifSelected(originalUrl);
+                      },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          previewUrl,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              color: widget.isDark
+                                  ? Colors.white.withOpacity(0.05)
+                                  : Colors.black.withOpacity(0.05),
+                              child: Center(
                                 child: CircularProgressIndicator(
                                   value: loadingProgress.expectedTotalBytes != null
-                                      ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
                                       : null,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    widget.isDark ? Colors.white : Colors.black,
+                                  ),
                                 ),
-                              );
-                            },
-                          ),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     );

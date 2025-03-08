@@ -1,18 +1,18 @@
 import 'dart:async';
 import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:beyondtheclass/pages/drawer/student/pages/teachersReviews/pages/comment_details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
+import '../pages/commntDetailed/comment_details_page.dart';
 import 'gif_picker.dart';
 
 class TeacherComments extends StatefulWidget {
-  final List<Map<String, dynamic>> comments;
   final String teacherId;
 
   const TeacherComments({
     super.key,
-    required this.comments,
     required this.teacherId,
   });
 
@@ -22,14 +22,55 @@ class TeacherComments extends StatefulWidget {
 
 class _TeacherCommentsState extends State<TeacherComments> {
   final _commentController = TextEditingController();
+  List<Map<String, dynamic>> _comments = [];
   int _rating = 0;
   bool _isAnonymous = false;
   bool _isSubmitting = false;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchComments();
+  }
 
   @override
   void dispose() {
     _commentController.dispose();
     super.dispose();
+  }
+
+  Future<void> _fetchComments() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final ApiClient apiClient = ApiClient();
+      final response = await apiClient.get(
+        '/api/teacher/mob/reviews/feedbacks',
+        queryParameters: {'id': widget.teacherId},
+      );
+
+      debugPrint("comments response: $response");
+      setState(() {
+        _comments = List<Map<String, dynamic>>.from(response);
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load comments: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _submitComment(WidgetRef ref) async {
@@ -54,6 +95,14 @@ class _TeacherCommentsState extends State<TeacherComments> {
       }
 
       final ApiClient apiClient = ApiClient();
+
+      debugPrint("rating: $_rating");
+      debugPrint("comment: ${_commentController.text.trim()}");
+      debugPrint("isAnonymous: $_isAnonymous");
+      debugPrint("user: $user");
+      debugPrint("teacherId: ${widget.teacherId}");
+      debugPrint("userId: ${user['_id']}");
+      
       await apiClient.post(
         '/api/teacher/rate',
         {
@@ -71,6 +120,9 @@ class _TeacherCommentsState extends State<TeacherComments> {
         _rating = 0;
         _isAnonymous = false;
       });
+
+      // Fetch updated comments
+      // await _fetchComments();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -310,33 +362,47 @@ class _TeacherCommentsState extends State<TeacherComments> {
         const SizedBox(height: 24),
 
         // Comments List
-        Container(
-          decoration: BoxDecoration(
-            color: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
-            border: Border.symmetric(
-              horizontal: BorderSide(
-                color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
+        if (_isLoading)
+          const Center(child: CircularProgressIndicator())
+        else if (_comments.isEmpty)
+          Center(
+            child: Text(
+              'No comments yet',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
               ),
             ),
-          ),
-          child: Column(
-            children: [
-              for (var i = 0; i < widget.comments.length; i++) ...[
-                _CommentItem(
-                  comment: widget.comments[i],
-                  isDark: isDark,
-                  teacherId: widget.teacherId,
+          )
+        else
+          Container(
+            decoration: BoxDecoration(
+              color: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
+              border: Border.symmetric(
+                horizontal: BorderSide(
+                  color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
                 ),
-                if (i < widget.comments.length - 1)
-                  Divider(
-                    height: 1,
-                    thickness: 1,
-                    color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
+              ),
+            ),
+            child: Column(
+              children: [
+                for (var i = 0; i < _comments.length; i++) ...[
+                  _CommentItem(
+                    comment: _comments[i],
+                    isDark: isDark,
+                    teacherId: widget.teacherId,
+                    onReplySubmitted: _fetchComments,
+                    showReplies: true,
                   ),
+                  if (i < _comments.length - 1)
+                    Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
+                    ),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
       ],
     );
   }
@@ -346,11 +412,15 @@ class _CommentItem extends StatefulWidget {
   final Map<String, dynamic> comment;
   final bool isDark;
   final String teacherId;
+  final VoidCallback onReplySubmitted;
+  final bool showReplies;
 
   const _CommentItem({
     required this.comment,
     required this.isDark,
     required this.teacherId,
+    required this.onReplySubmitted,
+    this.showReplies = true,
   });
 
   @override
@@ -358,179 +428,178 @@ class _CommentItem extends StatefulWidget {
 }
 
 class _CommentItemState extends State<_CommentItem> {
-  bool _showReplyBox = false;
+  final bool _showReplyBox = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final user = widget.comment['user'];
+    final name = user['name'] ?? 'Anonymous';
+    final isDeleted = user['_id'] == null;
+    final isAnonymous = widget.comment['isAnonymous'] ?? false;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CircleAvatar(
-                    radius: 16,
-                    backgroundColor: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
-                    child: Text(
-                      widget.comment['author'][0].toUpperCase(),
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: widget.isDark ? Colors.white : Colors.black,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
+                child: Text(
+                  name[0].toUpperCase(),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: widget.isDark ? Colors.white : Colors.black,
+                    fontWeight: FontWeight.w500,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                Text(
-                                  widget.comment['author'],
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                if (widget.comment['isVerified'] == true) ...[
-                                  const SizedBox(width: 4),
-                                  const Icon(
-                                    Icons.verified_rounded,
-                                    size: 16,
-                                    color: Colors.blue,
-                                  ),
-                                ],
-                              ],
-                            ),
-                            // Rating Stars
-                            if (widget.comment['rating'] != null)
-                              Row(
-                                children: List.generate(5, (index) {
-                                  return Icon(
-                                    index < (widget.comment['rating'] as int)
-                                        ? Icons.star_rounded
-                                        : Icons.star_outline_rounded,
-                                    size: 16,
-                                    color: index < (widget.comment['rating'] as int)
-                                        ? const Color(0xFFFFD700)
-                                        : widget.isDark 
-                                            ? Colors.white.withOpacity(0.3)
-                                            : Colors.black.withOpacity(0.3),
-                                  );
-                                }),
+                            Text(
+                              isAnonymous ? 'Anonymous' : name,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: isDeleted ? theme.colorScheme.onSurface.withOpacity(0.5) : null,
                               ),
+                            ),
+                            if (!isDeleted && !isAnonymous && user['isVerified'] == true) ...[
+                              const SizedBox(width: 4),
+                              const Icon(
+                                Icons.verified_rounded,
+                                size: 16,
+                                color: Colors.blue,
+                              ),
+                            ],
                           ],
                         ),
-                        Text(
-                          widget.comment['date'],
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        // Rating Stars
+                        if (widget.comment['rating'] != null)
+                          Row(
+                            children: List.generate(5, (index) {
+                              return Icon(
+                                index < (widget.comment['rating'] as int)
+                                    ? Icons.star_rounded
+                                    : Icons.star_outline_rounded,
+                                size: 16,
+                                color: index < (widget.comment['rating'] as int)
+                                    ? const Color(0xFFFFD700)
+                                    : widget.isDark 
+                                        ? Colors.white.withOpacity(0.3)
+                                        : Colors.black.withOpacity(0.3),
+                              );
+                            }),
                           ),
-                        ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Padding(
-                padding: const EdgeInsets.only(left: 44),
-                child: Text(
-                  widget.comment['text'],
-                  style: theme.textTheme.bodyMedium,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Padding(
-                padding: const EdgeInsets.only(left: 44),
-                child: Row(
-                  children: [
-                    _VoteButton(
-                      icon: Icons.arrow_upward_rounded,
-                      count: widget.comment['upvotes'] ?? 0,
-                      isDark: widget.isDark,
-                      onPressed: () {},
-                    ),
-                    const SizedBox(width: 16),
-                    _VoteButton(
-                      icon: Icons.arrow_downward_rounded,
-                      count: widget.comment['downvotes'] ?? 0,
-                      isDark: widget.isDark,
-                      onPressed: () {},
-                    ),
-                    const SizedBox(width: 16),
-                    TextButton.icon(
-                      onPressed: () {
-                        setState(() {
-                          _showReplyBox = !_showReplyBox;
-                        });
-                      },
-                      style: TextButton.styleFrom(
-                        foregroundColor: widget.isDark ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7),
-                        padding: EdgeInsets.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      icon: const Icon(
-                        Icons.reply_rounded,
-                        size: 20,
-                      ),
-                      label: Text(
-                        'Reply',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
+                    Text(
+                      widget.comment['updatedAt'] != null 
+                        ? _formatDate(widget.comment['updatedAt'])
+                        : '',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.5),
                       ),
                     ),
                   ],
                 ),
               ),
-              if (_showReplyBox) ...[
-                const SizedBox(height: 12),
-                Padding(
-                  padding: const EdgeInsets.only(left: 44),
-                  child: _ReplyBox(
-                    isDark: widget.isDark,
-                    onSubmit: () {
-                      setState(() {
-                        _showReplyBox = false;
-                      });
-                    },
-                    teacherId: widget.teacherId,
-                    parentId: widget.comment['_id'],
-                  ),
-                ),
-              ],
             ],
           ),
-        ),
-        if (widget.comment['replies'] != null && (widget.comment['replies'] as List).isNotEmpty) ...[
+          const SizedBox(height: 12),
           Padding(
             padding: const EdgeInsets.only(left: 44),
-            child: Column(
+            child: Text(
+              widget.comment['feedback'] ?? '',
+              style: theme.textTheme.bodyMedium,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.only(left: 44),
+            child: Row(
               children: [
-                for (var reply in widget.comment['replies'])
-                  _ReplyItem(
-                    reply: reply,
-                    isDark: widget.isDark,
-                    teacherId: widget.teacherId,
+                _VoteButton(
+                  icon: Icons.arrow_upward_rounded,
+                  count: widget.comment['upvoteCount'] ?? 0,
+                  isDark: widget.isDark,
+                  onPressed: () {},
+                ),
+                const SizedBox(width: 16),
+                _VoteButton(
+                  icon: Icons.arrow_downward_rounded,
+                  count: widget.comment['downvoteCount'] ?? 0,
+                  isDark: widget.isDark,
+                  onPressed: () {},
+                ),
+                const SizedBox(width: 16),
+                TextButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CommentDetailsPage(
+                          comment: widget.comment,
+                          teacherId: widget.teacherId,
+                          isDark: widget.isDark,
+                        ),
+                      ),
+                    );
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: widget.isDark ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7),
+                    padding: EdgeInsets.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
+                  icon: const Icon(
+                    Icons.comment_outlined,
+                    size: 20,
+                  ),
+                  label: Text(
+                    'View Replies',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: widget.isDark ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
         ],
-      ],
+      ),
     );
+  }
+
+  String _formatDate(String dateStr) {
+    final date = DateTime.parse(dateStr);
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays > 365) {
+      return '${(difference.inDays / 365).floor()} years ago';
+    } else if (difference.inDays > 30) {
+      return '${(difference.inDays / 30).floor()} months ago';
+    } else if (difference.inDays > 0) {
+      return '${difference.inDays} days ago';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours} hours ago';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes} minutes ago';
+    } else {
+      return 'Just now';
+    }
   }
 }
 
@@ -580,6 +649,13 @@ class _ReplyItemState extends State<_ReplyItem> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final user = widget.reply['user'] ?? {};
+    final name = user['name'] ?? '[deleted]';
+    final isDeleted = user['_id'] == null;
+    final isAnonymous = widget.reply['isAnonymous'] ?? false;
+    final date = widget.reply['updatedAt'] ?? widget.reply['createdAt'] ?? '';
+    final replyText = widget.reply['comment'] ?? widget.reply['text'] ?? '';
+    final gifUrl = widget.reply['gifUrl'];
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -602,7 +678,7 @@ class _ReplyItemState extends State<_ReplyItem> {
                   radius: 12,
                   backgroundColor: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
                   child: Text(
-                    widget.reply['author'][0].toUpperCase(),
+                    (isAnonymous ? 'A' : name[0]).toUpperCase(),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: widget.isDark ? Colors.white : Colors.black,
                       fontWeight: FontWeight.w500,
@@ -614,12 +690,13 @@ class _ReplyItemState extends State<_ReplyItem> {
                   child: Row(
                     children: [
                       Text(
-                        widget.reply['author'],
+                        isAnonymous ? 'Anonymous' : name,
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w600,
+                          color: isDeleted ? theme.colorScheme.onSurface.withOpacity(0.5) : null,
                         ),
                       ),
-                      if (widget.reply['isVerified'] == true) ...[
+                      if (!isDeleted && !isAnonymous && user['isVerified'] == true) ...[
                         const SizedBox(width: 4),
                         const Icon(
                           Icons.verified_rounded,
@@ -629,7 +706,7 @@ class _ReplyItemState extends State<_ReplyItem> {
                       ],
                       const Spacer(),
                       Text(
-                        widget.reply['date'],
+                        _formatDate(date),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurface.withOpacity(0.5),
                         ),
@@ -641,9 +718,21 @@ class _ReplyItemState extends State<_ReplyItem> {
             ),
             const SizedBox(height: 8),
             Text(
-              widget.reply['text'],
+              replyText,
               style: theme.textTheme.bodyMedium,
             ),
+            if (gifUrl != null && gifUrl.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  gifUrl,
+                  height: 150,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ],
             const SizedBox(height: 8),
             // Reaction Buttons
             Row(
@@ -788,6 +877,28 @@ class _ReplyItemState extends State<_ReplyItem> {
       ),
     );
   }
+
+  String _formatDate(String dateStr) {
+    if (dateStr.isEmpty) return '';
+    
+    final date = DateTime.parse(dateStr);
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays > 365) {
+      return '${(difference.inDays / 365).floor()} years ago';
+    } else if (difference.inDays > 30) {
+      return '${(difference.inDays / 30).floor()} months ago';
+    } else if (difference.inDays > 0) {
+      return '${difference.inDays} days ago';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours} hours ago';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes} minutes ago';
+    } else {
+      return 'Just now';
+    }
+  }
 }
 
 class _ReplyBox extends StatefulWidget {
@@ -810,19 +921,19 @@ class _ReplyBox extends StatefulWidget {
 }
 
 class _ReplyBoxState extends State<_ReplyBox> {
-  final TextEditingController _replyController = TextEditingController();
-  String? _selectedGifUrl;
-  bool _showGifPicker = false;
-  bool _showMentionsList = false;
-  List<String> _mentions = [];
-  List<Map<String, dynamic>> _mentionSuggestions = [];
-  bool _isSubmitting = false;
+  final TextEditingController replyController = TextEditingController();
+  String? selectedGifUrl;
+  bool showGifPicker = false;
+  bool showMentionsList = false;
+  List<String> mentions = [];
+  List<Map<String, dynamic>> mentionSuggestions = [];
+  bool isSubmitting = false;
 
-  Future<void> _submitReply(WidgetRef ref) async {
-    if (_replyController.text.trim().isEmpty) return;
+  Future<void> submitReply(WidgetRef ref) async {
+    if (replyController.text.trim().isEmpty) return;
 
     setState(() {
-      _isSubmitting = true;
+      isSubmitting = true;
     });
 
     try {
@@ -841,29 +952,57 @@ class _ReplyBoxState extends State<_ReplyBox> {
         {
           'teacherId': widget.teacherId,
           widget.isReplyToReply ? 'feedbackCommentId' : 'feedbackReviewId': widget.parentId,
-          'feedbackComment': _replyController.text.trim(),
-          'gifUrl': _selectedGifUrl ?? '',
-          'mentions': _mentions,
+          'feedbackComment': replyController.text.trim(),
+          'gifUrl': selectedGifUrl ?? '',
+          'mentions': mentions,
         },
       );
 
-      _replyController.clear();
+      replyController.clear();
       setState(() {
-        _selectedGifUrl = null;
-        _mentions = [];
-        _isSubmitting = false;
+        selectedGifUrl = null;
+        mentions = [];
+        isSubmitting = false;
       });
       widget.onSubmit();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Reply posted successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      // After submitting, fetch updated replies
+      if (widget.isReplyToReply) {
+        // Fetch replies to replies
+        final repliesResponse = await apiClient.get(
+          '/api/teacher/reply/reply/feedback',
+          queryParameters: {'feedbackCommentId': widget.parentId},
+        );
+        // Handle the updated replies
+        if (mounted && repliesResponse['replies'] != null) {
+          // Update the UI with new replies
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Reply posted successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        // Fetch root level replies
+        final repliesResponse = await apiClient.get(
+          '/api/teacher/reviews/feedbacks',
+          queryParameters: {'id': widget.teacherId},
+        );
+        // Handle the updated replies
+        if (mounted && repliesResponse != null) {
+          // Update the UI with new replies
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Reply posted successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
     } catch (e) {
       setState(() {
-        _isSubmitting = false;
+        isSubmitting = false;
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -876,7 +1015,7 @@ class _ReplyBoxState extends State<_ReplyBox> {
     }
   }
 
-  void _handleTextChange(String value) async {
+  void handleTextChange(String value) async {
     final lastWord = value.split(' ').last;
     if (lastWord.startsWith('@') && lastWord.length > 1) {
       final searchQuery = lastWord.substring(1);
@@ -888,32 +1027,32 @@ class _ReplyBoxState extends State<_ReplyBox> {
         );
 
         setState(() {
-          _mentionSuggestions = List<Map<String, dynamic>>.from(response['users']);
-          _showMentionsList = true;
+          mentionSuggestions = List<Map<String, dynamic>>.from(response['users']);
+          showMentionsList = true;
         });
       } catch (e) {
         print('Error searching users: $e');
       }
     } else {
       setState(() {
-        _showMentionsList = false;
+        showMentionsList = false;
       });
     }
   }
 
-  void _handleMentionSelected(Map<String, dynamic> user) {
-    final text = _replyController.text;
+  void handleMentionSelected(Map<String, dynamic> user) {
+    final text = replyController.text;
     final lastAtIndex = text.lastIndexOf('@');
     if (lastAtIndex != -1) {
       final newText = '${text.substring(0, lastAtIndex)}@${user['username']} ';
-      _replyController.text = newText;
-      _replyController.selection = TextSelection.fromPosition(
+      replyController.text = newText;
+      replyController.selection = TextSelection.fromPosition(
         TextPosition(offset: newText.length),
       );
     }
     setState(() {
-      _mentions.add(user['_id']);
-      _showMentionsList = false;
+      mentions.add(user['_id']);
+      showMentionsList = false;
     });
   }
 
@@ -931,11 +1070,11 @@ class _ReplyBoxState extends State<_ReplyBox> {
       ),
       child: Column(
         children: [
-          if (_selectedGifUrl != null) ...[
+          if (selectedGifUrl != null) ...[
             Stack(
               children: [
                 Image.network(
-                  _selectedGifUrl!,
+                  selectedGifUrl!,
                   height: 150,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -946,7 +1085,7 @@ class _ReplyBoxState extends State<_ReplyBox> {
                   child: IconButton(
                     onPressed: () {
                       setState(() {
-                        _selectedGifUrl = null;
+                        selectedGifUrl = null;
                       });
                     },
                     icon: const Icon(Icons.close),
@@ -964,7 +1103,7 @@ class _ReplyBoxState extends State<_ReplyBox> {
               IconButton(
                 onPressed: () {
                   setState(() {
-                    _showGifPicker = !_showGifPicker;
+                    showGifPicker = !showGifPicker;
                   });
                 },
                 icon: const Icon(Icons.gif_box_outlined),
@@ -972,8 +1111,8 @@ class _ReplyBoxState extends State<_ReplyBox> {
               ),
               Expanded(
                 child: TextField(
-                  controller: _replyController,
-                  onChanged: _handleTextChange,
+                  controller: replyController,
+                  onChanged: handleTextChange,
                   style: theme.textTheme.bodyMedium,
                   decoration: InputDecoration(
                     hintText: 'Write a reply... Use @ to mention',
@@ -988,7 +1127,7 @@ class _ReplyBoxState extends State<_ReplyBox> {
               Consumer(
                 builder: (context, ref, child) {
                   return TextButton(
-                    onPressed: _isSubmitting ? null : () => _submitReply(ref),
+                    onPressed: isSubmitting ? null : () => submitReply(ref),
                     style: TextButton.styleFrom(
                       backgroundColor: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black,
                       shape: const RoundedRectangleBorder(
@@ -999,7 +1138,7 @@ class _ReplyBoxState extends State<_ReplyBox> {
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
-                    child: _isSubmitting
+                    child: isSubmitting
                       ? SizedBox(
                           height: 20,
                           width: 20,
@@ -1022,7 +1161,7 @@ class _ReplyBoxState extends State<_ReplyBox> {
               ),
             ],
           ),
-          if (_showGifPicker)
+          if (showGifPicker)
             Container(
               height: 300,
               padding: const EdgeInsets.all(8),
@@ -1037,13 +1176,13 @@ class _ReplyBoxState extends State<_ReplyBox> {
                 isDark: widget.isDark,
                 onGifSelected: (gifUrl) {
                   setState(() {
-                    _selectedGifUrl = gifUrl;
-                    _showGifPicker = false;
+                    selectedGifUrl = gifUrl;
+                    showGifPicker = false;
                   });
                 },
               ),
             ),
-          if (_showMentionsList)
+          if (showMentionsList)
             Container(
               constraints: const BoxConstraints(maxHeight: 200),
               padding: const EdgeInsets.all(8),
@@ -1056,9 +1195,9 @@ class _ReplyBoxState extends State<_ReplyBox> {
               ),
               child: ListView.builder(
                 shrinkWrap: true,
-                itemCount: _mentionSuggestions.length,
+                itemCount: mentionSuggestions.length,
                 itemBuilder: (context, index) {
-                  final user = _mentionSuggestions[index];
+                  final user = mentionSuggestions[index];
                   return ListTile(
                     leading: CircleAvatar(
                       radius: 16,
@@ -1083,7 +1222,7 @@ class _ReplyBoxState extends State<_ReplyBox> {
                         color: theme.colorScheme.onSurface.withOpacity(0.5),
                       ),
                     ),
-                    onTap: () => _handleMentionSelected(user),
+                    onTap: () => handleMentionSelected(user),
                   );
                 },
               ),

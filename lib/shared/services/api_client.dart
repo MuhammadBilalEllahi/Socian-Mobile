@@ -193,5 +193,46 @@ class ApiException implements Exception {
   String toString() => message;
 }
 
+class ExternalApiClient {
+  final Dio _dio;
+
+  ExternalApiClient({Dio? dio})
+      : _dio = dio ?? Dio();
+
+  Future<Map<String, dynamic>> get(
+    String url, {
+    Map<String, String>? headers,
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    try {
+      final response = await _dio.get(
+        url,
+        queryParameters: queryParameters,
+        options: Options(headers: headers),
+      );
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
+  Future<Map<String, dynamic>> post(
+    String url,
+    Map<String, dynamic> data, {
+    Map<String, String>? headers,
+  }) async {
+    try {
+      final response = await _dio.post(
+        url,
+        data: data,
+        options: Options(headers: headers),
+      );
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+}
+
 
 

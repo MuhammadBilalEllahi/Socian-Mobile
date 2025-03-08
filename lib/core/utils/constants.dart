@@ -1,16 +1,20 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class ApiConstants {
-  // static const String baseUrl = "http://192.168.1.2:8080"; //my ip address
+  static const String localhostBaseUrl = "http://192.168.1.2:8080"; //my ip address
   // static const String baseUrl = "http://192.168.10.6:8080"; //my ip address
   // static const String baseUrl = "http://localhost:8080"; //my ip address
 
   // This below is ort forwarding url from localhost:8080. create your own every time
-
-  static const String baseUrl = "https://api.beyondtheclass.me";
+  static String get baseUrl => dotenv.env['PRODUCTION'] == "true"
+      ? "https://api.beyondtheclass.me"
+      : localhostBaseUrl;
 
   static const String api = '/api';
 
   static const String uploads = '/uploads';
-  static const String pdfBaseURl = "$baseUrl$api$uploads/";
+  static String get pdfBaseURl => "$baseUrl$api$uploads/";
+
 
   static const String auth = '/auth';
   static const String loginEndpoint = "$api$auth/login";
