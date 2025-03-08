@@ -68,7 +68,7 @@ class _ReplyReplyItemState extends State<ReplyReplyItem> {
                   radius: 12,
                   backgroundColor: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
                   child: Text(
-                     name,
+                    user['name'] != null ? user['name'][0].toUpperCase() : '#',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: widget.isDark ? Colors.white : Colors.black,
                       fontWeight: FontWeight.w500,

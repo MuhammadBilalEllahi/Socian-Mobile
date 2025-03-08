@@ -3,10 +3,12 @@ import 'package:beyondtheclass/pages/drawer/student/pages/teachersReviews/pages/
 import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:flutter/material.dart';
 import 'package:beyondtheclass/utils/date_formatter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'reaction_button.dart';
 import 'reply_reply_item.dart';
 
-class ReplyItem extends StatefulWidget {
+class ReplyItem extends ConsumerStatefulWidget {
   final Map<String, dynamic> reply;
   final bool isDark;
   final String teacherId;
@@ -25,10 +27,10 @@ class ReplyItem extends StatefulWidget {
   });
 
   @override
-  State<ReplyItem> createState() => _ReplyItemState();
+  ConsumerState<ReplyItem> createState() => _ReplyItemState();
 }
 
-class _ReplyItemState extends State<ReplyItem> {
+class _ReplyItemState extends ConsumerState<ReplyItem> {
   bool _showReplyBox = false;
   bool _showReplyReplies = false;
   final apiClient = ApiClient();
@@ -47,10 +49,10 @@ class _ReplyItemState extends State<ReplyItem> {
       debugPrint('response reply replies: $response');
       final data = response['replies']['replies'] as List;
       debugPrint('data reply replies: $data');
-      final mappedReplies = data.map((reply) => reply as Map<String, dynamic>).toList();
+      final mappedReplies = data.map((reply) => Map<String, dynamic>.from(reply as Map)).toList();
       debugPrint('mappedReplies: $mappedReplies');
       setState(() {
-        _replyReplies = List<Map<String, dynamic>>.from(mappedReplies);
+        _replyReplies = mappedReplies;
       });
     } catch (e) {
       debugPrint('Error loading reply replies: $e');
@@ -59,6 +61,54 @@ class _ReplyItemState extends State<ReplyItem> {
         _isLoadingReplies = false;
       });
     }
+  }
+
+  void _handleReplyAdded(Map<String, dynamic> reply, String parentId, bool isReplyToReply) {
+    final userMap = ref.read(authProvider).user;
+    if (userMap == null) return;
+
+    // If the reply already has a server-generated ID, update the existing reply
+    if (reply['_id'] != null && !reply['_id'].toString().contains('T')) {
+      setState(() {
+        // Find the temporary reply by checking if the ID contains a timestamp format
+        final index = _replyReplies.indexWhere((r) => 
+          r['_id'] != null && 
+          r['_id'].toString().contains('T') && 
+          r['comment'] == reply['comment']
+        );
+        
+        if (index != -1) {
+          // Replace the temporary reply with the server response
+          _replyReplies[index] = reply;
+        } else {
+          // If no temporary reply found, add the new reply
+          _replyReplies = [..._replyReplies, reply];
+        }
+      });
+      return;
+    }
+
+    // Otherwise, create an optimistic reply
+    final tempId = DateTime.now().toIso8601String();
+    final optimisticReply = Map<String, dynamic>.from({
+      '_id': tempId,
+      'comment': reply['comment'],
+      'gifUrl': reply['gifUrl'],
+      'user': Map<String, dynamic>.from({
+        '_id': userMap['_id'],
+        'name': userMap['name'],
+        'isVerified': userMap['isVerified'],
+      }),
+      'isAnonymous': false,
+      'createdAt': DateTime.now().toIso8601String(),
+      'reactions': <String, dynamic>{},
+    });
+
+    setState(() {
+      _replyReplies = [..._replyReplies, optimisticReply];
+    });
+
+    widget.onReplyAdded(optimisticReply, parentId, isReplyToReply);
   }
 
   @override
@@ -71,7 +121,7 @@ class _ReplyItemState extends State<ReplyItem> {
     final date = widget.reply['updatedAt'] ?? widget.reply['createdAt'] ?? '';
     final replyText = widget.reply['comment'] ?? widget.reply['text'] ?? '';
     final gifUrl = widget.reply['gifUrl'] ?? '';
-    final reactions = widget.reply['reactions'] as Map<String, dynamic>? ?? {};
+    final reactions = Map<String, dynamic>.from(widget.reply['reactions'] as Map? ?? {});
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -94,7 +144,7 @@ class _ReplyItemState extends State<ReplyItem> {
                   radius: 12,
                   backgroundColor: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
                   child: Text(
-                    (isAnonymous ? 'A' : name[0]).toUpperCase(),
+                    (isAnonymous ? 'A' :user['name'] != null ? user['name'][0]: '#').toUpperCase(),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: widget.isDark ? Colors.white : Colors.black,
                       fontWeight: FontWeight.w500,
@@ -188,7 +238,7 @@ class _ReplyItemState extends State<ReplyItem> {
                 Wrap(
                   spacing: -10,
                   children: [
-                    IconButton(
+                    if(widget.reply['replies'] != null && widget.reply['replies'].length > 0)  IconButton(
                   onPressed: () {
                     setState(() {
                       _showReplyReplies = !_showReplyReplies;
@@ -202,7 +252,7 @@ class _ReplyItemState extends State<ReplyItem> {
                     minimumSize: Size.zero,
                     iconSize: 20,
                   ),
-                  icon: const Icon(Icons.add_rounded),
+                  icon:  Icon(_showReplyReplies ? Icons.remove_rounded : Icons.add_rounded),
                 ),
                 IconButton(
                   onPressed: () {
@@ -229,7 +279,7 @@ class _ReplyItemState extends State<ReplyItem> {
                 teacherId: widget.teacherId,
                 isDark: widget.isDark,
                 isReplyToReply: true,
-                onReplyAdded: widget.onReplyAdded,
+                onReplyAdded: _handleReplyAdded,
                 onReplyRemoved: widget.onReplyRemoved,
               ),
 
@@ -241,7 +291,7 @@ class _ReplyItemState extends State<ReplyItem> {
             else if (_showReplyReplies)
               ..._replyReplies.map((reply) => ReplyReplyItem(
                 feedbackCommentId: widget.reply['_id'],
-                reply: reply,
+                reply: Map<String, dynamic>.from(reply),
                 isDark: widget.isDark,
                 teacherId: widget.teacherId,
                 onReaction: widget.onReaction,

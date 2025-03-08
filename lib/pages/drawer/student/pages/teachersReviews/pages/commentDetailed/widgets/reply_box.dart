@@ -77,7 +77,7 @@ class _ReplyBoxState extends ConsumerState<ReplyBox> {
         ? '/api/teacher/reply/reply/feedback'
         : '/api/teacher/reply/feedback';
 
-      await apiClient.post(
+      final response = await apiClient.post(
         endpoint,
         {
           'teacherId': widget.teacherId,
@@ -87,6 +87,24 @@ class _ReplyBoxState extends ConsumerState<ReplyBox> {
           if (widget.isReplyToReply && widget.isReplyToReplyToReply && widget.replyTo != null) 'replyTo': widget.replyTo,
         },
       );
+
+      // Update the optimistic reply with the actual ID from the response
+      final feedBackReplyId = response['feedBackReplyId'];
+      if (feedBackReplyId != null) {
+        widget.onReplyAdded({
+          '_id': feedBackReplyId,
+          'comment': text,
+          'gifUrl': _selectedGifUrl.value,
+          'user': {
+            '_id': userMap['_id'],
+            'name': userMap['name'],
+            'isVerified': userMap['isVerified'],
+          },
+          'isAnonymous': false,
+          'createdAt': DateTime.now().toIso8601String(),
+          'reactions': {},
+        }, widget.parentId, widget.isReplyToReply);
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

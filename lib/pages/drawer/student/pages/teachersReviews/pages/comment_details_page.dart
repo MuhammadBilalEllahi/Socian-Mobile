@@ -114,10 +114,42 @@ class _CommentDetailsPageState extends State<CommentDetailsPage> {
   void _addReplyOptimistically(Map<String, dynamic> reply, String parentId, bool isReplyToReply) {
     setState(() {
       if (!isReplyToReply) {
-        _replies.add(reply);
+        // If this is a new reply with a server-generated ID
+        if (reply['_id'] != null && !reply['_id'].toString().contains('T')) {
+          // Find and replace the temporary reply
+          final index = _replies.indexWhere((r) => 
+            r['_id'] != null && 
+            r['_id'].toString().contains('T') && 
+            r['comment'] == reply['comment']
+          );
+          if (index != -1) {
+            _replies[index] = reply;
+          } else {
+            _replies.add(reply);
+          }
+        } else {
+          // Add new optimistic reply
+          _replies.add(reply);
+        }
       } else {
         final nestedReplies = _nestedRepliesCache[parentId] ?? [];
-        nestedReplies.add(reply);
+        // If this is a new reply with a server-generated ID
+        if (reply['_id'] != null && !reply['_id'].toString().contains('T')) {
+          // Find and replace the temporary reply
+          final index = nestedReplies.indexWhere((r) => 
+            r['_id'] != null && 
+            r['_id'].toString().contains('T') && 
+            r['comment'] == reply['comment']
+          );
+          if (index != -1) {
+            nestedReplies[index] = reply;
+          } else {
+            nestedReplies.add(reply);
+          }
+        } else {
+          // Add new optimistic reply
+          nestedReplies.add(reply);
+        }
         _nestedRepliesCache[parentId] = nestedReplies;
         _showNestedReplies[parentId] = true;
       }
@@ -201,13 +233,15 @@ class _CommentDetailsPageState extends State<CommentDetailsPage> {
 
   List<Widget> _buildMainReplies(List<Map<String, dynamic>> replies) {
     debugPrint("_buildMainReplies: ${replies.toString()}");
-    return replies.map((reply) =>  ReplyItem(
-        reply: reply,
-        isDark: widget.isDark,
-        teacherId: widget.teacherId,
-        onReaction: _handleReaction,
-        onReplyAdded: _addReplyOptimistically,
-        onReplyRemoved: _removeOptimisticReply
+    return replies.where((reply) => 
+      reply['_id'] != null
+    ).map((reply) => ReplyItem(
+      reply: Map<String, dynamic>.from(reply),
+      isDark: widget.isDark,
+      teacherId: widget.teacherId,
+      onReaction: _handleReaction,
+      onReplyAdded: _addReplyOptimistically,
+      onReplyRemoved: _removeOptimisticReply,
     )).toList();
   }
 } 
