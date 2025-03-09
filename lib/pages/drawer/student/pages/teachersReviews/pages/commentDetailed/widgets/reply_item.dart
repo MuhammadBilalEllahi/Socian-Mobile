@@ -239,41 +239,41 @@ class _ReplyItemState extends ConsumerState<ReplyItem> {
                   spacing: -10,
                   children: [
                     if(widget.reply['replies'] != null && widget.reply['replies'].length > 0)  IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _showReplyReplies = !_showReplyReplies;
-                      if (_showReplyReplies) {
-                        _loadReplyReplies();
-                      }
-                    });
-                  },
-                   style: IconButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size.zero,
-                    iconSize: 20,
-                  ),
-                  icon:  Icon(_showReplyReplies ? Icons.remove_rounded : Icons.add_rounded),
-                ),
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _showReplyBox = !_showReplyBox;
-                    });
-                  },
-                  style: IconButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size.zero,
-                    iconSize: 20,
-                  ),
-                  icon: const Icon(Icons.reply_rounded),
-                ),
-              ])
+                      onPressed: () {
+                        setState(() {
+                          _showReplyReplies = !_showReplyReplies;
+                          if (_showReplyReplies) {
+                            _loadReplyReplies();
+                          }
+                        });
+                      },
+                      style: IconButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: Size.zero,
+                        iconSize: 20,
+                      ),
+                      icon: Icon(_showReplyReplies ? Icons.remove_rounded : Icons.add_rounded),
+                    ),
+                    if (!isDeleted) IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _showReplyBox = !_showReplyBox;
+                        });
+                      },
+                      style: IconButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: Size.zero,
+                        iconSize: 20,
+                      ),
+                      icon: const Icon(Icons.reply_rounded),
+                    ),
+                  ])
                 ],
             ),
             
             const SizedBox(height: 8),
             
-            if (_showReplyBox)
+            if (_showReplyBox && !isDeleted)
               ReplyBox(
                 parentId: widget.reply['_id'],
                 teacherId: widget.teacherId,

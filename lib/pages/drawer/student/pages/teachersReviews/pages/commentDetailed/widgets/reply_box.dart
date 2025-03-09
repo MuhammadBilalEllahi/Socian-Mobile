@@ -32,6 +32,7 @@ class _ReplyBoxState extends ConsumerState<ReplyBox> {
   final TextEditingController _replyController = TextEditingController();
   final ValueNotifier<bool> _showGifPicker = ValueNotifier<bool>(false);
   final ValueNotifier<String?> _selectedGifUrl = ValueNotifier<String?>(null);
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -44,6 +45,10 @@ class _ReplyBoxState extends ConsumerState<ReplyBox> {
   Future<void> _handleReply() async {
     final text = _replyController.text.trim();
     if (text.isEmpty) return;
+
+    setState(() {
+      _isLoading = true;
+    });
 
     final tempId = DateTime.now().toIso8601String();
     try {
@@ -65,12 +70,11 @@ class _ReplyBoxState extends ConsumerState<ReplyBox> {
         'isAnonymous': false,
         'createdAt': DateTime.now().toIso8601String(),
         'reactions': {},
+        'replies': [],
       };
 
       // Add reply optimistically
       widget.onReplyAdded(optimisticReply, widget.parentId, widget.isReplyToReply);
-
-      
 
       final ApiClient apiClient = ApiClient();
       final endpoint = widget.isReplyToReply
@@ -103,6 +107,7 @@ class _ReplyBoxState extends ConsumerState<ReplyBox> {
           'isAnonymous': false,
           'createdAt': DateTime.now().toIso8601String(),
           'reactions': {},
+          'replies': [],
         }, widget.parentId, widget.isReplyToReply);
       }
 
@@ -127,17 +132,24 @@ class _ReplyBoxState extends ConsumerState<ReplyBox> {
           ),
         );
       }
-    }finally{
-      // Clear input
-      _replyController.clear();
-      _selectedGifUrl.value = null;
-      _showGifPicker.value = false;
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        // Clear input
+        _replyController.clear();
+        _selectedGifUrl.value = null;
+        _showGifPicker.value = false;
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final userMap = ref.read(authProvider).user;
+    final bool isUserLoggedIn = userMap != null;
 
     return Column(
         children: [
@@ -168,7 +180,7 @@ class _ReplyBoxState extends ConsumerState<ReplyBox> {
                     top: 8,
                     right: 8,
                     child: IconButton(
-                      onPressed: () => _selectedGifUrl.value = null,
+                      onPressed: isUserLoggedIn ? () => _selectedGifUrl.value = null : null,
                       icon: const Icon(Icons.close),
                       style: IconButton.styleFrom(
                         backgroundColor: Colors.black54,
@@ -183,18 +195,19 @@ class _ReplyBoxState extends ConsumerState<ReplyBox> {
           Row(
             children: [
               IconButton(
-                onPressed: () => _showGifPicker.value = !_showGifPicker.value,
+                onPressed: isUserLoggedIn ? () => _showGifPicker.value = !_showGifPicker.value : null,
                 icon: const Icon(Icons.gif_box_outlined),
-                color: widget.isDark ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7),
+                color: (widget.isDark ? Colors.white : Colors.black).withOpacity(isUserLoggedIn ? 0.7 : 0.3),
               ),
               Expanded(
                 child: TextField(
                   controller: _replyController,
                   style: theme.textTheme.bodyMedium,
+                  enabled: isUserLoggedIn,
                   decoration: InputDecoration(
-                    hintText: 'Write a reply...',
+                    hintText: isUserLoggedIn ? 'Write a reply...' : 'Login to reply',
                     hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                      color: theme.colorScheme.onSurface.withOpacity(isUserLoggedIn ? 0.5 : 0.3),
                     ),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.all(12),
@@ -202,9 +215,9 @@ class _ReplyBoxState extends ConsumerState<ReplyBox> {
                 ),
               ),
               TextButton(
-                onPressed: _handleReply,
+                onPressed: (!isUserLoggedIn || _isLoading) ? null : _handleReply,
                 style: TextButton.styleFrom(
-                  backgroundColor: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black,
+                  backgroundColor: widget.isDark ? Colors.white.withOpacity(isUserLoggedIn ? 0.1 : 0.05) : Colors.black.withOpacity(isUserLoggedIn ? 1 : 0.3),
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.only(
                       topRight: Radius.circular(11),
@@ -213,20 +226,31 @@ class _ReplyBoxState extends ConsumerState<ReplyBox> {
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
-                child: Text(
-                  'Reply',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: widget.isDark ? Colors.white : Colors.white,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                child: _isLoading 
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          widget.isDark ? Colors.white : Colors.white,
+                        ),
+                      ),
+                    )
+                  : Text(
+                      isUserLoggedIn ? 'Reply' : 'Login to Reply',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: widget.isDark ? Colors.white : Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
               ),
             ],
           ),
           ValueListenableBuilder<bool>(
             valueListenable: _showGifPicker,
             builder: (context, show, _) {
-              if (!show) return const SizedBox.shrink();
+              if (!show || !isUserLoggedIn) return const SizedBox.shrink();
               return Container(
                 height: 300,
                 padding: const EdgeInsets.all(8),

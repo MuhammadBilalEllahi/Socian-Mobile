@@ -167,7 +167,7 @@ class _ReplyReplyItemState extends State<ReplyReplyItem> {
                   ],
                 ),
                  
-                IconButton(
+                if (!isDeleted) IconButton(
                   onPressed: () {
                     setState(() {
                       _showReplyBox = !_showReplyBox;
@@ -186,7 +186,7 @@ class _ReplyReplyItemState extends State<ReplyReplyItem> {
               ],
             ),
 
-            if (_showReplyBox)
+            if (_showReplyBox && !isDeleted)
               ReplyBox(
                 parentId: widget.feedbackCommentId,
                 teacherId: widget.teacherId,
