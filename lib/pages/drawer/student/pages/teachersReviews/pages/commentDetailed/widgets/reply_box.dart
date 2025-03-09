@@ -71,6 +71,8 @@ class _ReplyBoxState extends ConsumerState<ReplyBox> {
         'createdAt': DateTime.now().toIso8601String(),
         'reactions': {},
         'replies': [],
+        if (widget.isReplyToReply && widget.isReplyToReplyToReply && widget.replyTo != null) 
+          'replyTo': {'_id': widget.replyTo},
       };
 
       // Add reply optimistically
@@ -108,6 +110,8 @@ class _ReplyBoxState extends ConsumerState<ReplyBox> {
           'createdAt': DateTime.now().toIso8601String(),
           'reactions': {},
           'replies': [],
+          if (widget.isReplyToReply && widget.isReplyToReplyToReply && widget.replyTo != null) 
+            'replyTo': {'_id': widget.replyTo},
         }, widget.parentId, widget.isReplyToReply);
       }
 

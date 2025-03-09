@@ -122,184 +122,213 @@ class _ReplyItemState extends ConsumerState<ReplyItem> {
     final replyText = widget.reply['comment'] ?? widget.reply['text'] ?? '';
     final gifUrl = widget.reply['gifUrl'] ?? '';
     final reactions = Map<String, dynamic>.from(widget.reply['reactions'] as Map? ?? {});
+    final isTemporary = widget.reply['_id'] != null && widget.reply['_id'].toString().contains('T');
 
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(
-            color: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
-            width: 2,
+    return Opacity(
+      opacity: isTemporary ? 0.6 : 1.0,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
+              width: 2,
+            ),
           ),
         ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.only(left: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 12,
-                  backgroundColor: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
-                  child: Text(
-                    (isAnonymous ? 'A' :user['name'] != null ? user['name'][0]: '#').toUpperCase(),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: widget.isDark ? Colors.white : Colors.black,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Row(
+        child: Padding(
+          padding: const EdgeInsets.only(left: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Stack(
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        isAnonymous ? 'Anonymous' : name,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: isDeleted ? theme.colorScheme.onSurface.withOpacity(0.5) : null,
-                        ),
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 12,
+                            backgroundColor: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
+                            child: Text(
+                              (isAnonymous ? 'A' :user['name'] != null ? user['name'][0]: '#').toUpperCase(),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: widget.isDark ? Colors.white : Colors.black,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Text(
+                                  isAnonymous ? 'Anonymous' : name,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: isDeleted ? theme.colorScheme.onSurface.withOpacity(0.5) : null,
+                                  ),
+                                ),
+                                if (!isDeleted && !isAnonymous && user['isVerified'] == true) ...[
+                                  const SizedBox(width: 4),
+                                  const Icon(
+                                    Icons.verified_rounded,
+                                    size: 14,
+                                    color: Colors.blue,
+                                  ),
+                                ],
+                                const Spacer(),
+                                if (isTemporary)
+                                  const Text(
+                                    'Sending...',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontStyle: FontStyle.italic,
+                                      color: Colors.grey,
+                                    ),
+                                  )
+                                else
+                                  Text(
+                                    DateFormatter.formatDate(date),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      if (!isDeleted && !isAnonymous && user['isVerified'] == true) ...[
-                        const SizedBox(width: 4),
-                        const Icon(
-                          Icons.verified_rounded,
-                          size: 14,
-                          color: Colors.blue,
-                        ),
-                      ],
-                      const Spacer(),
+                      const SizedBox(height: 8),
                       Text(
-                        DateFormatter.formatDate(date),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.5),
-                        ),
+                        replyText,
+                        style: theme.textTheme.bodyMedium,
                       ),
                     ],
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              replyText,
-              style: theme.textTheme.bodyMedium,
-            ),
-            if (gifUrl != null && gifUrl.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  gifUrl,
-                  height: 150,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
+                  if (isTemporary)
+                    Positioned.fill(
+                      child: Container(
+                        color: Colors.transparent,
+                      ),
+                    ),
+                ],
+              ),
+              if (gifUrl != null && gifUrl.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    gifUrl,
                     height: 150,
                     width: double.infinity,
-                    color: Colors.grey.withOpacity(0.1),
-                    child: Center(
-                      child: Icon(
-                        Icons.broken_image_outlined,
-                        color: theme.colorScheme.onSurface.withOpacity(0.5),
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      height: 150,
+                      width: double.infinity,
+                      color: Colors.grey.withOpacity(0.1),
+                      child: Center(
+                        child: Icon(
+                          Icons.broken_image_outlined,
+                          color: theme.colorScheme.onSurface.withOpacity(0.5),
 
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Wrap(
-                  spacing: 8,
-                  children: [
-                    for (final reaction in [
-                      {'emoji': '😄', 'type': 'haha'},
-                      {'emoji': '😢', 'type': 'sad'},
-                      {'emoji': '❤️', 'type': 'love'},
-                      {'emoji': '😠', 'type': 'angry'},
-                      {'emoji': '💡', 'type': 'insightful'},
+              ],
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      for (final reaction in [
+                        {'emoji': '😄', 'type': 'haha'},
+                        {'emoji': '😢', 'type': 'sad'},
+                        {'emoji': '❤️', 'type': 'love'},
+                        {'emoji': '😠', 'type': 'angry'},
+                        {'emoji': '💡', 'type': 'insightful'},
+                      ])
+                        ReactionButton(
+                          emoji: reaction['emoji'] as String,
+                          count: reactions[reaction['type']] ?? 0,
+                          isDark: widget.isDark,
+                          isSelected: false,
+                          onPressed: () => widget.onReaction(widget.reply['_id'], reaction['type'] as String),
+                        ),
+                    ],
+                  ),
+                  
+                  Wrap(
+                    spacing: -10,
+                    children: [
+                      if(widget.reply['replies'] != null && widget.reply['replies'].length > 0)  IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _showReplyReplies = !_showReplyReplies;
+                            if (_showReplyReplies) {
+                              _loadReplyReplies();
+                            }
+                          });
+                        },
+                        style: IconButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: Size.zero,
+                          iconSize: 20,
+                        ),
+                        icon: Icon(_showReplyReplies ? Icons.remove_rounded : Icons.add_rounded),
+                      ),
+                      if (!isDeleted) IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _showReplyBox = !_showReplyBox;
+                          });
+                        },
+                        style: IconButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: Size.zero,
+                          iconSize: 20,
+                        ),
+                        icon: const Icon(Icons.reply_rounded),
+                      ),
                     ])
-                      ReactionButton(
-                        emoji: reaction['emoji'] as String,
-                        count: reactions[reaction['type']] ?? 0,
-                        isDark: widget.isDark,
-                        isSelected: false,
-                        onPressed: () => widget.onReaction(widget.reply['_id'], reaction['type'] as String),
-                      ),
                   ],
-                ),
-                
-                Wrap(
-                  spacing: -10,
-                  children: [
-                    if(widget.reply['replies'] != null && widget.reply['replies'].length > 0)  IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _showReplyReplies = !_showReplyReplies;
-                          if (_showReplyReplies) {
-                            _loadReplyReplies();
-                          }
-                        });
-                      },
-                      style: IconButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: Size.zero,
-                        iconSize: 20,
-                      ),
-                      icon: Icon(_showReplyReplies ? Icons.remove_rounded : Icons.add_rounded),
-                    ),
-                    if (!isDeleted) IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _showReplyBox = !_showReplyBox;
-                        });
-                      },
-                      style: IconButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: Size.zero,
-                        iconSize: 20,
-                      ),
-                      icon: const Icon(Icons.reply_rounded),
-                    ),
-                  ])
-                ],
-            ),
-            
-            const SizedBox(height: 8),
-            
-            if (_showReplyBox && !isDeleted)
-              ReplyBox(
-                parentId: widget.reply['_id'],
-                teacherId: widget.teacherId,
-                isDark: widget.isDark,
-                isReplyToReply: true,
-                onReplyAdded: _handleReplyAdded,
-                onReplyRemoved: widget.onReplyRemoved,
               ),
+              
+              const SizedBox(height: 8),
+              
+              if (_showReplyBox && !isDeleted)
+                ReplyBox(
+                  parentId: widget.reply['_id'],
+                  teacherId: widget.teacherId,
+                  isDark: widget.isDark,
+                  isReplyToReply: true,
+                  onReplyAdded: _handleReplyAdded,
+                  onReplyRemoved: widget.onReplyRemoved,
+                ),
 
-            if (_showReplyReplies && _isLoadingReplies)
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Center(child: CircularProgressIndicator()),
-              )
-            else if (_showReplyReplies)
-              ..._replyReplies.map((reply) => ReplyReplyItem(
-                feedbackCommentId: widget.reply['_id'],
-                reply: Map<String, dynamic>.from(reply),
-                isDark: widget.isDark,
-                teacherId: widget.teacherId,
-                onReaction: widget.onReaction,
-                onReplyAdded: widget.onReplyAdded,
-                onReplyRemoved: widget.onReplyRemoved,
-                parentUsername: widget.reply['user']?['name'] ?? '',
-              )),
-          ],
+              if (_showReplyReplies && _isLoadingReplies)
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (_showReplyReplies)
+                ..._replyReplies.map((reply) => ReplyReplyItem(
+                  feedbackCommentId: widget.reply['_id'],
+                  reply: Map<String, dynamic>.from(reply),
+                  isDark: widget.isDark,
+                  teacherId: widget.teacherId,
+                  onReaction: widget.onReaction,
+                  onReplyAdded: widget.onReplyAdded,
+                  onReplyRemoved: widget.onReplyRemoved,
+                  parentUsername: widget.reply['user']?['name'] ?? '',
+                )),
+            ],
+          ),
         ),
       ),
     );
