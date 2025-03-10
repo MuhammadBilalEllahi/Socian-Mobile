@@ -17,8 +17,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
   // Sample repost data
   final List<Map<String, dynamic>> reposts = [
     {
-      "originalPoster": "John Doe",
-      "username": "@johndoe", 
+      "originalPoster": "John Doe", 
+      "username": "@johndoe",
       "content": "Just discovered an amazing study spot in the library! Perfect lighting and super quiet.",
       "date": "2024-01-15",
       "likes": 45,
@@ -26,7 +26,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
     },
     {
       "originalPoster": "Jane Smith",
-      "username": "@jsmith",
+      "username": "@jsmith", 
       "content": "Great turnout at today's CS Society meetup! Thanks everyone who came.",
       "date": "2024-01-14",
       "likes": 32,
@@ -40,7 +40,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
       "type": "society",
       "societyName": "Computer Science Society",
       "content": "Next week's hackathon is going to be amazing! Don't forget to register.",
-      "date": "2024-01-16",
+      "date": "2024-01-16", 
       "likes": 56,
       "comments": 23
     },
@@ -98,7 +98,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
       "postedDate": "2024-01-15"
     },
     {
-      "type": "Contract",
+      "type": "Contract", 
       "title": "Web Developer",
       "company": "Digital Agency",
       "description": "6-month contract for full-stack development",
@@ -110,7 +110,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
     {
       "type": "Task",
       "title": "Logo Design",
-      "client": "Local Business",
+      "client": "Local Business", 
       "description": "Need a modern logo for a cafe",
       "budget": "\$200",
       "deadline": "1 week",
@@ -131,7 +131,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
     },
     {
       "foodItem": "Pancakes",
-      "cafeName": "Campus Cafe",
+      "cafeName": "Campus Cafe", 
       "rating": 4.0,
       "review": "Fluffy pancakes with great maple syrup. Perfect breakfast option.",
       "date": "2024-01-14",
@@ -167,15 +167,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
     super.dispose();
   }
 
-  Widget _buildRepostsTab() {
+  Widget _buildRepostsTab(Color background, Color foreground, Color border, Color mutedForeground, Color accent) {
     return ListView.builder(
       padding: const EdgeInsets.all(8.0),
       itemCount: reposts.length,
       itemBuilder: (context, index) {
         final repost = reposts[index];
         return Card(
-          color: Colors.grey[900],
+          color: accent,
           margin: const EdgeInsets.only(bottom: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: border),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -187,19 +191,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                     const SizedBox(width: 8),
                     Text(
                       'Reposted from ${repost["originalPoster"]}',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                      style: TextStyle(color: mutedForeground, fontSize: 14),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
                 Text(
                   repost["username"],
-                  style: TextStyle(color: Colors.grey[400], fontSize: 14),
+                  style: TextStyle(color: mutedForeground, fontSize: 14),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   repost["content"],
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: foreground),
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -207,22 +211,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                   children: [
                     Text(
                       repost["date"],
-                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                      style: TextStyle(color: mutedForeground, fontSize: 12),
                     ),
                     Row(
                       children: [
-                        Icon(Icons.favorite, color: Colors.red[400], size: 16),
+                        const Icon(Icons.favorite, color: Color(0xFFEC4899), size: 16),
                         const SizedBox(width: 4),
                         Text(
                           repost["likes"].toString(),
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(color: foreground),
                         ),
                         const SizedBox(width: 16),
-                        const Icon(Icons.comment, color: Colors.grey, size: 16),
+                        Icon(Icons.comment, color: mutedForeground, size: 16),
                         const SizedBox(width: 4),
                         Text(
                           repost["comments"].toString(),
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(color: foreground),
                         ),
                       ],
                     ),
@@ -236,15 +240,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
     );
   }
 
-  Widget _buildPostsTab() {
+  Widget _buildPostsTab(Color background, Color foreground, Color border, Color mutedForeground, Color accent) {
     return ListView.builder(
       padding: const EdgeInsets.all(8.0),
       itemCount: posts.length,
       itemBuilder: (context, index) {
         final post = posts[index];
         return Card(
-          color: Colors.grey[900],
+          color: accent,
           margin: const EdgeInsets.only(bottom: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: border),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -254,14 +262,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                   Text(
                     post["societyName"],
                     style: const TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF8B5CF6),
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 const SizedBox(height: 8),
                 Text(
                   post["content"],
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: foreground),
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -269,22 +277,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                   children: [
                     Text(
                       post["date"],
-                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                      style: TextStyle(color: mutedForeground, fontSize: 12),
                     ),
                     Row(
                       children: [
-                        Icon(Icons.favorite, color: Colors.red[400], size: 16),
+                        const Icon(Icons.favorite, color: Color(0xFFEC4899), size: 16),
                         const SizedBox(width: 4),
                         Text(
                           post["likes"].toString(),
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(color: foreground),
                         ),
                         const SizedBox(width: 16),
-                        const Icon(Icons.comment, color: Colors.grey, size: 16),
+                        Icon(Icons.comment, color: mutedForeground, size: 16),
                         const SizedBox(width: 4),
                         Text(
                           post["comments"].toString(),
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(color: foreground),
                         ),
                       ],
                     ),
@@ -298,15 +306,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
     );
   }
 
-  Widget _buildSocietyTab() {
+  Widget _buildSocietyTab(Color background, Color foreground, Color border, Color mutedForeground, Color accent, Color primary) {
     return ListView.builder(
       padding: const EdgeInsets.all(8.0),
       itemCount: societies.length,
       itemBuilder: (context, index) {
         final society = societies[index];
         return Card(
-          color: Colors.grey[900],
+          color: accent,
           margin: const EdgeInsets.only(bottom: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: border),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -317,8 +329,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                   children: [
                     Text(
                       society["name"],
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: foreground,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -326,7 +338,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.blue[900],
+                        color: primary,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -342,13 +354,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                 const SizedBox(height: 8),
                 Text(
                   society["description"],
-                  style: const TextStyle(color: Colors.grey),
+                  style: TextStyle(color: mutedForeground),
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Activities:',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: foreground,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -365,10 +377,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                   )).toList(),
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Benefits:',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: foreground,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -390,7 +402,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                     // Handle join society
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: primary,
                     minimumSize: const Size(double.infinity, 40),
                   ),
                   child: const Text('Join Society'),
@@ -403,15 +415,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
     );
   }
 
-  Widget _buildJobsTab() {
+  Widget _buildJobsTab(Color background, Color foreground, Color border, Color mutedForeground, Color accent, Color primary) {
     return ListView.builder(
       padding: const EdgeInsets.all(8.0),
       itemCount: jobs.length,
       itemBuilder: (context, index) {
         final job = jobs[index];
         return Card(
-          color: Colors.grey[900],
+          color: accent,
           margin: const EdgeInsets.only(bottom: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: border),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -421,7 +437,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: job["type"] == "Freelance" 
-                      ? Colors.blue[900]
+                      ? primary
                       : job["type"] == "Contract" 
                         ? Colors.green[900]
                         : Colors.orange[900],
@@ -438,8 +454,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                 const SizedBox(height: 12),
                 Text(
                   job["title"],
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: foreground,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -447,12 +463,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                 const SizedBox(height: 4),
                 Text(
                   job["company"] ?? job["client"],
-                  style: TextStyle(color: Colors.grey[400]),
+                  style: TextStyle(color: mutedForeground),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   job["description"],
-                  style: const TextStyle(color: Colors.grey),
+                  style: TextStyle(color: mutedForeground),
                 ),
                 const SizedBox(height: 12),
                 if (job["budget"] != null)
@@ -461,7 +477,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                       const Icon(Icons.attach_money, color: Colors.green, size: 16),
                       Text(
                         job["budget"],
-                        style: const TextStyle(color: Colors.white),
+                        style: TextStyle(color: foreground),
                       ),
                     ],
                   ),
@@ -471,7 +487,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                       const Icon(Icons.payments, color: Colors.green, size: 16),
                       Text(
                         job["salary"],
-                        style: const TextStyle(color: Colors.white),
+                        style: TextStyle(color: foreground),
                       ),
                     ],
                   ),
@@ -493,17 +509,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                   children: [
                     Text(
                       "Posted: ${job["postedDate"]}",
-                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                      style: TextStyle(color: mutedForeground, fontSize: 12),
                     ),
                     if (job["deadline"] != null)
                       Text(
                         "Deadline: ${job["deadline"]}",
-                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                        style: TextStyle(color: mutedForeground, fontSize: 12),
                       ),
                     if (job["duration"] != null)
                       Text(
                         "Duration: ${job["duration"]}",
-                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                        style: TextStyle(color: mutedForeground, fontSize: 12),
                       ),
                   ],
                 ),
@@ -515,7 +531,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
     );
   }
 
-  Widget _buildReviewsTab() {
+  Widget _buildReviewsTab(Color background, Color foreground, Color border, Color mutedForeground, Color accent, Color primary) {
     return Column(
       children: [
         Padding(
@@ -536,9 +552,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
               backgroundColor: WidgetStateProperty.resolveWith<Color>(
                 (Set<WidgetState> states) {
                   if (states.contains(WidgetState.selected)) {
-                    return Colors.grey[800]!;
+                    return primary;
                   }
-                  return Colors.black;
+                  return accent;
+                },
+              ),
+              foregroundColor: WidgetStateProperty.resolveWith<Color>(
+                (Set<WidgetState> states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return Colors.white;
+                  }
+                  return foreground;
                 },
               ),
             ),
@@ -563,6 +587,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                           date: cafeReviews[2]["date"],
                           foodItems: List<String>.from(cafeReviews[2]["foodItems"]),
                           moreReviews: cafeReviews.length > 3 ? cafeReviews.length - 3 : null,
+                          background: background,
+                          foreground: foreground,
+                          border: border,
+                          mutedForeground: mutedForeground,
+                          accent: accent,
                         ),
                       ),
                     // Second card (middle)
@@ -576,6 +605,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                           review: cafeReviews[1]["review"],
                           date: cafeReviews[1]["date"],
                           foodItems: List<String>.from(cafeReviews[1]["foodItems"]),
+                          background: background,
+                          foreground: foreground,
+                          border: border,
+                          mutedForeground: mutedForeground,
+                          accent: accent,
                         ),
                       ),
                     // First card (top)
@@ -587,6 +621,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                         review: cafeReviews[0]["review"],
                         date: cafeReviews[0]["date"],
                         foodItems: List<String>.from(cafeReviews[0]["foodItems"]),
+                        background: background,
+                        foreground: foreground,
+                        border: border,
+                        mutedForeground: mutedForeground,
+                        accent: accent,
                       ),
                   ],
                 ),
@@ -597,6 +636,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                   rating: 5.0,
                   review: "Excellent teaching methods and very helpful.",
                   date: "2024-01-10",
+                  background: background,
+                  foreground: foreground,
+                  border: border,
+                  mutedForeground: mutedForeground,
+                  accent: accent,
                 ),
             ],
           ),
@@ -613,10 +657,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
     required String date,
     required List<String> foodItems,
     int? moreReviews,
+    required Color background,
+    required Color foreground,
+    required Color border,
+    required Color mutedForeground,
+    required Color accent,
   }) {
     return Card(
-      color: Colors.grey[900],
+      color: accent,
       margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: border),
+      ),
       child: Stack(
         children: [
           Padding(
@@ -632,15 +685,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                       children: [
                         Text(
                           foodItem,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: foreground,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
                           cafeName,
-                          style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                          style: TextStyle(color: mutedForeground, fontSize: 14),
                         ),
                       ],
                     ),
@@ -649,7 +702,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                         const Icon(Icons.star, color: Colors.amber, size: 20),
                         Text(
                           rating.toString(),
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(color: foreground),
                         ),
                       ],
                     ),
@@ -658,24 +711,31 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                 const SizedBox(height: 8),
                 Text(
                   review,
-                  style: const TextStyle(color: Colors.grey),
+                  style: TextStyle(color: mutedForeground),
                 ),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
-                  children: foodItems.map((item) => Chip(
-                    label: Text(
-                      item,
-                      style: const TextStyle(fontSize: 12),
+                  children: foodItems.map((item) => Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: background,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: border),
                     ),
-                    backgroundColor: Colors.grey[800],
-                    labelStyle: const TextStyle(color: Colors.white),
+                    child: Text(
+                      item,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: mutedForeground,
+                      ),
+                    ),
                   )).toList(),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   date,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                  style: TextStyle(color: mutedForeground, fontSize: 12),
                 ),
               ],
             ),
@@ -687,13 +747,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.grey[800],
+                  color: background,
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: border),
                 ),
                 child: Text(
                   '+$moreReviews more',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: mutedForeground,
                     fontSize: 12,
                   ),
                 ),
@@ -710,10 +771,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
     required double rating,
     required String review,
     required String date,
+    required Color background,
+    required Color foreground,
+    required Color border,
+    required Color mutedForeground,
+    required Color accent,
   }) {
     return Card(
-      color: Colors.grey[900],
+      color: accent,
       margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: border),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -727,15 +797,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                   children: [
                     Text(
                       teacherName,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: foreground,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
                       department,
-                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                      style: TextStyle(color: mutedForeground, fontSize: 14),
                     ),
                   ],
                 ),
@@ -744,7 +814,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                     const Icon(Icons.star, color: Colors.amber, size: 20),
                     Text(
                       rating.toString(),
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(color: foreground),
                     ),
                   ],
                 ),
@@ -753,12 +823,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
             const SizedBox(height: 8),
             Text(
               review,
-              style: const TextStyle(color: Colors.grey),
+              style: TextStyle(color: mutedForeground),
             ),
             const SizedBox(height: 8),
             Text(
               date,
-              style: TextStyle(color: Colors.grey[600], fontSize: 12),
+              style: TextStyle(color: mutedForeground, fontSize: 12),
             ),
           ],
         ),
@@ -769,20 +839,27 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
+    // Custom theme colors
+    final background = isDarkMode ? const Color(0xFF09090B) : Colors.white;
+    final foreground = isDarkMode ? Colors.white : const Color(0xFF09090B);
+    final muted = isDarkMode ? const Color(0xFF27272A) : const Color(0xFFF4F4F5);
+    final mutedForeground = isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+    final border = isDarkMode ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+    final accent = isDarkMode ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
+    const primary = Color(0xFF8B5CF6);
 
     return DefaultTabController(
       length: 6,
       child: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: background,
         appBar: AppBar(
-          backgroundColor: Colors.black,
-          // leading: IconButton(
-          //   icon: const Icon(Icons.arrow_back, color: Colors.white),
-          //   // onPressed: () => Navigator.pop(context),
-          // ),
+          backgroundColor: background,
+          elevation: 0,
           actions: [
             IconButton(
-              icon: const Icon(Icons.more_horiz, color: Colors.white),
+              icon: Icon(Icons.more_horiz, color: foreground),
               onPressed: () => Navigator.pushNamed(context, AppRoutes.settings),
             ),
           ],
@@ -801,33 +878,43 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                         children: [
                           Text(
                             auth.user?['name'] ?? "Logged Out",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                            style: TextStyle(
+                              color: foreground,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                          CircleAvatar(
-                            radius: 30,
-                            backgroundImage: auth.user?['profile']['picture'] != null
-                                ? NetworkImage(auth.user?['profile']['picture'])
-                                : const AssetImage("assets/images/profilepic2.jpg")
-                                    as ImageProvider,
+                          Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: primary,
+                                width: 2,
+                              ),
+                            ),
+                            child: CircleAvatar(
+                              radius: 30,
+                              backgroundColor: accent,
+                              backgroundImage: auth.user?['profile']['picture'] != null
+                                  ? NetworkImage(auth.user?['profile']['picture'])
+                                  : const AssetImage("assets/images/profilepic2.jpg")
+                                      as ImageProvider,
+                            ),
                           ),
                         ],
                       ),
                       Text(
                         "@${auth.user?['username'] ?? "Logged Out"}",
-                        style: const TextStyle(color: Colors.grey, fontSize: 12),
+                        style: TextStyle(color: mutedForeground, fontSize: 14),
                       ),
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          const Icon(Icons.calendar_today, color: Colors.grey, size: 16),
+                          Icon(Icons.calendar_today, color: mutedForeground, size: 16),
                           const SizedBox(width: 8),
                           Text(
                             "Joined December 2023",
-                            style: TextStyle(color: Colors.grey[600]),
+                            style: TextStyle(color: mutedForeground),
                           ),
                         ],
                       ),
@@ -837,16 +924,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                           RichText(
                             text: TextSpan(
                               children: [
-                                const TextSpan(
+                                TextSpan(
                                   text: "10 ",
                                   style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
+                                    color: foreground,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                                 TextSpan(
                                   text: "Following",
-                                  style: TextStyle(color: Colors.grey[600]),
+                                  style: TextStyle(color: mutedForeground),
                                 ),
                               ],
                             ),
@@ -855,16 +942,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                           RichText(
                             text: TextSpan(
                               children: [
-                                const TextSpan(
+                                TextSpan(
                                   text: "5 ",
                                   style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
+                                    color: foreground,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                                 TextSpan(
                                   text: "Followers",
-                                  style: TextStyle(color: Colors.grey[600]),
+                                  style: TextStyle(color: mutedForeground),
                                 ),
                               ],
                             ),
@@ -881,18 +968,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                   TabBar(
                     controller: _tabController,
                     isScrollable: true,
-                    labelColor: Colors.white,
-                    unselectedLabelColor: Colors.grey,
-                    indicatorColor: Colors.white,
+                    labelColor: foreground,
+                    unselectedLabelColor: mutedForeground,
+                    indicatorColor: primary,
                     tabs: const [
-                      Tab(text: 'posts'),
-                      Tab(text: 'reposts'),
-                      Tab(text: 'reviews'),
-                      Tab(text: 'replies'),
-                      Tab(text: 'society'),
-                      Tab(text: 'jobs'),
+                      Tab(text: 'Posts'),
+                      Tab(text: 'Reposts'),
+                      Tab(text: 'Reviews'),
+                      Tab(text: 'Replies'),
+                      Tab(text: 'Society'),
+                      Tab(text: 'Jobs'),
                     ],
                   ),
+                  background,
                 ),
               ),
             ];
@@ -900,12 +988,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
           body: TabBarView(
             controller: _tabController,
             children: [
-              _buildPostsTab(),
-              _buildRepostsTab(),
-              _buildReviewsTab(),
-              const Center(child: Text('replies', style: TextStyle(color: Colors.white))),
-              _buildSocietyTab(),
-              _buildJobsTab(),
+              _buildPostsTab(background, foreground, border, mutedForeground, accent),
+              _buildRepostsTab(background, foreground, border, mutedForeground, accent),
+              _buildReviewsTab(background, foreground, border, mutedForeground, accent, primary),
+              Center(child: Text('Replies', style: TextStyle(color: foreground))),
+              _buildSocietyTab(background, foreground, border, mutedForeground, accent, primary),
+              _buildJobsTab(background, foreground, border, mutedForeground, accent, primary),
             ],
           ),
         ),
@@ -916,8 +1004,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
 
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final TabBar _tabBar;
+  final Color _background;
 
-  _SliverAppBarDelegate(this._tabBar);
+  _SliverAppBarDelegate(this._tabBar, this._background);
 
   @override
   double get minExtent => _tabBar.preferredSize.height;
@@ -927,7 +1016,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
-      color: Colors.black,
+      color: _background,
       child: _tabBar,
     );
   }

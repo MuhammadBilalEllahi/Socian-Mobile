@@ -20,24 +20,28 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
     final auth = ref.watch(authProvider);
     String name = auth.user?['name'] ?? "";
     String username = auth.user?['username'] ?? "";
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Drawer(
       width: MediaQuery.of(context).size.width * 0.85,
       child: Container(
           decoration: BoxDecoration(
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [
-              Color(0xFF1A1A1A),
-              Color(0xFF2D2D2D),
+                    colors: isDarkMode ? [
+                      const Color(0xFF1A1A1A),
+                      const Color(0xFF2D2D2D),
+                    ] : [
+                      Colors.white,
+                      const Color(0xFFF5F5F5),
                     ],
             ),
             boxShadow: [
               BoxShadow(
-              color: Colors.black.withValues(alpha:0.2),
-              blurRadius: 20,
-              spreadRadius: 5,
+                color: (isDarkMode ? Colors.black : Colors.grey).withOpacity(0.2),
+                blurRadius: 20,
+                spreadRadius: 5,
               ),
             ],
           ),
@@ -51,9 +55,12 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    Colors.white.withValues(alpha:0.1),
-                    Colors.white.withValues(alpha:0.05),
+                  colors: isDarkMode ? [
+                    Colors.white.withOpacity(0.1),
+                    Colors.white.withOpacity(0.05),
+                  ] : [
+                    Colors.grey.withOpacity(0.1),
+                    Colors.grey.withOpacity(0.05),
                   ],
                 ),
               ),
@@ -64,17 +71,17 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.arrow_back_ios_new,
-                          color: Colors.white70,
+                          color: isDarkMode ? Colors.white70 : Colors.black54,
                           size: 20,
                         ),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                       IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.logout,
-                          color: Colors.white70,
+                          color: isDarkMode ? Colors.white70 : Colors.black54,
                           size: 20,
                         ),
                         onPressed: () {
@@ -85,9 +92,9 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                             (route) => false,
                           );
                         },
+                      ),
+                    ],
                   ),
-                ],
-              ),
                   const SizedBox(height: 16),
                   // Profile Section
                   GestureDetector(
@@ -100,19 +107,22 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             gradient: LinearGradient(
-                              colors: [
-                                Colors.white.withValues(alpha:0.2),
-                                Colors.white.withValues(alpha:0.1),
+                              colors: isDarkMode ? [
+                                Colors.white.withOpacity(0.2),
+                                Colors.white.withOpacity(0.1),
+                              ] : [
+                                Colors.grey.withOpacity(0.2),
+                                Colors.grey.withOpacity(0.1),
                               ],
                             ),
                           ),
-                          child: const CircleAvatar(
+                          child: CircleAvatar(
                             radius: 24,
-                            backgroundColor: Color(0xFF2A2A2A),
-                          child: Icon(
-                            Icons.person,
+                            backgroundColor: isDarkMode ? const Color(0xFF2A2A2A) : Colors.grey[200],
+                            child: Icon(
+                              Icons.person,
                               size: 28,
-                              color: Colors.white70,
+                              color: isDarkMode ? Colors.white70 : Colors.black54,
                             ),
                           ),
                         ),
@@ -123,20 +133,20 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                             children: [
                               Text(
                                 name,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                                  color: isDarkMode ? Colors.white : Colors.black,
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Row(
                                 children: [
-                              Text(
+                                  Text(
                                     '@$username',
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color: Colors.white.withValues(alpha:0.7),
+                                      color: (isDarkMode ? Colors.white : Colors.black).withOpacity(0.7),
                                     ),
                                   ),
                                   const SizedBox(width: 8),
@@ -149,12 +159,12 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                                     child: const Text(
                                       'PREMIUM',
                                       style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
                                         color: Colors.black,
                                       ),
                                     ),
-                                ),
+                                  ),
                                 ],
                               ),
                             ],
@@ -166,7 +176,7 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                 ],
               ),
             ),
-            const Divider(color: Colors.white24, height: 1),
+            Divider(color: isDarkMode ? Colors.white24 : Colors.black12, height: 1),
             // Menu Items
             Expanded(
               child: ListView(
@@ -177,21 +187,19 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                     title: "Home",
                     onTap: () => ref.read(pageIndexProvider.notifier).state =
                         BottomNavBarRoute.home,
+                    isDarkMode: isDarkMode,
                   ),
-                  // _buildDrawerItem(
-                  //   icon: Icons.school,
-                  //   title: "All Universities",
-                  //   onTap: () => Navigator.of(context).pop(),
-                  // ),
                   _buildDrawerItem(
                     icon: Icons.location_city,
                     title: "Inter Campuses",
                     onTap: () => Navigator.of(context).pop(),
+                    isDarkMode: isDarkMode,
                   ),
                   _buildDrawerItem(
                     icon: Icons.people,
                     title: "Alumni",
                     onTap: () => Navigator.of(context).pop(),
+                    isDarkMode: isDarkMode,
                   ),
                   _buildDrawerItem(
                     icon: Icons.rate_review,
@@ -204,11 +212,13 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                         ),
                       );
                     },
+                    isDarkMode: isDarkMode,
                   ),
                   _buildDrawerItem(
                     icon: Icons.restaurant,
                     title: "Cafe Information Services",
                     onTap: () => Navigator.of(context).pop(),
+                    isDarkMode: isDarkMode,
                   ),
                   _buildDrawerItem(
                     icon: Icons.description,
@@ -221,6 +231,7 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                         ),
                       );
                     },
+                    isDarkMode: isDarkMode,
                   ),
                 ],
               ),
@@ -232,9 +243,12 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.white.withValues(alpha:0.05),
-                    Colors.white.withValues(alpha:0.02),
+                  colors: isDarkMode ? [
+                    Colors.white.withOpacity(0.05),
+                    Colors.white.withOpacity(0.02),
+                  ] : [
+                    Colors.grey.withOpacity(0.05),
+                    Colors.grey.withOpacity(0.02),
                   ],
                 ),
               ),
@@ -245,7 +259,7 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                     'Beyond The Class',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.white.withValues(alpha:0.5),
+                      color: (isDarkMode ? Colors.white : Colors.black).withOpacity(0.5),
                     ),
                   ),
                 ],
@@ -261,17 +275,18 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
+    required bool isDarkMode,
   }) {
     return ListTile(
       leading: Icon(
         icon,
-        color: Colors.white70,
+        color: isDarkMode ? Colors.white70 : Colors.black54,
         size: 22,
       ),
       title: Text(
         title,
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: isDarkMode ? Colors.white : Colors.black87,
           fontSize: 15,
           fontWeight: FontWeight.w500,
         ),

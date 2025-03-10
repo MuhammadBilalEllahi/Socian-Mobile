@@ -106,8 +106,9 @@ class TeacherDetailsPage extends StatelessWidget {
             TeacherContact(email: teacher['email'] ?? 'N/A'),
             const SizedBox(height: 16),
 
-            if (teacher['topFeedback'] != null) ...[
-              TeacherFeedback(feedback: teacher['topFeedback']),
+            if (teacher['feedbackSummary'] != null && 
+                (teacher['feedbackSummary'] as List).isNotEmpty) ...[
+              TeacherFeedback(feedback: (teacher['feedbackSummary'] as List).last),
               const SizedBox(height: 24),
             ],
 

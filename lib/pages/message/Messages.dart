@@ -9,7 +9,6 @@ class Messages extends StatefulWidget {
 }
 
 class _MessagesState extends State<Messages> with SingleTickerProviderStateMixin {
-  bool isDarkMode = true; // Toggle for theme
   late TabController _tabController;
 
   @override
@@ -29,188 +28,168 @@ class _MessagesState extends State<Messages> with SingleTickerProviderStateMixin
     super.dispose();
   }
 
-  ThemeData get _theme => isDarkMode ? _darkTheme : _lightTheme;
-
-  final _darkTheme = ThemeData(
-    brightness: Brightness.dark,
-    primaryColor: Colors.teal,
-    scaffoldBackgroundColor: const Color(0xFF121212),
-    colorScheme: const ColorScheme.dark().copyWith(
-      secondary: Colors.tealAccent,
-      surface: const Color(0xFF1E1E1E),
-    ),
-  );
-
-  final _lightTheme = ThemeData(
-    brightness: Brightness.light,
-    primaryColor: Colors.teal,
-    scaffoldBackgroundColor: Colors.white,
-    colorScheme: const ColorScheme.light().copyWith(
-      secondary: Colors.teal,
-      surface: Colors.grey[100],
-    ),
-  );
-
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: _theme,
-      child: Scaffold(
-        body: SafeArea(
-          child: NestedScrollView(
-            headerSliverBuilder: (context, innerBoxIsScrolled) {
-              return [
-                SliverAppBar(
-                  title: Text(
-                    "Messages",
-                    style: TextStyle(
-                      color: _theme.colorScheme.onSurface,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  actions: [
-                    IconButton(
-                      icon: Icon(
-                        isDarkMode ? Icons.light_mode : Icons.dark_mode,
-                        color: _theme.colorScheme.onSurface,
-                      ),
-                      onPressed: () => setState(() => isDarkMode = !isDarkMode),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.video_call_outlined,
-                        color: _theme.colorScheme.onSurface,
-                      ),
-                      onPressed: () {},
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.edit_outlined,
-                        color: _theme.colorScheme.onSurface,
-                      ),
-                      onPressed: () {},
-                    ),
-                  ],
-                  pinned: true,
-                  floating: true,
-                  bottom: TabBar(
-                    controller: _tabController,
-                    labelColor: _theme.colorScheme.onSurface,
-                    unselectedLabelColor: _theme.colorScheme.onSurface.withOpacity(0.5),
-                    tabs: const [
-                      Tab(text: 'Normal'),
-                      Tab(text: 'Society'),
-                      Tab(text: 'Job'),
-                    ],
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    
+    // Custom theme colors
+    final background = isDarkMode ? const Color(0xFF09090B) : Colors.white;
+    final foreground = isDarkMode ? Colors.white : const Color(0xFF09090B);
+    final muted = isDarkMode ? const Color(0xFF27272A) : const Color(0xFFF4F4F5);
+    final mutedForeground = isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+    final border = isDarkMode ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+    final accent = isDarkMode ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
+
+    return Scaffold(
+      backgroundColor: background,
+      body: SafeArea(
+        child: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
+            return [
+              SliverAppBar(
+                backgroundColor: background,
+                title: Text(
+                  "Messages",
+                  style: TextStyle(
+                    color: foreground,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-              ];
-            },
-            body: TabBarView(
-              controller: _tabController,
-              children: [
-                // Normal Tab
-                ListView(
-                  children: [
-                    // Stories Section
-                    Container(
-                      height: 130,
-                      decoration: BoxDecoration(
-                        color: _theme.colorScheme.surface,
-                        borderRadius: BorderRadius.circular(15),
-                        boxShadow: isDarkMode ? [] : [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.2),
-                            spreadRadius: 1,
-                            blurRadius: 5,
-                          ),
-                        ],
-                      ),
-                      margin: const EdgeInsets.all(8),
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                        children: [
+                actions: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.video_call_outlined,
+                      color: foreground,
+                    ),
+                    onPressed: () {},
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.edit_outlined,
+                      color: foreground,
+                    ),
+                    onPressed: () {},
+                  ),
+                ],
+                pinned: true,
+                floating: true,
+                bottom: TabBar(
+                  controller: _tabController,
+                  labelColor: foreground,
+                  unselectedLabelColor: mutedForeground,
+                  indicatorColor: foreground,
+                  tabs: const [
+                    Tab(text: 'Normal'),
+                    Tab(text: 'Society'),
+                    Tab(text: 'Job'),
+                  ],
+                ),
+              ),
+            ];
+          },
+          body: TabBarView(
+            controller: _tabController,
+            children: [
+              // Normal Tab
+              ListView(
+                children: [
+                  // Stories Section
+                  Container(
+                    height: 130,
+                    decoration: BoxDecoration(
+                      color: accent,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: border),
+                    ),
+                    margin: const EdgeInsets.all(8),
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                      children: [
+                        _buildStoryItem(
+                          isYourStory: true,
+                          name: "Your Story",
+                          hasUnseenStory: false,
+                          background: background,
+                          foreground: foreground,
+                          muted: muted,
+                        ),
+                        for (var i = 0; i < 10; i++)
                           _buildStoryItem(
-                            isYourStory: true,
-                            name: "Your Story",
-                            hasUnseenStory: false,
+                            name: "User ${i + 1}",
+                            hasUnseenStory: true,
+                            background: background,
+                            foreground: foreground,
+                            muted: muted,
                           ),
-                          for (var i = 0; i < 10; i++)
-                            _buildStoryItem(
-                              name: "User ${i + 1}",
-                              hasUnseenStory: true,
-                            ),
-                        ],
-                      ),
+                      ],
                     ),
+                  ),
 
-                    // Search Bar
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        decoration: BoxDecoration(
-                          color: _theme.colorScheme.surface,
-                          borderRadius: BorderRadius.circular(25),
-                          border: Border.all(
-                            color: _theme.colorScheme.onSurface.withOpacity(0.1),
-                          ),
-                        ),
-                        child: TextField(
-                          style: TextStyle(color: _theme.colorScheme.onSurface),
-                          decoration: InputDecoration(
-                            icon: Icon(Icons.search, color: _theme.colorScheme.onSurface.withOpacity(0.7)),
-                            hintText: 'Search messages...',
-                            hintStyle: TextStyle(color: _theme.colorScheme.onSurface.withOpacity(0.5)),
-                            border: InputBorder.none,
-                          ),
+                  // Search Bar
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: accent,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: border),
+                      ),
+                      child: TextField(
+                        style: TextStyle(color: foreground),
+                        decoration: InputDecoration(
+                          icon: Icon(Icons.search, color: mutedForeground),
+                          hintText: 'Search messages...',
+                          hintStyle: TextStyle(color: mutedForeground),
+                          border: InputBorder.none,
                         ),
                       ),
                     ),
+                  ),
 
-                    // Message List
-                    for (var i = 0; i < 15; i++)
-                      MessageCard(
-                        picture: 'assets/images/anime.png',
-                        name: 'User ${i + 1}',
-                        message: 'Hey there! How are you doing today?',
-                        time: '${(i + 1)}:45 PM',
-                        isOnline: i % 2 == 0,
-                      ),
-                  ],
-                ),
-
-                // Society Tab
-                ListView.builder(
-                  itemCount: 10,
-                  itemBuilder: (context, index) {
-                    return MessageCard(
+                  // Message List
+                  for (var i = 0; i < 15; i++)
+                    MessageCard(
                       picture: 'assets/images/anime.png',
-                      name: 'Society Group ${index + 1}',
-                      message: 'Latest society updates and discussions',
-                      time: '${(index + 1)}:00 PM',
-                      isOnline: true,
-                    );
-                  },
-                ),
+                      name: 'User ${i + 1}',
+                      message: 'Hey there! How are you doing today?',
+                      time: '${(i + 1)}:45 PM',
+                      isOnline: i % 2 == 0,
+                    ),
+                ],
+              ),
 
-                // Job Tab
-                ListView.builder(
-                  itemCount: 8,
-                  itemBuilder: (context, index) {
-                    return MessageCard(
-                      picture: 'assets/images/anime.png',
-                      name: 'Job Recruiter ${index + 1}',
-                      message: 'We have a new job opportunity for you',
-                      time: '${(index + 1)}:15 PM',
-                      isOnline: true,
-                    );
-                  },
-                ),
-              ],
-            ),
+              // Society Tab
+              ListView.builder(
+                itemCount: 10,
+                itemBuilder: (context, index) {
+                  return MessageCard(
+                    picture: 'assets/images/anime.png',
+                    name: 'Society Group ${index + 1}',
+                    message: 'Latest society updates and discussions',
+                    time: '${(index + 1)}:00 PM',
+                    isOnline: true,
+                  );
+                },
+              ),
+
+              // Job Tab
+              ListView.builder(
+                itemCount: 8,
+                itemBuilder: (context, index) {
+                  return MessageCard(
+                    picture: 'assets/images/anime.png',
+                    name: 'Job Recruiter ${index + 1}',
+                    message: 'We have a new job opportunity for you',
+                    time: '${(index + 1)}:15 PM',
+                    isOnline: true,
+                  );
+                },
+              ),
+            ],
           ),
         ),
       ),
@@ -221,6 +200,9 @@ class _MessagesState extends State<Messages> with SingleTickerProviderStateMixin
     required String name,
     bool isYourStory = false,
     bool hasUnseenStory = false,
+    required Color background,
+    required Color foreground,
+    required Color muted,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -236,17 +218,17 @@ class _MessagesState extends State<Messages> with SingleTickerProviderStateMixin
                   shape: BoxShape.circle,
                   gradient: hasUnseenStory
                       ? const LinearGradient(
-                          colors: [Colors.purple, Colors.black, Colors.pink],
+                          colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
                           begin: Alignment.topRight,
                           end: Alignment.bottomLeft,
                         )
                       : null,
-                  color: !hasUnseenStory ? _theme.colorScheme.onSurface.withOpacity(0.2) : null,
+                  color: !hasUnseenStory ? muted : null,
                 ),
                 child: Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: _theme.scaffoldBackgroundColor,
+                    color: background,
                   ),
                   padding: const EdgeInsets.all(2),
                   child: const CircleAvatar(
@@ -261,10 +243,10 @@ class _MessagesState extends State<Messages> with SingleTickerProviderStateMixin
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: _theme.primaryColor,
+                      color: const Color(0xFF8B5CF6),
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: _theme.scaffoldBackgroundColor,
+                        color: background,
                         width: 2,
                       ),
                     ),
@@ -282,7 +264,7 @@ class _MessagesState extends State<Messages> with SingleTickerProviderStateMixin
             name,
             style: TextStyle(
               fontSize: 12,
-              color: _theme.colorScheme.onSurface,
+              color: foreground,
               fontWeight: FontWeight.w500,
             ),
           ),

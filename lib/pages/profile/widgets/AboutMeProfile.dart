@@ -10,26 +10,36 @@ class AboutMeProfile extends StatefulWidget {
 class _AboutMeProfileState extends State<AboutMeProfile> {
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final border = isDarkMode ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+    final foreground = isDarkMode ? Colors.white : const Color(0xFF09090B);
+    final accent = isDarkMode ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
+    
     double screenWidth = MediaQuery.of(context).size.width;
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(30),
-        child: Container(
-          alignment: Alignment.centerLeft,
-
-          decoration: BoxDecoration(
-            // color: Colors.blueGrey[200],
-            color: Colors.transparent,
-            border: Border.all(
-              // color: Colors.grey,
-              width: 2,
-              color: Colors.teal
+      child: Container(
+        alignment: Alignment.centerLeft,
+        decoration: BoxDecoration(
+          color: accent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: border,
+            width: 1,
+          ),
+        ),
+        width: screenWidth / 1.1,
+        height: 200,
+        child: Center(
+          child: Text(
+            "Welcome To My Profile. Lorem Ipsum este pur şi simplu o machetă pentru text a industriei tipografice.",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+              color: foreground,
+              fontWeight: FontWeight.w500,
             ),
           ),
-          width: screenWidth / 1.1,
-          height: 200,
-          child: const Center(child: Text("Welcome To My Profile. Lorem Ipsum este pur şi simplu o machetă pentru text a industriei tipografice.",textAlign: TextAlign.center, style: TextStyle(fontSize: 20,fontStyle: FontStyle.italic,fontWeight: FontWeight.bold),)),
         ),
       ),
     );

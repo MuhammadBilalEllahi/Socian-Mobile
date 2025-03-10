@@ -4,17 +4,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../features/auth/presentation/auth_screen.dart';
 import '../../../../features/auth/providers/auth_provider.dart';
 
-class ProfileDropDown extends ConsumerWidget{
+class ProfileDropDown extends ConsumerWidget {
   const ProfileDropDown({super.key});
 
-
   @override
-  Widget build(BuildContext context, WidgetRef ref){
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final foreground = isDarkMode ? Colors.white : const Color(0xFF09090B);
+    final mutedForeground = isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+    const primary = Color(0xFF8B5CF6);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         PopupMenuButton<int>(
-          icon: const Icon(Icons.more_horiz),
+          icon: Icon(Icons.more_horiz, color: foreground),
+          color: isDarkMode ? const Color(0xFF18181B) : Colors.white,
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+              color: isDarkMode ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+            ),
+          ),
           onSelected: (value) {
             switch (value) {
               case 1:
@@ -32,55 +44,62 @@ class ProfileDropDown extends ConsumerWidget{
                   context,
                   MaterialPageRoute(builder: (context) => const AuthScreen()),
                 );
-                print("Logout");
-
                 break;
             }
           },
           itemBuilder: (context) => [
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 1,
               child: Row(
                 children: [
-                  Icon(Icons.person, color: Colors.teal),
-                  SizedBox(width: 8),
-                  Text("View Profile"),
+                  const Icon(Icons.person, color: primary),
+                  const SizedBox(width: 8),
+                  Text(
+                    "View Profile",
+                    style: TextStyle(color: foreground),
+                  ),
                 ],
               ),
             ),
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 2,
               child: Row(
                 children: [
-                  Icon(Icons.edit, color: Colors.orange),
-                  SizedBox(width: 8),
-                  Text("Edit Profile"),
+                  const Icon(Icons.edit, color: primary),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Edit Profile",
+                    style: TextStyle(color: foreground),
+                  ),
                 ],
               ),
             ),
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 3,
               child: Row(
                 children: [
-                  Icon(Icons.settings, color: Colors.blue),
-                  SizedBox(width: 8),
-                  Text("Settings"),
+                  const Icon(Icons.settings, color: primary),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Settings",
+                    style: TextStyle(color: foreground),
+                  ),
                 ],
               ),
             ),
-            const PopupMenuItem(
-
+            PopupMenuItem(
               value: 4,
               child: Row(
                 children: [
-                  Icon(Icons.logout, color: Colors.red),
-                  SizedBox(width: 8),
-                  Text("Logout"),
+                  const Icon(Icons.logout, color: Color(0xFFEC4899)),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Logout",
+                    style: TextStyle(color: foreground),
+                  ),
                 ],
               ),
-
             ),
-
           ],
         ),
         const SizedBox(width: 5),

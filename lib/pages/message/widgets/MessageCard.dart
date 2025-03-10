@@ -23,16 +23,21 @@ class MessageCard extends StatefulWidget {
 class _MessageCardState extends State<MessageCard> {
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final foreground = isDarkMode ? Colors.white : const Color(0xFF09090B);
+    final mutedForeground = isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+    final border = isDarkMode ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+
     // Helper function to determine message type icon
     Widget getMessageTypeIcon() {
       if (widget.message.contains('sent a GIF')) {
-        return const Icon(Icons.gif_box_outlined, size: 18, color: Colors.grey);
+        return Icon(Icons.gif_box_outlined, size: 18, color: mutedForeground);
       } else if (widget.message.contains('sent an image')) {
-        return const Icon(Icons.image_outlined, size: 18, color: Colors.grey);
+        return Icon(Icons.image_outlined, size: 18, color: mutedForeground);
       } else if (widget.message.contains('sent a voice message')) {
-        return const Icon(Icons.mic_outlined, size: 18, color: Colors.grey);
+        return Icon(Icons.mic_outlined, size: 18, color: mutedForeground);
       } else {
-        return const Icon(Icons.done_all, size: 18, color: Colors.blue);
+        return Icon(Icons.done_all, size: 18, color: Theme.of(context).primaryColor);
       }
     }
 
@@ -53,15 +58,16 @@ class _MessageCardState extends State<MessageCard> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: widget.isOnline ? const LinearGradient(
-                      colors: [Colors.purple, Colors.black],
+                      colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
                       begin: Alignment.topRight,
                       end: Alignment.bottomLeft,
                     ) : null,
+                    border: widget.isOnline ? null : Border.all(color: border, width: 1),
                   ),
                   padding: const EdgeInsets.all(1),
                   child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: isDarkMode ? const Color(0xFF09090B) : Colors.white,
                       shape: BoxShape.circle,
                     ),
                     padding: const EdgeInsets.all(1),
@@ -79,7 +85,8 @@ class _MessageCardState extends State<MessageCard> {
                     children: [
                       Text(
                         widget.name,
-                        style: const TextStyle(
+                        style: TextStyle(
+                          color: foreground,
                           fontWeight: FontWeight.w600,
                           fontSize: 15,
                         ),
@@ -87,24 +94,30 @@ class _MessageCardState extends State<MessageCard> {
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          getMessageTypeIcon(), // Now returns Widget instead of Widget?
+                          getMessageTypeIcon(),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               widget.message,
                               style: TextStyle(
-                                color: Colors.grey[600],
+                                color: mutedForeground,
                                 fontSize: 14,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          const Text(" • "),
+                          Text(
+                            " • ",
+                            style: TextStyle(
+                              color: mutedForeground,
+                              fontSize: 14,
+                            ),
+                          ),
                           Text(
                             widget.time,
                             style: TextStyle(
-                              color: Colors.grey[600],
+                              color: mutedForeground,
                               fontSize: 14,
                             ),
                           ),
@@ -117,7 +130,7 @@ class _MessageCardState extends State<MessageCard> {
             ),
           ),
         ),
-        const Divider(height: 1),
+        Divider(height: 1, color: border),
       ],
     );
   }
