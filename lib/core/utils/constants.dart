@@ -1,30 +1,48 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 class ApiConstants {
-  static const String localhostBaseUrl = "http://192.168.1.9:8080"; //my ip address
+  static const String localhostBaseUrl =
+      "http://192.168.1.8:8080"; //my ip address
   // static const String baseUrl = "http://192.168.10.6:8080"; //my ip address
-  static const String productionBaseUrl = "https://api.beyondtheclass.me"; //my ip address
+  static const String productionBaseUrl =
+      "https://api.beyondtheclass.me"; //my ip address
 
   // This below is ort forwarding url from localhost:8080. create your own every time
-  
 
   // static String get baseUrl => dotenv.env['PRODUCTION'] == "true"
-  //     ? 
+  //     ?
   //     : localhostBaseUrl;
 
-   static String get baseUrl {
+  static bool _useProductionUrl = false;
+  static const String _baseUrlCacheKey = 'use_production_url';
+
+  static Future<void> initializeBaseUrl() async {
+    final prefs = await SharedPreferences.getInstance();
+    _useProductionUrl = prefs.getBool(_baseUrlCacheKey) ?? false;
+  }
+
+  static Future<void> _saveUrlPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_baseUrlCacheKey, _useProductionUrl);
+  }
+
+  static Future<void> toggleBaseUrl() async {
+    _useProductionUrl = !_useProductionUrl;
+    await _saveUrlPreference();
+  }
+
+  static String get baseUrl {
     if (kReleaseMode) {
-      return productionBaseUrl; // Use production URL in release mode
+      return productionBaseUrl; // Always use production URL in release mode
     }
-    return dotenv.env['PRODUCTION'] == "true" ? productionBaseUrl : localhostBaseUrl;
+    return _useProductionUrl ? productionBaseUrl : localhostBaseUrl;
   }
 
   static const String api = '/api';
 
   static const String uploads = '/uploads';
   static String get pdfBaseURl => "$baseUrl$api$uploads/";
-
 
   static const String auth = '/auth';
   static const String loginEndpoint = "$api$auth/login";
@@ -71,20 +89,19 @@ class AppConstants {
   static const String googleAuth = "Continue with Google";
 }
 
-
 class AppRoles {
   static const String teacher = "teacher";
   static const String student = "student";
   static const String alumni = "alumni";
   static const String extOrg = "ext_org";
   static const String noAccess = "no_access";
-  }
+}
+
 class AppSuperRoles {
   static const String superAdmin = "super";
   static const String admin = "admin";
   static const String moderator = "mod";
   // static const String none = "none";
-
 }
 
 class AppRoutes {
