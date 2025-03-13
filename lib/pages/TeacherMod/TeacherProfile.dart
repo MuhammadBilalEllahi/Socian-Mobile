@@ -11,6 +11,7 @@ class TeacherProfile extends ConsumerWidget {
     final user = auth.user;
 
     return Scaffold(
+      backgroundColor: Colors.red,
       appBar: AppBar(
         title: const Text('Teacher Profile'),
       ),
