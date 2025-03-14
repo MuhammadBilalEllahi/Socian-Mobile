@@ -11,6 +11,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shorebird_code_push/shorebird_code_push.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../GPS/MapMainPage.dart';
+
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
@@ -32,7 +34,8 @@ class _HomePageState extends ConsumerState<HomePage> {
       BottomNavBarRoute.home: const CampusPosts(),
       BottomNavBarRoute.message: const Messages(),
       BottomNavBarRoute.search: const Center(child: Text('Explore', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold))),
-      BottomNavBarRoute.explore: const MapsLook(),
+      // BottomNavBarRoute.explore: const MapsLook(),
+      BottomNavBarRoute.explore: MapMainPage(apiKey: "AlzaSyB0ILYpD2Uimi-p7xrHB8ETrJc0uMaPuBY"),
       BottomNavBarRoute.profile: const ProfilePage(),
     };
   }
