@@ -38,6 +38,10 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- Add Google Maps API Key -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AlzaSyB0ILYpD2Uimi-p7xrHB8ETrJc0uMaPuBY"/>
          <meta-data
             android:name="io.flutter.embedding.android.EnableImpeller"
             android:value="false" />
@@ -45,10 +49,7 @@
     android:name="com.google.android.gms.auth.api.signin"
     android:value="1076027750526-li5gkit9klq06mmocutusfb6ta8e1etc.apps.googleusercontent.com" />
 
-        <!-- Add Google Maps API Key -->
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AlzaSyB0ILYpD2Uimi-p7xrHB8ETrJc0uMaPuBY"/>
+
 
     </application>
     <!-- Required to query activities that can process text, see:

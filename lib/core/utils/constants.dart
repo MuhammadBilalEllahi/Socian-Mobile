@@ -36,7 +36,8 @@ class ApiConstants {
     if (kReleaseMode) {
       return productionBaseUrl; // Always use production URL in release mode
     }
-    return _useProductionUrl ? productionBaseUrl : localhostBaseUrl;
+    // return _useProductionUrl ? productionBaseUrl : localhostBaseUrl;
+    return _useProductionUrl ? productionBaseUrl : productionBaseUrl;//changed
   }
 
   static const String api = '/api';
@@ -139,7 +140,7 @@ class AppAssets {
   static const String googleAuth = 'assets/images/googleAuth.png';
 }
 
-enum BottomNavBarRoute { home, message, search, explore, profile }
+enum BottomNavBarRoute { home, message, explore, gps, profile }
 
 extension BottomNavBarRouteMap on BottomNavBarRoute {
   int get index => BottomNavBarRoute.values.indexOf(this);

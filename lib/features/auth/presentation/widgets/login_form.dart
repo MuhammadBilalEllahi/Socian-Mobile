@@ -83,6 +83,8 @@ class _LoginFormState extends ConsumerState<LoginForm> {
       child: Column(
         children: [
           TextField(
+            style: TextStyle(color: Colors.white),
+
             controller: emailController,
             decoration: const InputDecoration(
               labelText: "Email/Username",
@@ -90,9 +92,11 @@ class _LoginFormState extends ConsumerState<LoginForm> {
             ),
           ),
           TextField(
+            style: TextStyle(color: Colors.white),
             controller: passwordController,
             obscureText: !isPasswordVisible,
             decoration: InputDecoration(
+
               labelText: "Password",
               labelStyle: const TextStyle(color: Colors.white),
               suffixIcon: IconButton(
