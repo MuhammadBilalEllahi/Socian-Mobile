@@ -36,7 +36,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       BottomNavBarRoute.message: const Messages(),
       BottomNavBarRoute.explore: const Center(child: Text('Explore', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold))),
       // BottomNavBarRoute.explore: const MapsLook(),
-      BottomNavBarRoute.gps: MapMainPage(apiKey: "AlzaSyB0ILYpD2Uimi-p7xrHB8ETrJc0uMaPuBY"),
+      BottomNavBarRoute.gps: const MapMainPage(),
       // BottomNavBarRoute.gps: TempMap(),
       BottomNavBarRoute.profile: const ProfilePage(),
     };

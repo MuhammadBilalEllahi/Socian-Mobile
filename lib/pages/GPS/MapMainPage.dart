@@ -2,22 +2,23 @@
   import 'package:flutter/material.dart';
   import 'package:google_maps_flutter/google_maps_flutter.dart';
   import 'package:http/http.dart' as http;
-  import 'package:location/location.dart';
+  import 'package:geolocator/geolocator.dart';
+  import 'package:flutter_dotenv/flutter_dotenv.dart';
 
   class MapMainPage extends StatefulWidget {
-    final String apiKey;
-
-    const MapMainPage({Key? key, required this.apiKey}) : super(key: key);
+    
+    const MapMainPage({super.key});
 
     @override
     _MapMainPageState createState() => _MapMainPageState();
   }
 
   class _MapMainPageState extends State<MapMainPage> {
+    final String apiKey = dotenv.env['MAPS_API_KEY'] ?? '';
+
     GoogleMapController? _mapController;
     LatLng? _userLocation;
     String? errorMessage;
-    Location location = Location();
 
     @override
     void initState() {
@@ -28,7 +29,6 @@
     Future<void> _fetchLocationWithTimeout() async {
       print("Starting location fetch...");
       try {
-        // Wrap the entire process in a timeout
         await _checkPermissionsAndFetchLocation().timeout(
           const Duration(seconds: 15),
           onTimeout: () {
@@ -48,32 +48,26 @@
       bool serviceEnabled;
 
       try {
-        serviceEnabled = await location.serviceEnabled().timeout(
-          const Duration(seconds: 5),
-          onTimeout: () => false, // If it hangs, assume service is off
-        );
+        serviceEnabled = await Geolocator.isLocationServiceEnabled();
       } catch (e) {
         print("Service check failed: $e");
         serviceEnabled = false;
       }
 
       if (!serviceEnabled) {
-        print("Requesting location service...");
-        serviceEnabled = await location.requestService();
-        if (!serviceEnabled) {
-          setState(() {
-            errorMessage = "Location service is disabled";
-          });
-          return;
-        }
+        print("Location services disabled");
+        setState(() {
+          errorMessage = "Location service is disabled";
+        });
+        return;
       }
 
       print("Checking permission...");
-      PermissionStatus permissionGranted = await location.hasPermission();
-      if (permissionGranted == PermissionStatus.denied) {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
         print("Requesting permission...");
-        permissionGranted = await location.requestPermission();
-        if (permissionGranted != PermissionStatus.granted) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
           setState(() {
             errorMessage = "Location permission denied";
           });
@@ -81,17 +75,22 @@
         }
       }
 
+      if (permission == LocationPermission.deniedForever) {
+        setState(() {
+          errorMessage = "Location permissions permanently denied";
+        });
+        return;
+      }
+
       print("Getting device location...");
       try {
-        LocationData locationData = await location.getLocation().timeout(
-          const Duration(seconds: 10),
-          onTimeout: () {
-            throw Exception("Device location timed out");
-          },
+        Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+          timeLimit: const Duration(seconds: 10),
         );
 
         setState(() {
-          _userLocation = LatLng(locationData.latitude!, locationData.longitude!);
+          _userLocation = LatLng(position.latitude, position.longitude);
           errorMessage = null;
           print("Location set: $_userLocation");
         });
@@ -105,7 +104,7 @@
 
     Future<void> _fetchIpBasedLocation() async {
       final url = Uri.parse(
-          'https://www.gomaps.pro/geolocation/v1/geolocate?key=${widget.apiKey}');
+          'https://www.gomaps.pro/geolocation/v1/geolocate?key=$apiKey');
 
       try {
         final response = await http.post(
