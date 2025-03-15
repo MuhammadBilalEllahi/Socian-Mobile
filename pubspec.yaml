@@ -62,6 +62,8 @@ dependencies:
   rive: ^0.13.20
   giphy_picker: ^3.0.2
   shared_preferences: ^2.5.2
+  mime: ^1.0.4
+  http_parser: ^4.0.2
 
 dev_dependencies:
   flutter_test:
