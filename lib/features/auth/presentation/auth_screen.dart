@@ -1,15 +1,72 @@
 
+import 'dart:math';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/presentation/widgets/login_form.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-class AuthScreen extends ConsumerWidget {
+class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  _AuthScreenState createState() => _AuthScreenState();
+}
+
+class _AuthScreenState extends ConsumerState<AuthScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAppNameAnimation;
+  late Animation<double> _scaleAppNameAnimation;
+  late Animation<double> _fadeSubtitleAnimation;
+  late Animation<double> _pulseFormAnimation;
+  late Animation<double> _fadeSignUpAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000), // Smooth duration for staggered effects
+    )..forward();
+
+    // App Name: Fade and subtle scale
+    _fadeAppNameAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: const Interval(0.0, 0.5, curve: Curves.easeIn)),
+    );
+    _scaleAppNameAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: const Interval(0.0, 0.5, curve: Curves.easeOut)),
+    );
+
+    // Subtitle: Fade only
+    _fadeSubtitleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: const Interval(0.3, 0.7, curve: Curves.easeInOut)),
+    );
+
+    // Login Form: Opacity pulse (gentle glow effect)
+    _pulseFormAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween<double>(begin: 0.0, end: 1.0), weight: 50),
+      TweenSequenceItem(tween: Tween<double>(begin: 1.0, end: 0.85), weight: 25),
+      TweenSequenceItem(tween: Tween<double>(begin: 0.85, end: 1.0), weight: 25),
+    ]).animate(
+      CurvedAnimation(parent: _animationController, curve: const Interval(0.5, 1.0, curve: Curves.easeInOut)),
+    );
+
+    // "Sign Up" Row: Fade only
+    _fadeSignUpAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: const Interval(0.7, 1.0, curve: Curves.easeIn)),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final authController = ref.watch(authProvider.notifier);
 
@@ -29,98 +86,218 @@ class AuthScreen extends ConsumerWidget {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color.fromARGB(255, 0, 0, 0), Color.fromARGB(255, 48, 48, 48)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: 
-        // authState.isLoading
-        //     ? const Center(child: CircularProgressIndicator())
-        //     : 
+        color: Colors.teal,
+        child: Stack(
+          children: [
+            // Particle Background (unchanged)
+            Positioned.fill(child: AnimatedBackgroundParticles()),
+            Positioned.fill(child: Container(color: Colors.black.withOpacity(0.2))),
+            // Foreground Content with Subtle Animations
             LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight,
-                ),
-                child: IntrinsicHeight(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const SizedBox(height: 100),
-                        const Icon(
-                          Icons.school,
-                          size: 80,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(height: 20),
-                        const Text(
-                          AppConstants.appName,
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        const Text(
-                          "Login to access your account",
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 40),
-                        const LoginForm(),
-                        const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                    child: IntrinsicHeight(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            const Text(
-                              "Don't have an account?",
-                              style: TextStyle(
-                                // color: Colors.teal.shade600,
-                                color: Colors.white,
-                                fontSize: 14,
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pushReplacementNamed(
-                                  context,
-                                  AppRoutes.roleSelection
-                                );
-                              },
-                              child: const Text(
-                                "Sign Up",
-                                style: TextStyle(
-                                  // color: Colors.teal.shade800,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
+                            const SizedBox(height: 120),
+                            // App Name with Fade and Subtle Scale
+                            FadeTransition(
+                              opacity: _fadeAppNameAnimation,
+                              child: ScaleTransition(
+                                scale: _scaleAppNameAnimation,
+                                child: ShaderMask(
+                                  shaderCallback: (bounds) => LinearGradient(
+                                    // colors: [Colors.purpleAccent.withOpacity(0.8), Colors.blueAccent, Colors.white],
+                                    colors: [ Colors.white, Colors.white],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    tileMode: TileMode.mirror,
+                                  ).createShader(bounds),
+                                  child: Text(
+                                    
+                                    AppConstants.appName,
+                                    style: GoogleFonts.cinzel(
+                                      color: Colors.white,
+                                      fontSize: 30,
+                                      fontWeight: FontWeight.bold,
+                                      // shadows: [
+                                      //   Shadow(
+                                      //     color: Colors.white,
+                                      //     blurRadius: 10,
+                                      //   ),
+                                      // ],
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
+                            const SizedBox(height: 20),
+                            // Subtitle with Fade
+                            FadeTransition(
+                              opacity: _fadeSubtitleAnimation,
+                              child: Text(
+                                "Login to access your account",
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 18,
+                                  color: Colors.white.withOpacity(0.85),
+                                  fontWeight: FontWeight.w400,
+                                  letterSpacing: 1.5,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            const SizedBox(height: 40),
+                            // Login Form with Opacity Pulse
+                            AnimatedBuilder(
+                              animation: _pulseFormAnimation,
+                              builder: (context, child) {
+                                return Opacity(
+                                  opacity: _pulseFormAnimation.value,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(20),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(16),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.15 * _pulseFormAnimation.value),
+                                          blurRadius: 15,
+                                          offset: const Offset(0, 8),
+                                        ),
+                                      ],
+                                      border: Border.all(
+                                        color: Colors.white.withOpacity(0.2),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: const LoginForm(),
+                                  ),
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 30),
+                            // "Sign Up" Row with Fade
+                            FadeTransition(
+                              opacity: _fadeSignUpAnimation,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "Don't have an account?",
+                                    style: GoogleFonts.montserrat(
+                                      color: Colors.white.withOpacity(0.85),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pushReplacementNamed(
+                                        context,
+                                        AppRoutes.roleSelection,
+                                      );
+                                    },
+                                    child: Text(
+                                      "Sign Up",
+                                      style: GoogleFonts.montserrat(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                        shadows: [
+                                          Shadow(
+                                            color: Colors.blueAccent.withOpacity(0.5),
+                                            blurRadius: 5,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Spacer(),
                           ],
                         ),
-                        const Spacer(),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ),
-            );
-          },
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
   }
 }
+
+// Particle Background Widget (unchanged)
+class AnimatedBackgroundParticles extends StatefulWidget {
+  @override
+  _AnimatedBackgroundParticlesState createState() => _AnimatedBackgroundParticlesState();
+}
+
+class _AnimatedBackgroundParticlesState extends State<AnimatedBackgroundParticles>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 10),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return CustomPaint(
+          painter: ParticlePainter(_controller.value),
+          child: Container(),
+        );
+      },
+    );
+  }
+}
+
+class ParticlePainter extends CustomPainter {
+  final double animationValue;
+
+  ParticlePainter(this.animationValue);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    for (int i = 0; i < 20; i++) {
+      final x = (size.width * (i / 20)) + (sin(animationValue * 2 * 3.14 + i) * 50);
+      final y = (size.height * (i / 20)) + (cos(animationValue * 2 * 3.14 + i) * 50);
+      canvas.drawCircle(Offset(x, y), 5 + (sin(animationValue + i) * 3), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+
+
 
 

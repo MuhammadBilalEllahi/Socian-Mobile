@@ -20,7 +20,12 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   bool isPasswordVisible = false;
 
   void _login() async {
-    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
+    // Trim input values to remove leading/trailing whitespace
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+
+    // Validate inputs
+    if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please enter both email and password'),
@@ -35,11 +40,8 @@ class _LoginFormState extends ConsumerState<LoginForm> {
     });
 
     try {
-      await ref.read(authProvider.notifier).login(
-            emailController.text,
-            passwordController.text,
-          );
-      
+      await ref.read(authProvider.notifier).login(email, password);
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Login successful!'),
@@ -82,23 +84,33 @@ class _LoginFormState extends ConsumerState<LoginForm> {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
+          // Email Input Field
           TextField(
-            style: TextStyle(color: Colors.white),
-
+            style: const TextStyle(color: Colors.white),
             controller: emailController,
             decoration: const InputDecoration(
               labelText: "Email/Username",
               labelStyle: TextStyle(color: Colors.white),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Colors.white),
+              ),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Colors.white),
+              ),
             ),
           ),
+
+          // Password Input Field
           TextField(
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
             controller: passwordController,
             obscureText: !isPasswordVisible,
             decoration: InputDecoration(
-
               labelText: "Password",
               labelStyle: const TextStyle(color: Colors.white),
+              enabledBorder: const UnderlineInputBorder(
+                borderSide: BorderSide(color: Colors.white),
+              ),
               suffixIcon: IconButton(
                 icon: Icon(
                   isPasswordVisible ? Icons.visibility : Icons.visibility_off,
@@ -112,7 +124,10 @@ class _LoginFormState extends ConsumerState<LoginForm> {
               ),
             ),
           ),
+
           const SizedBox(height: 20),
+
+          // Login Button
           GestureDetector(
             onTap: isLoading ? null : _login,
             child: Container(
