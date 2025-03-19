@@ -3,7 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'location_text_selector.dart';
 import 'location_search_modal.dart';
-import '../create_post.dart';
+import '../CreatePost.dart';
 
 class LocationSection extends StatefulWidget {
   final PostType postType;

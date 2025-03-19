@@ -1,11 +1,12 @@
 import 'package:beyondtheclass/components/loader.dart';
 import 'package:beyondtheclass/pages/drawer/student/StudentDrawer.dart';
+import 'package:beyondtheclass/pages/home/widgets/universities/AllUniversityPosts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
-import 'components/post/post.dart';
-import 'components/post/create_post.dart';
+import '../components/post/post.dart';
+
 import 'package:beyondtheclass/core/usecases/PostProvider.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -38,126 +39,12 @@ class _CampusPostsState extends ConsumerState<CampusPosts> with SingleTickerProv
   Widget build(BuildContext context) {
     final postState = ref.watch(postProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Scaffold(
-      backgroundColor: isDark ? Colors.black : Colors.white,
-      drawer: const StudentDrawer(),
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
-            SliverAppBar(
-              backgroundColor: isDark ? Colors.black : Colors.white,
-              elevation: 0,
-              toolbarHeight: 60.0,
-              centerTitle: false,
-              title: Text(
-                AppConstants.appName,
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24,
-                ),
-              ),
-              automaticallyImplyLeading: false,
-              pinned: true,
-              leading: GestureDetector(
-                onTap: () {
-                  Scaffold.of(context).openDrawer();
-                },
-                child: Icon(
-                  Icons.menu_outlined,
-                  color: isDark ? Colors.white : Colors.black,
-                ),
-              ),
-              bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(48),
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
-                      ),
-                    ),
-                  ),
-                  child: TabBar(
-                    controller: _tabController,
-                    labelColor: isDark ? Colors.white : Colors.black,
-                    unselectedLabelColor: isDark ? Colors.grey[400] : Colors.grey[600],
-                    indicatorColor: isDark ? Colors.white : Colors.black,
-                    indicatorWeight: 3,
-                    tabs: const [
-                      Tab(
-                        child: Text(
-                          'Campus',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      Tab(
-                        child: Text(
-                          'Universities',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ];
-        },
-        body: TabBarView(
-          controller: _tabController,
-          children: [
-            // Campus Tab
-            RefreshIndicator(
-              onRefresh: () async {
-                await ref.read(postProvider.notifier).fetchPosts();
-              },
-              child: _buildPostsList(postState, isDark),
-            ),
-            // Universities Tab
-            const LogoLoader(),
-            Center(
-              child: Text(
-                'Coming Soon',
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 60.0),
-        child: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>  const CreatePost(
-  societies: [
-    {'id': '1', 'name': 'Computer Science Society'},
-    {'id': '2', 'name': 'Photography Club'},
-    // ... more societies
-  ],),
-              ),
-            );
-          },
-          backgroundColor: isDark ? Colors.white : Colors.black,
-          child: Icon(
-            Icons.add,
-            color: isDark ? Colors.black : Colors.white,
-          ),
-        ),
-      ),
+    
+    return RefreshIndicator(
+      onRefresh: () async {
+        await ref.read(postProvider.notifier).fetchPosts();
+      },
+      child: _buildPostsList(postState, isDark),
     );
   }
 

@@ -134,6 +134,45 @@ Future<List<dynamic>> getList(
 }
 
 
+
+Future<Map<String, dynamic>> delete(
+  String endpoint, {
+  Map<String, String>? headers,
+  Map<String, dynamic>? queryParameters,
+}) async {
+  final defaultHeaders = {"x-platform": "app"};
+          final token = await SecureStorageService.instance.getToken();
+
+
+      // Merge default headers with any provided custom headers
+      final mergedHeaders = {...defaultHeaders, 
+      if (token != null) "Authorization": "Bearer $token",
+      if (headers != null) ...headers};
+
+  final response = await _dio.delete(endpoint, options: Options(headers: mergedHeaders), queryParameters: queryParameters); 
+  return response.data as Map<String, dynamic>;
+}
+
+
+Future<Map<String, dynamic>> patch(
+  String endpoint,
+  Map<String, dynamic>? data, {
+  Map<String, String>? headers,
+  Map<String, dynamic>? queryParameters,
+  
+}) async {
+  final defaultHeaders = {"x-platform": "app"};
+          final token = await SecureStorageService.instance.getToken();
+
+
+      // Merge default headers with any provided custom headers
+      final mergedHeaders = {...defaultHeaders, 
+      if (token != null) "Authorization": "Bearer $token",
+      if (headers != null) ...headers};
+      final response = await _dio.patch(endpoint, data: data, options: Options(headers: mergedHeaders), queryParameters: queryParameters); 
+      return response.data as Map<String, dynamic>;
+}
+
 // Future<Map<String, dynamic>> getMap(
 //   String endpoint, {
 //   Map<String, String>? headers,

@@ -16,7 +16,6 @@ import 'widgets/location_section.dart';
 import 'widgets/media_preview.dart';
 import 'widgets/voice_note_section.dart';
 import 'widgets/media_controls.dart';
-import 'widgets/full_screen_media_view.dart';
 import 'dart:async';
 
 enum PostType { personal, society }

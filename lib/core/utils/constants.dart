@@ -14,7 +14,7 @@ class ApiConstants {
   //     ?
   //     : localhostBaseUrl;
 
-  static bool _useProductionUrl = false;
+  static bool _useProductionUrl = true;
   static const String _baseUrlCacheKey = 'use_production_url';
 
   static Future<void> initializeBaseUrl() async {
