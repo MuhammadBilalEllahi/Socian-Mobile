@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:video_player/video_player.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'dialog/PostViewPage.dart';
 
 // Reusable stateless widget for post stats
 class PostStatItem extends StatelessWidget {
@@ -208,6 +210,45 @@ class PostCard extends StatefulWidget {
 class _PostCardState extends State<PostCard> {
   bool isLiked = false;
   bool isDisliked = false;
+  int currentMediaIndex = 0;
+  VideoPlayerController? _videoController;
+
+  @override
+  void initState() {
+    super.initState();
+    isLiked = widget.post['voteId']?['userVotes']?['upvote'] ?? false;
+    isDisliked = widget.post['voteId']?['userVotes']?['downvote'] ?? false;
+    _initializeVideo();
+  }
+
+  void _initializeVideo() {
+    final media = widget.post['media'] as List?;
+    if (media != null && media.isNotEmpty) {
+      final video = media.firstWhere(
+        (element) => element['type']?.startsWith('video/') ?? false,
+        orElse: () => null,
+      );
+      if (video != null) {
+        _videoController = VideoPlayerController.networkUrl(Uri.parse(video['url']))
+          ..initialize().then((_) {
+            setState(() {});
+          });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _videoController?.dispose();
+    super.dispose();
+  }
+
+  void _showPostView() {
+    showDialog(
+      context: context,
+      builder: (context) => PostViewPage(post: widget.post),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -216,28 +257,33 @@ class _PostCardState extends State<PostCard> {
     final formattedDate = DateFormat('MMM d, y').format(createdAt);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-      decoration: BoxDecoration(
-        color: isDark ? const Color.fromARGB(0, 0, 0, 0) : Colors.white,
-        border: Border(
-          bottom: BorderSide(
-            color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
-            width: 1,
+    return GestureDetector(
+      onTap: _showPostView,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+        decoration: BoxDecoration(
+          color: isDark ? const Color.fromARGB(0, 0, 0, 0) : Colors.white,
+          border: Border(
+            bottom: BorderSide(
+              color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+              width: 1,
+            ),
           ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildUserInfo(isDark, formattedDate),
-          const SizedBox(height: 8),
-          _buildPostContent(isDark),
-          // const SizedBox(height: 16),
-          PostMedia(media: media),
-          const SizedBox(height: 4),
-          _buildActionButtons(),
-        ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildUserInfo(isDark, formattedDate),
+            const SizedBox(height: 8),
+            _buildPostContent(isDark),
+            if (media != null && media.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              _buildMediaCarousel(media),
+            ],
+            const SizedBox(height: 4),
+            _buildActionButtons(),
+          ],
+        ),
       ),
     );
   }
@@ -334,6 +380,93 @@ class _PostCardState extends State<PostCard> {
   );
   }
 
+  Widget _buildMediaCarousel(List media) {
+    return Column(
+      children: [
+        CarouselSlider(
+          options: CarouselOptions(
+            height: 300,
+            viewportFraction: 1.0,
+            onPageChanged: (index, reason) {
+              setState(() {
+                currentMediaIndex = index;
+              });
+            },
+          ),
+          items: media.map((item) {
+            if (item['type']?.startsWith('image/') ?? false) {
+              return Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    item['url'],
+                    width: double.infinity,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              );
+            } else if (item['type']?.startsWith('video/') ?? false) {
+              return Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: _videoController != null && _videoController!.value.isInitialized
+                      ? AspectRatio(
+                          aspectRatio: _videoController!.value.aspectRatio,
+                          child: VideoPlayer(_videoController!),
+                        )
+                      : const SizedBox(
+                          height: 300,
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          }).toList(),
+        ),
+        if (media.length > 1) ...[
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: media.asMap().entries.map((entry) {
+              return Container(
+                width: 8,
+                height: 8,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: entry.key == currentMediaIndex
+                      ? Colors.blue
+                      : Colors.grey[300],
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ],
+    );
+  }
+
   Widget _buildActionButtons() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
@@ -363,9 +496,7 @@ class _PostCardState extends State<PostCard> {
         PostStatItem(
           icon: Icons.chat_bubble_outline,
           count: widget.post['commentsCount'] ?? 0,
-          onTap: () {
-            // TODO: Show comments
-          },
+          onTap: _showPostView,
           isActive: false,
         ),
         PostStatItem(

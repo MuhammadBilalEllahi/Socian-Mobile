@@ -3,7 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 class ApiConstants {
   static const String localhostBaseUrl =
-      "http://192.168.1.8:8080"; //my ip address
+      "http://192.168.1.9:8080"; //my ip address
   // static const String baseUrl = "http://192.168.10.6:8080"; //my ip address
   static const String productionBaseUrl =
       "https://api.beyondtheclass.me"; //my ip address
@@ -14,7 +14,7 @@ class ApiConstants {
   //     ?
   //     : localhostBaseUrl;
 
-  static bool _useProductionUrl = true;
+  static bool _useProductionUrl = false;
   static const String _baseUrlCacheKey = 'use_production_url';
 
   static Future<void> initializeBaseUrl() async {
