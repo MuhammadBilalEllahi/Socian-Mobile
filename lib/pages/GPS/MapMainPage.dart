@@ -15,7 +15,7 @@ class MapMainPage extends StatefulWidget {
 
 class _MapMainPageState extends State<MapMainPage> {
   final String apiKey = dotenv.env['MAPS_API_KEY'] ?? '';
-  final String backendUrl = dotenv.env['BACKEND_URL'] ?? '';
+  final String backendUrl = 'https://api.beyondtheclass.me/api/location/users-in-radius';
 
   GoogleMapController? _mapController;
   LatLng? _userLocation;
