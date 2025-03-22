@@ -1,5 +1,6 @@
 
 import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:beyondtheclass/pages/GPS/GpsInitialPage.dart';
 import 'package:beyondtheclass/pages/bottomBar/MyBottomNavBar.dart';
 import 'package:beyondtheclass/pages/explore/MapsPage.dart';
 import 'package:beyondtheclass/pages/StudentPages/home/widgets/campus/CampusPosts.dart';
@@ -35,9 +36,10 @@ class _HomePageState extends ConsumerState<HomePage> {
       BottomNavBarRoute.home: const CampusPosts(),
       BottomNavBarRoute.message: const Messages(),
       BottomNavBarRoute.explore: const Center(child: Text('Explore', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold))),
-      // BottomNavBarRoute.explore: const MapsLook(),
-      BottomNavBarRoute.gps: const MapMainPage(),
-      // BottomNavBarRoute.gps: TempMap(),
+      
+      // BottomNavBarRoute.gps: const MapMainPage(),
+      BottomNavBarRoute.gps: const GpsInitialPage(),
+     
       BottomNavBarRoute.profile: const ProfilePage(),
     };
   }

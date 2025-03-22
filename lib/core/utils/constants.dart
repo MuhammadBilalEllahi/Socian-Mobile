@@ -73,6 +73,11 @@ class ApiConstants {
 
   static const String teachers = '/teacher';
   static const String campusTeachers = '$api$teachers/campus/teachers';
+  
+  
+  static const String gpsRadius = '$api/location/users-in-radius';
+
+
 }
 
 class AppConstants {
