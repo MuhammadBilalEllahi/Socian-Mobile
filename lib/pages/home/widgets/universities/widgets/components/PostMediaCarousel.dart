@@ -20,6 +20,8 @@ class PostMediaCarousel extends StatefulWidget {
 
 class _PostMediaCarouselState extends State<PostMediaCarousel> {
   VideoPlayerController? _videoController;
+  bool _isPlaying = false;
+  bool _showControls = true;
 
   @override
   void initState() {
@@ -42,6 +44,36 @@ class _PostMediaCarouselState extends State<PostMediaCarousel> {
     }
   }
 
+  void _togglePlayPause() {
+    if (_videoController != null && _videoController!.value.isInitialized) {
+      setState(() {
+        if (_isPlaying) {
+          _videoController!.pause();
+        } else {
+          _videoController!.play();
+        }
+        _isPlaying = !_isPlaying;
+      });
+    }
+  }
+
+  void _toggleControls() {
+    setState(() {
+      _showControls = !_showControls;
+    });
+    
+    // Auto-hide controls after a few seconds if video is playing
+    if (_showControls && _isPlaying) {
+      Future.delayed(const Duration(seconds: 3), () {
+        if (mounted && _isPlaying) {
+          setState(() {
+            _showControls = false;
+          });
+        }
+      });
+    }
+  }
+
   @override
   void dispose() {
     _videoController?.dispose();
@@ -61,7 +93,17 @@ class _PostMediaCarouselState extends State<PostMediaCarousel> {
           viewportFraction: 1.0,
           enlargeCenterPage: false,
           enableInfiniteScroll: widget.mediaList.length > 1,
-          onPageChanged: (index, reason) => widget.onPageChanged(index),
+          onPageChanged: (index, reason) {
+            widget.onPageChanged(index);
+            // Pause video when changing pages
+            if (_videoController != null && _videoController!.value.isPlaying) {
+              _videoController!.pause();
+              setState(() {
+                _isPlaying = false;
+                _showControls = true;
+              });
+            }
+          },
         ),
         items: widget.mediaList.map((media) {
           final bool isVideo = media['type']?.startsWith('video/') ?? false;
@@ -83,30 +125,43 @@ class _PostMediaCarouselState extends State<PostMediaCarousel> {
     final size = MediaQuery.of(context).size;
     
     return Stack(
-        alignment: Alignment.center,
-        children: [
-          if (_videoController != null && _videoController!.value.isInitialized)
-            SizedBox(
+      alignment: Alignment.center,
+      children: [
+        if (_videoController != null && _videoController!.value.isInitialized)
+          GestureDetector(
+            onTap: _toggleControls,
+            child: SizedBox(
               width: size.width,
               height: size.height,
               child: VideoPlayer(_videoController!),
-            )
-          else
-            Image.network(
-              media['thumbnail'] ?? '',
-              width: double.infinity,
-              height: double.infinity,
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) =>
-                  const Center(child: Text('Video Thumbnail Not Available')),
             ),
-          const Icon(
-            Icons.play_circle_fill,
-            size: 50,
-            color: Colors.white,
+          )
+        else
+          Image.network(
+            media['thumbnail'] ?? '',
+            width: double.infinity,
+            height: double.infinity,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) =>
+                const Center(child: Text('Video Thumbnail Not Available')),
           ),
-        ],
-      
+        if (_showControls)
+          GestureDetector(
+            onTap: _togglePlayPause,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.3),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                _isPlaying ? Icons.pause : Icons.play_arrow,
+                size: 50,
+                color: Colors.white,
+              ),
+            ),
+          ),
+      ],
     );
   }
 

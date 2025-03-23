@@ -20,6 +20,8 @@ class _AllUniversityPostsState extends State<AllUniversityPosts> {
 
   void _fetchPosts() async {
     final posts = await AllUniversityService.getAllUniversityPosts();
+
+    debugPrint('posts--------------: $posts');
     setState(() {
       _posts = posts;
     });

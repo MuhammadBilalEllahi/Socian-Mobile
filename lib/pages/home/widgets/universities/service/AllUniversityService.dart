@@ -18,19 +18,19 @@ class AllUniversityService {
     });
   }
 
-  static Future<void> getSinglePost(String postId) async {
+  static Future<Map<String, dynamic>> getSinglePost(String postId) async {
     final response = await apiClient.get('/api/posts/single/post?postId=$postId');
     return response;
   }
 
-  static Future<void> postComments(String postId) async {
+  static Future<List<Map<String, dynamic>>> getComments(String postId) async {
     final response = await apiClient.get('/api/posts/post/comments?postId=$postId');
-    return response;
+    return List<Map<String, dynamic>>.from(response);
   }
 
-  static Future<void> repliesComments(String commentId) async {
+  static Future<List<Map<String, dynamic>>> repliesComments(String commentId) async {
     final response = await apiClient.get('/api/posts/post/comment/replies?commentId=$commentId');
-    return response;
+    return List<Map<String, dynamic>>.from(response);
   }
 
   static Future<Map<String, dynamic>> createComment(String postId, String comment) async {
