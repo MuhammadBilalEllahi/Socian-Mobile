@@ -127,8 +127,13 @@ class _MapMainPageState extends State<MapMainPage> {
   Future<void> _fetchUsersInRadius() async {
     if (_userLocation == null) return;
 
-    final url = Uri.parse(
-        "$backendUrl/api/location/users-in-radius?lat=${_userLocation!.latitude}&lng=${_userLocation!.longitude}&radius=$_radius");
+    // final url = Uri.parse(
+    //     "$backendUrl/api/location/users-in-radius?lat=${_userLocation!.latitude}&lng=${_userLocation!.longitude}&radius=$_radius");
+
+final url = Uri.parse(
+  "$backendUrl?lat=${_userLocation!.latitude}&lng=${_userLocation!.longitude}&radius=$_radius"
+);
+
 
     try {
       final response = await http.get(url).timeout(const Duration(seconds: 10));

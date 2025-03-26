@@ -32,7 +32,7 @@ class ApiConstants {
     await _saveUrlPreference();
   }
 
-  static String get baseUrl {
+  static String get baseUrl { 
     if (kReleaseMode) {
       return productionBaseUrl; // Always use production URL in release mode
     }
