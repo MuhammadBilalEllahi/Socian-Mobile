@@ -6,7 +6,6 @@ import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:beyondtheclass/pages/splashScreen/components/GoogleButton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -34,7 +33,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
     _textAnimationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3500), // Increased to 3s for 3 words
+      duration: const Duration(milliseconds: 3500),
     )..forward();
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -51,7 +50,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       ),
     );
 
-    Future.delayed(const Duration(seconds: 4), () { // Adjusted to 4s to see full animation
+    Future.delayed(const Duration(seconds: 4), () {
       setState(() => _moveToTop = true);
     });
   }
@@ -112,7 +111,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 Text(
                   AppConstants.appSloganNewLine,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.montserrat(
+                  style: TextStyle(
                     fontSize: 16,
                     color: Colors.white.withOpacity(0.8),
                     fontWeight: FontWeight.w300,
@@ -174,70 +173,57 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     );
   }
 
+  Widget _buildAnimatedAppName() {
+    String appName = 'Beyond The Class'; 
+    List<String> words = appName.split(' '); 
+    double totalDuration = 3.5;
 
+    return ShaderMask(
+      shaderCallback: (bounds) => const LinearGradient(
+        colors: [Colors.white, Colors.white],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ).createShader(bounds),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: words.asMap().entries.map((entry) {
+          final index = entry.key;
+          final word = entry.value;
+          final wordDelay = (index * (totalDuration * 0.15)) / words.length;
 
+          return AnimatedBuilder(
+            animation: _textAnimationController,
+            builder: (context, child) {
+              final animationValue = (_textAnimationController.value - wordDelay).clamp(0.0, 1.0);
+              final progress = Curves.easeOutCubic.transform(animationValue);
 
-
-  // Fixed to animate all words in "Beyond The Class"
-Widget _buildAnimatedAppName() {
-  String appName = 'Beyond The Class'; 
-  List<String> words = appName.split(' '); 
-  double totalDuration = 3.5; // Total animation duration in seconds
-
-  return ShaderMask(
-    shaderCallback: (bounds) => const LinearGradient(
-      colors: [Colors.white, Colors.white],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    ).createShader(bounds),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: words.asMap().entries.map((entry) {
-        final index = entry.key;
-        final word = entry.value;
-        final wordDelay = (index * (totalDuration * 0.15)) / words.length; // Delays each word slightly
-
-        return AnimatedBuilder(
-          animation: _textAnimationController,
-          builder: (context, child) {
-            final animationValue = (_textAnimationController.value - wordDelay)
-                .clamp(0.0, 1.0); // Ensures full animation
-            final progress = Curves.easeOutCubic.transform(animationValue);
-
-            return Transform.translate(
-              offset: Offset(0, -30 * (1 - progress)), // Moves up smoothly
-              child: Opacity(
-                opacity: progress,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                  child: Text(
-                    word,
-                    style: GoogleFonts.cinzel(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(color: Colors.black.withOpacity(0.3), blurRadius: 10),
-                      ],
+              return Transform.translate(
+                offset: Offset(0, -30 * (1 - progress)),
+                child: Opacity(
+                  opacity: progress,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                    child: Text(
+                      word,
+                      style: const TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(color: Colors.black26, blurRadius: 10),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            );
-          },
-        );
-      }).toList(),
-    ),
-  );
-}
-
-
-
-
-
-
-
+              );
+            },
+          );
+        }).toList(),
+      ),
+    );
+  }
 
   Widget _buildInfoContainer(String imagePath, String title, String subtitle, Color baseColor) {
     return Container(
@@ -275,7 +261,7 @@ Widget _buildAnimatedAppName() {
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.cinzel(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -284,7 +270,7 @@ Widget _buildAnimatedAppName() {
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: GoogleFonts.montserrat(
+                  style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
@@ -324,7 +310,7 @@ Widget _buildAnimatedAppName() {
         child: Center(
           child: Text(
             text,
-            style: GoogleFonts.montserrat(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: textColor,
@@ -336,7 +322,6 @@ Widget _buildAnimatedAppName() {
   }
 }
 
-// Particle Background Widget (unchanged)
 class AnimatedBackgroundParticles extends StatefulWidget {
   @override
   _AnimatedBackgroundParticlesState createState() => _AnimatedBackgroundParticlesState();
@@ -387,8 +372,8 @@ class ParticlePainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     for (int i = 0; i < 20; i++) {
-      final x = (size.width * (i / 20)) + (sin(animationValue * 2 * 3.14 + i) * 50);
-      final y = (size.height * (i / 20)) + (cos(animationValue * 2 * 3.14 + i) * 50);
+      final x = (size.width * (i / 20)) + (sin(animationValue * 2 * pi + i) * 50);
+      final y = (size.height * (i / 20)) + (cos(animationValue * 2 * pi + i) * 50);
       canvas.drawCircle(Offset(x, y), 5 + (sin(animationValue + i) * 3), paint);
     }
   }
@@ -396,13 +381,3 @@ class ParticlePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
-
-
-
-
-
-
-
-
-
-

@@ -1,43 +1,103 @@
 import 'dart:convert';
+import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:web_socket_channel/io.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 
-class MapMainPage extends StatefulWidget {
+class MapMainPage extends ConsumerStatefulWidget {
   const MapMainPage({super.key});
 
   @override
-  _MapMainPageState createState() => _MapMainPageState();
+  ConsumerState<MapMainPage> createState() => _MapMainPageState();
 }
 
-class _MapMainPageState extends State<MapMainPage> {
+class _MapMainPageState extends ConsumerState<MapMainPage> {
   final String apiKey = dotenv.env['MAPS_API_KEY'] ?? '';
-  final String backendUrl = 'https://api.beyondtheclass.me/api/location/users-in-radius';
+  final String baseUrl = ApiConstants.portUrl;
 
   GoogleMapController? _mapController;
   LatLng? _userLocation;
   String? errorMessage;
   Set<Marker> _markers = {};
   Set<Circle> _circles = {};
-  IOWebSocketChannel? _channel;
-  double _radius = 500.0; // Default radius in meters
+  IO.Socket? _socket;
+  double _radius = 500.0;
   int _userCountInRadius = 0;
 
-  // Custom marker icons
-  BitmapDescriptor? _userMarkerIcon; // Red for user
-  BitmapDescriptor? _otherMarkerIcon; // Blue for others
+  BitmapDescriptor? _userMarkerIcon;
+  BitmapDescriptor? _otherMarkerIcon;
 
   @override
   void initState() {
     super.initState();
-    _setMarkerIcons(); // Set custom marker icons
+    _setMarkerIcons();
     _fetchLocationWithTimeout();
+    _initSocket();
   }
 
-  // Function to set custom marker icons
+  void _initSocket() {
+    try {
+      _socket = IO.io(baseUrl, <String, dynamic>{
+        'transports': ['websocket'],
+        'autoConnect': false,
+      });
+
+      _socket?.connect();
+
+      _socket?.on('connect', (_) {
+        print('Connected to Socket.IO server');
+      });
+
+      _socket?.on('attendeeLocationUpdate', (data) {
+        if (data != null && _isWithinRadius(data['latitude'], data['longitude'])) {
+          setState(() {
+            if (!_markers.any((m) => m.markerId.value == data['id'].toString())) {
+              _markers.add(
+                Marker(
+                  markerId: MarkerId(data['id'].toString()),
+                  position: LatLng(data['latitude'], data['longitude']),
+                  icon: _otherMarkerIcon ?? BitmapDescriptor.defaultMarker,
+                  infoWindow: InfoWindow(title: data['name'] ?? "Unknown"),
+                ),
+              );
+              _userCountInRadius = _markers.length - 1;
+            }
+          });
+        }
+      });
+
+      _socket?.on('attendeesList', (data) {
+        if (data is List) {
+          setState(() {
+            for (var user in data) {
+              if (_isWithinRadius(user['latitude'], user['longitude']) &&
+                  !_markers.any((m) => m.markerId.value == user['id'].toString())) {
+                _markers.add(
+                  Marker(
+                    markerId: MarkerId(user['id'].toString()),
+                    position: LatLng(user['latitude'], user['longitude']),
+                    icon: _otherMarkerIcon ?? BitmapDescriptor.defaultMarker,
+                    infoWindow: InfoWindow(title: user['name'] ?? "Unknown"),
+                  ),
+                );
+              }
+            }
+            _userCountInRadius = _markers.length - 1;
+          });
+        }
+      });
+
+      _socket?.on('error', (error) => print('Socket error: $error'));
+      _socket?.on('disconnect', (_) => print('Disconnected from Socket.IO server'));
+    } catch (e) {
+      print('Socket initialization error: $e');
+    }
+  }
+
   Future<void> _setMarkerIcons() async {
     _userMarkerIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed);
     _otherMarkerIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
@@ -92,18 +152,39 @@ class _MapMainPageState extends State<MapMainPage> {
 
     setState(() {
       _userLocation = LatLng(position.latitude, position.longitude);
+      final auth = ref.read(authProvider); // Access auth data here
       _markers.add(Marker(
         markerId: const MarkerId("user_location"),
         position: _userLocation!,
-        icon: _userMarkerIcon ?? BitmapDescriptor.defaultMarker, // Red marker for user
-        infoWindow: const InfoWindow(title: "Your Location"),
+        icon: _userMarkerIcon ?? BitmapDescriptor.defaultMarker,
+        infoWindow: InfoWindow(title: auth.user?['name'] ?? "Your Location"),
       ));
       _updateCircle();
     });
 
     _mapController?.animateCamera(CameraUpdate.newLatLngZoom(_userLocation!, 15));
-    _fetchUsersInRadius();
-    _connectWebSocket();
+    _sendLocationUpdate();
+    _requestNearbyAttendees();
+  }
+
+  void _sendLocationUpdate() {
+    if (_userLocation == null || _socket == null || !_socket!.connected) return;
+
+    final auth = ref.read(authProvider); // Access auth data here
+    final userData = {
+      'userId': auth.user?['id'] ?? 'default_user_id', // Use auth ID
+      'name': auth.user?['name'] ?? 'Unknown', // Use auth name
+      'latitude': _userLocation!.latitude,
+      'longitude': _userLocation!.longitude,
+      'radius': _radius,
+    };
+
+    _socket?.emit('updateLocation', userData);
+  }
+
+  void _requestNearbyAttendees() {
+    if (_socket == null || !_socket!.connected) return;
+    _socket?.emit('requestAttendees');
   }
 
   void _updateCircle() {
@@ -124,78 +205,6 @@ class _MapMainPageState extends State<MapMainPage> {
     });
   }
 
-  Future<void> _fetchUsersInRadius() async {
-    if (_userLocation == null) return;
-
-    // final url = Uri.parse(
-    //     "$backendUrl/api/location/users-in-radius?lat=${_userLocation!.latitude}&lng=${_userLocation!.longitude}&radius=$_radius");
-
-final url = Uri.parse(
-  "$backendUrl?lat=${_userLocation!.latitude}&lng=${_userLocation!.longitude}&radius=$_radius"
-);
-
-
-    try {
-      final response = await http.get(url).timeout(const Duration(seconds: 10));
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          _markers.clear();
-          _markers.add(Marker(
-            markerId: const MarkerId("user_location"),
-            position: _userLocation!,
-            icon: _userMarkerIcon ?? BitmapDescriptor.defaultMarker, // Red marker for user
-            infoWindow: const InfoWindow(title: "Your Location"),
-          ));
-
-          _userCountInRadius = data.length;
-          for (var user in data) {
-            _markers.add(
-              Marker(
-                markerId: MarkerId(user['id'].toString()),
-                position: LatLng(user['latitude'], user['longitude']),
-                icon: _otherMarkerIcon ?? BitmapDescriptor.defaultMarker, // Blue marker for others
-                infoWindow: InfoWindow(title: user['name']),
-              ),
-            );
-          }
-        });
-      } else {
-        setState(() {
-          errorMessage = "Failed to load users: ${response.statusCode}";
-        });
-      }
-    } catch (e) {
-      setState(() {
-        errorMessage = "Error fetching users: $e";
-      });
-    }
-  }
-
-  void _connectWebSocket() {
-    _channel = IOWebSocketChannel.connect(Uri.parse(backendUrl));
-    _channel!.stream.listen((message) {
-      final data = jsonDecode(message);
-      if (data['event'] == 'attendeeLocationUpdate' && _isWithinRadius(data['latitude'], data['longitude'])) {
-        setState(() {
-          _markers.add(
-            Marker(
-              markerId: MarkerId(data['id'].toString()),
-              position: LatLng(data['latitude'], data['longitude']),
-              icon: _otherMarkerIcon ?? BitmapDescriptor.defaultMarker, // Blue marker for others
-              infoWindow: InfoWindow(title: data['name']),
-            ),
-          );
-          _userCountInRadius = _markers.length - 1; // Subtract user's own marker
-        });
-      }
-    }, onError: (error) {
-      setState(() {
-        errorMessage = "WebSocket error: $error";
-      });
-    });
-  }
-
   bool _isWithinRadius(double lat, double lng) {
     if (_userLocation == null) return false;
     double distance = Geolocator.distanceBetween(
@@ -209,6 +218,9 @@ final url = Uri.parse(
 
   @override
   Widget build(BuildContext context) {
+    final auth = ref.watch(authProvider); // Watch auth changes reactively
+    String name = auth.user?['name'] ?? "Unknown";
+
     return Scaffold(
       body: Stack(
         children: [
@@ -256,18 +268,43 @@ final url = Uri.parse(
                     setState(() {
                       _radius = value;
                       _updateCircle();
-                      _fetchUsersInRadius();
+                      _sendLocationUpdate();
+                      _requestNearbyAttendees();
                     });
                   },
                 ),
               ],
             ),
           ),
+          Positioned(
+            top: 150,
+            left: 0,
+            bottom: 0,
+            width: 150,
+            child: Container(
+              color: Colors.white.withOpacity(0.8),
+              child: ListView(
+                padding: const EdgeInsets.all(8.0),
+                children: _markers
+                    .where((marker) => marker.markerId.value != "user_location")
+                    .map((marker) => ListTile(
+                          title: Text(
+                            marker.infoWindow.title ?? "Unknown",
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ))
+                    .toList(),
+              ),
+            ),
+          ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _fetchLocationWithTimeout,
-        child: const Icon(Icons.refresh),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, 100),
+        child: FloatingActionButton(
+          onPressed: _fetchLocationWithTimeout,
+          child: const Icon(Icons.refresh),
+        ),
       ),
     );
   }
@@ -275,7 +312,8 @@ final url = Uri.parse(
   @override
   void dispose() {
     _mapController?.dispose();
-    _channel?.sink.close();
+    _socket?.disconnect();
+    _socket?.dispose();
     super.dispose();
   }
 }

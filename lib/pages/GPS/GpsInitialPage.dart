@@ -1,7 +1,6 @@
 import 'package:beyondtheclass/pages/GPS/LiveLocation.dart';
 import 'package:beyondtheclass/pages/GPS/MapMainPage.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class GpsInitialPage extends StatelessWidget {
   const GpsInitialPage({super.key});
@@ -35,7 +34,6 @@ class GpsInitialPage extends StatelessWidget {
                 ),
               ),
             ),
-         
             Positioned(
               top: 50,
               left: 0,
@@ -43,7 +41,7 @@ class GpsInitialPage extends StatelessWidget {
               child: Center(
                 child: Text(
                   'GPS Navigation',
-                  style: GoogleFonts.poppins(
+                  style: TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
@@ -139,46 +137,45 @@ class CustomAppBarClipper extends CustomClipper<Path> {
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
 
-
-  Widget _buildNavigationCard(BuildContext context, {
-    required String title,
-    required IconData icon,
-    required Gradient gradient,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 25),
-        decoration: BoxDecoration(
-          gradient: gradient,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 20,
-              spreadRadius: 5,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: Colors.white, size: 35),
-            const SizedBox(width: 15),
-            Text(
-              title,
-              style: GoogleFonts.poppins(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
+Widget _buildNavigationCard(
+  BuildContext context, {
+  required String title,
+  required IconData icon,
+  required Gradient gradient,
+  required VoidCallback onTap,
+}) {
+  return GestureDetector(
+    onTap: onTap,
+    child: Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 25),
+      decoration: BoxDecoration(
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 20,
+            spreadRadius: 5,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
-    );
-  }
-
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: Colors.white, size: 35),
+          const SizedBox(width: 15),
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}

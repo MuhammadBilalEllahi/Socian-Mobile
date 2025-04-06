@@ -6,7 +6,11 @@ class ApiConstants {
       "http://192.168.1.8:8080"; //my ip address
   // static const String baseUrl = "http://192.168.10.6:8080"; //my ip address
   static const String productionBaseUrl =
-      "https://api.beyondtheclass.me"; 
+      "https://w7x50p90-8080.inc1.devtunnels.ms/"; 
+    
+
+  static const String portUrl =
+      "https://w7x50p90-8080.inc1.devtunnels.ms/"; 
 
   // This below is ort forwarding url from localhost:8080. create your own every time
 

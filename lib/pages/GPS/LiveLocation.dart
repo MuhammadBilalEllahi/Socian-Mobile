@@ -1,5 +1,5 @@
-
 import 'dart:convert';
+import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -16,7 +16,8 @@ class LiveLocation extends StatefulWidget {
 
 class _LiveLocationState extends State<LiveLocation> {
   final String apiKey = dotenv.env['MAPS_API_KEY'] ?? '';
-  final String backendUrl = 'https://api.beyondtheclass.me/api/location/users-in-radius';
+  final String baseUrl = ApiConstants.portUrl;
+  late String backendUrl; // Declare backendUrl with `late`
 
   GoogleMapController? _mapController;
   LatLng? _userLocation;
@@ -27,6 +28,7 @@ class _LiveLocationState extends State<LiveLocation> {
   @override
   void initState() {
     super.initState();
+    backendUrl = '$baseUrl/api/location/users-in-radius'; // Initialize here
     _fetchLocationWithTimeout();
   }
 
@@ -86,7 +88,8 @@ class _LiveLocationState extends State<LiveLocation> {
       ));
     });
 
-    _mapController?.animateCamera(CameraUpdate.newLatLngZoom(_userLocation!, 15));
+    _mapController
+        ?.animateCamera(CameraUpdate.newLatLngZoom(_userLocation!, 15));
 
     _fetchAttendees();
     _connectWebSocket();
@@ -166,7 +169,8 @@ class _LiveLocationState extends State<LiveLocation> {
           else
             Center(
               child: errorMessage != null
-                  ? Text(errorMessage!, style: const TextStyle(color: Colors.red))
+                  ? Text(errorMessage!,
+                      style: const TextStyle(color: Colors.red))
                   : const CircularProgressIndicator(),
             ),
         ],
@@ -185,4 +189,3 @@ class _LiveLocationState extends State<LiveLocation> {
     super.dispose();
   }
 }
-
