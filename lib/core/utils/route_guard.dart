@@ -1,4 +1,5 @@
 import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/PastPapers.dart';
+import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/SubjectsView.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
@@ -119,6 +120,7 @@ class RouteGuard {
           AppRoutes.mapMainPage: const MapsLook(),
           AppRoutes.profileMainPage: const ProfilePage(),
           AppRoutes.pastPaperScreen: const PastPapers(),
+          AppRoutes.subjectsInDepartmentScreen: const SubjectsView(),
           ...commonRoutes,
         };
       case AppRoles.teacher:

@@ -61,6 +61,7 @@ dependencies:
   rive: ^0.13.20
   giphy_picker: ^3.0.2
   shared_preferences: ^2.5.2
+  flutter_pdfview: ^1.4.0
 
 dev_dependencies:
   flutter_test:

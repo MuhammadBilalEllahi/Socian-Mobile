@@ -4,7 +4,6 @@ import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PastPapers extends StatefulWidget {
-
   const PastPapers({super.key});
 
   @override
@@ -12,32 +11,24 @@ class PastPapers extends StatefulWidget {
 }
 
 class _PastPapersState extends State<PastPapers> {
-  late Future<Map<String, dynamic>> pastPapers = Future.value({}) ;
+  late Future<Map<String, dynamic>> pastPapers = Future.value({});
   final ApiClient apiClient = ApiClient();
   late String id;
+  String subjectName = '';
 
   @override
   void initState() {
     super.initState();
   }
 
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    
-    // Retrieve route arguments and cast to Map<String, dynamic> or null
     final routeArgs = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-
-print("Route $routeArgs ${routeArgs!['id']}");
-    if (routeArgs.containsKey('id')) {
-      
-      id = routeArgs['id']; 
-      print("ID HM ${routeArgs['id']}");
-      // Fetch past papers based on the retrieved id
+    if (routeArgs?.containsKey('_id') ?? false) {
+      id = routeArgs!['_id'];
       fetchPastPapers(id);
     } else {
-      // Handle error case where 'id' is missing
       setState(() {
         pastPapers = Future.error('Invalid route arguments or missing ID');
       });
@@ -45,13 +36,12 @@ print("Route $routeArgs ${routeArgs!['id']}");
   }
 
   void fetchPastPapers(String id) async {
-      
-      print("ID $id");
     final String endpoint = "${ApiConstants.subjectPastpapers}/$id";
     try {
       final response = await apiClient.get(endpoint);
+      debugPrint("PAST PAPERS? $response");
       setState(() {
-        // pastPapers = Future.value(response);
+        subjectName = response?['subjectName'] ?? '';
         pastPapers = Future.value(response ?? {});
       });
     } catch (e) {
@@ -64,7 +54,10 @@ print("Route $routeArgs ${routeArgs!['id']}");
   Future<void> _launchPDF(String? pdfUrl) async {
     if (pdfUrl == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No PDF link available')),
+        const SnackBar(
+          content: Text('No PDF link available'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
@@ -74,12 +67,18 @@ print("Route $routeArgs ${routeArgs!['id']}");
       final Uri url = Uri.parse(downloadUrl);
       if (!await launchUrl(url, mode: LaunchMode.platformDefault)) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not launch $downloadUrl')),
+          SnackBar(
+            content: Text('Could not launch $downloadUrl'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error opening PDF: $e')),
+        SnackBar(
+          content: Text('Error opening PDF: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -87,9 +86,17 @@ print("Route $routeArgs ${routeArgs!['id']}");
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text('Past Papers', style: Theme.of(context).textTheme.headlineSmall),
-        backgroundColor: Colors.deepPurple[50],
+        title: Text(
+          subjectName.isEmpty ? 'Past Papers' : '$subjectName Past Papers',
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+          ),
+        ),
+        backgroundColor: const Color(0xFF09090B),
         elevation: 0,
       ),
       body: FutureBuilder<Map<String, dynamic>>(
@@ -98,7 +105,7 @@ print("Route $routeArgs ${routeArgs!['id']}");
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple),
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
             );
           } else if (snapshot.hasError) {
@@ -108,8 +115,19 @@ print("Route $routeArgs ${routeArgs!['id']}");
                 children: [
                   const Icon(Icons.error_outline, color: Colors.red, size: 60),
                   const SizedBox(height: 16),
-                  Text('Error Loading Past Papers', style: Theme.of(context).textTheme.titleMedium),
-                  Text('${snapshot.error}', style: Theme.of(context).textTheme.bodySmall),
+                  Text(
+                    'Error Loading Past Papers',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    '${snapshot.error}',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 14,
+                    ),
+                  ),
                 ],
               ),
             );
@@ -118,40 +136,52 @@ print("Route $routeArgs ${routeArgs!['id']}");
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.list, color: Colors.grey, size: 60),
+                  Icon(Icons.list, color: Colors.grey[800], size: 60),
                   const SizedBox(height: 16),
-                  Text('No Past Papers Available', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    'No Past Papers Available',
+                    style: TextStyle(
+                      color: Colors.grey[300],
+                      fontSize: 16,
+                    ),
+                  ),
                 ],
               ),
             );
           } else {
-            final papers = snapshot.data!['pastPapers']!;
+            final papers = snapshot.data!['papers'] as List;
             return ListView.builder(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(16),
               itemCount: papers.length,
               itemBuilder: (context, index) {
                 final paper = papers[index];
-                return Card(
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF18181B),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFF27272A), width: 1),
                   ),
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  child: ExpansionTile(
-                    title: Text(
-                      'Academic Year ${paper['year']}',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.deepPurple,
-                        fontWeight: FontWeight.bold,
+                  child: Theme(
+                    data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                    child: ExpansionTile(
+                      title: Text(
+                        'Academic Year ${paper['academicYear']}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
+                      iconColor: Colors.white,
+                      collapsedIconColor: Colors.white,
+                      children: [
+                        if (paper['papers'] != null) ...[
+                          _buildSectionTitle('Papers'),
+                          _buildPaperSection(paper['papers'] as List),
+                        ],
+                      ],
                     ),
-                    children: [
-                      _buildSectionTitle('Assignments'),
-                      _buildAssignmentSection(paper['assignments']),
-                      const Divider(),
-                      _buildSectionTitle('Fall Final Theory Papers'),
-                      _buildPaperSection(paper['fall']['final']['theory']),
-                    ],
                   ),
                 );
               },
@@ -167,58 +197,91 @@ print("Route $routeArgs ${routeArgs!['id']}");
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Text(
         title,
-        style: TextStyle(
-          fontWeight: FontWeight.w600,
-          color: Colors.deepPurple[700],
+        style: const TextStyle(
+          fontWeight: FontWeight.w500,
+          color: Colors.white,
+          fontSize: 14,
         ),
       ),
     );
   }
 
-  Widget _buildAssignmentSection(List assignments) {
-    if (assignments.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Text('No assignments available', style: TextStyle(color: Colors.grey)),
-      );
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: assignments.map((assignment) {
-        return ListTile(
-          leading: const Icon(Icons.assignment, color: Colors.deepPurple),
-          title: Text(assignment['name']),
-          trailing: IconButton(
-            icon: const Icon(Icons.download, color: Colors.deepPurple),
-            onPressed: () => _launchPDF(assignment['file']['pdf']),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
   Widget _buildPaperSection(List papers) {
     if (papers.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Text('No theory papers available', style: TextStyle(color: Colors.grey)),
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Text(
+          'No papers available',
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontSize: 14,
+          ),
+        ),
       );
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: papers.map((paper) {
-        return ListTile(
-          leading: const Icon(Icons.description, color: Colors.deepPurple),
-          title: Text(paper['name']),
-          trailing: IconButton(
-            icon: const Icon(Icons.download, color: Colors.deepPurple),
-            onPressed: () => _launchPDF(paper['file']['pdf']),
+        String paperTitle = '${paper['type']}';
+        if (paper['category'] != null) {
+          paperTitle += ' (${paper['category']})';
+        }
+        if (paper['term'] != null) {
+          paperTitle += ' - ${paper['term']}';
+        }
+        if (paper['sessionType'] != null) {
+          paperTitle += ' - Session ${paper['sessionType']}';
+        }
+        
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          decoration: BoxDecoration(
+            color: const Color(0xFF09090B),
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: const Color(0xFF27272A), width: 1),
+          ),
+          child: ListTile(
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: const Icon(Icons.description, color: Colors.white, size: 20),
+            ),
+            title: Text(
+              paperTitle,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (paper['teachers'] != null && paper['teachers'].isNotEmpty)
+                  Text(
+                    'Teacher: ${paper['teachers'][0]['name']}',
+                    style: TextStyle(
+                      color: Colors.grey[500],
+                      fontSize: 12,
+                    ),
+                  ),
+                if (paper['metadata'] != null)
+                  Text(
+                    'Views: ${paper['metadata']['views']} | Downloads: ${paper['metadata']['downloads']}',
+                    style: TextStyle(
+                      color: Colors.grey[500],
+                      fontSize: 12,
+                    ),
+                  ),
+              ],
+            ),
+            onTap: () => _launchPDF(paper['pdfUrl']),
           ),
         );
       }).toList(),
     );
   }
 }
-
-
-
