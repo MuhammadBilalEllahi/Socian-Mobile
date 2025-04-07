@@ -120,6 +120,7 @@ class AppRoutes {
   static const String profileMainPage = '/profile';
   static const String pastPaperScreen = '/past-papers';
   static const String subjectsInDepartmentScreen = '/subjects-in-department';
+  static const String discussionViewScreen = '/discussion-view';
   static const String settings = '/settings';
 
   // Teacher routes
