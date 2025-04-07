@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
 
-class PastPaperItem extends StatelessWidget {
+class PastPaperInfoCard extends StatelessWidget {
   final Map<String, dynamic> paper;
   final Function(String url, String name, String year) onPaperSelected;
   final bool isFirst;
   final bool isLast;
 
-  const PastPaperItem({
+  const PastPaperInfoCard({
     super.key,
     required this.paper,
     required this.onPaperSelected,
@@ -17,29 +17,35 @@ class PastPaperItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: const Color(0xFF2D2D2D),
-      elevation: 4,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: () {
-          if (paper['file'] != null && paper['file']['url'] != null) {
-            final url = "${ApiConstants.baseUrl}/api/uploads/${paper['file']['url']}";
-            onPaperSelected(
-              url,
-              paper['name'],
-              paper['academicYear']?.toString() ?? '',
-            );
-          }
-        },
-        borderRadius: BorderRadius.circular(12),
+    return InkWell(
+      onTap: () {
+        if (paper['file'] != null && paper['file']['url'] != null) {
+          final url = "${ApiConstants.baseUrl}/api/uploads/${paper['file']['url']}";
+          onPaperSelected(
+            url,
+            paper['name'],
+            paper['academicYear']?.toString() ?? '',
+          );
+        }
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Card(
+        color: const Color(0xFF2D2D2D),
+        elevation: 4,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
+              if (!isFirst)
+                const Icon(
+                  Icons.arrow_back_ios,
+                  color: Colors.grey,
+                  size: 20,
+                ),
               Container(
                 width: 40,
                 height: 40,
@@ -97,10 +103,17 @@ class PastPaperItem extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(
-                Icons.swipe,
-                color: Colors.grey,
-                size: 20,
+              Row(
+                children: [
+                  if (!isFirst && !isLast)
+                    const SizedBox(width: 8),
+                  if (!isLast)
+                    const Icon(
+                      Icons.arrow_forward_ios,
+                      color: Colors.grey,
+                      size: 20,
+                    ),
+                ],
               ),
             ],
           ),

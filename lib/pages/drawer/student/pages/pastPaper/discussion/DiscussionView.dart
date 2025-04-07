@@ -5,7 +5,7 @@ import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
-import 'PastPaperItem.dart';
+import 'PastPaperInfoCard.dart';
 import 'PdfViewer.dart';
 
 class DiscussionView extends StatefulWidget {
@@ -158,8 +158,11 @@ class _DiscussionViewState extends State<DiscussionView> {
                   ),
                 ),
                 // Past Papers List Section
-                Expanded(
-                  child: papers.isEmpty
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SizedBox(
+                    height: 100, // Fixed height for the card section
+                    child: papers.isEmpty
                       ? const Center(
                           child: Text(
                             'No papers available',
@@ -169,8 +172,12 @@ class _DiscussionViewState extends State<DiscussionView> {
                       : PageView.builder(
                           controller: _pageController,
                           itemCount: papers.length,
+                          physics: const BouncingScrollPhysics(),
+                          onPageChanged: (index) {
+                            loadPaper(index);
+                          },
                           itemBuilder: (context, index) {
-                            return PastPaperItem(
+                            return PastPaperInfoCard(
                               paper: papers[index],
                               isFirst: index == 0,
                               isLast: index == papers.length - 1,
@@ -184,6 +191,7 @@ class _DiscussionViewState extends State<DiscussionView> {
                             );
                           },
                         ),
+                  ),
                 ),
               ],
             ),
