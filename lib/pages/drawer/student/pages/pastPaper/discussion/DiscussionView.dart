@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'PastPaperInfoCard.dart';
 import 'PdfViewer.dart';
-import 'Comments.dart';
+import 'commentSection/Comments.dart';
 
 class DiscussionView extends StatefulWidget {
   const DiscussionView({super.key});
@@ -226,7 +226,7 @@ class _DiscussionViewState extends State<DiscussionView> {
                 // Comments Section
                 if (isCommentsVisible)
                   Expanded(
-                    child: Comments(toBeDiscussedId: id),
+                        child: Comments(toBeDiscussedId: id),
                   ),
               ],
             ),
