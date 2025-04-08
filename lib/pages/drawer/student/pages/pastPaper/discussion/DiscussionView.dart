@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'PastPaperInfoCard.dart';
 import 'PdfViewer.dart';
+import 'Comments.dart';
 
 class DiscussionView extends StatefulWidget {
   const DiscussionView({super.key});
@@ -28,6 +29,8 @@ class _DiscussionViewState extends State<DiscussionView> {
   String? currentPdfUrl;
   File? pdfFile;
   int currentIndex = 0;
+  bool isCommentsVisible = true;
+  bool isPdfExpanded = false;
 
   @override
   void initState() {
@@ -145,14 +148,41 @@ class _DiscussionViewState extends State<DiscussionView> {
           style: TextStyle(color: Colors.white),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: Icon(
+              isPdfExpanded ? Icons.fullscreen_exit : Icons.fullscreen,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              setState(() {
+                isPdfExpanded = !isPdfExpanded;
+              });
+            },
+          ),
+          IconButton(
+            icon: Icon(
+              isCommentsVisible ? Icons.comment : Icons.comment_outlined,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              setState(() {
+                isCommentsVisible = !isCommentsVisible;
+              });
+            },
+          ),
+        ],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
                 // PDF Viewer Section
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.4,
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  height: isPdfExpanded 
+                      ? MediaQuery.of(context).size.height * 0.7
+                      : MediaQuery.of(context).size.height * 0.4,
                   child: PdfViewer(
                     pdfFile: pdfFile,
                   ),
@@ -161,7 +191,7 @@ class _DiscussionViewState extends State<DiscussionView> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: SizedBox(
-                    height: 100, // Fixed height for the card section
+                    height: 100,
                     child: papers.isEmpty
                       ? const Center(
                           child: Text(
@@ -193,6 +223,11 @@ class _DiscussionViewState extends State<DiscussionView> {
                         ),
                   ),
                 ),
+                // Comments Section
+                if (isCommentsVisible)
+                  Expanded(
+                    child: Comments(toBeDiscussedId: id),
+                  ),
               ],
             ),
     );
