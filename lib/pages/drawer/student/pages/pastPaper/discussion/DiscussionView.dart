@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'PastPaperInfoCard.dart';
 import 'PdfViewer.dart';
 import 'commentSection/Comments.dart';
+import 'components/ChatBox.dart';
 
 class DiscussionView extends StatefulWidget {
   const DiscussionView({super.key});
@@ -260,10 +261,14 @@ class _DiscussionViewState extends State<DiscussionView> {
                           ),
                   ),
                 ),
-                // Comments Section
+                // Comments or ChatBox Section
                 if (isCommentsVisible)
                   Expanded(
                     child: Comments(toBeDiscussedId: id),
+                  ),
+                if (chatBoxVisible)
+                  Expanded(
+                    child: ChatBox(discussionId: id),
                   ),
               ],
             ),
