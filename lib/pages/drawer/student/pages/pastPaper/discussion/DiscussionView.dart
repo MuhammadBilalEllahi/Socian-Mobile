@@ -31,7 +31,7 @@ class _DiscussionViewState extends State<DiscussionView> {
   int currentIndex = 0;
   bool isCommentsVisible = true;
   bool isPdfExpanded = false;
-
+  bool chatBoxVisible = false;
   @override
   void initState() {
     super.initState();
@@ -77,7 +77,8 @@ class _DiscussionViewState extends State<DiscussionView> {
     if (index >= 0 && index < papers.length) {
       final paper = papers[index];
       if (paper['file'] != null && paper['file']['url'] != null) {
-        final url = "${ApiConstants.baseUrl}/api/uploads/${paper['file']['url']}";
+        final url =
+            "${ApiConstants.baseUrl}/api/uploads/${paper['file']['url']}";
         setState(() {
           currentPdfUrl = url;
           currentIndex = index;
@@ -95,11 +96,12 @@ class _DiscussionViewState extends State<DiscussionView> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final routeArgs = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final routeArgs =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     if (routeArgs?.containsKey('_id') ?? false) {
       id = routeArgs!['_id'];
       type = routeArgs['paperType'];
-      subjectId = routeArgs['subjectId']; 
+      subjectId = routeArgs['subjectId'];
       if (_cachedSelectivePastPapers == null) {
         fetchSelectivePastPapers(id);
       }
@@ -112,7 +114,8 @@ class _DiscussionViewState extends State<DiscussionView> {
 
   Future<void> fetchSelectivePastPapers(String id) async {
     try {
-      final response = await apiClient.get('/api/pastpaper/${type.toLowerCase()}/$subjectId');
+      final response = await apiClient
+          .get('/api/pastpaper/${type.toLowerCase()}/$subjectId');
       setState(() {
         _cachedSelectivePastPapers = response;
         if (response['papers'] != null) {
@@ -157,6 +160,11 @@ class _DiscussionViewState extends State<DiscussionView> {
             onPressed: () {
               setState(() {
                 isPdfExpanded = !isPdfExpanded;
+                if (!isCommentsVisible && !isPdfExpanded) {
+                  isCommentsVisible = !isCommentsVisible;
+                } else if (isPdfExpanded) {
+                  isCommentsVisible = false;
+                }
               });
             },
           ),
@@ -167,8 +175,37 @@ class _DiscussionViewState extends State<DiscussionView> {
             ),
             onPressed: () {
               setState(() {
+                if (isPdfExpanded && !isCommentsVisible) {
+                  isPdfExpanded = false;
+                }
                 isCommentsVisible = !isCommentsVisible;
               });
+            },
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.format_align_center, // chat box icon
+              color: Colors.white,
+            ),
+            onPressed: () {
+              setState(() {
+                if (isCommentsVisible && !chatBoxVisible) {
+                  isCommentsVisible = false;
+                  chatBoxVisible = true;
+                } else if (chatBoxVisible) {
+                  isCommentsVisible = true;
+                  chatBoxVisible = false;
+                }
+              });
+            },
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.analytics, // answers so far icon
+              color: Colors.white,
+            ),
+            onPressed: () {
+              Navigator.pushNamed(context, AppRoutes.answersPage);
             },
           ),
         ],
@@ -180,7 +217,7 @@ class _DiscussionViewState extends State<DiscussionView> {
                 // PDF Viewer Section
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
-                  height: isPdfExpanded 
+                  height: isPdfExpanded
                       ? MediaQuery.of(context).size.height * 0.7
                       : MediaQuery.of(context).size.height * 0.4,
                   child: PdfViewer(
@@ -193,40 +230,40 @@ class _DiscussionViewState extends State<DiscussionView> {
                   child: SizedBox(
                     height: 100,
                     child: papers.isEmpty
-                      ? const Center(
-                          child: Text(
-                            'No papers available',
-                            style: TextStyle(color: Colors.white),
+                        ? const Center(
+                            child: Text(
+                              'No papers available',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          )
+                        : PageView.builder(
+                            controller: _pageController,
+                            itemCount: papers.length,
+                            physics: const BouncingScrollPhysics(),
+                            onPageChanged: (index) {
+                              loadPaper(index);
+                            },
+                            itemBuilder: (context, index) {
+                              return PastPaperInfoCard(
+                                paper: papers[index],
+                                isFirst: index == 0,
+                                isLast: index == papers.length - 1,
+                                onPaperSelected: (url, name, year) {
+                                  _pageController.animateToPage(
+                                    index,
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInOut,
+                                  );
+                                },
+                              );
+                            },
                           ),
-                        )
-                      : PageView.builder(
-                          controller: _pageController,
-                          itemCount: papers.length,
-                          physics: const BouncingScrollPhysics(),
-                          onPageChanged: (index) {
-                            loadPaper(index);
-                          },
-                          itemBuilder: (context, index) {
-                            return PastPaperInfoCard(
-                              paper: papers[index],
-                              isFirst: index == 0,
-                              isLast: index == papers.length - 1,
-                              onPaperSelected: (url, name, year) {
-                                _pageController.animateToPage(
-                                  index,
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.easeInOut,
-                                );
-                              },
-                            );
-                          },
-                        ),
                   ),
                 ),
                 // Comments Section
                 if (isCommentsVisible)
                   Expanded(
-                        child: Comments(toBeDiscussedId: id),
+                    child: Comments(toBeDiscussedId: id),
                   ),
               ],
             ),

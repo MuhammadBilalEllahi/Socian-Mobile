@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:beyondtheclass/features/auth/data/auth_data_source.dart';
@@ -16,7 +17,8 @@ class AuthDataSourceImpl implements AuthDataSource {
 
     try {
       // Adding a print to check the API call
-      print("4.1 - Making API call to login endpoint");
+      debugPrint(
+          "4.1 - Making API call to login endpoint ${ApiConstants.baseUrl}");
 
       final response = await client.post(
         ApiConstants.loginEndpoint,
@@ -29,9 +31,9 @@ class AuthDataSourceImpl implements AuthDataSource {
 
       if (response.containsKey('access_token')) {
         String token = response['access_token'];
-        
+
         // await SecureStorageService.instance.saveToken(token);
-  // await  SharedPreferencesService.instance.saveToken(token);
+        // await  SharedPreferencesService.instance.saveToken(token);
         print("Token received: $token");
 
         return {'access_token': token};

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 class ApiConstants {
   static const String localhostBaseUrl =
       "http://192.168.1.8:8080"; //my ip address
@@ -122,6 +123,7 @@ class AppRoutes {
   static const String subjectsInDepartmentScreen = '/subjects-in-department';
   static const String discussionViewScreen = '/discussion-view';
   static const String settings = '/settings';
+  static const String answersPage = '/past-paper/answers';
 
   // Teacher routes
   static const String teacherHome = '/teacher/home';
