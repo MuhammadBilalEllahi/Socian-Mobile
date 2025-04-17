@@ -69,18 +69,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image
-          // Container(
-          //   width: double.infinity,
-          //   height: double.infinity,
-          //   decoration: const BoxDecoration(
-          //     image: DecorationImage(
-          //       image: AssetImage(AppAssets.splashBackground2),
-          //       fit: BoxFit.cover,
-          //     ),
-          //   ),
-          // ),
-          // Gradient Overlay
+
+
           Container(
             width: double.infinity,
             height: double.infinity,

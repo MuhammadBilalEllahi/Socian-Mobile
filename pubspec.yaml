@@ -58,9 +58,12 @@ dependencies:
   record: ^5.0.4
   path_provider: ^2.1.2
   google_maps_flutter: ^2.5.3
+  location: ^8.0.0
   rive: ^0.13.20
   giphy_picker: ^3.0.2
   shared_preferences: ^2.5.2
+  mime: ^1.0.4
+  http_parser: ^4.0.2
   flutter_pdfview: ^1.4.0
   flutter_html: ^3.0.0
   web_socket_channel: ^3.0.2
