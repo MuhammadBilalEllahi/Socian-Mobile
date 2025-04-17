@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'dart:async';
-import '../create_post.dart';
+import '../CreatePost.dart';
 
 class VoiceNoteSection extends StatelessWidget {
   final bool isRecording;

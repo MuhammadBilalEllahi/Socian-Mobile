@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../create_post.dart';
+import '../CreatePost.dart';
 
 class PostTypeSelector extends StatelessWidget {
   final PostType selectedType;

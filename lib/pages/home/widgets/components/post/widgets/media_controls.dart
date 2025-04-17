@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
-import '../create_post.dart';
+import '../CreatePost.dart';
 
 class MediaControls extends StatelessWidget {
   final Function() onImagePick;

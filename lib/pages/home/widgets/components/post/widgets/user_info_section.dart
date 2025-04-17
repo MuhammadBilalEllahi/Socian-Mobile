@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
-import '../create_post.dart';
+import '../CreatePost.dart';
 import 'location_text_selector.dart';
 
 class UserInfoSection extends ConsumerWidget {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:io';
-import '../create_post.dart';
+import '../CreatePost.dart';
 
 class MediaPreview extends StatelessWidget {
   final List<File> mediaFiles;

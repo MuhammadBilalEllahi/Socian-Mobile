@@ -50,7 +50,10 @@
     android:name="com.google.android.gms.auth.api.signin"
     android:value="1076027750526-li5gkit9klq06mmocutusfb6ta8e1etc.apps.googleusercontent.com" />
 
-
+        <!-- Add Google Maps API Key -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDTnSz8W8hgvXPGu18ugJMRfE9kCh4ecbY"/>
 
     </application>
     <!-- Required to query activities that can process text, see:

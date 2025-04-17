@@ -1,4 +1,7 @@
 import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/PastPapers.dart';
+import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/SubjectsView.dart';
+import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/discussion/DiscussionView.dart';
+import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/discussion/answerPage/AnswersPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
@@ -23,7 +26,8 @@ import 'package:beyondtheclass/pages/AlumniPages/AlumniJobs.dart';
 import 'package:beyondtheclass/pages/profile/settings/SettingsPage.dart';
 
 class RouteGuard {
-  static Route<dynamic>? onGenerateRoute(RouteSettings settings, WidgetRef ref) {
+  static Route<dynamic>? onGenerateRoute(
+      RouteSettings settings, WidgetRef ref) {
     final auth = ref.read(authProvider);
     final userRole = auth.role;
 
@@ -71,7 +75,7 @@ class RouteGuard {
 
     // Get the route configuration based on the user's role
     final availableRoutes = _getRoutesForRole(userRole);
-    
+
     // If the requested route is not available for the user's role, redirect to appropriate home
     if (!availableRoutes.containsKey(settings.name)) {
       return MaterialPageRoute(
@@ -119,6 +123,9 @@ class RouteGuard {
           AppRoutes.mapMainPage: const MapsLook(),
           AppRoutes.profileMainPage: const ProfilePage(),
           AppRoutes.pastPaperScreen: const PastPapers(),
+          AppRoutes.subjectsInDepartmentScreen: const SubjectsView(),
+          AppRoutes.discussionViewScreen: const DiscussionView(),
+          AppRoutes.answersPage: const AnswersPage(),
           ...commonRoutes,
         };
       case AppRoles.teacher:
@@ -165,4 +172,4 @@ class RouteGuard {
         return AppRoutes.authScreen;
     }
   }
-} 
+}
