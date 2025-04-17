@@ -1,318 +1,198 @@
+import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:beyondtheclass/shared/services/WebSocketService.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ChatBox extends StatefulWidget {
+typedef ChatMessage = Map<String, dynamic>;
+
+class ChatBox extends ConsumerStatefulWidget {
   final String discussionId;
   const ChatBox({super.key, required this.discussionId});
 
   @override
-  State<ChatBox> createState() => _ChatBoxState();
+  ConsumerState<ChatBox> createState() => _ChatBoxState();
 }
 
-class _ChatBoxState extends State<ChatBox> {
-  final List<Map<String, String>> messages = [
-    {
-      'user': 'Alice',
-      'text': 'Hey, did you solve Q3?',
-      'timestamp': '10:30 AM',
-      'avatar': 'A'
-    },
-    {
-      'user': 'Bob',
-      'text': 'Not yet, it looks tough!',
-      'timestamp': '10:31 AM',
-      'avatar': 'B'
-    },
-  ];
+class _ChatBoxState extends ConsumerState<ChatBox> {
+  final List<ChatMessage> messages = [];
+  int usersCount = 1;
   final TextEditingController _controller = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
+  late final WebSocketService ws;
+  late final String discussionId;
+  StreamSubscription? _msgStream;
+  late final auth = ref.watch(authProvider);
 
-  int onlineUsers = 5;
-  String status = 'Active';
+  @override
+  void didUpdateWidget(covariant ChatBox oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    debugPrint(
+        "----------discussionId: ${widget.discussionId} and ${oldWidget.discussionId}");
+    if (widget.discussionId != oldWidget.discussionId) {
+      // Clean up old
+      ws.removeUserFromDiscussion(oldWidget.discussionId);
+      messages.clear();
+      ws.joinDiscussion(widget.discussionId);
 
-  void _sendMessage() {
-    final text = _controller.text.trim();
-    if (text.isNotEmpty) {
-      setState(() {
-        messages.add({
-          'user': 'You',
-          'text': text,
-          'timestamp': '${DateTime.now().hour}:${DateTime.now().minute}',
-          'avatar': 'Y'
-        });
-      });
-      _controller.clear();
-      _scrollToBottom();
+      setState(() {});
+      debugPrint("----------discussionId after setState: $discussionId");
     }
   }
 
-  void _scrollToBottom() {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        0,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
+  @override
+  void initState() {
+    super.initState();
+    discussionId = widget.discussionId;
+    ws = WebSocketService();
+    ws.connect();
+    ws.joinDiscussion(discussionId);
+    // Listen for messages
+    debugPrint("----------discussionId: $discussionId");
+    _msgStream = ws.messages.listen((data) {
+      if (data is Map && data['message'] != null) {
+        debugPrint("----------data: $data");
+        setState(() {
+          messages.add(Map<String, dynamic>.from(data));
+        });
+      } else if (data is Map && data['usersCount'] != null) {
+        setState(() {
+          usersCount = data['usersCount'] as int;
+        });
+      } else if (data is Map && data['users'] != null) {
+        // Optionally handle users list
+      } else if (data is Map &&
+          data['socketId'] != null &&
+          data['user'] != null &&
+          data['message'] != null) {
+        setState(() {
+          messages.add(Map<String, dynamic>.from(data));
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _msgStream?.cancel();
+    super.dispose();
+  }
+
+  void _sendMessage(String discussionId) {
+    debugPrint(
+        "----------discussionId: for sending message out: $discussionId");
+    final text = _controller.text.trim();
+    if (text.isNotEmpty) {
+      final user = {
+        '_id': auth.user?['_id'],
+        'name': auth.user?['name'],
+        'username': auth.user?['username'] ?? '',
+        'picture': auth.user?['picture'] ?? '',
+      };
+      debugPrint("----------discussionId: for sending message: $discussionId");
+      ws.sendMessageInDiscussion([discussionId, text, user]);
+      _controller.clear();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF09090B),
+      color: const Color(0xFF121212),
       child: Column(
         children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: const BoxDecoration(
-              color: Color(0xFF18181B),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-            ),
+          // Users count at the top
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildStatusIndicator(),
-                const Spacer(),
-                _buildHeaderActions(),
+                const Icon(Icons.people, color: Colors.white, size: 18),
+                const SizedBox(width: 6),
+                Text(
+                  'Users in chat: $usersCount',
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                ),
               ],
             ),
           ),
           Expanded(
-            child: Container(
-              color: const Color(0xFF09090B),
-              child: ListView.builder(
-                controller: _scrollController,
-                reverse: true,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  final msg = messages[messages.length - 1 - index];
-                  return _buildMessageItem(msg);
-                },
-              ),
-            ),
-          ),
-          _buildMessageInput(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatusIndicator() {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: const Color(0xFF27272A),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.people_alt_rounded,
-                  color: Color(0xFF4ADE80), size: 16),
-              const SizedBox(width: 8),
-              Text(
-                '$onlineUsers online',
-                style: const TextStyle(
-                  color: Color(0xFF4ADE80),
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 12),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: const Color(0xFF27272A),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF4ADE80),
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                status,
-                style: const TextStyle(
-                  color: Color(0xFFA1A1AA),
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildHeaderActions() {
-    return Row(
-      children: [
-        IconButton(
-          icon: const Icon(Icons.search_rounded,
-              color: Color(0xFFA1A1AA), size: 20),
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: const Icon(Icons.more_vert_rounded,
-              color: Color(0xFFA1A1AA), size: 20),
-          onPressed: () {},
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMessageItem(Map<String, String> msg) {
-    final isUser = msg['user'] == 'You';
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        mainAxisAlignment:
-            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          if (!isUser) _buildAvatar(msg['avatar'] ?? ''),
-          if (!isUser) const SizedBox(width: 8),
-          Flexible(
-            child: Container(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.75,
-              ),
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color:
-                    isUser ? const Color(0xFF2563EB) : const Color(0xFF27272A),
-                borderRadius: BorderRadius.circular(16).copyWith(
-                  bottomLeft: isUser ? null : const Radius.circular(4),
-                  bottomRight: isUser ? const Radius.circular(4) : null,
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment:
-                    isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        msg['user'] ?? '',
-                        style: TextStyle(
-                          color: isUser
-                              ? const Color(0xFFBFDBFE)
-                              : const Color(0xFFA1A1AA),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
+            child: ListView.builder(
+              reverse: true,
+              itemCount: messages.length,
+              itemBuilder: (context, index) {
+                final msg = messages[messages.length - 1 - index];
+                final isMe = msg['_id'] == auth.user?['_id'];
+                return Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  child: Align(
+                    alignment:
+                        isMe ? Alignment.centerRight : Alignment.centerLeft,
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isMe ? Colors.blue[700] : Colors.grey[800],
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      const SizedBox(width: 6),
-                      Text(
-                        msg['timestamp'] ?? '',
-                        style: TextStyle(
-                          color: isUser
-                              ? const Color(0xFFBFDBFE)
-                              : const Color(0xFF71717A),
-                          fontSize: 11,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: isMe
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            msg['user']?.toString() ?? '',
+                            style: TextStyle(
+                              color: Colors.grey[300],
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            msg['message']?.toString() ??
+                                msg['text']?.toString() ??
+                                '',
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 15),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    msg['text'] ?? '',
-                    style: const TextStyle(
-                      color: Color(0xFFFFFFFF),
-                      fontSize: 15,
                     ),
                   ),
-                ],
-              ),
+                );
+              },
             ),
           ),
-          if (isUser) const SizedBox(width: 8),
-          if (isUser) _buildAvatar(msg['avatar'] ?? ''),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAvatar(String initial) {
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        color: const Color(0xFF3F3F46),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Center(
-        child: Text(
-          initial,
-          style: const TextStyle(
-            color: Color(0xFFFFFFFF),
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMessageInput() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      color: const Color(0xFF18181B),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.add_circle_outline_rounded,
-                color: Color(0xFFA1A1AA)),
-            onPressed: () {},
-          ),
-          Expanded(
-            child: TextField(
-              controller: _controller,
-              style: const TextStyle(
-                color: Color(0xFFFFFFFF),
-                fontSize: 15,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Type a message...',
-                hintStyle: const TextStyle(color: Color(0xFF71717A)),
-                filled: true,
-                fillColor: const Color(0xFF27272A),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'Type a message...',
+                      hintStyle: TextStyle(color: Colors.grey[600]),
+                      filled: true,
+                      fillColor: const Color(0xFF1A1A1A),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                    onSubmitted: (_) => _sendMessage(discussionId),
+                  ),
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide:
-                      const BorderSide(color: Color(0xFF2563EB), width: 2),
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: const Icon(Icons.send, color: Colors.white),
+                  onPressed: () => _sendMessage(discussionId),
                 ),
-              ),
-              onSubmitted: (_) => _sendMessage(),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF2563EB),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.send_rounded, color: Color(0xFFFFFFFF)),
-              onPressed: _sendMessage,
+              ],
             ),
           ),
         ],

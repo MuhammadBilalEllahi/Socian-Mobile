@@ -4,10 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/core/utils/route_guard.dart';
 import 'package:beyondtheclass/theme/AppThemes.dart';
+import 'package:beyondtheclass/shared/services/WebSocketService.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
+  WebSocketService().connect();
   runApp(
     const ProviderScope(
       child: MyApp(),
@@ -23,7 +25,6 @@ class MyApp extends ConsumerWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: AppConstants.appName,
-      
       themeMode: ThemeMode.system,
       theme: AppThemes.lightTheme,
       darkTheme: AppThemes.darkTheme,

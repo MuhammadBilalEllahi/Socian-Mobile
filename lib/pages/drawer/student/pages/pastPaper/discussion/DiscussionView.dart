@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:beyondtheclass/shared/services/WebSocketService.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -132,6 +133,7 @@ class _DiscussionViewState extends State<DiscussionView> {
           }
         }
         isLoading = false;
+        debugPrint("----------papers: ${papers[currentIndex]}");
       });
     } catch (e) {
       setState(() {
@@ -268,7 +270,9 @@ class _DiscussionViewState extends State<DiscussionView> {
                   ),
                 if (chatBoxVisible)
                   Expanded(
-                    child: ChatBox(discussionId: id),
+                    child: ChatBox(
+                        discussionId: papers[_pageController.page!.round()]
+                            ['_id']),
                   ),
               ],
             ),
