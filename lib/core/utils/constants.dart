@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiConstants {
   static const String localhostBaseUrl =
-      "http://192.168.1.8:8080"; //my ip address
+      "http://10.135.49.240:8080"; //my ip address
   // static const String baseUrl = "http://192.168.10.6:8080"; //my ip address
   static const String productionBaseUrl =
       "https://api.beyondtheclass.me"; //my ip address
@@ -143,7 +143,7 @@ class AppAssets {
   static const String googleAuth = 'assets/images/googleAuth.png';
 }
 
-enum BottomNavBarRoute { home, message, search, explore, profile }
+enum BottomNavBarRoute { home, message, explore, gps, profile }
 
 extension BottomNavBarRouteMap on BottomNavBarRoute {
   int get index => BottomNavBarRoute.values.indexOf(this);

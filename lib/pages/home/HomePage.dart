@@ -1,8 +1,8 @@
-
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/pages/bottomBar/MyBottomNavBar.dart';
 import 'package:beyondtheclass/pages/explore/MapsPage.dart';
 import 'package:beyondtheclass/pages/StudentPages/home/widgets/campus/CampusPosts.dart';
+import 'package:beyondtheclass/pages/gps/GpsInitialPage.dart';
 import 'package:beyondtheclass/pages/home/widgets/campus/CampusPosts.dart';
 import 'package:beyondtheclass/pages/message/Messages.dart';
 import 'package:beyondtheclass/pages/profile/ProfilePage.dart';
@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shorebird_code_push/shorebird_code_push.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:beyondtheclass/pages/home/widgets/AllView.dart';
+
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
@@ -32,8 +33,10 @@ class _HomePageState extends ConsumerState<HomePage> {
     _pages = {
       BottomNavBarRoute.home: const AllView(),
       BottomNavBarRoute.message: const Messages(),
-      BottomNavBarRoute.search: const Center(child: Text('Explore', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold))),
-      BottomNavBarRoute.explore: const MapsLook(),
+      BottomNavBarRoute.explore: const Center(
+          child: Text('Explore',
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold))),
+      BottomNavBarRoute.gps: const GpsInitialPage(),
       BottomNavBarRoute.profile: const ProfilePage(),
     };
   }
@@ -49,7 +52,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       await _showInAppUpdateModal();
     } else if (status == UpdateStatus.upToDate) {
       // Handle up to date case
-    } else if(status == UpdateStatus.outdated) {
+    } else if (status == UpdateStatus.outdated) {
       await _showPlayStoreUpdateModal();
     }
   }
@@ -255,14 +258,14 @@ class _HomePageState extends ConsumerState<HomePage> {
                   width: double.infinity,
                   child: TextButton(
                     onPressed: () async {
-                      final url = Uri.parse('market://details?id=com.beyondtheclass.app');
+                      final url = Uri.parse(
+                          'market://details?id=com.beyondtheclass.app');
                       if (await canLaunchUrl(url)) {
                         await launchUrl(url);
                       } else {
                         // Fallback to web URL if market URL fails
-                        await launchUrl(
-                          Uri.parse('https://play.google.com/store/apps/details?id=com.beyondtheclass.app')
-                        );
+                        await launchUrl(Uri.parse(
+                            'https://play.google.com/store/apps/details?id=com.beyondtheclass.app'));
                       }
                       // Navigator.pop(context);
                     },
@@ -329,10 +332,12 @@ class _HomePageState extends ConsumerState<HomePage> {
     return Scaffold(
       extendBody: true,
       backgroundColor: isDark ? Colors.black : Colors.white,
-      body: _pages[selectedRoute] ?? const Center(child: Text("Page Not Found")),
+      body:
+          _pages[selectedRoute] ?? const Center(child: Text("Page Not Found")),
       bottomNavigationBar: MyBottomNavBar(
         selectedIndex: selectedRoute.index,
-        onItemTapped: (index) => ref.read(pageIndexProvider.notifier).state = BottomNavBarRoute.values[index],
+        onItemTapped: (index) => ref.read(pageIndexProvider.notifier).state =
+            BottomNavBarRoute.values[index],
       ),
     );
   }
