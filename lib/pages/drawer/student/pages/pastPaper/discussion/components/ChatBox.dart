@@ -90,7 +90,8 @@ class _ChatBoxState extends ConsumerState<ChatBox> {
         'picture': auth.user?['picture'] ?? '',
       };
       debugPrint("----------discussionId: for sending message: $discussionId");
-      ws.sendMessageInDiscussion([discussionId, text, user]);
+      ws.sendMessageInDiscussion(
+          {'discussionId': discussionId, 'message': text, 'user': user});
       _controller.clear();
     }
   }
