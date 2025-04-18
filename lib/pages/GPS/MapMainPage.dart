@@ -18,6 +18,7 @@ class MapMainPage extends ConsumerStatefulWidget {
 class _MapMainPageState extends ConsumerState<MapMainPage> {
   final String apiKey = dotenv.env['MAPS_API_KEY'] ?? '';
   final String baseUrl = ApiConstants.portUrl;
+  bool _isDropdownOpen = false;
 
   GoogleMapController? _mapController;
   LatLng? _userLocation;
@@ -25,11 +26,14 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
   Set<Marker> _markers = {};
   Set<Circle> _circles = {};
   IO.Socket? _socket;
-  double _radius = 500.0;
+  double _radius = 50.0;
   int _userCountInRadius = 0;
 
   BitmapDescriptor? _userMarkerIcon;
   BitmapDescriptor? _otherMarkerIcon;
+
+  bool _isSharingLocation = false;
+  bool _isInRadius = false;
 
   @override
   void initState() {
@@ -53,29 +57,39 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
       });
 
       _socket?.on('attendeeLocationUpdate', (data) {
-        if (data != null && _isWithinRadius(data['latitude'], data['longitude'])) {
+        final auth = ref.read(authProvider);
+        final currentUserId = auth.user?['id'].toString();
+
+        if (data != null &&
+            data['id'].toString() != currentUserId &&
+            _isWithinRadius(data['latitude'], data['longitude'])) {
           setState(() {
-            if (!_markers.any((m) => m.markerId.value == data['id'].toString())) {
-              _markers.add(
-                Marker(
-                  markerId: MarkerId(data['id'].toString()),
-                  position: LatLng(data['latitude'], data['longitude']),
-                  icon: _otherMarkerIcon ?? BitmapDescriptor.defaultMarker,
-                  infoWindow: InfoWindow(title: data['name'] ?? "Unknown"),
-                ),
-              );
-              _userCountInRadius = _markers.length - 1;
-            }
+            final markerId = data['id'].toString();
+            _markers.removeWhere((m) => m.markerId.value == markerId);
+            _markers.add(
+              Marker(
+                markerId: MarkerId(markerId),
+                position: LatLng(data['latitude'], data['longitude']),
+                icon: _otherMarkerIcon ?? BitmapDescriptor.defaultMarker,
+                infoWindow: InfoWindow(title: data['name'] ?? "Unknown"),
+              ),
+            );
+            _userCountInRadius = _markers.length;
           });
         }
       });
 
       _socket?.on('attendeesList', (data) {
+        final auth = ref.read(authProvider);
+        final currentUserId = auth.user?['id'].toString();
+
         if (data is List) {
           setState(() {
+            _markers.removeWhere((m) => m.markerId.value != "user_location");
+
             for (var user in data) {
-              if (_isWithinRadius(user['latitude'], user['longitude']) &&
-                  !_markers.any((m) => m.markerId.value == user['id'].toString())) {
+              if (user['id'].toString() != currentUserId &&
+                  _isWithinRadius(user['latitude'], user['longitude'])) {
                 _markers.add(
                   Marker(
                     markerId: MarkerId(user['id'].toString()),
@@ -86,21 +100,25 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
                 );
               }
             }
-            _userCountInRadius = _markers.length - 1;
+
+            _userCountInRadius = _markers.length;
           });
         }
       });
 
       _socket?.on('error', (error) => print('Socket error: $error'));
-      _socket?.on('disconnect', (_) => print('Disconnected from Socket.IO server'));
+      _socket?.on(
+          'disconnect', (_) => print('Disconnected from Socket.IO server'));
     } catch (e) {
       print('Socket initialization error: $e');
     }
   }
 
   Future<void> _setMarkerIcons() async {
-    _userMarkerIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed);
-    _otherMarkerIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
+    _userMarkerIcon =
+        BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed);
+    _otherMarkerIcon =
+        BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
   }
 
   Future<void> _fetchLocationWithTimeout() async {
@@ -152,28 +170,47 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
 
     setState(() {
       _userLocation = LatLng(position.latitude, position.longitude);
-      final auth = ref.read(authProvider); // Access auth data here
-      _markers.add(Marker(
-        markerId: const MarkerId("user_location"),
-        position: _userLocation!,
-        icon: _userMarkerIcon ?? BitmapDescriptor.defaultMarker,
-        infoWindow: InfoWindow(title: auth.user?['name'] ?? "Your Location"),
-      ));
+      _isInRadius = _isWithinRadius(position.latitude, position.longitude);
       _updateCircle();
     });
 
-    _mapController?.animateCamera(CameraUpdate.newLatLngZoom(_userLocation!, 15));
-    _sendLocationUpdate();
-    _requestNearbyAttendees();
+    _mapController
+        ?.animateCamera(CameraUpdate.newLatLngZoom(_userLocation!, 15));
+  }
+
+  void _toggleLocationSharing() {
+    if (_userLocation == null) return;
+
+    final auth = ref.read(authProvider);
+
+    setState(() {
+      _isSharingLocation = !_isSharingLocation;
+
+      if (_isSharingLocation) {
+        _markers.add(Marker(
+          markerId: const MarkerId("user_location"),
+          position: _userLocation!,
+          icon: _userMarkerIcon ?? BitmapDescriptor.defaultMarker,
+          infoWindow: InfoWindow(title: auth.user?['name'] ?? "Your Location"),
+        ));
+        _sendLocationUpdate();
+        _requestNearbyAttendees();
+      } else {
+        _markers.removeWhere((m) => m.markerId.value == "user_location");
+        _socket?.emit('stopSharing', {
+          'userId': auth.user?['id'],
+        });
+      }
+    });
   }
 
   void _sendLocationUpdate() {
     if (_userLocation == null || _socket == null || !_socket!.connected) return;
 
-    final auth = ref.read(authProvider); // Access auth data here
+    final auth = ref.read(authProvider);
     final userData = {
-      'userId': auth.user?['id'] ?? 'default_user_id', // Use auth ID
-      'name': auth.user?['name'] ?? 'Unknown', // Use auth name
+      'userId': auth.user?['id'] ?? 'default_user_id',
+      'name': auth.user?['name'] ?? 'Unknown',
       'latitude': _userLocation!.latitude,
       'longitude': _userLocation!.longitude,
       'radius': _radius,
@@ -218,8 +255,7 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
 
   @override
   Widget build(BuildContext context) {
-    final auth = ref.watch(authProvider); // Watch auth changes reactively
-    String name = auth.user?['name'] ?? "Unknown";
+    final auth = ref.watch(authProvider);
 
     return Scaffold(
       body: Stack(
@@ -242,58 +278,142 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
           else
             Center(
               child: errorMessage != null
-                  ? Text(errorMessage!, style: const TextStyle(color: Colors.red))
+                  ? Text(errorMessage!,
+                      style: const TextStyle(color: Colors.red))
                   : const CircularProgressIndicator(),
             ),
+
+          // Top Status Panel
           Positioned(
             top: 50,
             left: 20,
             right: 20,
-            child: Column(
-              children: [
-                Container(
-                  color: Colors.black,
-                  child: Text(
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.75),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  Text(
                     "Users in radius: $_userCountInRadius",
-                    style: const TextStyle(color: Colors.white, fontSize: 20),
+                    style: const TextStyle(color: Colors.white, fontSize: 18),
                   ),
-                ),
-                Slider(
-                  value: _radius,
-                  min: 100,
-                  max: 1000,
-                  divisions: 20,
-                  label: "${_radius.round()} meters",
-                  onChanged: (value) {
-                    setState(() {
-                      _radius = value;
-                      _updateCircle();
-                      _sendLocationUpdate();
-                      _requestNearbyAttendees();
-                    });
-                  },
-                ),
-              ],
+                  const SizedBox(height: 10),
+                  ElevatedButton.icon(
+                    onPressed: _isInRadius ? _toggleLocationSharing : null,
+                    icon: Icon(_isSharingLocation
+                        ? Icons.location_off
+                        : Icons.location_on),
+                    label: Text(_isSharingLocation
+                        ? "Stop Sharing"
+                        : "Share My Location"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _isInRadius ? Colors.blue : Colors.grey,
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: Colors.grey.shade400,
+                      disabledForegroundColor: Colors.white70,
+                    ),
+                  ),
+                  Slider(
+                      value: _radius,
+                      min: 10,
+                      max: 100,
+                      divisions: 20,
+                      label: "${_radius.round()} meters",
+                      onChanged: (value) {
+                        setState(() {
+                          _radius = value;
+                          _updateCircle();
+                        });
+
+                        if (_isSharingLocation) {
+                          _sendLocationUpdate(); // Notify server of radius change
+                          _requestNearbyAttendees(); // Ask server for new nearby users
+                        }
+                      }),
+                ],
+              ),
             ),
           ),
+
+          
+          // Left Panel - Nearby Users as Dropdown
           Positioned(
-            top: 150,
+            top: 250,
             left: 0,
-            bottom: 0,
-            width: 150,
-            child: Container(
-              color: Colors.white.withOpacity(0.8),
-              child: ListView(
-                padding: const EdgeInsets.all(8.0),
-                children: _markers
-                    .where((marker) => marker.markerId.value != "user_location")
-                    .map((marker) => ListTile(
-                          title: Text(
-                            marker.infoWindow.title ?? "Unknown",
-                            style: const TextStyle(fontSize: 16),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              width: 180,
+              height: _isDropdownOpen ? 300 : 50,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.95),
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: Offset(2, 2),
+                  )
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _isDropdownOpen = !_isDropdownOpen;
+                      });
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Nearby Users",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 12),
                           ),
-                        ))
-                    .toList(),
+                          Icon(
+                            _isDropdownOpen
+                                ? Icons.keyboard_arrow_up
+                                : Icons.keyboard_arrow_down,
+                            size: 20,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (_isDropdownOpen) const Divider(),
+                  if (_isDropdownOpen)
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: _markers.length,
+                        itemBuilder: (context, index) {
+                          final marker = _markers.elementAt(index);
+                          if (marker.markerId.value == "user_location")
+                            return const SizedBox();
+                          return Card(
+                            elevation: 1,
+                            child: ListTile(
+                              title: Text(
+                                marker.infoWindow.title ?? "Unknown",
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                              dense: true,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                ],
               ),
             ),
           ),

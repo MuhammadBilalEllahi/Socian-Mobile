@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+// https://w7x50p90-8080.inc1.devtunnels.ms/
 class ApiConstants {
   static const String localhostBaseUrl =
-      "http://192.168.1.8:8080"; //my ip address
+      "https://w7x50p90-8080.inc1.devtunnels.ms/"; //my ip address
   // static const String baseUrl = "http://192.168.10.6:8080"; //my ip address
   static const String productionBaseUrl =
       "https://w7x50p90-8080.inc1.devtunnels.ms/"; 
