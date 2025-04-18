@@ -12,36 +12,58 @@ class ApiConstants {
   // static const String baseUrl = "http://192.168.10.6:8080"; 
   static const String productionBaseUrl =
       "https://api.beyondtheclass.me"; 
+  // static const String localhostBaseUrl =
+  //     "http://10.135.49.240:8080"; //my ip address
+  // // static const String baseUrl = "http://192.168.10.6:8080"; //my ip address
+  // static const String productionBaseUrl =
+  //     "https://api.beyondtheclass.me"; //my ip address
 
   // This below is ort forwarding url from localhost:8080. create your own every time
 
-  // static String get baseUrl => dotenv.env['PRODUCTION'] == "true"
-  //     ?
-  //     : localhostBaseUrl;
+  static Map<int, String> urlMap = {
+    -2: '',
+    -1: "http://10.135.49.240:8080", // localhost
+    0: "https://api.beyondtheclass.me", // production
 
-  static bool _useProductionUrl = false;
-  static const String _baseUrlCacheKey = 'use_production_url';
+    1: "http://192.168.10.1:8080",
+    2: "http://192.168.10.2:8080",
+    3: "http://192.168.10.3:8080",
+    4: "http://192.168.10.4:8080",
+    5: "http://192.168.10.5:8080",
+    6: "http://192.168.10.6:8080",
+    7: "http://192.168.10.7:8080",
+    8: "http://192.168.10.8:8080",
+    9: "http://192.168.10.9:8080",
+    10: "http://192.168.10.10:8080",
+    11: "http://192.168.10.11:8080",
+    12: "http://192.168.10.12:8080",
+  };
+
+  static int _currentUrlIndex = 0;
+  static const String _urlIndexCacheKey = 'current_url_index';
 
   static Future<void> initializeBaseUrl() async {
     final prefs = await SharedPreferences.getInstance();
-    _useProductionUrl = prefs.getBool(_baseUrlCacheKey) ?? false;
+    _currentUrlIndex = prefs.getInt(_urlIndexCacheKey) ?? 0;
   }
 
   static Future<void> _saveUrlPreference() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_baseUrlCacheKey, _useProductionUrl);
+    await prefs.setInt(_urlIndexCacheKey, _currentUrlIndex);
   }
 
-  static Future<void> toggleBaseUrl() async {
-    _useProductionUrl = !_useProductionUrl;
-    await _saveUrlPreference();
+  static Future<void> setUrlByIndex(int index) async {
+    if (urlMap.containsKey(index)) {
+      _currentUrlIndex = index;
+      await _saveUrlPreference();
+    }
   }
 
   static String get baseUrl {
     if (kReleaseMode) {
-      return productionBaseUrl; // Always use production URL in release mode
+      return urlMap[1]!; // Always use production URL in release mode
     }
-    return _useProductionUrl ? productionBaseUrl : localhostBaseUrl;
+    return urlMap[_currentUrlIndex] ?? urlMap[0]!;
   }
 
   static const String api = '/api';
