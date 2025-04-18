@@ -2,12 +2,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
+// https://api.beyondtheclass.me"
+// https://w7x50p90-8080.inc1.devtunnels.ms/
+
 class ApiConstants {
   static const String localhostBaseUrl =
-      "http://10.135.49.240:8080"; //my ip address
-  // static const String baseUrl = "http://192.168.10.6:8080"; //my ip address
+      "https://api.beyondtheclass.me"; 
+  // static const String baseUrl = "http://192.168.10.6:8080"; 
   static const String productionBaseUrl =
-      "https://api.beyondtheclass.me"; //my ip address
+      "https://api.beyondtheclass.me"; 
 
   // This below is ort forwarding url from localhost:8080. create your own every time
 
