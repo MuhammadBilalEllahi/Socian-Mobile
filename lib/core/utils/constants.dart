@@ -16,21 +16,21 @@ class ApiConstants {
     -1: "http://10.135.49.240:8080", // localhost
     0: "https://api.beyondtheclass.me", // production
 
-    1: "http://192.168.10.1:8080",
-    2: "http://192.168.10.2:8080",
-    3: "http://192.168.10.3:8080",
-    4: "http://192.168.10.4:8080",
-    5: "http://192.168.10.5:8080",
-    6: "http://192.168.10.6:8080",
-    7: "http://192.168.10.7:8080",
-    8: "http://192.168.10.8:8080",
-    9: "http://192.168.10.9:8080",
-    10: "http://192.168.10.10:8080",
-    11: "http://192.168.10.11:8080",
-    12: "http://192.168.10.12:8080",
+    1: "http://192.168.1.1:8080",
+    2: "http://192.168.1.2:8080",
+    3: "http://192.168.1.3:8080",
+    4: "http://192.168.1.4:8080",
+    5: "http://192.168.1.5:8080",
+    6: "http://192.168.1.6:8080",
+    7: "http://192.168.1.7:8080",
+    8: "http://192.168.1.8:8080",
+    9: "http://192.168.1.9:8080",
+    10: "http://192.168.1.10:8080",
+    11: "http://192.168.1.11:8080",
+    12: "http://192.168.1.12:8080",
   };
 
-  static int _currentUrlIndex = 9;
+  static int _currentUrlIndex = 8;
   static const String _urlIndexCacheKey = 'current_url_index';
 
   static Future<void> initializeBaseUrl() async {
@@ -52,7 +52,7 @@ class ApiConstants {
 
   static String get baseUrl {
     if (kReleaseMode) {
-      return urlMap[1]!; // Always use production URL in release mode
+      return urlMap[0]!; // Always use production URL in release mode
     }
     return urlMap[_currentUrlIndex] ?? urlMap[0]!;
   }

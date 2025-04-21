@@ -219,7 +219,7 @@ class _DiscussionViewState extends State<DiscussionView> {
               children: [
                 // PDF Viewer Section
                 AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
+                  duration: const Duration(milliseconds: 350),
                   height: isPdfExpanded
                       ? MediaQuery.of(context).size.height * 0.7
                       : MediaQuery.of(context).size.height * 0.4,
@@ -229,9 +229,9 @@ class _DiscussionViewState extends State<DiscussionView> {
                 ),
                 // Past Papers List Section
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(1.0),
                   child: SizedBox(
-                    height: 100,
+                    height: 80,
                     child: papers.isEmpty
                         ? const Center(
                             child: Text(

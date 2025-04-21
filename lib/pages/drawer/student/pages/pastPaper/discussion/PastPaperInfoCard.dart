@@ -1,7 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
 
-class PastPaperInfoCard extends StatelessWidget {
+class PastPaperInfoCard extends StatefulWidget {
   final Map<String, dynamic> paper;
   final Function(String url, String name, String year) onPaperSelected;
   final bool isFirst;
@@ -16,107 +17,160 @@ class PastPaperInfoCard extends StatelessWidget {
   });
 
   @override
+  State<PastPaperInfoCard> createState() => _PastPaperInfoCardState();
+}
+
+class _PastPaperInfoCardState extends State<PastPaperInfoCard> {
+  bool showDiscussionCard = false;
+  late Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startToggleTimer();
+  }
+
+  void _startToggleTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 6), (_) {
+      if (mounted) {
+        setState(() {
+          showDiscussionCard = !showDiscussionCard;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return InkWell(
+      canRequestFocus: true,
+      borderRadius: BorderRadius.circular(12),
       onTap: () {
-        if (paper['file'] != null && paper['file']['url'] != null) {
-          final url = "${ApiConstants.baseUrl}/api/uploads/${paper['file']['url']}";
-          onPaperSelected(
+        if (widget.paper['file'] != null &&
+            widget.paper['file']['url'] != null) {
+          final url =
+              "${ApiConstants.baseUrl}/api/uploads/${widget.paper['file']['url']}";
+          widget.onPaperSelected(
             url,
-            paper['name'],
-            paper['academicYear']?.toString() ?? '',
+            widget.paper['name'],
+            widget.paper['academicYear']?.toString() ?? '',
           );
         }
       },
-      borderRadius: BorderRadius.circular(12),
-      child: Card(
-        color: const Color(0xFF2D2D2D),
-        elevation: 4,
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 800),
+        transitionBuilder: (child, animation) => FadeTransition(
+          opacity: animation,
+          child: child,
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              if (!isFirst)
-                const Icon(
-                  Icons.arrow_back_ios,
-                  color: Colors.grey,
-                  size: 20,
-                ),
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF3D3D3D),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Center(
-                  child: Text(
-                    paper['name']?.isNotEmpty == true ? paper['name'][0].toUpperCase() : '?',
+        child: _buildCard(key: ValueKey(showDiscussionCard)),
+      ),
+    );
+  }
+
+  Widget _buildCard({required Key key}) {
+    return Card(
+      key: key,
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      color: const Color(0xFF121212),
+      elevation: 6,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+        child: Row(
+          children: [
+            if (!widget.isFirst)
+              const Icon(Icons.arrow_back_ios_new,
+                  size: 18, color: Color(0xFF888888)),
+            if (!widget.isFirst) const SizedBox(width: 10),
+
+            // Icon / Avatar
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 400),
+              child: showDiscussionCard
+                  ? const Icon(Icons.chat_bubble_outline,
+                      color: Colors.white, key: ValueKey('chat'))
+                  : Container(
+                      key: const ValueKey('initial'),
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2E2E2E),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Center(
+                        child: Text(
+                          widget.paper['name']?.isNotEmpty == true
+                              ? widget.paper['name'][0].toUpperCase()
+                              : '?',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+            ),
+
+            const SizedBox(width: 12),
+
+            // Paper Info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    showDiscussionCard
+                        ? "Discussion Available"
+                        : widget.paper['name'] ?? 'Untitled',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.w600,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      paper['name'] ?? 'Untitled',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Text(
-                          'Year: ${paper['academicYear'] ?? 'N/A'}',
-                          style: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 12,
-                          ),
+                  const SizedBox(height: 2),
+                  showDiscussionCard
+                      ? const Text(
+                          "Join the conversation 👥",
+                          style: TextStyle(color: Colors.grey, fontSize: 12.5),
+                        )
+                      : Row(
+                          children: [
+                            Text(
+                              "Year: ${widget.paper['academicYear'] ?? 'N/A'}",
+                              style: const TextStyle(
+                                  color: Colors.grey, fontSize: 12.5),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              "Type: ${widget.paper['type'] ?? 'Unknown'}",
+                              style: const TextStyle(
+                                  color: Colors.grey, fontSize: 12.5),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Type: ${paper['type'] ?? 'Unknown'}',
-                          style: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              Row(
-                children: [
-                  if (!isFirst && !isLast)
-                    const SizedBox(width: 8),
-                  if (!isLast)
-                    const Icon(
-                      Icons.arrow_forward_ios,
-                      color: Colors.grey,
-                      size: 20,
-                    ),
                 ],
               ),
-            ],
-          ),
+            ),
+
+            // Arrow
+            if (!widget.isLast) const SizedBox(width: 12),
+            if (!widget.isLast)
+              const Icon(Icons.arrow_forward_ios,
+                  size: 18, color: Color(0xFF888888)),
+          ],
         ),
       ),
     );
