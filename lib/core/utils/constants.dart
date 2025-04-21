@@ -1,3 +1,4 @@
+import 'package:beyondtheclass/shared/services/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -164,6 +165,82 @@ enum BottomNavBarRoute { home, message, explore, gps, profile }
 
 extension BottomNavBarRouteMap on BottomNavBarRoute {
   int get index => BottomNavBarRoute.values.indexOf(this);
+}
+
+enum IntroStatusEnum { pastpaperRightNaviagation, skip, allCompleted }
+
+class IntroStatus {
+  static const _prefix = 'introStatus_';
+  static String _keyFor(IntroStatusEnum status) => '$_prefix${status.name}';
+
+  static final Map<IntroStatusEnum, bool> introStatus = {
+    IntroStatusEnum.pastpaperRightNaviagation: false,
+    IntroStatusEnum.skip: false,
+    IntroStatusEnum.allCompleted: false
+  };
+
+  static final Map<IntroStatusEnum, bool> _introStatus = {
+    for (var status in IntroStatusEnum.values) status: false,
+  };
+
+  static Future<void> initializeFromCache() async {
+    final prefs = AppPrefs();
+    for (var status in IntroStatusEnum.values) {
+      final key = _keyFor(status);
+      final value = prefs.getBool(key) ?? false;
+      _introStatus[status] = value;
+    }
+  }
+
+  static isAllIntroCompleteOrSkipped() {
+    return _introStatus[IntroStatusEnum.skip] == true ||
+        _introStatus[IntroStatusEnum.allCompleted] == true;
+  }
+
+  static bool getStatus(IntroStatusEnum status) {
+    return _introStatus[status] ?? false;
+  }
+
+  static isThisIntroCompleted(IntroStatusEnum statusEnum) {
+    return _introStatus[statusEnum] == true;
+  }
+
+  static Future<void> markIntroCompleted(
+      IntroStatusEnum introStatusEmun) async {
+    _introStatus[introStatusEmun] = true;
+    final prefs = AppPrefs();
+    await prefs.setBool(_keyFor(introStatusEmun), true);
+  }
+}
+
+enum RiveThumb {
+  swipeRight,
+  swipeLeft,
+  oneTouch,
+  forceTouch,
+  tapAndHold,
+  tap3,
+  tap2,
+  tap,
+  doubleTap,
+  idle
+}
+
+class RiveComponentStrings {
+  static const Map<RiveThumb, String> thumbAnimations = {
+    RiveThumb.swipeRight: 'Swipe Right',
+    RiveThumb.swipeLeft: 'Swipe Left',
+    RiveThumb.oneTouch: '1 Touch',
+    RiveThumb.forceTouch: 'Force Touch',
+    RiveThumb.tapAndHold: 'Tap & Hold',
+    RiveThumb.tap3: 'Tap 3',
+    RiveThumb.tap2: 'Tap 2',
+    RiveThumb.tap: 'Tap',
+    RiveThumb.doubleTap: 'Double Tap',
+    RiveThumb.idle: 'Idle',
+  };
+
+  static const String thumbAsset = 'assets/animations/thumbsList.riv';
 }
 
 

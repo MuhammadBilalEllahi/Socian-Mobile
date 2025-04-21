@@ -153,23 +153,24 @@ class _ChatBoxState extends ConsumerState<ChatBox> {
                     alignment:
                         isMe ? Alignment.centerRight : Alignment.centerLeft,
                     child: Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 5),
                       decoration: BoxDecoration(
                         color: isMe ? Colors.blue[700] : accent,
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(7),
                         border: Border.all(color: border),
                       ),
                       child: Column(
                         crossAxisAlignment: isMe
-                            ? CrossAxisAlignment.end
+                            ? CrossAxisAlignment.start
                             : CrossAxisAlignment.start,
                         children: [
                           Text(
                             msg['name']?.toString() ?? '',
                             style: TextStyle(
                               color: isMe ? Colors.white : mutedForeground,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                           const SizedBox(height: 2),

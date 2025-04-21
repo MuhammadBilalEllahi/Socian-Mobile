@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:beyondtheclass/components/rive/RepeatingThumbAnimation.dart';
+import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:flutter/material.dart';
 
 class PastPaperInfoCard extends StatefulWidget {
@@ -135,9 +136,20 @@ class _PastPaperInfoCardState extends State<PastPaperInfoCard> {
                   ),
                   // const SizedBox(height: 2),
                   showDiscussionCard
-                      ? const Text(
-                          "Join the conversation",
-                          style: TextStyle(color: Colors.grey, fontSize: 12.5),
+                      ? Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Positioned(
+                              top: -10,
+                              right: -30,
+                              child: RepeatingThumbAnimation(RiveThumb.tap),
+                            ),
+                            Text(
+                              "Join the conversation",
+                              style:
+                                  TextStyle(color: Colors.grey, fontSize: 12.5),
+                            ),
+                          ],
                         )
                       : Row(
                           children: [
@@ -158,7 +170,6 @@ class _PastPaperInfoCardState extends State<PastPaperInfoCard> {
               ),
             ),
 
-            const RepeatingThumbAnimation(),
             // Arrow
             if (!widget.isLast) const SizedBox(width: 12),
             if (!widget.isLast)

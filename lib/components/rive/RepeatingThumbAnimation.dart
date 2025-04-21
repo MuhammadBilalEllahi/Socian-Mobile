@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
+import 'package:beyondtheclass/core/utils/constants.dart';
 
 class RepeatingThumbAnimation extends StatefulWidget {
-  const RepeatingThumbAnimation({super.key});
+  final RiveThumb animationType;
+  final Color? color;
+  const RepeatingThumbAnimation(this.animationType, {this.color, super.key});
 
   @override
   State<RepeatingThumbAnimation> createState() =>
@@ -20,10 +23,29 @@ class _RepeatingThumbAnimationState extends State<RepeatingThumbAnimation> {
   }
 
   void _loadRive() async {
-    final data = await RiveFile.asset('assets/animations/t_g_thumb.riv');
-    debugPrint("RVIVE $data");
-    final artboard = data.mainArtboard;
-    _controller = SimpleAnimation('Tap', autoplay: true);
+    final data = await RiveFile.asset(RiveComponentStrings.thumbAsset);
+    final artboard = data.mainArtboard.instance();
+
+    if (widget.color != null) {
+      // Find all shape nodes in artboard
+      for (var child in artboard.children) {
+        if (child is Shape) {
+          // Get the fill property
+          for (var fill in child.fills) {
+            fill.paint.color = widget.color!;
+          }
+          // Get the stroke property
+          for (var stroke in child.strokes) {
+            stroke.paint.color = widget.color!;
+          }
+        }
+      }
+    }
+
+    // Get the animation name from the map
+    final animationName =
+        RiveComponentStrings.thumbAnimations[widget.animationType];
+    _controller = SimpleAnimation(animationName!, autoplay: true);
     artboard.addController(_controller);
     setState(() => _artboard = artboard);
   }
