@@ -148,28 +148,58 @@ class _DiscussionViewState extends State<DiscussionView> {
   void _handleChatBoxToggle(int index) {
     setState(() {
       final paperId = papers[index]['_id'];
+      activeChatBoxId = paperId;
 
-      // If clicking the same paper's chatbox, just toggle visibility
-      if (activeChatBoxId == paperId) {
-        if (isCommentsVisible && !chatBoxVisible) {
-          isCommentsVisible = false;
-          chatBoxVisible = true;
-        } else if (chatBoxVisible) {
-          isCommentsVisible = true;
-          chatBoxVisible = false;
-        }
-      } else {
-        // If clicking a different paper, close previous chatbox and open new one
-        if (chatBoxVisible) {
-          // Close previous chatbox
-          isCommentsVisible = true;
-          chatBoxVisible = false;
-        }
-        // Open new chatbox
-        isCommentsVisible = false;
-        chatBoxVisible = true;
-        activeChatBoxId = paperId;
-      }
+      // Show bottom sheet
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        enableDrag: true,
+        isDismissible: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        builder: (context) => Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.5,
+            minChildSize: 0.3,
+            maxChildSize: 0.8,
+            expand: false,
+            snap: true,
+            snapSizes: const [0.3, 0.5, 0.8],
+            builder: (context, scrollController) => Container(
+              decoration: const BoxDecoration(
+                color: Color(0xFF121212),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Column(
+                children: [
+                  // Drag handle
+                  Container(
+                    margin: const EdgeInsets.only(top: 8),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[600],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  Expanded(
+                    child: ChatBox(
+                      discussionId: paperId,
+                      key: ValueKey(paperId),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
     });
   }
 
@@ -208,9 +238,8 @@ class _DiscussionViewState extends State<DiscussionView> {
             ),
             onPressed: () {
               setState(() {
-                if ((isPdfExpanded || chatBoxVisible) && !isCommentsVisible) {
+                if (isPdfExpanded && !isCommentsVisible) {
                   isPdfExpanded = false;
-                  chatBoxVisible = false;
                 }
                 isCommentsVisible = !isCommentsVisible;
               });
@@ -218,24 +247,7 @@ class _DiscussionViewState extends State<DiscussionView> {
           ),
           IconButton(
             icon: const Icon(
-              Icons.format_align_center, // chat box icon
-              color: Colors.white,
-            ),
-            onPressed: () {
-              setState(() {
-                if (isCommentsVisible && !chatBoxVisible) {
-                  isCommentsVisible = false;
-                  chatBoxVisible = true;
-                } else if (chatBoxVisible) {
-                  isCommentsVisible = true;
-                  chatBoxVisible = false;
-                }
-              });
-            },
-          ),
-          IconButton(
-            icon: const Icon(
-              Icons.analytics, // answers so far icon
+              Icons.analytics,
               color: Colors.white,
             ),
             onPressed: () {
@@ -296,18 +308,10 @@ class _DiscussionViewState extends State<DiscussionView> {
                           ),
                   ),
                 ),
-                // Comments or ChatBox Section
+                // Comments Section
                 if (isCommentsVisible)
                   Expanded(
                     child: Comments(toBeDiscussedId: id),
-                  ),
-                if (chatBoxVisible && activeChatBoxId != null)
-                  Expanded(
-                    child: ChatBox(
-                      discussionId: activeChatBoxId!,
-                      key: ValueKey(
-                          activeChatBoxId), // Force rebuild when paper changes
-                    ),
                   ),
               ],
             ),

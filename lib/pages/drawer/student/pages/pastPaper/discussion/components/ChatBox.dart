@@ -22,6 +22,7 @@ class _ChatBoxState extends ConsumerState<ChatBox> {
   late final String discussionId;
   StreamSubscription? _msgStream;
   late final auth = ref.watch(authProvider);
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void didUpdateWidget(covariant ChatBox oldWidget) {
@@ -52,13 +53,10 @@ class _ChatBoxState extends ConsumerState<ChatBox> {
         if (data['usersCount'] != null) {
           setState(() {
             usersCount = data['usersCount'] as int;
-            // debugPrint('Updated users count: $usersCount');
           });
         } else if (data['message'] != null) {
           setState(() {
-            // Handle the new message structure
             final message = Map<String, dynamic>.from(data);
-            // Ensure user data is properly structured
             if (message['_id'] == null && message['name'] != null) {
               message['_id'] = message['name'];
             }
@@ -67,12 +65,25 @@ class _ChatBoxState extends ConsumerState<ChatBox> {
         }
       }
     });
+
+    // Add keyboard listener
+    _focusNode.addListener(() {
+      if (_focusNode.hasFocus) {
+        // Scroll to bottom when keyboard appears
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted) {
+            setState(() {});
+          }
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
     _controller.dispose();
     _msgStream?.cancel();
+    _focusNode.dispose();
     ws.removeUserFromDiscussion(discussionId);
     super.dispose();
   }
@@ -113,6 +124,7 @@ class _ChatBoxState extends ConsumerState<ChatBox> {
               ],
             ),
           ),
+          const Divider(color: Colors.grey, height: 1),
           Expanded(
             child: ListView.builder(
               reverse: true,
@@ -159,13 +171,16 @@ class _ChatBoxState extends ConsumerState<ChatBox> {
               },
             ),
           ),
-          Padding(
+          const Divider(color: Colors.grey, height: 1),
+          // Message input area
+          Container(
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: _controller,
+                    focusNode: _focusNode,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: 'Type a message...',
