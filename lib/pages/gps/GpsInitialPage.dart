@@ -7,182 +7,162 @@ class GpsInitialPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final background = isDarkMode ? const Color(0xFF09090B) : Colors.white;
+    final foreground = isDarkMode ? Colors.white : const Color(0xFF09090B);
+    final muted =
+        isDarkMode ? const Color(0xFF27272A) : const Color(0xFFF4F4F5);
+    final mutedForeground =
+        isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+    final border =
+        isDarkMode ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+    final accent =
+        isDarkMode ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(120),
-        child: Stack(
+      backgroundColor: background,
+      appBar: AppBar(
+        backgroundColor: background,
+        elevation: 0,
+        title: Text(
+          'GPS Navigation',
+          style: TextStyle(
+            color: foreground,
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: Container(
+        color: background,
+        child: Column(
           children: [
-            ClipPath(
-              clipper: CustomAppBarClipper(),
-              child: Container(
-                height: 120,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Color.fromARGB(255, 18, 231, 89),
-                      Color.fromARGB(255, 64, 165, 233)
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 10,
-                      spreadRadius: 2,
-                      offset: Offset(0, 5),
+            Expanded(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildNavigationCard(
+                      context,
+                      title: 'Live Location',
+                      description:
+                          'Track your current location and nearby users',
+                      icon: Icons.location_on,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const LiveLocation()),
+                      ),
+                      background: background,
+                      foreground: foreground,
+                      muted: muted,
+                      border: border,
+                    ),
+                    const SizedBox(height: 24),
+                    _buildNavigationCard(
+                      context,
+                      title: 'Call a Meeting',
+                      description: 'Create a meeting point and invite others',
+                      icon: Icons.group,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const MapMainPage()),
+                      ),
+                      background: background,
+                      foreground: foreground,
+                      muted: muted,
+                      border: border,
                     ),
                   ],
-                ),
-              ),
-            ),
-            Positioned(
-              top: 50,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Text(
-                  'GPS Navigation',
-                  style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
                 ),
               ),
             ),
           ],
         ),
       ),
-      body: Stack(
-        children: [
-          Positioned(
-            top: 0,
-            right: -50,
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color.fromARGB(255, 10, 218, 97).withOpacity(0.2),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -50,
-            left: -50,
-            child: Container(
-              width: 250,
-              height: 250,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color.fromARGB(255, 10, 165, 212).withOpacity(0.2),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 40),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildNavigationCard(
-                  context,
-                  title: 'Live Location',
-                  icon: Icons.location_on,
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFF0F2027),
-                      Color(0xFF203A43),
-                      Color(0xFF2C5364)
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const LiveLocation()),
-                  ),
-                ),
-                const SizedBox(height: 25),
-                _buildNavigationCard(
-                  context,
-                  title: 'Call a Meeting',
-                  icon: Icons.group,
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF8E2DE2), Color(0xFF4A00E0)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const MapMainPage()),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
-}
-
-class CustomAppBarClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    Path path = Path();
-    path.lineTo(0, size.height - 30);
-    path.quadraticBezierTo(
-        size.width / 2, size.height + 10, size.width, size.height - 30);
-    path.lineTo(size.width, 0);
-    path.close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
 
 Widget _buildNavigationCard(
   BuildContext context, {
   required String title,
+  required String description,
   required IconData icon,
-  required Gradient gradient,
   required VoidCallback onTap,
+  required Color background,
+  required Color foreground,
+  required Color muted,
+  required Color border,
 }) {
   return GestureDetector(
     onTap: onTap,
     child: Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 25),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: gradient,
-        borderRadius: BorderRadius.circular(20),
+        color: background,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 20,
-            spreadRadius: 5,
-            offset: const Offset(0, 8),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: Colors.white, size: 35),
-          const SizedBox(width: 15),
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: muted,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  icon,
+                  color: foreground,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: foreground,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: TextStyle(
+                        color: foreground.withOpacity(0.7),
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: foreground.withOpacity(0.5),
+                size: 16,
+              ),
+            ],
           ),
         ],
       ),

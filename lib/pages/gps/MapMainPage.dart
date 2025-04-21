@@ -18,7 +18,6 @@ class MapMainPage extends ConsumerStatefulWidget {
 class _MapMainPageState extends ConsumerState<MapMainPage> {
   final String apiKey = dotenv.env['MAPS_API_KEY'] ?? '';
   final String baseUrl = ApiConstants.baseUrl;
-
   GoogleMapController? _mapController;
   LatLng? _userLocation;
   String? errorMessage;
@@ -27,6 +26,7 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
   IO.Socket? _socket;
   double _radius = 500.0;
   int _userCountInRadius = 0;
+  bool _isLoading = true;
 
   BitmapDescriptor? _userMarkerIcon;
   BitmapDescriptor? _otherMarkerIcon;
@@ -110,6 +110,7 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
   }
 
   Future<void> _fetchLocationWithTimeout() async {
+    setState(() => _isLoading = true);
     try {
       await _checkPermissionsAndFetchLocation().timeout(
         const Duration(seconds: 15),
@@ -120,6 +121,7 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
     } catch (e) {
       setState(() {
         errorMessage = "Error: $e";
+        _isLoading = false;
       });
     }
   }
@@ -129,6 +131,7 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
     if (!serviceEnabled) {
       setState(() {
         errorMessage = "Location service is disabled";
+        _isLoading = false;
       });
       return;
     }
@@ -139,6 +142,7 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
       if (permission == LocationPermission.denied) {
         setState(() {
           errorMessage = "Location permission denied";
+          _isLoading = false;
         });
         return;
       }
@@ -147,6 +151,7 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
     if (permission == LocationPermission.deniedForever) {
       setState(() {
         errorMessage = "Location permissions permanently denied";
+        _isLoading = false;
       });
       return;
     }
@@ -158,7 +163,7 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
 
     setState(() {
       _userLocation = LatLng(position.latitude, position.longitude);
-      final auth = ref.read(authProvider); // Access auth data here
+      final auth = ref.read(authProvider);
       _markers.add(Marker(
         markerId: const MarkerId("user_location"),
         position: _userLocation!,
@@ -166,6 +171,7 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
         infoWindow: InfoWindow(title: auth.user?['name'] ?? "Your Location"),
       ));
       _updateCircle();
+      _isLoading = false;
     });
 
     _mapController
@@ -177,10 +183,10 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
   void _sendLocationUpdate() {
     if (_userLocation == null || _socket == null || !_socket!.connected) return;
 
-    final auth = ref.read(authProvider); // Access auth data here
+    final auth = ref.read(authProvider);
     final userData = {
-      'userId': auth.user?['id'] ?? 'default_user_id', // Use auth ID
-      'name': auth.user?['name'] ?? 'Unknown', // Use auth name
+      'userId': auth.user?['id'] ?? 'default_user_id',
+      'name': auth.user?['name'] ?? 'Unknown',
       'latitude': _userLocation!.latitude,
       'longitude': _userLocation!.longitude,
       'radius': _radius,
@@ -225,10 +231,39 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
 
   @override
   Widget build(BuildContext context) {
-    final auth = ref.watch(authProvider); // Watch auth changes reactively
-    String name = auth.user?['name'] ?? "Unknown";
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final background = isDarkMode ? const Color(0xFF09090B) : Colors.white;
+    final foreground = isDarkMode ? Colors.white : const Color(0xFF09090B);
+    final muted =
+        isDarkMode ? const Color(0xFF27272A) : const Color(0xFFF4F4F5);
+    final mutedForeground =
+        isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+    final border =
+        isDarkMode ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+    final accent =
+        isDarkMode ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
 
     return Scaffold(
+      backgroundColor: background,
+      appBar: AppBar(
+        backgroundColor: background,
+        elevation: 0,
+        title: Text(
+          'Meeting Point',
+          style: TextStyle(
+            color: foreground,
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh, color: foreground),
+            onPressed: _fetchLocationWithTimeout,
+          ),
+        ],
+      ),
       body: Stack(
         children: [
           if (_userLocation != null)
@@ -246,73 +281,188 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
               myLocationEnabled: true,
               myLocationButtonEnabled: true,
             )
-          else
+          else if (_isLoading)
             Center(
-              child: errorMessage != null
-                  ? Text(errorMessage!,
-                      style: const TextStyle(color: Colors.red))
-                  : const CircularProgressIndicator(),
-            ),
-          Positioned(
-            top: 50,
-            left: 20,
-            right: 20,
-            child: Column(
-              children: [
-                Container(
-                  color: Colors.black,
-                  child: Text(
-                    "Users in radius: $_userCountInRadius",
-                    style: const TextStyle(color: Colors.white, fontSize: 20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(foreground),
                   ),
-                ),
-                Slider(
-                  value: _radius,
-                  min: 100,
-                  max: 1000,
-                  divisions: 20,
-                  label: "${_radius.round()} meters",
-                  onChanged: (value) {
-                    setState(() {
-                      _radius = value;
-                      _updateCircle();
-                      _sendLocationUpdate();
-                      _requestNearbyAttendees();
-                    });
-                  },
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  Text(
+                    'Setting up meeting point...',
+                    style: TextStyle(
+                      color: foreground,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else if (errorMessage != null)
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    color: Colors.red[400],
+                    size: 48,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    errorMessage!,
+                    style: TextStyle(
+                      color: foreground,
+                      fontSize: 16,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: muted,
+                      foregroundColor: foreground,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: _fetchLocationWithTimeout,
+                    child: const Text('Try Again'),
+                  ),
+                ],
+              ),
             ),
-          ),
           Positioned(
-            top: 150,
-            left: 0,
-            bottom: 0,
-            width: 150,
+            top: 16,
+            right: 16,
             child: Container(
-              color: Colors.white.withOpacity(0.8),
-              child: ListView(
-                padding: const EdgeInsets.all(8.0),
-                children: _markers
-                    .where((marker) => marker.markerId.value != "user_location")
-                    .map((marker) => ListTile(
-                          title: Text(
-                            marker.infoWindow.title ?? "Unknown",
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                        ))
-                    .toList(),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: background,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: border),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Text(
+                '$_userCountInRadius users in radius',
+                style: TextStyle(
+                  color: foreground,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ),
+          Positioned(
+            bottom: 16,
+            left: 16,
+            right: 16,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: background,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: border),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Meeting Radius: ${_radius.round()}m',
+                    style: TextStyle(
+                      color: foreground,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Slider(
+                    value: _radius,
+                    min: 100,
+                    max: 1000,
+                    divisions: 20,
+                    label: "${_radius.round()}m",
+                    onChanged: (value) {
+                      setState(() {
+                        _radius = value;
+                        _updateCircle();
+                        _sendLocationUpdate();
+                        _requestNearbyAttendees();
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_markers.length > 1)
+            Positioned(
+              top: 80,
+              left: 16,
+              child: Container(
+                width: 200,
+                decoration: BoxDecoration(
+                  color: background,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: border),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Text(
+                        'Nearby Users',
+                        style: TextStyle(
+                          color: foreground,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    ..._markers
+                        .where((marker) =>
+                            marker.markerId.value != "user_location")
+                        .map((marker) => ListTile(
+                              title: Text(
+                                marker.infoWindow.title ?? "Unknown",
+                                style: TextStyle(
+                                  color: foreground,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ))
+                        .toList(),
+                  ],
+                ),
+              ),
+            ),
         ],
-      ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 0, 100),
-        child: FloatingActionButton(
-          onPressed: _fetchLocationWithTimeout,
-          child: const Icon(Icons.refresh),
-        ),
       ),
     );
   }
