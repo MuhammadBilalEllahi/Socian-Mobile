@@ -86,6 +86,13 @@ class _PastPaperInfoCardState extends State<PastPaperInfoCard> {
                   size: 18, color: Color.fromARGB(255, 206, 205, 205)),
             if (!widget.isFirst) const SizedBox(width: 10),
 
+            if (widget.isLast &&
+                !showDiscussionCard &&
+                !IntroStatus.getStatus(IntroStatusEnum.skip) &&
+                !IntroStatus.getStatus(
+                    IntroStatusEnum.pastpaperRightNaviagation))
+              const RepeatingThumbAnimation(RiveThumb.swipeRight),
+
             // Icon / Avatar
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 400),
@@ -136,7 +143,7 @@ class _PastPaperInfoCardState extends State<PastPaperInfoCard> {
                   ),
                   // const SizedBox(height: 2),
                   showDiscussionCard
-                      ? Stack(
+                      ? const Stack(
                           clipBehavior: Clip.none,
                           children: [
                             Positioned(
@@ -169,6 +176,12 @@ class _PastPaperInfoCardState extends State<PastPaperInfoCard> {
                 ],
               ),
             ),
+
+            if (widget.isFirst &&
+                !showDiscussionCard &&
+                !IntroStatus.getStatus(
+                    IntroStatusEnum.pastpaperRightNaviagation))
+              const RepeatingThumbAnimation(RiveThumb.swipeLeft),
 
             // Arrow
             if (!widget.isLast) const SizedBox(width: 12),
