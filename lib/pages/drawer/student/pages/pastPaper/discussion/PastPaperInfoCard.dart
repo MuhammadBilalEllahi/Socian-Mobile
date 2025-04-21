@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:beyondtheclass/components/rive/RepeatingThumbAnimation.dart';
 import 'package:flutter/material.dart';
 
 class PastPaperInfoCard extends StatefulWidget {
@@ -157,6 +158,7 @@ class _PastPaperInfoCardState extends State<PastPaperInfoCard> {
               ),
             ),
 
+            const RepeatingThumbAnimation(),
             // Arrow
             if (!widget.isLast) const SizedBox(width: 12),
             if (!widget.isLast)
