@@ -34,6 +34,8 @@ class _DiscussionViewState extends State<DiscussionView> {
   bool isCommentsVisible = true;
   bool isPdfExpanded = false;
   bool chatBoxVisible = false;
+  String? activeChatBoxId; // Track which paper's chatbox is active
+
   @override
   void initState() {
     super.initState();
@@ -143,6 +145,34 @@ class _DiscussionViewState extends State<DiscussionView> {
     }
   }
 
+  void _handleChatBoxToggle(int index) {
+    setState(() {
+      final paperId = papers[index]['_id'];
+
+      // If clicking the same paper's chatbox, just toggle visibility
+      if (activeChatBoxId == paperId) {
+        if (isCommentsVisible && !chatBoxVisible) {
+          isCommentsVisible = false;
+          chatBoxVisible = true;
+        } else if (chatBoxVisible) {
+          isCommentsVisible = true;
+          chatBoxVisible = false;
+        }
+      } else {
+        // If clicking a different paper, close previous chatbox and open new one
+        if (chatBoxVisible) {
+          // Close previous chatbox
+          isCommentsVisible = true;
+          chatBoxVisible = false;
+        }
+        // Open new chatbox
+        isCommentsVisible = false;
+        chatBoxVisible = true;
+        activeChatBoxId = paperId;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -178,8 +208,9 @@ class _DiscussionViewState extends State<DiscussionView> {
             ),
             onPressed: () {
               setState(() {
-                if (isPdfExpanded && !isCommentsVisible) {
+                if ((isPdfExpanded || chatBoxVisible) && !isCommentsVisible) {
                   isPdfExpanded = false;
+                  chatBoxVisible = false;
                 }
                 isCommentsVisible = !isCommentsVisible;
               });
@@ -258,6 +289,8 @@ class _DiscussionViewState extends State<DiscussionView> {
                                     curve: Curves.easeInOut,
                                   );
                                 },
+                                onChatBoxToggle: () =>
+                                    _handleChatBoxToggle(index),
                               );
                             },
                           ),
@@ -268,11 +301,13 @@ class _DiscussionViewState extends State<DiscussionView> {
                   Expanded(
                     child: Comments(toBeDiscussedId: id),
                   ),
-                if (chatBoxVisible)
+                if (chatBoxVisible && activeChatBoxId != null)
                   Expanded(
                     child: ChatBox(
-                        discussionId: papers[_pageController.page!.round()]
-                            ['_id']),
+                      discussionId: activeChatBoxId!,
+                      key: ValueKey(
+                          activeChatBoxId), // Force rebuild when paper changes
+                    ),
                   ),
               ],
             ),

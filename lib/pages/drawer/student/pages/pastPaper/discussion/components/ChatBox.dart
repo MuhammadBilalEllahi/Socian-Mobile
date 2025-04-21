@@ -26,16 +26,15 @@ class _ChatBoxState extends ConsumerState<ChatBox> {
   @override
   void didUpdateWidget(covariant ChatBox oldWidget) {
     super.didUpdateWidget(oldWidget);
-    debugPrint(
-        "----------discussionId: ${widget.discussionId} and ${oldWidget.discussionId}");
     if (widget.discussionId != oldWidget.discussionId) {
-      // Clean up old
+      // Clean up old connection
       ws.removeUserFromDiscussion(oldWidget.discussionId);
       messages.clear();
-      ws.joinDiscussion(widget.discussionId);
+      usersCount = 1;
 
+      // Set up new connection
+      ws.joinDiscussion(widget.discussionId);
       setState(() {});
-      debugPrint("----------discussionId after setState: $discussionId");
     }
   }
 
@@ -46,27 +45,26 @@ class _ChatBoxState extends ConsumerState<ChatBox> {
     ws = WebSocketService();
     ws.connect();
     ws.joinDiscussion(discussionId);
+
     // Listen for messages
-    debugPrint("----------discussionId: $discussionId");
     _msgStream = ws.messages.listen((data) {
-      if (data is Map && data['message'] != null) {
-        debugPrint("----------data: $data");
-        setState(() {
-          messages.add(Map<String, dynamic>.from(data));
-        });
-      } else if (data is Map && data['usersCount'] != null) {
-        setState(() {
-          usersCount = data['usersCount'] as int;
-        });
-      } else if (data is Map && data['users'] != null) {
-        // Optionally handle users list
-      } else if (data is Map &&
-          data['socketId'] != null &&
-          data['user'] != null &&
-          data['message'] != null) {
-        setState(() {
-          messages.add(Map<String, dynamic>.from(data));
-        });
+      if (data is Map) {
+        if (data['usersCount'] != null) {
+          setState(() {
+            usersCount = data['usersCount'] as int;
+            // debugPrint('Updated users count: $usersCount');
+          });
+        } else if (data['message'] != null) {
+          setState(() {
+            // Handle the new message structure
+            final message = Map<String, dynamic>.from(data);
+            // Ensure user data is properly structured
+            if (message['_id'] == null && message['name'] != null) {
+              message['_id'] = message['name'];
+            }
+            messages.add(message);
+          });
+        }
       }
     });
   }
@@ -75,12 +73,11 @@ class _ChatBoxState extends ConsumerState<ChatBox> {
   void dispose() {
     _controller.dispose();
     _msgStream?.cancel();
+    ws.removeUserFromDiscussion(discussionId);
     super.dispose();
   }
 
   void _sendMessage(String discussionId) {
-    debugPrint(
-        "----------discussionId: for sending message out: $discussionId");
     final text = _controller.text.trim();
     if (text.isNotEmpty) {
       final user = {
@@ -89,7 +86,6 @@ class _ChatBoxState extends ConsumerState<ChatBox> {
         'username': auth.user?['username'] ?? '',
         'picture': auth.user?['picture'] ?? '',
       };
-      debugPrint("----------discussionId: for sending message: $discussionId");
       ws.sendMessageInDiscussion(
           {'discussionId': discussionId, 'message': text, 'user': user});
       _controller.clear();
@@ -142,7 +138,7 @@ class _ChatBoxState extends ConsumerState<ChatBox> {
                             : CrossAxisAlignment.start,
                         children: [
                           Text(
-                            msg['user']?.toString() ?? '',
+                            msg['name']?.toString() ?? '',
                             style: TextStyle(
                               color: Colors.grey[300],
                               fontSize: 12,
@@ -151,9 +147,7 @@ class _ChatBoxState extends ConsumerState<ChatBox> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            msg['message']?.toString() ??
-                                msg['text']?.toString() ??
-                                '',
+                            msg['message']?.toString() ?? '',
                             style: const TextStyle(
                                 color: Colors.white, fontSize: 15),
                           ),

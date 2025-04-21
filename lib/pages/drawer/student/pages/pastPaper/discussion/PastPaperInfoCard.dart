@@ -1,17 +1,18 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:beyondtheclass/core/utils/constants.dart';
 
 class PastPaperInfoCard extends StatefulWidget {
   final Map<String, dynamic> paper;
   final Function(String url, String name, String year) onPaperSelected;
   final bool isFirst;
   final bool isLast;
+  final VoidCallback onChatBoxToggle;
 
-  const PastPaperInfoCard({
+  PastPaperInfoCard({
     super.key,
     required this.paper,
     required this.onPaperSelected,
+    required this.onChatBoxToggle,
     this.isFirst = false,
     this.isLast = false,
   });
@@ -31,7 +32,7 @@ class _PastPaperInfoCardState extends State<PastPaperInfoCard> {
   }
 
   void _startToggleTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 6), (_) {
+    _timer = Timer.periodic(const Duration(seconds: 7), (_) {
       if (mounted) {
         setState(() {
           showDiscussionCard = !showDiscussionCard;
@@ -52,19 +53,10 @@ class _PastPaperInfoCardState extends State<PastPaperInfoCard> {
       canRequestFocus: true,
       borderRadius: BorderRadius.circular(12),
       onTap: () {
-        if (widget.paper['file'] != null &&
-            widget.paper['file']['url'] != null) {
-          final url =
-              "${ApiConstants.baseUrl}/api/uploads/${widget.paper['file']['url']}";
-          widget.onPaperSelected(
-            url,
-            widget.paper['name'],
-            widget.paper['academicYear']?.toString() ?? '',
-          );
-        }
+        widget.onChatBoxToggle();
       },
       child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 800),
+        duration: const Duration(milliseconds: 750),
         transitionBuilder: (child, animation) => FadeTransition(
           opacity: animation,
           child: child,
@@ -89,7 +81,7 @@ class _PastPaperInfoCardState extends State<PastPaperInfoCard> {
           children: [
             if (!widget.isFirst)
               const Icon(Icons.arrow_back_ios_new,
-                  size: 18, color: Color(0xFF888888)),
+                  size: 18, color: Color.fromARGB(255, 206, 205, 205)),
             if (!widget.isFirst) const SizedBox(width: 10),
 
             // Icon / Avatar
@@ -140,10 +132,10 @@ class _PastPaperInfoCardState extends State<PastPaperInfoCard> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 2),
+                  // const SizedBox(height: 2),
                   showDiscussionCard
                       ? const Text(
-                          "Join the conversation 👥",
+                          "Join the conversation",
                           style: TextStyle(color: Colors.grey, fontSize: 12.5),
                         )
                       : Row(
@@ -169,7 +161,7 @@ class _PastPaperInfoCardState extends State<PastPaperInfoCard> {
             if (!widget.isLast) const SizedBox(width: 12),
             if (!widget.isLast)
               const Icon(Icons.arrow_forward_ios,
-                  size: 18, color: Color(0xFF888888)),
+                  size: 18, color: Color.fromARGB(255, 206, 205, 205)),
           ],
         ),
       ),
