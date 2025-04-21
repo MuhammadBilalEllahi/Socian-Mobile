@@ -105,8 +105,22 @@ class _ChatBoxState extends ConsumerState<ChatBox> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    // Custom theme colors
+    final background = isDarkMode ? const Color(0xFF09090B) : Colors.white;
+    final foreground = isDarkMode ? Colors.white : const Color(0xFF09090B);
+    final muted =
+        isDarkMode ? const Color(0xFF27272A) : const Color(0xFFF4F4F5);
+    final mutedForeground =
+        isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+    final border =
+        isDarkMode ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+    final accent =
+        isDarkMode ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
+
     return Container(
-      color: const Color(0xFF121212),
+      color: background,
       child: Column(
         children: [
           // Users count at the top
@@ -115,16 +129,16 @@ class _ChatBoxState extends ConsumerState<ChatBox> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.people, color: Colors.white, size: 18),
+                Icon(Icons.people, color: foreground, size: 18),
                 const SizedBox(width: 6),
                 Text(
                   'Users in chat: $usersCount',
-                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                  style: TextStyle(color: foreground, fontSize: 14),
                 ),
               ],
             ),
           ),
-          const Divider(color: Colors.grey, height: 1),
+          Divider(color: border, height: 1),
           Expanded(
             child: ListView.builder(
               reverse: true,
@@ -141,8 +155,9 @@ class _ChatBoxState extends ConsumerState<ChatBox> {
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: isMe ? Colors.blue[700] : Colors.grey[800],
+                        color: isMe ? Colors.blue[700] : accent,
                         borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: border),
                       ),
                       child: Column(
                         crossAxisAlignment: isMe
@@ -152,7 +167,7 @@ class _ChatBoxState extends ConsumerState<ChatBox> {
                           Text(
                             msg['name']?.toString() ?? '',
                             style: TextStyle(
-                              color: Colors.grey[300],
+                              color: isMe ? Colors.white : mutedForeground,
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                             ),
@@ -160,8 +175,9 @@ class _ChatBoxState extends ConsumerState<ChatBox> {
                           const SizedBox(height: 2),
                           Text(
                             msg['message']?.toString() ?? '',
-                            style: const TextStyle(
-                                color: Colors.white, fontSize: 15),
+                            style: TextStyle(
+                                color: isMe ? Colors.white : foreground,
+                                fontSize: 15),
                           ),
                         ],
                       ),
@@ -171,7 +187,7 @@ class _ChatBoxState extends ConsumerState<ChatBox> {
               },
             ),
           ),
-          const Divider(color: Colors.grey, height: 1),
+          Divider(color: border, height: 1),
           // Message input area
           Container(
             padding: const EdgeInsets.all(8.0),
@@ -181,17 +197,25 @@ class _ChatBoxState extends ConsumerState<ChatBox> {
                   child: TextField(
                     controller: _controller,
                     focusNode: _focusNode,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: foreground),
                     decoration: InputDecoration(
                       hintText: 'Type a message...',
-                      hintStyle: TextStyle(color: Colors.grey[600]),
+                      hintStyle: TextStyle(color: mutedForeground),
                       filled: true,
-                      fillColor: const Color(0xFF1A1A1A),
+                      fillColor: accent,
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 12),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
+                        borderSide: BorderSide(color: border),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: border),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: border),
                       ),
                     ),
                     onSubmitted: (_) => _sendMessage(discussionId),
@@ -199,7 +223,7 @@ class _ChatBoxState extends ConsumerState<ChatBox> {
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  icon: const Icon(Icons.send, color: Colors.white),
+                  icon: Icon(Icons.send, color: foreground),
                   onPressed: () => _sendMessage(discussionId),
                 ),
               ],

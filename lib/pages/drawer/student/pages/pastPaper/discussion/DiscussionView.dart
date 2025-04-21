@@ -34,7 +34,7 @@ class _DiscussionViewState extends State<DiscussionView> {
   bool isCommentsVisible = true;
   bool isPdfExpanded = false;
   bool chatBoxVisible = false;
-  String? activeChatBoxId; // Track which paper's chatbox is active
+  String? activeChatBoxId;
 
   @override
   void initState() {
@@ -172,9 +172,10 @@ class _DiscussionViewState extends State<DiscussionView> {
             snap: true,
             snapSizes: const [0.3, 0.5, 0.8],
             builder: (context, scrollController) => Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFF121212),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(20)),
               ),
               child: Column(
                 children: [
@@ -184,7 +185,9 @@ class _DiscussionViewState extends State<DiscussionView> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.grey[600],
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey[600]
+                          : Colors.grey[400],
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -205,20 +208,35 @@ class _DiscussionViewState extends State<DiscussionView> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+
+    // Custom theme colors
+    final background = isDarkMode ? const Color(0xFF09090B) : Colors.white;
+    final foreground = isDarkMode ? Colors.white : const Color(0xFF09090B);
+    final muted =
+        isDarkMode ? const Color(0xFF27272A) : const Color(0xFFF4F4F5);
+    final mutedForeground =
+        isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+    final border =
+        isDarkMode ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+    final accent =
+        isDarkMode ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
+
     return Scaffold(
-      backgroundColor: const Color(0xFF1E1E1E),
+      backgroundColor: background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF2D2D2D),
-        title: const Text(
+        backgroundColor: background,
+        title: Text(
           'Discussion',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: foreground),
         ),
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: foreground),
         actions: [
           IconButton(
             icon: Icon(
               isPdfExpanded ? Icons.fullscreen_exit : Icons.fullscreen,
-              color: Colors.white,
+              color: foreground,
             ),
             onPressed: () {
               setState(() {
@@ -234,7 +252,7 @@ class _DiscussionViewState extends State<DiscussionView> {
           IconButton(
             icon: Icon(
               isCommentsVisible ? Icons.comment : Icons.comment_outlined,
-              color: Colors.white,
+              color: foreground,
             ),
             onPressed: () {
               setState(() {
@@ -246,9 +264,9 @@ class _DiscussionViewState extends State<DiscussionView> {
             },
           ),
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.analytics,
-              color: Colors.white,
+              color: foreground,
             ),
             onPressed: () {
               Navigator.pushNamed(context, AppRoutes.answersPage);
@@ -257,7 +275,11 @@ class _DiscussionViewState extends State<DiscussionView> {
         ],
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+              child: CircularProgressIndicator(
+                color: foreground,
+              ),
+            )
           : Column(
               children: [
                 // PDF Viewer Section
@@ -276,10 +298,10 @@ class _DiscussionViewState extends State<DiscussionView> {
                   child: SizedBox(
                     height: 80,
                     child: papers.isEmpty
-                        ? const Center(
+                        ? Center(
                             child: Text(
                               'No papers available',
-                              style: TextStyle(color: Colors.white),
+                              style: TextStyle(color: foreground),
                             ),
                           )
                         : PageView.builder(
