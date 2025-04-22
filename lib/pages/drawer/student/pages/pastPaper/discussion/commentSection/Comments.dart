@@ -1,3 +1,5 @@
+import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/discussion/commentSection/AddAnswer.dart';
 import 'package:flutter/material.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
 
@@ -65,28 +67,16 @@ class _CommentsState extends State<Comments> {
     }
   }
 
-  Future<void> _upvoteComment(String commentId) async {
+  Future<void> _voteComment(String commentId, EnumVoteType voteType) async {
     try {
-      await _apiClient.post('/api/discussion/upvote/$commentId', {});
+      await _apiClient.post('/api/discussion/comment/vote',
+          {'commentId': commentId, 'voteType': voteType.name});
+      // debugPrint("VOTE TYPE ${voteType.name}");
       _fetchComments(); // Refresh comments to get updated vote counts
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to upvote comment'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  Future<void> _downvoteComment(String commentId) async {
-    try {
-      await _apiClient.post('/api/discussion/downvote/$commentId', {});
-      _fetchComments(); // Refresh comments to get updated vote counts
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to downvote comment'),
+        SnackBar(
+          content: Text('Failed to ${voteType.name} comment'),
           backgroundColor: Colors.red,
         ),
       );
@@ -105,9 +95,9 @@ class _CommentsState extends State<Comments> {
     }
 
     try {
-      await _apiClient.post('/api/discussion/add-comment', {
+      await _apiClient.post('/api/discussion/comment/add-comment', {
         'toBeDiscussedId': widget.toBeDiscussedId,
-        'content': _commentController.text.trim(),
+        'commentContent': _commentController.text.trim(),
       });
       _commentController.clear();
       _fetchComments(); // Refresh comments to show the new one
@@ -389,7 +379,10 @@ class _CommentsState extends State<Comments> {
                   borderRadius: BorderRadius.circular(8)),
             ),
             onPressed: () {
-              Navigator.pop(context);
+              _apiClient.post('/api/discussion/comment/reply-to-comment', {
+                'commentId': parentCommentId,
+                'replyContent': _replyController.text
+              });
             },
             child: Text('Reply', style: TextStyle(color: foreground)),
           ),
@@ -466,7 +459,8 @@ class _CommentsState extends State<Comments> {
                       color: mutedForeground, size: 16),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
-                  onPressed: () => _upvoteComment(comment['_id'].toString()),
+                  onPressed: () => _voteComment(
+                      comment['_id'].toString(), EnumVoteType.upvote),
                 ),
                 Text(
                   comment['voteId']['upVotesCount']?.toString() ?? '0',
@@ -478,7 +472,8 @@ class _CommentsState extends State<Comments> {
                       color: mutedForeground, size: 16),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
-                  onPressed: () => _downvoteComment(comment['_id'].toString()),
+                  onPressed: () => _voteComment(
+                      comment['_id'].toString(), EnumVoteType.downvote),
                 ),
                 Text(
                   comment['voteId']['downVotesCount']?.toString() ?? '0',
@@ -563,6 +558,31 @@ class _CommentsState extends State<Comments> {
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
+                Container(
+                  // padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: mutedForeground),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: IconButton(
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) => DraggableScrollableSheet(
+                            initialChildSize: 0.7,
+                            minChildSize: 0.5,
+                            maxChildSize: 0.9,
+                            expand: false,
+                            builder: (context, scrollController) => AddAnswer(
+                              toBeDiscussedId: widget.toBeDiscussedId,
+                            ),
+                          ),
+                        );
+                      },
+                      icon: Icon(Icons.add, color: foreground)),
+                ),
                 Expanded(
                   child: TextField(
                     controller: _commentController,

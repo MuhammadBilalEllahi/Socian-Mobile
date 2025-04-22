@@ -167,6 +167,8 @@ extension BottomNavBarRouteMap on BottomNavBarRoute {
   int get index => BottomNavBarRoute.values.indexOf(this);
 }
 
+enum EnumVoteType { upvote, downvote }
+
 enum IntroStatusEnum { pastpaperRightNaviagation, skip, allCompleted }
 
 class IntroStatus {
