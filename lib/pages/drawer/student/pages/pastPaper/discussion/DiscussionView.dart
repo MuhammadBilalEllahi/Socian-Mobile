@@ -34,6 +34,8 @@ class _DiscussionViewState extends State<DiscussionView> {
   bool isCommentsVisible = true;
   bool isPdfExpanded = false;
   bool chatBoxVisible = false;
+  String? activeChatBoxId;
+
   @override
   void initState() {
     super.initState();
@@ -78,6 +80,9 @@ class _DiscussionViewState extends State<DiscussionView> {
   void loadPaper(int index) async {
     if (index >= 0 && index < papers.length) {
       final paper = papers[index];
+      debugPrint("DATAof $paper");
+      id = paper['_id'];
+      // isCommentsVisible = false;
       if (paper['file'] != null && paper['file']['url'] != null) {
         final url =
             "${ApiConstants.baseUrl}/api/uploads/${paper['file']['url']}";
@@ -143,22 +148,98 @@ class _DiscussionViewState extends State<DiscussionView> {
     }
   }
 
+  void _handleChatBoxToggle(int index) {
+    setState(() {
+      final paperId = papers[index]['_id'];
+      activeChatBoxId = paperId;
+
+      // Show bottom sheet
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        enableDrag: true,
+        isDismissible: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        builder: (context) => Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.5,
+            minChildSize: 0.3,
+            maxChildSize: 0.8,
+            expand: false,
+            snap: true,
+            snapSizes: const [0.3, 0.5, 0.8],
+            builder: (context, scrollController) => Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Column(
+                children: [
+                  // Drag handle
+                  Container(
+                    margin: const EdgeInsets.only(top: 8),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey[600]
+                          : Colors.grey[400],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  Expanded(
+                    child: ChatBox(
+                      discussionId: paperId,
+                      key: ValueKey(paperId),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+
+    // Custom theme colors
+    final background = isDarkMode ? const Color(0xFF09090B) : Colors.white;
+    final foreground = isDarkMode ? Colors.white : const Color(0xFF09090B);
+    final muted =
+        isDarkMode ? const Color(0xFF27272A) : const Color(0xFFF4F4F5);
+    final mutedForeground =
+        isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+    final border =
+        isDarkMode ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+    final accent =
+        isDarkMode ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
+
     return Scaffold(
-      backgroundColor: const Color(0xFF1E1E1E),
+      backgroundColor: background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF2D2D2D),
-        title: const Text(
+        backgroundColor: background,
+        title: Text(
           'Discussion',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: foreground),
         ),
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: foreground),
         actions: [
           IconButton(
             icon: Icon(
               isPdfExpanded ? Icons.fullscreen_exit : Icons.fullscreen,
-              color: Colors.white,
+              color: foreground,
             ),
             onPressed: () {
               setState(() {
@@ -174,7 +255,7 @@ class _DiscussionViewState extends State<DiscussionView> {
           IconButton(
             icon: Icon(
               isCommentsVisible ? Icons.comment : Icons.comment_outlined,
-              color: Colors.white,
+              color: foreground,
             ),
             onPressed: () {
               setState(() {
@@ -186,26 +267,9 @@ class _DiscussionViewState extends State<DiscussionView> {
             },
           ),
           IconButton(
-            icon: const Icon(
-              Icons.format_align_center, // chat box icon
-              color: Colors.white,
-            ),
-            onPressed: () {
-              setState(() {
-                if (isCommentsVisible && !chatBoxVisible) {
-                  isCommentsVisible = false;
-                  chatBoxVisible = true;
-                } else if (chatBoxVisible) {
-                  isCommentsVisible = true;
-                  chatBoxVisible = false;
-                }
-              });
-            },
-          ),
-          IconButton(
-            icon: const Icon(
-              Icons.analytics, // answers so far icon
-              color: Colors.white,
+            icon: Icon(
+              Icons.analytics,
+              color: foreground,
             ),
             onPressed: () {
               Navigator.pushNamed(context, AppRoutes.answersPage);
@@ -214,12 +278,16 @@ class _DiscussionViewState extends State<DiscussionView> {
         ],
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+              child: CircularProgressIndicator(
+                color: foreground,
+              ),
+            )
           : Column(
               children: [
                 // PDF Viewer Section
                 AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
+                  duration: const Duration(milliseconds: 350),
                   height: isPdfExpanded
                       ? MediaQuery.of(context).size.height * 0.7
                       : MediaQuery.of(context).size.height * 0.4,
@@ -229,14 +297,14 @@ class _DiscussionViewState extends State<DiscussionView> {
                 ),
                 // Past Papers List Section
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(1.0),
                   child: SizedBox(
-                    height: 100,
+                    height: 80,
                     child: papers.isEmpty
-                        ? const Center(
+                        ? Center(
                             child: Text(
                               'No papers available',
-                              style: TextStyle(color: Colors.white),
+                              style: TextStyle(color: foreground),
                             ),
                           )
                         : PageView.builder(
@@ -258,21 +326,20 @@ class _DiscussionViewState extends State<DiscussionView> {
                                     curve: Curves.easeInOut,
                                   );
                                 },
+                                onChatBoxToggle: () =>
+                                    _handleChatBoxToggle(index),
                               );
                             },
                           ),
                   ),
                 ),
-                // Comments or ChatBox Section
+                // Comments Section
                 if (isCommentsVisible)
                   Expanded(
-                    child: Comments(toBeDiscussedId: id),
-                  ),
-                if (chatBoxVisible)
-                  Expanded(
-                    child: ChatBox(
-                        discussionId: papers[_pageController.page!.round()]
-                            ['_id']),
+                    child: Comments(
+                      toBeDiscussedId: papers[currentIndex]['_id'],
+                      key: ValueKey(papers[currentIndex]['_id']),
+                    ),
                   ),
               ],
             ),

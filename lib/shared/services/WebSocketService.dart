@@ -80,6 +80,7 @@ class WebSocketService with WidgetsBindingObserver {
       });
       _socket!.on('usersCount', (usersCount) {
         debugPrint("----------usersCount: $usersCount");
+        _messageController?.add({'usersCount': usersCount});
       });
     }
   }
@@ -87,6 +88,10 @@ class WebSocketService with WidgetsBindingObserver {
   void removeUserFromDiscussion(String discussionId) {
     if (_isConnected && _socket != null) {
       _socket!.emit('removeUserFromDiscussion', discussionId);
+      _socket!.on('usersCount', (usersCount) {
+        debugPrint("----------usersCount after remove: $usersCount");
+        _messageController?.add({'usersCount': usersCount});
+      });
     }
   }
 

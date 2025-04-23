@@ -1,3 +1,4 @@
+import 'package:beyondtheclass/shared/services/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,12 +12,27 @@ class ApiConstants {
 
   // This below is ort forwarding url from localhost:8080. create your own every time
 
-  // static String get baseUrl => dotenv.env['PRODUCTION'] == "true"
-  //     ?
-  //     : localhostBaseUrl;
+  static Map<int, String> urlMap = {
+    -2: '',
+    -1: "http://10.135.49.240:8080", // localhost
+    0: "https://api.beyondtheclass.me", // production
 
-  static bool _useProductionUrl = false;
-  static const String _baseUrlCacheKey = 'use_production_url';
+    1: "http://192.168.1.1:8080",
+    2: "http://192.168.1.2:8080",
+    3: "http://192.168.1.3:8080",
+    4: "http://192.168.1.4:8080",
+    5: "http://192.168.1.5:8080",
+    6: "http://192.168.1.6:8080",
+    7: "http://192.168.1.7:8080",
+    8: "http://192.168.1.8:8080",
+    9: "http://192.168.1.9:8080",
+    10: "http://192.168.1.10:8080",
+    11: "http://192.168.1.11:8080",
+    12: "http://192.168.1.12:8080",
+  };
+
+  static int _currentUrlIndex = 8;
+  static const String _urlIndexCacheKey = 'current_url_index';
 
   static Future<void> initializeBaseUrl() async {
     final prefs = await SharedPreferences.getInstance();
@@ -35,7 +51,7 @@ class ApiConstants {
 
   static String get baseUrl {
     if (kReleaseMode) {
-      return productionBaseUrl; // Always use production URL in release mode
+      return urlMap[0]!; // Always use production URL in release mode
     }
     return _useProductionUrl ? productionBaseUrl : localhostBaseUrl;
   }
@@ -147,6 +163,84 @@ enum BottomNavBarRoute { home, message, explore, gps, profile }
 
 extension BottomNavBarRouteMap on BottomNavBarRoute {
   int get index => BottomNavBarRoute.values.indexOf(this);
+}
+
+enum EnumVoteType { upvote, downvote }
+
+enum IntroStatusEnum { pastpaperRightNaviagation, skip, allCompleted }
+
+class IntroStatus {
+  static const _prefix = 'introStatus_';
+  static String _keyFor(IntroStatusEnum status) => '$_prefix${status.name}';
+
+  static final Map<IntroStatusEnum, bool> introStatus = {
+    IntroStatusEnum.pastpaperRightNaviagation: false,
+    IntroStatusEnum.skip: false,
+    IntroStatusEnum.allCompleted: false
+  };
+
+  static final Map<IntroStatusEnum, bool> _introStatus = {
+    for (var status in IntroStatusEnum.values) status: false,
+  };
+
+  static Future<void> initializeFromCache() async {
+    final prefs = AppPrefs();
+    for (var status in IntroStatusEnum.values) {
+      final key = _keyFor(status);
+      final value = prefs.getBool(key) ?? false;
+      _introStatus[status] = value;
+    }
+  }
+
+  static isAllIntroCompleteOrSkipped() {
+    return _introStatus[IntroStatusEnum.skip] == true ||
+        _introStatus[IntroStatusEnum.allCompleted] == true;
+  }
+
+  static bool getStatus(IntroStatusEnum status) {
+    return _introStatus[status] ?? false;
+  }
+
+  static isThisIntroCompleted(IntroStatusEnum statusEnum) {
+    return _introStatus[statusEnum] == true;
+  }
+
+  static Future<void> markIntroCompleted(
+      IntroStatusEnum introStatusEmun) async {
+    _introStatus[introStatusEmun] = true;
+    final prefs = AppPrefs();
+    await prefs.setBool(_keyFor(introStatusEmun), true);
+  }
+}
+
+enum RiveThumb {
+  swipeRight,
+  swipeLeft,
+  oneTouch,
+  forceTouch,
+  tapAndHold,
+  tap3,
+  tap2,
+  tap,
+  doubleTap,
+  idle
+}
+
+class RiveComponentStrings {
+  static const Map<RiveThumb, String> thumbAnimations = {
+    RiveThumb.swipeRight: 'Swipe Right',
+    RiveThumb.swipeLeft: 'Swipe Left',
+    RiveThumb.oneTouch: '1 Touch',
+    RiveThumb.forceTouch: 'Force Touch',
+    RiveThumb.tapAndHold: 'Tap & Hold',
+    RiveThumb.tap3: 'Tap 3',
+    RiveThumb.tap2: 'Tap 2',
+    RiveThumb.tap: 'Tap',
+    RiveThumb.doubleTap: 'Double Tap',
+    RiveThumb.idle: 'Idle',
+  };
+
+  static const String thumbAsset = 'assets/animations/thumbsList.riv';
 }
 
 

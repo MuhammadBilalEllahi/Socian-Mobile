@@ -42,35 +42,50 @@ class _DepartmentPageState extends State<DepartmentPage> {
   }
 
   void navigateToPastPapers(String id) {
-    Navigator.pushNamed(
-      context,
-      AppRoutes.subjectsInDepartmentScreen,
-      arguments: {'_id': id}
-    );
+    Navigator.pushNamed(context, AppRoutes.subjectsInDepartmentScreen,
+        arguments: {'_id': id});
   }
 
   List<dynamic> _filterDepartments(List<dynamic> departments) {
     if (_searchQuery.isEmpty) return departments;
-    return departments.where((department) =>
-      department['name'].toString().toLowerCase().contains(_searchQuery.toLowerCase())
-    ).toList();
+    return departments
+        .where((department) => department['name']
+            .toString()
+            .toLowerCase()
+            .contains(_searchQuery.toLowerCase()))
+        .toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+
+    // Custom theme colors
+    final background = isDarkMode ? const Color(0xFF09090B) : Colors.white;
+    final foreground = isDarkMode ? Colors.white : const Color(0xFF09090B);
+    final muted =
+        isDarkMode ? const Color(0xFF27272A) : const Color(0xFFF4F4F5);
+    final mutedForeground =
+        isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+    final border =
+        isDarkMode ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+    final accent =
+        isDarkMode ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
+
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 15, 15, 15), // Dark background
+      backgroundColor: background,
       appBar: AppBar(
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Departments',
           style: TextStyle(
-            color: Colors.white,
+            color: foreground,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
         ),
-        backgroundColor: const Color.fromARGB(255, 104, 104, 104), // Slightly lighter dark
+        backgroundColor: muted,
         elevation: 0,
       ),
       body: Column(
@@ -79,16 +94,24 @@ class _DepartmentPageState extends State<DepartmentPage> {
             padding: const EdgeInsets.all(16.0),
             child: TextField(
               controller: _searchController,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: foreground),
               decoration: InputDecoration(
                 hintText: 'Search departments...',
-                hintStyle: TextStyle(color: Colors.grey[400]),
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                hintStyle: TextStyle(color: mutedForeground),
+                prefixIcon: Icon(Icons.search, color: mutedForeground),
                 filled: true,
-                fillColor: const Color.fromARGB(255, 41, 41, 41),
+                fillColor: accent,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+                  borderSide: BorderSide(color: border),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: border),
                 ),
                 contentPadding: const EdgeInsets.symmetric(vertical: 12),
               ),
@@ -104,9 +127,9 @@ class _DepartmentPageState extends State<DepartmentPage> {
               future: departments,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
+                  return Center(
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Color.fromARGB(255, 46, 46, 46)), // Purple
+                      valueColor: AlwaysStoppedAnimation<Color>(foreground),
                     ),
                   );
                 } else if (snapshot.hasError) {
@@ -114,18 +137,22 @@ class _DepartmentPageState extends State<DepartmentPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.error_outline, color: Color(0xFFEF4444), size: 60),
+                        Icon(Icons.error_outline,
+                            color: Colors.red[400], size: 60),
                         const SizedBox(height: 16),
                         Text(
                           'Error Loading Departments',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: foreground,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         Text(
                           '${snapshot.error}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[400],
+                          style: TextStyle(
+                            color: mutedForeground,
+                            fontSize: 14,
                           ),
                         ),
                       ],
@@ -136,19 +163,22 @@ class _DepartmentPageState extends State<DepartmentPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.list, color: Color(0xFF6B7280), size: 60),
+                        Icon(Icons.list, color: mutedForeground, size: 60),
                         const SizedBox(height: 16),
                         Text(
                           'No Departments Available',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: foreground,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ),
                   );
                 } else {
-                  final filteredDepartments = _filterDepartments(snapshot.data!);
+                  final filteredDepartments =
+                      _filterDepartments(snapshot.data!);
                   return ListView.builder(
                     padding: const EdgeInsets.all(16),
                     itemCount: filteredDepartments.length,
@@ -157,11 +187,12 @@ class _DepartmentPageState extends State<DepartmentPage> {
                       return Container(
                         margin: const EdgeInsets.only(bottom: 16),
                         decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 41, 41, 41),
+                          color: accent,
                           borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: border),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color.fromARGB(255, 182, 182, 182).withValues(alpha:0.1),
+                              color: Colors.black.withOpacity(0.1),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
@@ -172,12 +203,14 @@ class _DepartmentPageState extends State<DepartmentPage> {
                           child: InkWell(
                             onTap: () {
                               debugPrint("DEPARTMENT DATA $department");
-                              final departmentId = department['_id']?.toString();
-                              if (departmentId == null || departmentId.isEmpty) {
+                              final departmentId =
+                                  department['_id']?.toString();
+                              if (departmentId == null ||
+                                  departmentId.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text('Invalid Department ID'),
-                                    backgroundColor: Color(0xFFEF4444),
+                                    backgroundColor: Colors.red,
                                   ),
                                 );
                                 return;
@@ -193,14 +226,16 @@ class _DepartmentPageState extends State<DepartmentPage> {
                                     width: 48,
                                     height: 48,
                                     decoration: BoxDecoration(
-                                      color: const Color.fromARGB(255, 165, 165, 165).withOpacity(0.1),
+                                      color: muted,
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Center(
                                       child: Text(
-                                        department['name']?.isNotEmpty == true ? department['name'][0] : '?',
-                                        style: const TextStyle(
-                                          color: Color.fromARGB(255, 0, 0, 0),
+                                        department['name']?.isNotEmpty == true
+                                            ? department['name'][0]
+                                            : '?',
+                                        style: TextStyle(
+                                          color: foreground,
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -211,16 +246,16 @@ class _DepartmentPageState extends State<DepartmentPage> {
                                   Expanded(
                                     child: Text(
                                       department['name'],
-                                      style: const TextStyle(
-                                        color: Color.fromARGB(255, 241, 241, 241),
+                                      style: TextStyle(
+                                        color: foreground,
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
                                   ),
-                                  const Icon(
+                                  Icon(
                                     Icons.arrow_forward_ios,
-                                    color: Color.fromARGB(255, 172, 172, 172),
+                                    color: mutedForeground,
                                     size: 16,
                                   ),
                                 ],
