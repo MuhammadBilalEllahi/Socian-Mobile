@@ -13,7 +13,7 @@ import 'package:shorebird_code_push/shorebird_code_push.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../GPS/MapMainPage.dart';
-import '../GPS/TempMap.dart';
+// import '../GPS/TempMap.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
