@@ -80,6 +80,9 @@ class _DiscussionViewState extends State<DiscussionView> {
   void loadPaper(int index) async {
     if (index >= 0 && index < papers.length) {
       final paper = papers[index];
+      debugPrint("DATAof $paper");
+      id = paper['_id'];
+      // isCommentsVisible = false;
       if (paper['file'] != null && paper['file']['url'] != null) {
         final url =
             "${ApiConstants.baseUrl}/api/uploads/${paper['file']['url']}";
@@ -333,7 +336,10 @@ class _DiscussionViewState extends State<DiscussionView> {
                 // Comments Section
                 if (isCommentsVisible)
                   Expanded(
-                    child: Comments(toBeDiscussedId: id),
+                    child: Comments(
+                      toBeDiscussedId: papers[currentIndex]['_id'],
+                      key: ValueKey(papers[currentIndex]['_id']),
+                    ),
                   ),
               ],
             ),

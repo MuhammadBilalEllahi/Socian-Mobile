@@ -5,6 +5,7 @@ import 'package:beyondtheclass/shared/services/api_client.dart';
 
 class Comments extends StatefulWidget {
   final String toBeDiscussedId;
+
   const Comments({super.key, required this.toBeDiscussedId});
 
   @override
