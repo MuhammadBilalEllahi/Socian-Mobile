@@ -341,3 +341,105 @@ class _PastPapersState extends State<PastPapers> {
     );
   }
 }
+
+
+
+
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+class AnswersPage extends StatelessWidget {
+  const AnswersPage({Key? key}) : super(key: key);
+
+  static const String _solutionCode = '''
+def twoSum(nums, target):
+    """
+    Find two indices such that nums[i] + nums[j] == target.
+    """
+    lookup = {}
+    for i, num in enumerate(nums):
+        complement = target - num
+        if complement in lookup:
+            return [lookup[complement], i]
+        lookup[num] = i
+''';
+
+  @override
+  Widget build(BuildContext context) {
+    final codeLines = _solutionCode.trim().split('\n');
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Solution'),
+        backgroundColor: Colors.black87,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.copy, size: 20),
+            tooltip: 'Copy Code',
+            onPressed: () {
+              Clipboard.setData(const ClipboardData(text: _solutionCode));
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Code copied to clipboard')),
+              );
+            },
+          ),
+        ],
+      ),
+      backgroundColor: Colors.grey[900],
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E1E1E),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Line numbers
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: List.generate(
+                        codeLines.length,
+                        (i) => Text(
+                          '${i + 1}'.padLeft(2),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontFamily: 'monospace',
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    // Code lines
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: codeLines
+                          .map(
+                            (line) => Text(
+                              line.replaceAll('\t', '    '),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'monospace',
+                                fontSize: 14,
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

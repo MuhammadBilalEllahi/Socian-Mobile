@@ -272,7 +272,11 @@ class _DiscussionViewState extends State<DiscussionView> {
               color: foreground,
             ),
             onPressed: () {
-              Navigator.pushNamed(context, AppRoutes.answersPage);
+              Navigator.pushNamed(context, AppRoutes.answersPage, arguments: {
+                'pastPapers': pastPapers,
+                'subjectId': subjectId,
+                'papers': papers,
+              });
             },
           ),
         ],
