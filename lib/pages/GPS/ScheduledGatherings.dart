@@ -1,88 +1,327 @@
 import 'dart:convert';
-
+import 'dart:io' as IO;
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 
-class ScheduledGatherings extends StatefulWidget {
+import 'dart:convert';
+import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
+
+class ScheduledGatherings extends ConsumerStatefulWidget {
+  const ScheduledGatherings({super.key});
+
   @override
-  _ScheduledGatheringsState createState() => _ScheduledGatheringsState();
+  ConsumerState<ScheduledGatherings> createState() => _ScheduledGatheringsState();
 }
 
-class _ScheduledGatheringsState extends State<ScheduledGatherings> {
-  List<Gathering> _gatherings = [];
+class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings> {
+  final String baseUrl = ApiConstants.baseUrl;
+  List<dynamic> _gatherings = [];
+  String? errorMessage;
   bool _isLoading = true;
+  IO.Socket? _socket;
 
   @override
   void initState() {
     super.initState();
     _fetchGatherings();
+    _initSocket();
+  }
+
+  void _initSocket() {
+    try {
+      _socket = IO.io(baseUrl, <String, dynamic>{
+        'transports': ['websocket'],
+        'autoConnect': false,
+      });
+
+      _socket?.connect();
+
+      _socket?.on('connect', (_) {
+        print('Connected to Socket.IO server');
+      });
+
+      _socket?.on('gatheringUpdate', (data) {
+        _fetchGatherings();
+      });
+
+      _socket?.on('error', (error) => print('Socket error: $error'));
+      _socket?.on('disconnect', (_) => print('Disconnected from Socket.IO server'));
+    } catch (e) {
+      print('Socket initialization error: $e');
+    }
   }
 
   Future<void> _fetchGatherings() async {
+    setState(() {
+      _isLoading = true;
+      errorMessage = null;
+    });
+
     try {
-      // Replace with your API call
-      final String baseUrl = ApiConstants.baseUrl;
-final response = await http.get(Uri.parse('$baseUrl/api/gatherings/upcoming'));
+      final auth = ref.read(authProvider);
+        final url = '$baseUrl/api/gatherings/upcoming';
+  print('Attempting to fetch from: $url'); // Add this line
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/gatherings/upcoming'),
+        headers: {
+          'Authorization': 'Bearer ${auth.token}',
+        },
+      );
+    print('Response status: ${response.statusCode}'); // Add this line
+
       if (response.statusCode == 200) {
         setState(() {
-          _gatherings = (json.decode(response.body) as List)
-              .map((g) => Gathering.fromJson(g))
-              .toList();
+          _gatherings = json.decode(response.body);
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          errorMessage = 'Failed to load gatherings: ${response.statusCode}';
           _isLoading = false;
         });
       }
     } catch (e) {
-      setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load gatherings')),
-      );
+      setState(() {
+        errorMessage = 'Error: ${e.toString()}';
+        _isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final background = isDarkMode ? const Color(0xFF09090B) : Colors.white;
+    final foreground = isDarkMode ? Colors.white : const Color(0xFF09090B);
+    final muted =
+        isDarkMode ? const Color(0xFF27272A) : const Color(0xFFF4F4F5);
+    final mutedForeground =
+        isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+    final border =
+        isDarkMode ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+    final accent =
+        isDarkMode ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
+
     return Scaffold(
+      backgroundColor: background,
       appBar: AppBar(
-        title: Text('Upcoming Gatherings'),
+        backgroundColor: background,
+        elevation: 0,
+        title: Text(
+          'Scheduled Gatherings',
+          style: TextStyle(
+            color: foreground,
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh, color: foreground),
+            onPressed: _fetchGatherings,
+          ),
+        ],
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : _gatherings.isEmpty
-              ? Center(child: Text('No upcoming gatherings'))
-              : ListView.builder(
-                  itemCount: _gatherings.length,
-                  itemBuilder: (context, index) {
-                    final gathering = _gatherings[index];
-                    return Card(
-                      margin: EdgeInsets.all(8),
-                      child: ListTile(
-                        title: Text(gathering.title),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(DateFormat('MMM dd, yyyy - hh:mm a').format(gathering.startTime)),
-                            Text('${gathering.attendees.length} attending'),
-                          ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(foreground),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Loading gatherings...',
+                    style: TextStyle(
+                      color: foreground,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : errorMessage != null
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        color: Colors.red[400],
+                        size: 48,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        errorMessage!,
+                        style: TextStyle(
+                          color: foreground,
+                          fontSize: 16,
                         ),
-                        trailing: Icon(Icons.arrow_forward),
-                        onTap: () {
-                          Navigator.push(
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: muted,
+                          foregroundColor: foreground,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: _fetchGatherings,
+                        child: const Text('Try Again'),
+                      ),
+                    ],
+                  ),
+                )
+              : _gatherings.isEmpty
+                  ? Center(
+                      child: Text(
+                        'No upcoming gatherings',
+                        style: TextStyle(
+                          color: mutedForeground,
+                          fontSize: 16,
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _gatherings.length,
+                      itemBuilder: (context, index) {
+                        final gathering = _gatherings[index];
+                        final startTime = DateTime.parse(gathering['startTime']);
+                        final endTime = DateTime.parse(gathering['endTime']);
+                        final now = DateTime.now();
+                        final isActive = now.isAfter(startTime) && now.isBefore(endTime);
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(
+                            color: accent,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: border),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.all(16),
+                            title: Text(
+                              gathering['title'],
+                              style: TextStyle(
+                                color: foreground,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 8),
+                                Text(
+                                  gathering['description'] ?? '',
+                                  style: TextStyle(
+                                    color: mutedForeground,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.calendar_today,
+                                      size: 16,
+                                      color: mutedForeground,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      DateFormat('MMM dd, yyyy').format(startTime),
+                                      style: TextStyle(
+                                        color: mutedForeground,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.access_time,
+                                      size: 16,
+                                      color: mutedForeground,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      '${DateFormat('hh:mm a').format(startTime)} - ${DateFormat('hh:mm a').format(endTime)}',
+                                      style: TextStyle(
+                                        color: mutedForeground,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: isActive
+                                        ? Colors.green.withOpacity(0.2)
+                                        : Colors.blue.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Text(
+                                    isActive ? 'Active Now' : 'Upcoming',
+                                    style: TextStyle(
+                                      color: isActive ? Colors.green : Colors.blue,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            onTap: () {
+                              Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => GatheringDetailScreen(gathering: gathering),
                             ),
                           );
-                        },
-                      ),
-                    );
-                  },
-                ),
+                            },
+                          ),
+                        );
+                      },
+                    ),
     );
+  }
+
+  @override
+  void dispose() {
+    _socket?.disconnect();
+    _socket?.dispose();
+    super.dispose();
   }
 }
 
