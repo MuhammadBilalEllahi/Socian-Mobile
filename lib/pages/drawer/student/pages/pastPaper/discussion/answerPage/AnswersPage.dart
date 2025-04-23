@@ -93,7 +93,8 @@ class _AnswersPageState extends State<AnswersPage> {
     }
   }
 
-  final moreCount = 2;
+  bool showFull = false;
+  int moreCount = 2;
 
   @override
   Widget build(BuildContext context) {
@@ -268,9 +269,10 @@ class _AnswersPageState extends State<AnswersPage> {
                                           physics:
                                               const NeverScrollableScrollPhysics(),
                                           itemCount: question['answers'] != null
-                                              ? (question['answers'] as List)
-                                                          .length <
-                                                      moreCount
+                                              ? ((question['answers'] as List)
+                                                              .length <
+                                                          moreCount ||
+                                                      showFull)
                                                   ? (question['answers']
                                                           as List)
                                                       .length
@@ -453,26 +455,35 @@ class _AnswersPageState extends State<AnswersPage> {
                                       if (question['answers'] != null &&
                                           (question['answers'] as List).length >
                                               moreCount)
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 16.0, vertical: 8.0),
-                                          child: Row(
-                                            children: [
-                                              Text(
-                                                "+ ${(question['answers'] as List).length - moreCount} answers",
-                                                style: TextStyle(
-                                                  color: mutedForeground,
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w500,
+                                        GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              // moreCount = 10;
+                                              showFull = !showFull;
+                                            });
+                                          },
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 16.0,
+                                                vertical: 8.0),
+                                            child: Row(
+                                              children: [
+                                                Text(
+                                                  " ${showFull ? '-' : '+'} ${(question['answers'] as List).length - moreCount} answers",
+                                                  style: TextStyle(
+                                                    color: mutedForeground,
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
                                                 ),
-                                              ),
-                                              const SizedBox(width: 4),
-                                              Icon(
-                                                Icons.arrow_forward_ios,
-                                                size: 12,
-                                                color: mutedForeground,
-                                              ),
-                                            ],
+                                                const SizedBox(width: 4),
+                                                Icon(
+                                                  Icons.arrow_forward_ios,
+                                                  size: 12,
+                                                  color: mutedForeground,
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         )
                                     ]));
