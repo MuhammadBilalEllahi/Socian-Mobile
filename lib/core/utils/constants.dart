@@ -4,11 +4,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiConstants {
-  static const String localhostBaseUrl =
-      "http://10.135.49.240:8080"; //my ip address
-  // static const String baseUrl = "http://192.168.10.6:8080"; //my ip address
-  static const String productionBaseUrl =
-      "https://api.beyondtheclass.me"; //my ip address
+  // static const String localhostBaseUrl =
+  //     "http://10.135.49.240:8080"; //my ip address
+  // // static const String baseUrl = "http://192.168.10.6:8080"; //my ip address
+  // static const String productionBaseUrl =
+  //     "https://api.beyondtheclass.me"; //my ip address
 
   // This below is ort forwarding url from localhost:8080. create your own every time
 
@@ -36,24 +36,26 @@ class ApiConstants {
 
   static Future<void> initializeBaseUrl() async {
     final prefs = await SharedPreferences.getInstance();
-    _useProductionUrl = prefs.getBool(_baseUrlCacheKey) ?? false;
+    _currentUrlIndex = prefs.getInt(_urlIndexCacheKey) ?? 0;
   }
 
   static Future<void> _saveUrlPreference() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_baseUrlCacheKey, _useProductionUrl);
+    await prefs.setInt(_urlIndexCacheKey, _currentUrlIndex);
   }
 
-  static Future<void> toggleBaseUrl() async {
-    _useProductionUrl = !_useProductionUrl;
-    await _saveUrlPreference();
+  static Future<void> setUrlByIndex(int index) async {
+    if (urlMap.containsKey(index)) {
+      _currentUrlIndex = index;
+      await _saveUrlPreference();
+    }
   }
 
   static String get baseUrl {
     if (kReleaseMode) {
       return urlMap[0]!; // Always use production URL in release mode
     }
-    return _useProductionUrl ? productionBaseUrl : localhostBaseUrl;
+    return urlMap[_currentUrlIndex] ?? urlMap[0]!;
   }
 
   static const String api = '/api';
