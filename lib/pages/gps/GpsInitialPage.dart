@@ -1,3 +1,4 @@
+import 'package:beyondtheclass/pages/gps/ScheduledGatherings.dart';
 import 'package:flutter/material.dart';
 import 'package:beyondtheclass/pages/gps/LiveLocation.dart';
 import 'package:beyondtheclass/pages/gps/MapMainPage.dart';
@@ -46,23 +47,7 @@ class GpsInitialPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _buildNavigationCard(
-                      context,
-                      title: 'Live Location',
-                      description:
-                          'Track your current location and nearby users',
-                      icon: Icons.location_on,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const LiveLocation()),
-                      ),
-                      background: background,
-                      foreground: foreground,
-                      muted: muted,
-                      border: border,
-                    ),
-                    const SizedBox(height: 24),
+                                       
                     _buildNavigationCard(
                       context,
                       title: 'Call a Meeting',
@@ -72,6 +57,38 @@ class GpsInitialPage extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                             builder: (context) => const MapMainPage()),
+                      ),
+                      background: background,
+                      foreground: foreground,
+                      muted: muted,
+                      border: border,
+                    ),
+                    const SizedBox(height: 24),
+                    _buildNavigationCard(
+                      context,
+                      title: 'Scheduled Gatherings',
+                      description: 'Join a scheduled gathering',
+                      icon: Icons.group,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>  ScheduledGatherings()),
+                      ),
+                      background: background,
+                      foreground: foreground,
+                      muted: muted,
+                      border: border,
+                    ),
+                      const SizedBox(height: 24),
+                    _buildNavigationCard(
+                      context,
+                      title: 'Schedule a New Gathering',
+                      description: 'Mark a new gathering to notify others',
+                      icon: Icons.group,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>  ScheduledGatherings()),
                       ),
                       background: background,
                       foreground: foreground,

@@ -175,7 +175,9 @@ class _TeacherCommentsState extends State<TeacherComments> {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Container(
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
+              // color: Colors.yellow,
+              color: Colors.transparent,
+              // color: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),

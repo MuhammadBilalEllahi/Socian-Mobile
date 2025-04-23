@@ -15,7 +15,7 @@ class TeacherDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     // Sample comments data - Replace with actual data from your backend
     final List<Map<String, dynamic>> comments = [
       {
@@ -34,11 +34,7 @@ class TeacherDetailsPage extends StatelessWidget {
             'text': 'Totally agree! The way they explain complex topics is amazing.',
             'isVerified': false,
             'isAnonymous': true,
-            'reactions': {
-              'haha': 2,
-              'love': 5,
-              'insightful': 3
-            }
+            'reactions': {'haha': 2, 'love': 5, 'insightful': 3}
           }
         ]
       },
@@ -58,10 +54,7 @@ class TeacherDetailsPage extends StatelessWidget {
             'text': 'Yes, they take time to ensure everyone understands.',
             'isVerified': true,
             'isAnonymous': false,
-            'reactions': {
-              'love': 3,
-              'insightful': 2
-            }
+            'reactions': {'love': 3, 'insightful': 2}
           },
           {
             'author': 'Anonymous',
@@ -69,16 +62,12 @@ class TeacherDetailsPage extends StatelessWidget {
             'text': 'The best teacher in the department!',
             'isVerified': false,
             'isAnonymous': true,
-            'reactions': {
-              'haha': 1,
-              'love': 4,
-              'insightful': 1
-            }
+            'reactions': {'haha': 1, 'love': 4, 'insightful': 1}
           }
         ]
       },
     ];
-    
+
     return Scaffold(
       backgroundColor: isDark ? Colors.black : Colors.white,
       appBar: AppBar(
@@ -102,29 +91,39 @@ class TeacherDetailsPage extends StatelessWidget {
           children: [
             TeacherHeader(teacher: teacher),
             const SizedBox(height: 24),
-            
             TeacherContact(email: teacher['email'] ?? 'N/A'),
             const SizedBox(height: 16),
-
-            if (teacher['feedbackSummary'] != null && 
+            if (teacher['feedbackSummary'] != null &&
                 (teacher['feedbackSummary'] as List).isNotEmpty) ...[
               TeacherFeedback(feedback: (teacher['feedbackSummary'] as List).last),
               const SizedBox(height: 24),
             ],
-
-            if (teacher['subjectsTaught'] != null && 
+            if (teacher['subjectsTaught'] != null &&
                 (teacher['subjectsTaught'] as List).isNotEmpty) ...[
               TeacherSubjects(
                 subjects: List<String>.from(teacher['subjectsTaught']),
               ),
               const SizedBox(height: 24),
             ],
-
             TeacherComments(
               teacherId: teacher['_id'],
             ),
             const SizedBox(height: 24),
           ],
+        ),
+      ),
+      // Floating Action Button
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+        
+
+        },
+        backgroundColor: isDark ? Colors.tealAccent : Colors.teal,
+        child: const Icon(Icons.add_comment, color: Colors.white),
+        tooltip: 'Add Feedback',
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16), // Rounded corners for a modern look
         ),
       ),
     );

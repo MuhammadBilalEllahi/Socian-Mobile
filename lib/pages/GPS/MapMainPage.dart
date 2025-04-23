@@ -53,21 +53,25 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
       });
 
       _socket?.on('attendeeLocationUpdate', (data) {
-        if (data != null &&
-            _isWithinRadius(data['latitude'], data['longitude'])) {
+        if (data != null) {
+          final userId = data['userId']?.toString() ?? data['id']?.toString() ?? 'unknown';
+          final isWithinRadius = _isWithinRadius(data['latitude'], data['longitude']);
+          
           setState(() {
-            if (!_markers
-                .any((m) => m.markerId.value == data['id'].toString())) {
+            // Remove existing marker if it exists
+            _markers.removeWhere((m) => m.markerId.value == userId);
+            
+            if (isWithinRadius && userId != ref.read(authProvider).user?['id']?.toString()) {
               _markers.add(
                 Marker(
-                  markerId: MarkerId(data['id'].toString()),
+                  markerId: MarkerId(userId),
                   position: LatLng(data['latitude'], data['longitude']),
                   icon: _otherMarkerIcon ?? BitmapDescriptor.defaultMarker,
                   infoWindow: InfoWindow(title: data['name'] ?? "Unknown"),
                 ),
               );
-              _userCountInRadius = _markers.length - 1;
             }
+            _updateUserCount();
           });
         }
       });
@@ -75,13 +79,16 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
       _socket?.on('attendeesList', (data) {
         if (data is List) {
           setState(() {
+            // Clear all markers except the user's own marker
+            _markers.removeWhere((m) => m.markerId.value != "user_location");
+            
             for (var user in data) {
+              final userId = user['userId']?.toString() ?? user['id']?.toString() ?? 'unknown';
               if (_isWithinRadius(user['latitude'], user['longitude']) &&
-                  !_markers
-                      .any((m) => m.markerId.value == user['id'].toString())) {
+                  userId != ref.read(authProvider).user?['id']?.toString()) {
                 _markers.add(
                   Marker(
-                    markerId: MarkerId(user['id'].toString()),
+                    markerId: MarkerId(userId),
                     position: LatLng(user['latitude'], user['longitude']),
                     icon: _otherMarkerIcon ?? BitmapDescriptor.defaultMarker,
                     infoWindow: InfoWindow(title: user['name'] ?? "Unknown"),
@@ -89,17 +96,21 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
                 );
               }
             }
-            _userCountInRadius = _markers.length - 1;
+            _updateUserCount();
           });
         }
       });
 
       _socket?.on('error', (error) => print('Socket error: $error'));
-      _socket?.on(
-          'disconnect', (_) => print('Disconnected from Socket.IO server'));
+      _socket?.on('disconnect', (_) => print('Disconnected from Socket.IO server'));
     } catch (e) {
       print('Socket initialization error: $e');
     }
+  }
+
+  void _updateUserCount() {
+    // Count all markers except the user's own marker
+    _userCountInRadius = _markers.where((m) => m.markerId.value != "user_location").length;
   }
 
   Future<void> _setMarkerIcons() async {
@@ -112,6 +123,12 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
   Future<void> _fetchLocationWithTimeout() async {
     setState(() => _isLoading = true);
     try {
+      // Clear existing markers except user's marker
+      setState(() {
+        _markers.removeWhere((m) => m.markerId.value != "user_location");
+        _updateUserCount();
+      });
+      
       await _checkPermissionsAndFetchLocation().timeout(
         const Duration(seconds: 15),
         onTimeout: () {
@@ -163,6 +180,9 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
 
     setState(() {
       _userLocation = LatLng(position.latitude, position.longitude);
+      // Remove existing user marker if it exists
+      _markers.removeWhere((m) => m.markerId.value == "user_location");
+      
       final auth = ref.read(authProvider);
       _markers.add(Marker(
         markerId: const MarkerId("user_location"),
@@ -172,10 +192,10 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
       ));
       _updateCircle();
       _isLoading = false;
+      _updateUserCount();
     });
 
-    _mapController
-        ?.animateCamera(CameraUpdate.newLatLngZoom(_userLocation!, 15));
+    _mapController?.animateCamera(CameraUpdate.newLatLngZoom(_userLocation!, 15));
     _sendLocationUpdate();
     _requestNearbyAttendees();
   }
@@ -185,7 +205,7 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
 
     final auth = ref.read(authProvider);
     final userData = {
-      'userId': auth.user?['id'] ?? 'default_user_id',
+      'userId': auth.user?['id']?.toString() ?? 'default_user_id',
       'name': auth.user?['name'] ?? 'Unknown',
       'latitude': _userLocation!.latitude,
       'longitude': _userLocation!.longitude,
@@ -395,8 +415,8 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
                   const SizedBox(height: 8),
                   Slider(
                     value: _radius,
-                    min: 100,
-                    max: 1000,
+                    min: 10,
+                    max: 500,
                     divisions: 20,
                     label: "${_radius.round()}m",
                     onChanged: (value) {
