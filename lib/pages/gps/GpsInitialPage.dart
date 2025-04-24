@@ -1,6 +1,6 @@
+import 'package:beyondtheclass/pages/gps/CreateNewGathering.dart';
 import 'package:beyondtheclass/pages/gps/ScheduledGatherings.dart';
 import 'package:flutter/material.dart';
-import 'package:beyondtheclass/pages/gps/LiveLocation.dart';
 import 'package:beyondtheclass/pages/gps/MapMainPage.dart';
 
 class GpsInitialPage extends StatelessWidget {
@@ -88,7 +88,7 @@ class GpsInitialPage extends StatelessWidget {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) =>  ScheduledGatherings()),
+                            builder: (context) =>  CreateNewGathering()),
                       ),
                       background: background,
                       foreground: foreground,
