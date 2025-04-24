@@ -1,5 +1,5 @@
 import 'package:beyondtheclass/core/utils/constants.dart';
-import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/discussion/commentSection/AddAnswer.dart';
+import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/discussion/answerPage/AddAnswer.dart';
 import 'package:flutter/material.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
 

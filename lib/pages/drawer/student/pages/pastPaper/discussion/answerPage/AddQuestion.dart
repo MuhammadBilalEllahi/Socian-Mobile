@@ -19,7 +19,7 @@ class AddQuestion extends StatefulWidget {
 
 class _AddQuestionState extends State<AddQuestion> {
   final ApiClient _apiClient = ApiClient();
-  final questionNumberController = TextEditingController();
+  final questionNumberOrAlphaBetController = TextEditingController();
   final partController = TextEditingController();
   final subPartController = TextEditingController();
   final questionContentController = TextEditingController();
@@ -40,7 +40,7 @@ class _AddQuestionState extends State<AddQuestion> {
 
   @override
   void dispose() {
-    questionNumberController.dispose();
+    questionNumberOrAlphaBetController.dispose();
     partController.dispose();
     subPartController.dispose();
     questionContentController.dispose();
@@ -104,15 +104,17 @@ class _AddQuestionState extends State<AddQuestion> {
     });
   }
 
-  String _calculateFullPath(String questionNumber, {String? parentPath}) {
+  String _calculateFullPath(String questionNumberOrAlphaBet,
+      {String? parentPath}) {
+    debugPrint("THIS IS CALCULT $questionNumberOrAlphaBet and $parentPath");
     if (parentPath == null || parentPath.isEmpty) {
-      return questionNumber;
+      return questionNumberOrAlphaBet;
     }
-    return '$parentPath.$questionNumber';
+    return '$parentPath.$questionNumberOrAlphaBet';
   }
 
   Future<void> _submitQuestion({String? parentId, int level = 0}) async {
-    if (questionNumberController.text.isEmpty) {
+    if (questionNumberOrAlphaBetController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Question number is required')),
       );
@@ -138,7 +140,7 @@ class _AddQuestionState extends State<AddQuestion> {
       }
 
       final calculatedFullPath = _calculateFullPath(
-        questionNumberController.text,
+        questionNumberOrAlphaBetController.text,
         parentPath: parentFullPath,
       );
 
@@ -146,7 +148,7 @@ class _AddQuestionState extends State<AddQuestion> {
         'toBeDiscussedId': widget.toBeDiscussedId,
         'parentId': parentId,
         // 'questionLevel': parentId == null ? 'main' : 'sub',
-        'questionNumberOrAlphabet': questionNumberController.text,
+        'questionNumberOrAlphabet': questionNumberOrAlphaBetController.text,
         'questionContent': questionContentController.text,
         'questionLevel': level,
         'fullPath': calculatedFullPath,
@@ -170,7 +172,7 @@ class _AddQuestionState extends State<AddQuestion> {
           _loadSubQuestionAtLevel(level - 1, parentId);
         }
         // Clear form
-        questionNumberController.clear();
+        questionNumberOrAlphaBetController.clear();
         questionContentController.clear();
 
         // Notify parent about the new question
@@ -194,7 +196,7 @@ class _AddQuestionState extends State<AddQuestion> {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
-              controller: questionNumberController,
+              controller: questionNumberOrAlphaBetController,
               decoration: const InputDecoration(
                 labelText: 'Question Number/Letter*',
                 hintText: 'e.g., 5, a, i, etc.',

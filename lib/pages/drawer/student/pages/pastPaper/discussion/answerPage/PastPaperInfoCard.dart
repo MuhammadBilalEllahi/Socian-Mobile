@@ -80,24 +80,25 @@ class PastPaperInfoCard extends StatelessWidget {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text(
                         paper['name'] ?? 'Untitled Paper',
                         style: TextStyle(
                           color: foreground,
-                          fontSize: 16,
+                          fontSize: 15,
                           fontWeight: FontWeight.w600,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
+                      // const SizedBox(height: 4),
                       Text(
                         'Year: ${paper['year'] ?? 'N/A'}',
                         style: TextStyle(
                           color: mutedForeground,
-                          fontSize: 14,
+                          fontSize: 11,
                         ),
                       ),
                     ],

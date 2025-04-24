@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class AppThemes{
+class AppThemes {
   // Light Theme
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
@@ -13,12 +13,10 @@ class AppThemes{
     //
     // ),
     textTheme: const TextTheme(
-      // bodyText1: TextStyle(color: Colors.black),
-      // bodyText2: TextStyle(color: Colors.black),
-    ),
+        // bodyText1: TextStyle(color: Colors.black),
+        // bodyText2: TextStyle(color: Colors.black),
+        ),
     // colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple).copyWith(surface: Colors.white),
-
-
 
     // Bilal from here
     iconTheme: const IconThemeData(
@@ -38,9 +36,8 @@ class AppThemes{
     //   // bodyText2: TextStyle(color: Colors.white),
     // ), colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple).copyWith(surface: Colors.black),
 
-
     // Bilal from here
-iconTheme: const IconThemeData(
+    iconTheme: const IconThemeData(
       color: Colors.white,
     ),
   );
