@@ -18,18 +18,22 @@ class ScheduledGatherings extends ConsumerStatefulWidget {
   ConsumerState<ScheduledGatherings> createState() => _ScheduledGatheringsState();
 }
 
-class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings> {
+class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings> 
+    with SingleTickerProviderStateMixin {
   final String baseUrl = ApiConstants.baseUrl;
   final ApiClient _apiClient = ApiClient();
-  List<Map<String, dynamic>> _gatherings = [];
+  List<Map<String, dynamic>> _upcomingGatherings = [];
+  List<Map<String, dynamic>> _previousGatherings = [];
   String? errorMessage;
   bool _isLoading = true;
   IO.Socket? _socket;
   String? _userId;
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     _loadUserId();
     _fetchGatherings();
     _initSocket();
@@ -91,17 +95,26 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings> {
     });
 
     try {
-      print('Attempting to fetch from: $baseUrl/api/gatherings/upcoming');
-      final response = await _apiClient.getList('/api/gatherings/upcoming');
-      print('Response data: $response');
-      print('Response length: ${(response as List<dynamic>?)?.length ?? 0}');
-
+      // Fetch upcoming gatherings
+      final upcomingResponse = await _apiClient.getList('/api/gatherings/upcoming');
+      // Fetch all gatherings to filter for previous ones
+      final allResponse = await _apiClient.getList('/api/gatherings/all');
+      
+      final now = DateTime.now();
+      
       setState(() {
-        _gatherings.clear();
-        _gatherings = (response as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [];
+        _upcomingGatherings = (upcomingResponse as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [];
+        
+        _previousGatherings = (allResponse as List<dynamic>?)
+            ?.cast<Map<String, dynamic>>()
+            ?.where((gathering) {
+              final endTime = DateTime.tryParse(gathering['endTime']?.toString() ?? '')?.toLocal();
+              return endTime != null && endTime.isBefore(now);
+            })
+            ?.toList() ?? [];
+        
         _isLoading = false;
       });
-      print('Updated gatherings: ${_gatherings.map((g) => g['title']).toList()}');
     } catch (e) {
       print('Error fetching gatherings: $e');
       setState(() {
@@ -142,6 +155,7 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings> {
     final mutedForeground = isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
     final border = isDarkMode ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
     final accent = isDarkMode ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
+    final primaryColor = isDarkMode ? const Color(0xFF6366F1) : const Color(0xFF4F46E5);
 
     return Scaffold(
       backgroundColor: background,
@@ -149,7 +163,7 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings> {
         backgroundColor: background,
         elevation: 0,
         title: Text(
-          'Scheduled Gatherings',
+          'Your Gatherings',
           style: TextStyle(
             color: foreground,
             fontSize: 24,
@@ -163,6 +177,16 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings> {
             onPressed: _fetchGatherings,
           ),
         ],
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: primaryColor,
+          labelColor: primaryColor,
+          unselectedLabelColor: mutedForeground,
+          tabs: const [
+            Tab(text: 'Upcoming'),
+            Tab(text: 'Previous'),
+          ],
+        ),
       ),
       body: _isLoading
           ? Center(
@@ -170,7 +194,7 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(foreground),
+                    valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -205,8 +229,8 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings> {
                       const SizedBox(height: 24),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: muted,
-                          foregroundColor: foreground,
+                          backgroundColor: primaryColor,
+                          foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -218,133 +242,148 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings> {
                     ],
                   ),
                 )
-              : _gatherings.isEmpty
-                  ? Center(
-                      child: Text(
-                        'No upcoming gatherings',
-                        style: TextStyle(
-                          color: mutedForeground,
-                          fontSize: 16,
-                        ),
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: _gatherings.length,
-                      itemBuilder: (context, index) {
-                        final gathering = _gatherings[index];
-                        print('Gathering $index: ID: ${gathering['_id']}, Title: ${gathering['title']}, StartTime: ${gathering['startTime']}');
-                        print('Gathering $index: creatorId: ${gathering['creatorId']}, Type: ${gathering['creatorId'].runtimeType}');
-                        print('Gathering $index: assigned creatorName: ${(gathering['creatorId'] is Map ? gathering['creatorId']['name'] : (gathering['creatorId'] is List ? gathering['creatorId'][0]['name'] : gathering['creatorId']))}');
-                        final startTime = DateTime.tryParse(gathering['startTime']?.toString() ?? '')?.toLocal() ?? DateTime.now();
-                        final endTime = DateTime.tryParse(gathering['endTime']?.toString() ?? '')?.toLocal() ?? DateTime.now();
-                        final now = DateTime.now();
-                        final isActive = now.isAfter(startTime) && now.isBefore(endTime);
-                        final isCreator = _userId != null && _userId == (gathering['creatorId'] is Map ? gathering['creatorId']['_id']?.toString() : gathering['creatorId']?.toString());
+              : TabBarView(
+                  controller: _tabController,
+                  children: [
+                    // Upcoming Tab
+                    _buildGatheringList(
+                      gatherings: _upcomingGatherings,
+                      emptyMessage: 'No upcoming gatherings',
+                      emptyIcon: Icons.event_rounded,
+                      foreground: foreground,
+                      mutedForeground: mutedForeground,
+                      accent: accent,
+                      border: border,
+                      isUpcoming: true,
+                    ),
+                    
+                    // Previous Tab
+                    _buildGatheringList(
+                      gatherings: _previousGatherings,
+                      emptyMessage: 'No previous gatherings',
+                      emptyIcon: Icons.history,
+                      foreground: foreground,
+                      mutedForeground: mutedForeground,
+                      accent: accent,
+                      border: border,
+                      isUpcoming: false,
+                    ),
+                  ],
+                ),
+    );
+  }
 
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 16),
-                          decoration: BoxDecoration(
-                            color: accent,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: border),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
+  Widget _buildGatheringList({
+    required List<Map<String, dynamic>> gatherings,
+    required String emptyMessage,
+    required IconData emptyIcon,
+    required Color foreground,
+    required Color mutedForeground,
+    required Color accent,
+    required Color border,
+    required bool isUpcoming,
+  }) {
+    if (gatherings.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              emptyIcon,
+              size: 48,
+              color: mutedForeground,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              emptyMessage,
+              style: TextStyle(
+                color: mutedForeground,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _fetchGatherings,
+      color: foreground,
+      backgroundColor: accent,
+      child: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: gatherings.length,
+        separatorBuilder: (context, index) => const SizedBox(height: 16),
+        itemBuilder: (context, index) {
+          final gathering = gatherings[index];
+          final startTime = DateTime.tryParse(gathering['startTime']?.toString() ?? '')?.toLocal() ?? DateTime.now();
+          final endTime = DateTime.tryParse(gathering['endTime']?.toString() ?? '')?.toLocal() ?? DateTime.now();
+          final now = DateTime.now();
+          final isActive = now.isAfter(startTime) && now.isBefore(endTime);
+          final isCreator = _userId != null && _userId == (gathering['creatorId'] is Map ? gathering['creatorId']['_id']?.toString() : gathering['creatorId']?.toString());
+          final attendeesCount = (gathering['attendees'] as List<dynamic>?)?.length ?? 0;
+
+
+
+          return Container(
+            decoration: BoxDecoration(
+              color: accent,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: border),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => GatheringDetailScreen(
+                      gathering: Gathering.fromJson(gathering),
+                    ),
+                  ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            gathering['title']?.toString() ?? 'Untitled',
+                            style: TextStyle(
+                              color: foreground,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            title: Text(
-                              gathering['title']?.toString() ?? 'Untitled',
-                              style: TextStyle(
-                                color: foreground,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 8),
-                                Text(
-                                  gathering['description']?.toString() ?? '',
-                                  style: TextStyle(
-                                    color: mutedForeground,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Scheduled by: ${(gathering['creatorId'] is Map ? gathering['creatorId']['name']?.toString() : (gathering['creatorId'] is List && gathering['creatorId'].isNotEmpty ? gathering['creatorId'][0]['name']?.toString() : gathering['creatorId']?.toString())) ?? 'Unknown'}',
-                                  style: TextStyle(
-                                    color: mutedForeground,
-                                    fontSize: 14,
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                Row(
+                        ),
+                        if (isCreator)
+                          IconButton(
+                            icon: Icon(Icons.more_vert, size: 20, color: mutedForeground),
+                            onPressed: () {
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (context) => Column(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(
-                                      Icons.calendar_today,
-                                      size: 16,
-                                      color: mutedForeground,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      DateFormat('MMM dd, yyyy').format(startTime),
-                                      style: TextStyle(
-                                        color: mutedForeground,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.access_time,
-                                      size: 16,
-                                      color: mutedForeground,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      '${DateFormat('hh:mm a').format(startTime)} - ${DateFormat('hh:mm a').format(endTime)}',
-                                      style: TextStyle(
-                                        color: mutedForeground,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: isActive ? Colors.green.withOpacity(0.2) : Colors.blue.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Text(
-                                    isActive ? 'Active Now' : 'Upcoming',
-                                    style: TextStyle(
-                                      color: isActive ? Colors.green : Colors.blue,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            trailing: isCreator
-                                ? PopupMenuButton<String>(
-                                    icon: Icon(Icons.more_vert, color: foreground),
-                                    onSelected: (value) {
-                                      if (value == 'delete') {
+                                    ListTile(
+                                      leading: const Icon(Icons.delete, color: Colors.red),
+                                      title: const Text('Delete', style: TextStyle(color: Colors.red)),
+                                      onTap: () {
+                                        Navigator.pop(context);
                                         showDialog(
                                           context: context,
                                           builder: (context) => AlertDialog(
@@ -365,35 +404,145 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings> {
                                             ],
                                           ),
                                         );
-                                      }
-                                    },
-                                    itemBuilder: (context) => [
-                                      const PopupMenuItem(
-                                        value: 'delete',
-                                        child: Text('Delete', style: TextStyle(color: Colors.red)),
-                                      ),
-                                    ],
-                                  )
-                                : null,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => GatheringDetailScreen(
-                                    gathering: Gathering.fromJson(gathering),
-                                  ),
+                                      },
+                                    ),
+                                  ],
                                 ),
                               );
                             },
                           ),
-                        );
-                      },
+                      ],
                     ),
+                    const SizedBox(height: 8),
+                    if (gathering['description'] != null && gathering['description'].toString().isNotEmpty)
+                      Column(
+                        children: [
+                          Text(
+                            gathering['description']?.toString() ?? '',
+                            style: TextStyle(
+                              color: mutedForeground,
+                              fontSize: 14,
+                            ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                      ),
+                    Text(
+                      'Hosted by ${(gathering['creatorId'] is Map ? gathering['creatorId']['name']?.toString() : (gathering['creatorId'] is List && gathering['creatorId'].isNotEmpty ? gathering['creatorId'][0]['name']?.toString() : gathering['creatorId']?.toString())) ?? 'Unknown'}',
+                      style: TextStyle(
+                        color: mutedForeground,
+                        fontSize: 14,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_today,
+                          size: 16,
+                          color: mutedForeground,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          DateFormat('MMM dd, yyyy').format(startTime),
+                          style: TextStyle(
+                            color: mutedForeground,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Icon(
+                          Icons.access_time,
+                          size: 16,
+                          color: mutedForeground,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${DateFormat('hh:mm a').format(startTime)} - ${DateFormat('hh:mm a').format(endTime)}',
+                          style: TextStyle(
+                            color: mutedForeground,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: isUpcoming 
+                              ? (isActive 
+                                ? Colors.green.withOpacity(0.2) 
+                                : Colors.blue.withOpacity(0.2))
+                              : Colors.grey.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Text(
+                            isUpcoming 
+                              ? (isActive ? 'Active Now' : 'Upcoming')
+                              : 'Completed',
+                            style: TextStyle(
+                              color: isUpcoming 
+                                ? (isActive ? Colors.green : Colors.blue)
+                                : Colors.grey,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        const Spacer(),
+                        if (isUpcoming && isActive)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.group, size: 14, color: Colors.orange),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '$attendeesCount attending',
+                                  style: TextStyle(
+                                    color: Colors.orange,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+
+
+
+
+
+
+
+
+
+        },
+      ),
     );
   }
 
   @override
   void dispose() {
+    _tabController.dispose();
     _socket?.disconnect();
     _socket?.dispose();
     super.dispose();
@@ -669,3 +818,23 @@ class Attendee {
     );
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
