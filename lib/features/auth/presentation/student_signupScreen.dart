@@ -2,7 +2,6 @@ import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/presentation/widgets/signup_form.dart';
 import 'package:flutter/material.dart';
 
-
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
@@ -11,20 +10,27 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  
   @override
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments as Map?;
-
     final role = args?['role'];
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color.fromARGB(255, 0, 0, 0), Color.fromARGB(255, 48, 48, 48)],
+            colors: isDarkMode
+                ? [
+                    Color.fromARGB(255, 0, 0, 0),
+                    Color.fromARGB(255, 48, 48, 48)
+                  ]
+                : [
+                    Color.fromARGB(255, 240, 240, 240),
+                    Color.fromARGB(255, 255, 255, 255)
+                  ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -43,54 +49,53 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         const SizedBox(height: 100),
-                        const Icon(
+                        Icon(
                           Icons.school,
                           size: 80,
-                          color: Colors.white,
+                          color: isDarkMode ? Colors.white : Colors.black87,
                         ),
                         const SizedBox(height: 20),
-                        const Text(
+                        Text(
                           AppConstants.appName,
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: isDarkMode ? Colors.white : Colors.black87,
                           ),
                         ),
                         const SizedBox(height: 10),
-                         Text(
+                        Text(
                           "${role == AppRoles.student ? "Student" : role == AppRoles.teacher ? "Teacher" : role == AppRoles.alumni ? "Alumni" : ""} Sign Up",
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
-                            color: Colors.white,
+                            color: isDarkMode ? Colors.white : Colors.black87,
                           ),
                         ),
                         const SizedBox(height: 15),
-                         SignUpForm(role),
+                        SignUpForm(role),
                         const SizedBox(height: 5),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text(
+                            Text(
                               "Already have an account?",
                               style: TextStyle(
-                                // color: Colors.teal.shade600,
-                                color: Colors.white,
+                                color:
+                                    isDarkMode ? Colors.white : Colors.black87,
                                 fontSize: 14,
                               ),
                             ),
                             TextButton(
                               onPressed: () {
                                 Navigator.pushReplacementNamed(
-                                  context,
-                                  AppRoutes.authScreen
-                                );
+                                    context, AppRoutes.authScreen);
                               },
-                              child: const Text(
+                              child: Text(
                                 "Log In",
                                 style: TextStyle(
-                                  // color: Colors.teal.shade800,
-                                  color: Colors.white,
+                                  color: isDarkMode
+                                      ? Colors.white
+                                      : Colors.black87,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
                                 ),

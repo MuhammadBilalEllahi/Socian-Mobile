@@ -18,7 +18,7 @@ class SignUpForm extends StatefulWidget {
 }
 
 class _SignUpFormState extends State<SignUpForm> {
-  final _formKey = GlobalKey<FormState>(); // FormKey for validation
+  final _formKey = GlobalKey<FormState>();
   final GlobalKey<FormFieldState<String>> _usernameKey =
       GlobalKey<FormFieldState<String>>();
 
@@ -27,32 +27,29 @@ class _SignUpFormState extends State<SignUpForm> {
   final _nameController = TextEditingController();
   final _usernameController = TextEditingController();
 
-  String? selectedUniversity; // To store the selected value  ### _id
-  String? selectedDepartment; // To store the selected value  ### _id
+  String? selectedUniversity;
+  String? selectedDepartment;
   String? selectedRegex;
   String? selectedDomain;
-  bool isPasswordVisible = false; // Track password visibility
+  bool isPasswordVisible = false;
   List<Map<String, dynamic>> universities = [];
   List<Map<String, dynamic>> departmentsInSelectedUniversity = [];
   bool isLoading = true;
   bool isSigningUp = false;
   final ApiClient apiClient = ApiClient();
-
-  bool isUsernameTaken = false; // Flag to track if username is taken
+  bool isUsernameTaken = false;
 
   @override
   void initState() {
     super.initState();
     fetchUniversities();
 
-    // Add listener to the username controller to check for uniqueness
     _usernameController.addListener(() {
       if (_usernameController.text.length >= 7) {
         checkUsernameAvailability(_usernameController.text);
       } else {
         setState(() {
-          isUsernameTaken =
-              false; // Reset flag if username is less than 7 characters
+          isUsernameTaken = false;
         });
       }
     });
@@ -60,11 +57,8 @@ class _SignUpFormState extends State<SignUpForm> {
 
   void fetchUniversities() async {
     try {
-      print(ApiConstants.universityAndCampusNames);
       final response =
           await apiClient.getList(ApiConstants.universityAndCampusNames);
-      // print("A $apiClient");
-      // print("A $response");
       setState(() {
         universities = (response)
             .map((uni) => {
@@ -75,8 +69,6 @@ class _SignUpFormState extends State<SignUpForm> {
                   'domain': uni['domain'],
                 })
             .toList();
-
-        print("fetching universities: $universities");
         isLoading = false;
       });
     } catch (e) {
@@ -92,39 +84,27 @@ class _SignUpFormState extends State<SignUpForm> {
       if (value == null || value.isEmpty) {
         return 'Please enter an email';
       }
-
-      // Regular expression for email validation
-      final emailRegex =
-          RegExp(selectedRegex ?? ''); // Fallback to empty string
+      final emailRegex = RegExp(selectedRegex ?? '');
       if (!emailRegex.hasMatch(value)) {
         return 'Please enter a valid email address';
       }
-
-      return null; // Return null if valid
+      return null;
     };
   }
 
-// Function to check username availability
   void checkUsernameAvailability(String username) async {
     try {
       final response = await apiClient
           .get(ApiConstants.usernames, queryParameters: {'username': username});
-      print("REsponse $response ${response == true}");
       if (response == true) {
         setState(() {
-          isUsernameTaken = true; // Set the flag for taken username
+          isUsernameTaken = true;
         });
-
-// WidgetsBinding.instance.addPostFrameCallback((_) {
-//     _usernameKey.currentState?.validate();
-//   });
       } else {
         setState(() {
-          isUsernameTaken = false; // Reset flag if username is available
+          isUsernameTaken = false;
         });
-        // _usernameKey.currentState?.validate();
       }
-
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _usernameKey.currentState?.validate();
       });
@@ -132,43 +112,30 @@ class _SignUpFormState extends State<SignUpForm> {
       print("Error checking username: $e");
     }
   }
+
   FormFieldValidator<dynamic> usernameValidator() {
     return (value) {
-      // Check for empty value
       if (value == null || value.isEmpty) {
         return 'Username cannot be empty';
       }
-
-      // Check for minimum length
       if (value.length < 8) {
         return 'Username must be at least 8 characters long';
       }
-
-      // Check for whitespace
       if (value.contains(' ')) {
         return 'Username cannot contain spaces';
       }
-
-      // Check for lowercase
       if (value.contains(RegExp(r'[A-Z]'))) {
         return 'Username must be lowercase';
       }
-
-      // Check for numbers
       if (!value.contains(RegExp(r'[0-9]'))) {
         return 'Username must contain at least one number';
       }
-
-      // Check for valid characters
       if (!RegExp(r'^[a-z0-9_]+$').hasMatch(value)) {
         return 'Username can only contain lowercase letters, numbers, and underscores';
       }
-
-      // Check if username is taken
       if (isUsernameTaken) {
         return 'Username is already taken';
       }
-
       return null;
     };
   }
@@ -211,12 +178,8 @@ class _SignUpFormState extends State<SignUpForm> {
         ),
       );
 
-      Navigator.pushNamed(
-        context, 
-        AppRoutes.otpScreen,
-        arguments: {'userId': userId, 'email': email}
-      );
-
+      Navigator.pushNamed(context, AppRoutes.otpScreen,
+          arguments: {'userId': userId, 'email': email});
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -241,6 +204,8 @@ class _SignUpFormState extends State<SignUpForm> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Form(
         key: _formKey,
         child: Padding(
@@ -269,9 +234,7 @@ class _SignUpFormState extends State<SignUpForm> {
                   });
                 },
               ),
-
               const SizedBox(height: 16),
-
               MyDropdownField<String>(
                 value: selectedDepartment,
                 items: departmentsInSelectedUniversity,
@@ -283,18 +246,12 @@ class _SignUpFormState extends State<SignUpForm> {
                   });
                 },
               ),
-
-              // Full Name TextField
               MyTextField(
                   textEditingController: _nameController,
                   label: 'Full Name',
                   obscureTextBool: false,
                   focus: false,
                   validator: nameValidator()),
-
-              // const SizedBox(height: 16),
-
-              // Username TextField
               MyTextField(
                   customKey: _usernameKey,
                   textEditingController: _usernameController,
@@ -302,16 +259,12 @@ class _SignUpFormState extends State<SignUpForm> {
                   obscureTextBool: false,
                   focus: false,
                   validator: usernameValidator()),
-
-              // const SizedBox(height: 16),
-              // Institutional Email TextField
               MyTextField(
                   textEditingController: _emailController,
                   label: 'Your Instituitonal Email',
                   obscureTextBool: false,
                   focus: false,
                   validator: emailValidator()),
-
               MyTextField(
                   textEditingController: _passwordController,
                   label: 'Password',
@@ -320,20 +273,18 @@ class _SignUpFormState extends State<SignUpForm> {
                   suffixIcon: IconButton(
                     icon: Icon(
                       isPasswordVisible
-                          ? Icons.visibility // Open eye icon
-                          : Icons.visibility_off, // Closed eye icon
-                      color: Colors.white,
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: isDarkMode ? Colors.white : Colors.black,
                     ),
                     onPressed: () {
                       setState(() {
-                        isPasswordVisible = !isPasswordVisible; // Toggle state
+                        isPasswordVisible = !isPasswordVisible;
                       });
                     },
                   ),
                   validator: passwordValidator()),
-
               const SizedBox(height: 10),
-
               Center(
                 child: GestureDetector(
                   onTap: isSigningUp ? null : _signup,
@@ -344,15 +295,15 @@ class _SignUpFormState extends State<SignUpForm> {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          isSigningUp 
-                            ? Colors.grey 
-                            : const Color.fromARGB(255, 18, 18, 18),
-                          isSigningUp 
-                            ? Colors.grey.shade700
-                            : const Color.fromARGB(255, 0, 0, 0),
                           isSigningUp
-                            ? Colors.grey.shade600
-                            : const Color.fromARGB(255, 31, 31, 31)
+                              ? Colors.grey
+                              : const Color.fromARGB(255, 18, 18, 18),
+                          isSigningUp
+                              ? Colors.grey.shade700
+                              : const Color.fromARGB(255, 0, 0, 0),
+                          isSigningUp
+                              ? Colors.grey.shade600
+                              : const Color.fromARGB(255, 31, 31, 31)
                         ],
                         begin: Alignment.centerLeft,
                         end: Alignment.bottomRight,
@@ -369,7 +320,8 @@ class _SignUpFormState extends State<SignUpForm> {
                               width: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
                             )
                           : const Text(
@@ -420,7 +372,7 @@ FormFieldValidator<dynamic> passwordValidator() {
       return 'Password must contain at least one uppercase letter';
     }
     if (!value.contains(RegExp(r'[a-z]'))) {
-      return 'Password must contain at least one lowercase letter'; 
+      return 'Password must contain at least one lowercase letter';
     }
     if (!value.contains(RegExp(r'[0-9]'))) {
       return 'Password must contain at least one number';

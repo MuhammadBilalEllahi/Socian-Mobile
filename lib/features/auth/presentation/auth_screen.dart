@@ -1,4 +1,3 @@
-
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/presentation/widgets/login_form.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
@@ -12,6 +11,7 @@ class AuthScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
     final authController = ref.watch(authProvider.notifier);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     print("authController ${authController.authUseCases}");
 
@@ -29,18 +29,22 @@ class AuthScreen extends ConsumerWidget {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color.fromARGB(255, 0, 0, 0), Color.fromARGB(255, 48, 48, 48)],
+            colors: isDarkMode
+                ? [
+                    Color.fromARGB(255, 0, 0, 0),
+                    Color.fromARGB(255, 48, 48, 48)
+                  ]
+                : [
+                    Color.fromARGB(255, 240, 240, 240),
+                    Color.fromARGB(255, 255, 255, 255)
+                  ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
         ),
-        child: 
-        // authState.isLoading
-        //     ? const Center(child: CircularProgressIndicator())
-        //     : 
-            LayoutBuilder(
+        child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
               child: ConstrainedBox(
@@ -54,26 +58,26 @@ class AuthScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         const SizedBox(height: 100),
-                        const Icon(
+                        Icon(
                           Icons.school,
                           size: 80,
-                          color: Colors.white,
+                          color: isDarkMode ? Colors.white : Colors.black87,
                         ),
                         const SizedBox(height: 20),
-                        const Text(
+                        Text(
                           AppConstants.appName,
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: isDarkMode ? Colors.white : Colors.black87,
                           ),
                         ),
                         const SizedBox(height: 10),
-                        const Text(
+                        Text(
                           "Login to access your account",
                           style: TextStyle(
                             fontSize: 18,
-                            color: Colors.white,
+                            color: isDarkMode ? Colors.white : Colors.black87,
                           ),
                         ),
                         const SizedBox(height: 40),
@@ -82,26 +86,25 @@ class AuthScreen extends ConsumerWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text(
+                            Text(
                               "Don't have an account?",
                               style: TextStyle(
-                                // color: Colors.teal.shade600,
-                                color: Colors.white,
+                                color:
+                                    isDarkMode ? Colors.white : Colors.black87,
                                 fontSize: 14,
                               ),
                             ),
                             TextButton(
                               onPressed: () {
                                 Navigator.pushReplacementNamed(
-                                  context,
-                                  AppRoutes.roleSelection
-                                );
+                                    context, AppRoutes.roleSelection);
                               },
-                              child: const Text(
+                              child: Text(
                                 "Sign Up",
                                 style: TextStyle(
-                                  // color: Colors.teal.shade800,
-                                  color: Colors.white,
+                                  color: isDarkMode
+                                      ? Colors.white
+                                      : Colors.black87,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
                                 ),
@@ -122,5 +125,3 @@ class AuthScreen extends ConsumerWidget {
     );
   }
 }
-
-

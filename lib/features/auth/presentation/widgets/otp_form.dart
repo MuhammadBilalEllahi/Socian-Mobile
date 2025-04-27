@@ -12,7 +12,8 @@ class OTPVerificationScreen extends ConsumerStatefulWidget {
   const OTPVerificationScreen({super.key});
 
   @override
-  ConsumerState<OTPVerificationScreen> createState() => _OTPVerificationScreenState();
+  ConsumerState<OTPVerificationScreen> createState() =>
+      _OTPVerificationScreenState();
 }
 
 class _OTPVerificationScreenState extends ConsumerState<OTPVerificationScreen> {
@@ -24,14 +25,23 @@ class _OTPVerificationScreenState extends ConsumerState<OTPVerificationScreen> {
     final args = ModalRoute.of(context)!.settings.arguments as Map?;
     final userId = args?['userId'];
     final email = args?['email'];
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color.fromARGB(255, 0, 0, 0), Color.fromARGB(255, 48, 48, 48)],
+            colors: isDarkMode
+                ? [
+                    Color.fromARGB(255, 0, 0, 0),
+                    Color.fromARGB(255, 48, 48, 48)
+                  ]
+                : [
+                    Color.fromARGB(255, 240, 240, 240),
+                    Color.fromARGB(255, 255, 255, 255)
+                  ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -43,41 +53,49 @@ class _OTPVerificationScreenState extends ConsumerState<OTPVerificationScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  icon: Icon(Icons.arrow_back,
+                      color: isDarkMode ? Colors.white : Colors.black87),
                   onPressed: () => Navigator.pop(context),
                 ),
                 const SizedBox(height: 40),
-                const Text(
+                Text(
                   'OTP Verification',
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: isDarkMode ? Colors.white : Colors.black87,
                   ),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   'Please enter the verification code sent to\n$email',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
-                    color: Colors.white70,
+                    color: isDarkMode ? Colors.white70 : Colors.black54,
                   ),
                 ),
                 const SizedBox(height: 40),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
+                    color: isDarkMode
+                        ? Colors.white.withOpacity(0.1)
+                        : Colors.black.withOpacity(0.05),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: TextField(
                     controller: _otpController,
-                    style: const TextStyle(color: Colors.white, fontSize: 20),
-                    decoration: const InputDecoration(
+                    style: TextStyle(
+                        color: isDarkMode ? Colors.white : Colors.black87,
+                        fontSize: 20),
+                    decoration: InputDecoration(
                       border: InputBorder.none,
                       hintText: 'Enter 6-digit OTP',
-                      hintStyle: TextStyle(color: Colors.white54),
-                      counterStyle: TextStyle(color: Colors.white70),
+                      hintStyle: TextStyle(
+                          color: isDarkMode ? Colors.white54 : Colors.black38),
+                      counterStyle: TextStyle(
+                          color: isDarkMode ? Colors.white70 : Colors.black54),
                     ),
                     keyboardType: TextInputType.number,
                     maxLength: 6,
@@ -88,56 +106,63 @@ class _OTPVerificationScreenState extends ConsumerState<OTPVerificationScreen> {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: isLoading ? null : () async {
-                      setState(() => isLoading = true);
-                      String otp = _otpController.text.trim();
+                    onPressed: isLoading
+                        ? null
+                        : () async {
+                            setState(() => isLoading = true);
+                            String otp = _otpController.text.trim();
 
-                      if (otp.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Please enter OTP"))
-                        );
-                        setState(() => isLoading = false);
-                        return;
-                      }
+                            if (otp.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text("Please enter OTP")));
+                              setState(() => isLoading = false);
+                              return;
+                            }
 
-                      var response = await _verifyOTP(userId, otp);
-                      // debugPrint("response $response");
+                            var response = await _verifyOTP(userId, otp);
 
-                      if (response != null && response['access_token'] != null) {
-                        final token = response['access_token'];
-                        final user = JwtDecoder.decode(token);
-                        
-                        // Update auth state through the controller
-                        await ref.read(authProvider.notifier).updateAuthState(user, token);
+                            if (response != null &&
+                                response['access_token'] != null) {
+                              final token = response['access_token'];
+                              final user = JwtDecoder.decode(token);
 
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("OTP Verified Successfully"))
-                        );
+                              await ref
+                                  .read(authProvider.notifier)
+                                  .updateAuthState(user, token);
 
-                        Navigator.pushReplacementNamed(context, AppRoutes.home);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Invalid OTP"))
-                        );
-                      }
-                      setState(() => isLoading = false);
-                    },
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content:
+                                          Text("OTP Verified Successfully")));
+
+                              Navigator.pushReplacementNamed(
+                                  context, AppRoutes.home);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text("Invalid OTP")));
+                            }
+                            setState(() => isLoading = false);
+                          },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
+                      backgroundColor:
+                          isDarkMode ? Colors.white : Colors.black87,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: isLoading 
-                      ? const CircularProgressIndicator()
-                      : const Text(
-                          'Verify OTP',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
+                    child: isLoading
+                        ? CircularProgressIndicator(
+                            color: isDarkMode ? Colors.black87 : Colors.white,
+                          )
+                        : Text(
+                            'Verify OTP',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: isDarkMode ? Colors.black87 : Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
                   ),
                 ),
                 const Spacer(),
@@ -146,9 +171,10 @@ class _OTPVerificationScreenState extends ConsumerState<OTPVerificationScreen> {
                     onPressed: () {
                       // TODO: Implement resend OTP
                     },
-                    child: const Text(
+                    child: Text(
                       "Didn't receive code? Resend",
-                      style: TextStyle(color: Colors.white70),
+                      style: TextStyle(
+                          color: isDarkMode ? Colors.white70 : Colors.black54),
                     ),
                   ),
                 ),

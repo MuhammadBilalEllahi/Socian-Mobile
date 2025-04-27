@@ -13,6 +13,7 @@ class ApiConstants {
   // This below is ort forwarding url from localhost:8080. create your own every time
 
   static Map<int, String> urlMap = {
+    -3: 'https://j9kfnb6c-8080.inc1.devtunnels.ms', //bilal
     -2: 'https://w7x50p90-8080.inc1.devtunnels.ms',
     -1: "http://10.135.49.240:8080", // localhost
     0: "https://api.beyondtheclass.me", // production
@@ -31,7 +32,7 @@ class ApiConstants {
     12: "http://192.168.1.12:8080",
   };
 
-  static int _currentUrlIndex = -2;
+  static int _currentUrlIndex = -3;
   static const String _urlIndexCacheKey = 'current_url_index';
 
   static Future<void> initializeBaseUrl() async {
@@ -53,7 +54,8 @@ class ApiConstants {
 
   static String get baseUrl {
     if (kReleaseMode) {
-      return urlMap[_currentUrlIndex]!; // Always use production URL in release mode
+      return urlMap[
+          _currentUrlIndex]!; // Always use production URL in release mode
     }
     return urlMap[_currentUrlIndex] ?? urlMap[0]!;
   }

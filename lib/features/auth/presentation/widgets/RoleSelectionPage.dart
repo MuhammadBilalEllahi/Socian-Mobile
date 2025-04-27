@@ -7,12 +7,21 @@ class RoleSelectionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
+    return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color.fromARGB(255, 0, 0, 0), Color.fromARGB(255, 48, 48, 48)],
+            colors: isDarkMode
+                ? [
+                    Color.fromARGB(255, 0, 0, 0),
+                    Color.fromARGB(255, 48, 48, 48)
+                  ]
+                : [
+                    Color.fromARGB(255, 240, 240, 240),
+                    Color.fromARGB(255, 255, 255, 255)
+                  ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -20,22 +29,27 @@ class RoleSelectionPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text("Select Your Role",style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 28),),
-            const SizedBox(height: 10,),
+            Text(
+              "Select Your Role",
+              style: TextStyle(
+                  color: isDarkMode ? Colors.white : Colors.black87,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 28),
+            ),
+            const SizedBox(height: 10),
             _buildRoleCard(
               context,
               role: "Student",
-              // icon: Icons.school,
               emoji: "🎓",
+              isDarkMode: isDarkMode,
               onTap: () {
                 Navigator.pushNamed(
                   context,
                   AppRoutes.signupScreen,
                   arguments: {
-                    "role":AppRoles.student,
+                    "role": AppRoles.student,
                   },
                 );
-                // Handle Student selection logic
                 debugPrint("Student selected");
               },
             ),
@@ -43,17 +57,16 @@ class RoleSelectionPage extends StatelessWidget {
             _buildRoleCard(
               context,
               role: "Faculty Member",
-              // icon: Icons.person,
               emoji: "👩‍🏫",
+              isDarkMode: isDarkMode,
               onTap: () {
                 Navigator.pushNamed(
                   context,
                   AppRoutes.signupScreen,
                   arguments: {
-                    "role":AppRoles.teacher,
+                    "role": AppRoles.teacher,
                   },
                 );
-                // Handle Faculty Member selection logic
                 debugPrint("Faculty Member selected");
               },
             ),
@@ -61,17 +74,16 @@ class RoleSelectionPage extends StatelessWidget {
             _buildRoleCard(
               context,
               role: "Alumni",
-              // icon: Icons.group,
               emoji: "🧑‍🎓",
+              isDarkMode: isDarkMode,
               onTap: () {
                 Navigator.pushNamed(
                   context,
                   AppRoutes.signupScreen,
                   arguments: {
-                    "role":AppRoles.alumni,
+                    "role": AppRoles.alumni,
                   },
                 );
-                // Handle Alumni selection logic
                 debugPrint("Alumni selected");
               },
             ),
@@ -82,42 +94,58 @@ class RoleSelectionPage extends StatelessWidget {
   }
 
   Widget _buildRoleCard(
-      BuildContext context, {
-        required String role,
-        required String emoji,
-        required VoidCallback onTap,
-      }) {
+    BuildContext context, {
+    required String role,
+    required String emoji,
+    required bool isDarkMode,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20),
         padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
-          // color: Colors.white,
-          gradient: const LinearGradient(
-                  colors: [Color.fromARGB(255, 42, 40, 40), Color.fromARGB(255, 69, 69, 69)],
-                ),
+          gradient: LinearGradient(
+            colors: isDarkMode
+                ? [
+                    Color.fromARGB(255, 42, 40, 40),
+                    Color.fromARGB(255, 69, 69, 69)
+                  ]
+                : [
+                    Color.fromARGB(255, 250, 250, 250),
+                    Color.fromARGB(255, 230, 230, 230)
+                  ],
+          ),
           borderRadius: BorderRadius.circular(15),
           border: Border.all(
-            color: const Color.fromARGB(65, 255, 255, 255), 
-          width: 0.6
-          ),
-          boxShadow: const [
+              color: isDarkMode
+                  ? const Color.fromARGB(65, 255, 255, 255)
+                  : const Color.fromARGB(65, 0, 0, 0),
+              width: 0.6),
+          boxShadow: [
             BoxShadow(
-              color: Colors.black26,
+              color: isDarkMode ? Colors.black26 : Colors.grey.shade300,
               blurRadius: 8,
-              offset: Offset(0, 4),
+              offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Row(
           children: [
-            // Emoji or Icon
             Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
-                  colors: [Color.fromARGB(255, 32, 32, 32), Color.fromARGB(255, 69, 69, 69)],
+                  colors: isDarkMode
+                      ? [
+                          Color.fromARGB(255, 32, 32, 32),
+                          Color.fromARGB(255, 69, 69, 69)
+                        ]
+                      : [
+                          Color.fromARGB(255, 240, 240, 240),
+                          Color.fromARGB(255, 220, 220, 220)
+                        ],
                 ),
               ),
               padding: const EdgeInsets.all(10),
@@ -127,32 +155,31 @@ class RoleSelectionPage extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 15),
-            // Role Title
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     role,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 255, 255, 255),
+                      color: isDarkMode ? Colors.white : Colors.black87,
                     ),
                   ),
                   const SizedBox(height: 5),
                   Text(
                     "Select this if you are a $role.",
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
-                      color: Color.fromARGB(255, 170, 170, 170),
+                      color: isDarkMode
+                          ? Color.fromARGB(255, 170, 170, 170)
+                          : Color.fromARGB(255, 100, 100, 100),
                     ),
                   ),
                 ],
               ),
             ),
-            // Icon
-
           ],
         ),
       ),

@@ -39,7 +39,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
             emailController.text,
             passwordController.text,
           );
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Login successful!'),
@@ -64,6 +64,20 @@ class _LoginFormState extends ConsumerState<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final gradientColors = isDarkMode
+        ? [
+            Color.fromARGB(255, 18, 18, 18),
+            Color.fromARGB(255, 0, 0, 0),
+            Color.fromARGB(255, 31, 31, 31)
+          ]
+        : [
+            Color.fromARGB(255, 240, 240, 240),
+            Color.fromARGB(255, 220, 220, 220),
+            Color.fromARGB(255, 200, 200, 200)
+          ];
+
     ref.listen<AuthState>(authProvider, (previous, next) {
       if (next.error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -74,7 +88,8 @@ class _LoginFormState extends ConsumerState<LoginForm> {
         );
       }
       if (next.user != null) {
-        Navigator.pushNamedAndRemoveUntil(context, AppRoutes.home, (route) => false);
+        Navigator.pushNamedAndRemoveUntil(
+            context, AppRoutes.home, (route) => false);
       }
     });
 
@@ -83,26 +98,24 @@ class _LoginFormState extends ConsumerState<LoginForm> {
       child: Column(
         children: [
           TextField(
-            style: TextStyle(color: Colors.white),
-
+            style: TextStyle(color: textColor),
             controller: emailController,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: "Email/Username",
-              labelStyle: TextStyle(color: Colors.white),
+              labelStyle: TextStyle(color: textColor),
             ),
           ),
           TextField(
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: textColor),
             controller: passwordController,
             obscureText: !isPasswordVisible,
             decoration: InputDecoration(
-
               labelText: "Password",
-              labelStyle: const TextStyle(color: Colors.white),
+              labelStyle: TextStyle(color: textColor),
               suffixIcon: IconButton(
                 icon: Icon(
                   isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                  color: Colors.white,
+                  color: textColor,
                 ),
                 onPressed: () {
                   setState(() {
@@ -120,35 +133,34 @@ class _LoginFormState extends ConsumerState<LoginForm> {
               padding: const EdgeInsets.fromLTRB(4, 10, 4, 10),
               margin: const EdgeInsets.fromLTRB(2, 0, 2, 0),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [
-                    Color.fromARGB(255, 18, 18, 18),
-                    Color.fromARGB(255, 0, 0, 0),
-                    Color.fromARGB(255, 31, 31, 31)
-                  ],
+                gradient: LinearGradient(
+                  colors: gradientColors,
                   begin: Alignment.centerLeft,
                   end: Alignment.bottomRight,
                 ),
                 border: Border.all(
-                    color: const Color.fromRGBO(255, 255, 255, 1), width: 0.6),
+                    color: isDarkMode
+                        ? const Color.fromRGBO(255, 255, 255, 1)
+                        : const Color.fromRGBO(0, 0, 0, 0.2),
+                    width: 0.6),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Center(
                 child: isLoading
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(textColor),
                         ),
                       )
-                    : const Text(
+                    : Text(
                         AppConstants.login,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
-                          color: Colors.white,
+                          color: textColor,
                         ),
                       ),
               ),

@@ -3,24 +3,24 @@ import 'package:flutter/services.dart';
 // import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
 class MyTextField extends StatelessWidget {
-  const MyTextField({
-    super.key,
-    required TextEditingController textEditingController,
-    required this.label,
-    required this.obscureTextBool,
-    required this.focus,
-    required this.validator,
-    this.readOnly = false,
-    this.inputFormatters,
-    this.inputBorder,
-    this.height,
-    this.width,
-    this.padZero,
-    this.keybordType,
-    this.validatorForm,
-    this.suffixIcon,
-    this.customKey
-  }) : _textEditingController = textEditingController;
+  const MyTextField(
+      {super.key,
+      required TextEditingController textEditingController,
+      required this.label,
+      required this.obscureTextBool,
+      required this.focus,
+      required this.validator,
+      this.readOnly = false,
+      this.inputFormatters,
+      this.inputBorder,
+      this.height,
+      this.width,
+      this.padZero,
+      this.keybordType,
+      this.validatorForm,
+      this.suffixIcon,
+      this.customKey})
+      : _textEditingController = textEditingController;
 
   final TextEditingController _textEditingController;
   final FormFieldValidator<String>? validatorForm;
@@ -36,11 +36,12 @@ class MyTextField extends StatelessWidget {
   final double? padZero;
   final TextInputType? keybordType;
   final IconButton? suffixIcon;
-
   final Key? customKey;
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return SizedBox(
       height: height ?? 90,
       width: width ?? 400,
@@ -49,35 +50,38 @@ class MyTextField extends StatelessWidget {
             padZero ?? 0, padZero ?? 0, padZero ?? 0, padZero ?? 0),
         child: TextFormField(
           key: customKey,
-          style: const TextStyle(color: Colors.white,),
+          style: TextStyle(
+            color: isDarkMode ? Colors.white : Colors.black87,
+          ),
           controller: _textEditingController,
           autofocus: focus,
           validator: validatorForm ?? validator,
           readOnly: readOnly,
           keyboardType: keybordType,
-          
-
-          // style: GoogleFonts.abel(),
-
           obscureText: obscureTextBool,
-          // textInputAction: textInputType,
           inputFormatters: inputFormatters,
           decoration: InputDecoration(
-            fillColor: Colors.white,
-            // error: ,
-
-            suffixIcon: suffixIcon ,
+            fillColor: isDarkMode ? Colors.grey[900] : Colors.white,
+            suffixIcon: suffixIcon,
             errorStyle: const TextStyle(color: Colors.redAccent, fontSize: 10),
-            // iconColor: Colors.blue,
-
             border: inputBorder ?? const UnderlineInputBorder(),
             label: Text(
               label,
-              style: const TextStyle(
-                  fontSize: 16, color: Colors.white),
+              style: TextStyle(
+                fontSize: 16,
+                color: isDarkMode ? Colors.white : Colors.black87,
+              ),
             ),
-
-            //  focusColor: Colors.amber
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(
+                color: isDarkMode ? Colors.white54 : Colors.black54,
+              ),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(
+                color: isDarkMode ? Colors.white : Colors.black87,
+              ),
+            ),
           ),
         ),
       ),
