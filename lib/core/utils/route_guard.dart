@@ -2,6 +2,7 @@ import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/PastPapers.d
 import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/SubjectsView.dart';
 import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/discussion/DiscussionView.dart';
 import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/discussion/answerPage/AnswersPage.dart';
+import 'package:beyondtheclass/pages/gps/ScheduledGatherings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
@@ -126,6 +127,7 @@ class RouteGuard {
           AppRoutes.subjectsInDepartmentScreen: const SubjectsView(),
           AppRoutes.discussionViewScreen: const DiscussionView(),
           AppRoutes.answersPage: const AnswersPage(),
+          AppRoutes.scheduleGatherings: const ScheduledGatherings(),
           ...commonRoutes,
         };
       case AppRoles.teacher:

@@ -17,7 +17,8 @@ class ScheduledGatherings extends ConsumerStatefulWidget {
   const ScheduledGatherings({super.key});
 
   @override
-  ConsumerState<ScheduledGatherings> createState() => _ScheduledGatheringsState();
+  ConsumerState<ScheduledGatherings> createState() =>
+      _ScheduledGatheringsState();
 }
 
 class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
@@ -93,13 +94,15 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
 
         setState(() {
           // Update _currentGatherings
-          final currentIndex = _currentGatherings.indexWhere((g) => g['_id']?.toString() == gatheringId);
+          final currentIndex = _currentGatherings
+              .indexWhere((g) => g['_id']?.toString() == gatheringId);
           if (currentIndex != -1) {
             _currentGatherings[currentIndex]['attendees'] = attendees;
           }
 
           // Update _upcomingGatherings
-          final upcomingIndex = _upcomingGatherings.indexWhere((g) => g['_id']?.toString() == gatheringId);
+          final upcomingIndex = _upcomingGatherings
+              .indexWhere((g) => g['_id']?.toString() == gatheringId);
           if (upcomingIndex != -1) {
             _upcomingGatherings[upcomingIndex]['attendees'] = attendees;
           }
@@ -107,7 +110,8 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
       });
 
       _socket?.on('error', (error) => print('Socket error: $error'));
-      _socket?.on('disconnect', (_) => print('Disconnected from Socket.IO server'));
+      _socket?.on(
+          'disconnect', (_) => print('Disconnected from Socket.IO server'));
     } catch (e) {
       print('Socket initialization error: $e');
     }
@@ -132,11 +136,16 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
         _currentGatherings.clear();
         _previousGatherings.clear();
 
-        final gatherings = (response as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [];
+        final gatherings =
+            (response as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [];
 
         for (var gathering in gatherings) {
-          final startTime = DateTime.tryParse(gathering['startTime']?.toString() ?? '')?.toLocal();
-          final endTime = DateTime.tryParse(gathering['endTime']?.toString() ?? '')?.toLocal();
+          final startTime =
+              DateTime.tryParse(gathering['startTime']?.toString() ?? '')
+                  ?.toLocal();
+          final endTime =
+              DateTime.tryParse(gathering['endTime']?.toString() ?? '')
+                  ?.toLocal();
 
           if (startTime == null || endTime == null) continue;
 
@@ -152,9 +161,12 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
         _isLoading = false;
       });
 
-      print('Upcoming gatherings: ${_upcomingGatherings.map((g) => g['title']).toList()}');
-      print('Current gatherings: ${_currentGatherings.map((g) => g['title']).toList()}');
-      print('Previous gatherings: ${_previousGatherings.map((g) => g['title']).toList()}');
+      print(
+          'Upcoming gatherings: ${_upcomingGatherings.map((g) => g['title']).toList()}');
+      print(
+          'Current gatherings: ${_currentGatherings.map((g) => g['title']).toList()}');
+      print(
+          'Previous gatherings: ${_previousGatherings.map((g) => g['title']).toList()}');
     } catch (e) {
       print('Error fetching gatherings: $e');
       setState(() {
@@ -180,7 +192,8 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
       print('Error deleting gathering: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to delete gathering: ${e is ApiException ? e.message : e.toString()}'),
+          content: Text(
+              'Failed to delete gathering: ${e is ApiException ? e.message : e.toString()}'),
         ),
       );
     }
@@ -189,13 +202,27 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final background = isDarkMode ? const Color(0xFF09090B) : Colors.white;
-    final foreground = isDarkMode ? Colors.white : const Color(0xFF09090B);
-    final muted = isDarkMode ? const Color(0xFF27272A) : const Color(0xFFF4F4F5);
-    final mutedForeground = isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
-    final border = isDarkMode ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
-    final accent = isDarkMode ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
-    final primaryColor = isDarkMode ? const Color(0xFF6366F1) : const Color(0xFF4F46E5);
+    final background =
+        isDarkMode ? const Color(0xFF000000) : const Color(0xFFFFFFFF);
+    final foreground =
+        isDarkMode ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
+    final muted =
+        isDarkMode ? const Color(0xFF1A1A1A) : const Color(0xFFF5F5F5);
+    final mutedForeground =
+        isDarkMode ? const Color(0xFFA3A3A3) : const Color(0xFF737373);
+    final border =
+        isDarkMode ? const Color(0xFF262626) : const Color(0xFFE5E5E5);
+    final accent =
+        isDarkMode ? const Color(0xFF1A1A1A) : const Color(0xFFFAFAFA);
+    final primaryColor =
+        isDarkMode ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
+    final cardBackground =
+        isDarkMode ? const Color(0xFF1A1A1A) : const Color(0xFFFFFFFF);
+    final cardBorder =
+        isDarkMode ? const Color(0xFF262626) : const Color(0xFFE5E5E5);
+    final cardShadow = isDarkMode
+        ? Colors.black.withOpacity(0.1)
+        : Colors.black.withOpacity(0.05);
 
     return Scaffold(
       backgroundColor: background,
@@ -206,8 +233,9 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
           'Your Gatherings',
           style: TextStyle(
             color: foreground,
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
+            fontSize: 20,
+            fontWeight: FontWeight.w500,
+            letterSpacing: -0.5,
           ),
         ),
         centerTitle: true,
@@ -222,6 +250,16 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
           indicatorColor: primaryColor,
           labelColor: primaryColor,
           unselectedLabelColor: mutedForeground,
+          labelStyle: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            letterSpacing: -0.3,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+            letterSpacing: -0.3,
+          ),
           tabs: const [
             Tab(text: 'Upcoming'),
             Tab(text: 'Current'),
@@ -241,8 +279,9 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
                   Text(
                     'Loading gatherings...',
                     style: TextStyle(
-                      color: foreground,
-                      fontSize: 16,
+                      color: mutedForeground,
+                      fontSize: 14,
+                      letterSpacing: -0.3,
                     ),
                   ),
                 ],
@@ -262,8 +301,9 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
                       Text(
                         errorMessage!,
                         style: TextStyle(
-                          color: foreground,
-                          fontSize: 16,
+                          color: mutedForeground,
+                          fontSize: 14,
+                          letterSpacing: -0.3,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -271,14 +311,23 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primaryColor,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          foregroundColor: background,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(6),
                           ),
+                          elevation: 0,
                         ),
                         onPressed: _fetchGatherings,
-                        child: const Text('Try Again'),
+                        child: const Text(
+                          'Try Again',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -292,9 +341,10 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
                       emptyIcon: Icons.event_rounded,
                       foreground: foreground,
                       mutedForeground: mutedForeground,
-                      accent: accent,
-                      border: border,
+                      accent: cardBackground,
+                      border: cardBorder,
                       isUpcoming: true,
+                      cardShadow: cardShadow,
                     ),
                     _buildGatheringList(
                       gatherings: _currentGatherings,
@@ -302,9 +352,10 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
                       emptyIcon: Icons.event_available,
                       foreground: foreground,
                       mutedForeground: mutedForeground,
-                      accent: accent,
-                      border: border,
+                      accent: cardBackground,
+                      border: cardBorder,
                       isUpcoming: true,
+                      cardShadow: cardShadow,
                     ),
                     _buildGatheringList(
                       gatherings: _previousGatherings,
@@ -312,9 +363,10 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
                       emptyIcon: Icons.history,
                       foreground: foreground,
                       mutedForeground: mutedForeground,
-                      accent: accent,
-                      border: border,
+                      accent: cardBackground,
+                      border: cardBorder,
                       isUpcoming: false,
+                      cardShadow: cardShadow,
                     ),
                   ],
                 ),
@@ -330,6 +382,7 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
     required Color accent,
     required Color border,
     required bool isUpcoming,
+    required Color cardShadow,
   }) {
     if (gatherings.isEmpty) {
       return Center(
@@ -346,7 +399,8 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
               emptyMessage,
               style: TextStyle(
                 color: mutedForeground,
-                fontSize: 16,
+                fontSize: 14,
+                letterSpacing: -0.3,
               ),
             ),
           ],
@@ -361,35 +415,42 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
       child: ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: gatherings.length,
-        separatorBuilder: (context, index) => const SizedBox(height: 16),
+        separatorBuilder: (context, index) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
           final gathering = gatherings[index];
-          print('Gathering $index: ID: ${gathering['_id']}, Title: ${gathering['title']}, StartTime: ${gathering['startTime']}');
-          print('Gathering $index: creatorId: ${gathering['creatorId']}, Type: ${gathering['creatorId'].runtimeType}');
-          print('Gathering $index: assigned creatorName: ${(gathering['creatorId'] is Map ? gathering['creatorId']['name'] : (gathering['creatorId'] is List ? gathering['creatorId'][0]['name'] : gathering['creatorId']))}');
-          final startTime = DateTime.tryParse(gathering['startTime']?.toString() ?? '')?.toLocal() ?? DateTime.now();
-          final endTime = DateTime.tryParse(gathering['endTime']?.toString() ?? '')?.toLocal() ?? DateTime.now();
+          final startTime =
+              DateTime.tryParse(gathering['startTime']?.toString() ?? '')
+                      ?.toLocal() ??
+                  DateTime.now();
+          final endTime =
+              DateTime.tryParse(gathering['endTime']?.toString() ?? '')
+                      ?.toLocal() ??
+                  DateTime.now();
           final now = DateTime.now();
           final isActive = now.isAfter(startTime) && now.isBefore(endTime);
           final isCreator = _userId != null &&
-              _userId == (gathering['creatorId'] is Map ? gathering['creatorId']['_id']?.toString() : gathering['creatorId']?.toString());
-          final attendeesCount = (gathering['attendees'] as List<dynamic>?)?.length ?? 0;
+              _userId ==
+                  (gathering['creatorId'] is Map
+                      ? gathering['creatorId']['_id']?.toString()
+                      : gathering['creatorId']?.toString());
+          final attendeesCount =
+              (gathering['attendees'] as List<dynamic>?)?.length ?? 0;
 
           return Container(
             decoration: BoxDecoration(
               color: accent,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(6),
               border: Border.all(color: border),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
+                  color: cardShadow,
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
             child: InkWell(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(6),
               onTap: () {
                 Navigator.push(
                   context,
@@ -414,8 +475,9 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
                             gathering['title']?.toString() ?? 'Untitled',
                             style: TextStyle(
                               color: foreground,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: -0.3,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -423,34 +485,52 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
                         ),
                         if (isCreator)
                           IconButton(
-                            icon: Icon(Icons.more_vert, size: 20, color: mutedForeground),
+                            icon: Icon(Icons.more_vert,
+                                size: 20, color: mutedForeground),
                             onPressed: () {
                               showModalBottomSheet(
                                 context: context,
+                                backgroundColor: accent,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(6),
+                                  ),
+                                ),
                                 builder: (context) => Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     ListTile(
-                                      leading: const Icon(Icons.delete, color: Colors.red),
-                                      title: const Text('Delete', style: TextStyle(color: Colors.red)),
+                                      leading: const Icon(Icons.delete,
+                                          color: Colors.red),
+                                      title: const Text('Delete',
+                                          style: TextStyle(color: Colors.red)),
                                       onTap: () {
                                         Navigator.pop(context);
                                         showDialog(
                                           context: context,
                                           builder: (context) => AlertDialog(
-                                            title: const Text('Delete Gathering'),
-                                            content: const Text('Are you sure you want to delete this gathering?'),
+                                            backgroundColor: accent,
+                                            title:
+                                                const Text('Delete Gathering'),
+                                            content: const Text(
+                                                'Are you sure you want to delete this gathering?'),
                                             actions: [
                                               TextButton(
-                                                onPressed: () => Navigator.of(context).pop(),
+                                                onPressed: () =>
+                                                    Navigator.of(context).pop(),
                                                 child: const Text('Cancel'),
                                               ),
                                               TextButton(
                                                 onPressed: () {
                                                   Navigator.of(context).pop();
-                                                  _deleteGathering(gathering['_id']?.toString() ?? '');
+                                                  _deleteGathering(
+                                                      gathering['_id']
+                                                              ?.toString() ??
+                                                          '');
                                                 },
-                                                child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                                                child: const Text('Delete',
+                                                    style: TextStyle(
+                                                        color: Colors.red)),
                                               ),
                                             ],
                                           ),
@@ -465,7 +545,8 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
                       ],
                     ),
                     const SizedBox(height: 8),
-                    if (gathering['description'] != null && gathering['description'].toString().isNotEmpty)
+                    if (gathering['description'] != null &&
+                        gathering['description'].toString().isNotEmpty)
                       Column(
                         children: [
                           Text(
@@ -473,6 +554,7 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
                             style: TextStyle(
                               color: mutedForeground,
                               fontSize: 14,
+                              letterSpacing: -0.3,
                             ),
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
@@ -485,6 +567,7 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
                       style: TextStyle(
                         color: mutedForeground,
                         fontSize: 14,
+                        letterSpacing: -0.3,
                         fontStyle: FontStyle.italic,
                       ),
                     ),
@@ -502,6 +585,7 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
                           style: TextStyle(
                             color: mutedForeground,
                             fontSize: 14,
+                            letterSpacing: -0.3,
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -516,6 +600,7 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
                           style: TextStyle(
                             color: mutedForeground,
                             fontSize: 14,
+                            letterSpacing: -0.3,
                           ),
                         ),
                       ],
@@ -524,34 +609,54 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
                             color: isUpcoming
-                                ? (isActive ? Colors.green.withOpacity(0.2) : Colors.blue.withOpacity(0.2))
-                                : Colors.grey.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(16),
+                                ? (isActive
+                                    ? Colors.green.withOpacity(0.1)
+                                    : Colors.blue.withOpacity(0.1))
+                                : Colors.grey.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                              color: isUpcoming
+                                  ? (isActive
+                                      ? Colors.green.withOpacity(0.2)
+                                      : Colors.blue.withOpacity(0.2))
+                                  : Colors.grey.withOpacity(0.2),
+                            ),
                           ),
                           child: Text(
-                            isUpcoming ? (isActive ? 'Active Now' : 'Upcoming') : 'Completed',
+                            isUpcoming
+                                ? (isActive ? 'Active Now' : 'Upcoming')
+                                : 'Completed',
                             style: TextStyle(
-                              color: isUpcoming ? (isActive ? Colors.green : Colors.blue) : Colors.grey,
+                              color: isUpcoming
+                                  ? (isActive ? Colors.green : Colors.blue)
+                                  : Colors.grey,
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
+                              letterSpacing: -0.3,
                             ),
                           ),
                         ),
                         const Spacer(),
                         if (isUpcoming && isActive)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: Colors.orange.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(16),
+                              color: Colors.orange.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                color: Colors.orange.withOpacity(0.2),
+                              ),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.group, size: 14, color: Colors.orange),
+                                Icon(Icons.group,
+                                    size: 14, color: Colors.orange),
                                 const SizedBox(width: 4),
                                 Text(
                                   '$attendeesCount attending',
@@ -559,6 +664,7 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
                                     color: Colors.orange,
                                     fontSize: 12,
                                     fontWeight: FontWeight.w500,
+                                    letterSpacing: -0.3,
                                   ),
                                 ),
                               ],
@@ -589,7 +695,8 @@ class GatheringDetailScreen extends StatefulWidget {
   final Gathering gathering;
   final IO.Socket? socket;
 
-  const GatheringDetailScreen({super.key, required this.gathering, this.socket});
+  const GatheringDetailScreen(
+      {super.key, required this.gathering, this.socket});
 
   @override
   State<GatheringDetailScreen> createState() => _GatheringDetailScreenState();
@@ -629,7 +736,8 @@ class _GatheringDetailScreenState extends State<GatheringDetailScreen>
       duration: const Duration(milliseconds: 500),
       vsync: this,
     );
-    _animation = CurvedAnimation(parent: _animationController!, curve: Curves.easeInOut);
+    _animation =
+        CurvedAnimation(parent: _animationController!, curve: Curves.easeInOut);
     _animationController!.forward();
   }
 
@@ -668,7 +776,8 @@ class _GatheringDetailScreenState extends State<GatheringDetailScreen>
     // Generate icons for attendees
     for (var attendee in _attendees) {
       if (!_userIcons.containsKey(attendee.userId)) {
-        _userIcons[attendee.userId] = await _createDotIcon(_generateColor(attendee.userId));
+        _userIcons[attendee.userId] =
+            await _createDotIcon(_generateColor(attendee.userId));
       }
     }
     setState(() {});
@@ -712,7 +821,9 @@ class _GatheringDetailScreenState extends State<GatheringDetailScreen>
 
       if (gatheringId == widget.gathering.id && attendees != null) {
         setState(() {
-          _attendees = attendees.map((a) => Attendee.fromJson(a as Map<String, dynamic>)).toList();
+          _attendees = attendees
+              .map((a) => Attendee.fromJson(a as Map<String, dynamic>))
+              .toList();
           _generateUserIcons(); // Update icons for new attendees
         });
       }
@@ -722,7 +833,8 @@ class _GatheringDetailScreenState extends State<GatheringDetailScreen>
   void _checkGatheringStatus() {
     final now = DateTime.now();
     setState(() {
-      _isGatheringActive = now.isAfter(widget.gathering.startTime) && now.isBefore(widget.gathering.endTime);
+      _isGatheringActive = now.isAfter(widget.gathering.startTime) &&
+          now.isBefore(widget.gathering.endTime);
     });
     if (_isGatheringActive && _hasMarkedAttendance) {
       _startLocationUpdates();
@@ -731,7 +843,8 @@ class _GatheringDetailScreenState extends State<GatheringDetailScreen>
 
   Future<void> _getUserLocation() async {
     try {
-      final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.medium);
+      final position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.medium);
       setState(() {
         _userLocation = LatLng(position.latitude, position.longitude);
       });
@@ -761,14 +874,16 @@ class _GatheringDetailScreenState extends State<GatheringDetailScreen>
 
   void _startLocationUpdates() {
     _locationUpdateTimer?.cancel();
-    _locationUpdateTimer = Timer.periodic(const Duration(seconds: 10), (timer) async {
+    _locationUpdateTimer =
+        Timer.periodic(const Duration(seconds: 10), (timer) async {
       if (!_isGatheringActive || !_hasMarkedAttendance) {
         timer.cancel();
         return;
       }
 
       try {
-        final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.medium);
+        final position = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.medium);
         final newLocation = LatLng(position.latitude, position.longitude);
         final distance = Geolocator.distanceBetween(
           newLocation.latitude,
@@ -873,7 +988,8 @@ class _GatheringDetailScreenState extends State<GatheringDetailScreen>
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final foreground = isDarkMode ? Colors.white : const Color(0xFF09090B);
-    final mutedForeground = isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+    final mutedForeground =
+        isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
     final background = isDarkMode ? const Color(0xFF09090B) : Colors.white;
     final gatheringLocation = LatLng(
       widget.gathering.location.latitude,
@@ -919,7 +1035,9 @@ class _GatheringDetailScreenState extends State<GatheringDetailScreen>
                 );
               },
               markers: {
-                if (_userLocation != null && _isWithinRadius && _hasMarkedAttendance)
+                if (_userLocation != null &&
+                    _isWithinRadius &&
+                    _hasMarkedAttendance)
                   Marker(
                     markerId: const MarkerId('user_location'),
                     position: _userLocation!,
@@ -929,8 +1047,10 @@ class _GatheringDetailScreenState extends State<GatheringDetailScreen>
                 ..._attendees.map(
                   (attendee) => Marker(
                     markerId: MarkerId(attendee.userId),
-                    position: LatLng(attendee.location.latitude, attendee.location.longitude),
-                    icon: _userIcons[attendee.userId] ?? BitmapDescriptor.defaultMarker,
+                    position: LatLng(attendee.location.latitude,
+                        attendee.location.longitude),
+                    icon: _userIcons[attendee.userId] ??
+                        BitmapDescriptor.defaultMarker,
                     infoWindow: InfoWindow(title: attendee.name),
                   ),
                 ),
@@ -987,7 +1107,8 @@ class _GatheringDetailScreenState extends State<GatheringDetailScreen>
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(Icons.calendar_today, size: 16, color: mutedForeground),
+                      Icon(Icons.calendar_today,
+                          size: 16, color: mutedForeground),
                       const SizedBox(width: 4),
                       Text(
                         'Starts: ${DateFormat('MMM dd, yyyy - hh:mm a').format(widget.gathering.startTime)}',
@@ -1020,11 +1141,16 @@ class _GatheringDetailScreenState extends State<GatheringDetailScreen>
                   const SizedBox(height: 16),
                   Center(
                     child: ElevatedButton(
-                      onPressed: _isGatheringActive && _isWithinRadius && !_hasMarkedAttendance ? _markAttendance : null,
+                      onPressed: _isGatheringActive &&
+                              _isWithinRadius &&
+                              !_hasMarkedAttendance
+                          ? _markAttendance
+                          : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.indigo,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 32, vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -1032,7 +1158,8 @@ class _GatheringDetailScreenState extends State<GatheringDetailScreen>
                       ),
                       child: const Text(
                         "I'm Here",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w600),
                       ),
                     ),
                   ),
@@ -1084,21 +1211,31 @@ class Gathering {
       id: json['_id']?.toString() ?? '',
       title: json['title']?.toString() ?? 'Untitled',
       description: json['description']?.toString(),
-      location: Location.fromJson(json['location'] as Map<String, dynamic>? ?? {}),
+      location:
+          Location.fromJson(json['location'] as Map<String, dynamic>? ?? {}),
       radius: int.tryParse(json['radius']?.toString() ?? '') ?? 100,
-      startTime: DateTime.tryParse(json['startTime']?.toString() ?? '')?.toLocal() ?? DateTime.now(),
-      endTime: DateTime.tryParse(json['endTime']?.toString() ?? '')?.toLocal() ?? DateTime.now(),
-      attendees: (json['attendees'] as List<dynamic>?)?.map((a) => Attendee.fromJson(a as Map<String, dynamic>)).toList() ?? [],
+      startTime:
+          DateTime.tryParse(json['startTime']?.toString() ?? '')?.toLocal() ??
+              DateTime.now(),
+      endTime:
+          DateTime.tryParse(json['endTime']?.toString() ?? '')?.toLocal() ??
+              DateTime.now(),
+      attendees: (json['attendees'] as List<dynamic>?)
+              ?.map((a) => Attendee.fromJson(a as Map<String, dynamic>))
+              .toList() ??
+          [],
       creatorId: (json['creatorId'] is Map
-          ? json['creatorId']['_id']?.toString()
-          : (json['creatorId'] is List && json['creatorId'].isNotEmpty
-              ? json['creatorId'][0]['_id']?.toString()
-              : json['creatorId']?.toString())) ?? '',
+              ? json['creatorId']['_id']?.toString()
+              : (json['creatorId'] is List && json['creatorId'].isNotEmpty
+                  ? json['creatorId'][0]['_id']?.toString()
+                  : json['creatorId']?.toString())) ??
+          '',
       creatorName: (json['creatorId'] is Map
-          ? json['creatorId']['name']?.toString()
-          : (json['creatorId'] is List && json['creatorId'].isNotEmpty
-              ? json['creatorId'][0]['name']?.toString()
-              : json['creatorId']?.toString())) ?? 'Unknown',
+              ? json['creatorId']['name']?.toString()
+              : (json['creatorId'] is List && json['creatorId'].isNotEmpty
+                  ? json['creatorId'][0]['name']?.toString()
+                  : json['creatorId']?.toString())) ??
+          'Unknown',
     );
   }
 }
@@ -1134,8 +1271,11 @@ class Attendee {
     return Attendee(
       userId: json['userId']?.toString() ?? '',
       name: json['name']?.toString() ?? 'Unknown',
-      location: Location.fromJson(json['location'] as Map<String, dynamic>? ?? {}),
-      timestamp: DateTime.tryParse(json['timestamp']?.toString() ?? '')?.toLocal() ?? DateTime.now(),
+      location:
+          Location.fromJson(json['location'] as Map<String, dynamic>? ?? {}),
+      timestamp:
+          DateTime.tryParse(json['timestamp']?.toString() ?? '')?.toLocal() ??
+              DateTime.now(),
     );
   }
 }
