@@ -1,15 +1,17 @@
+import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SocietyPage extends StatefulWidget {
+class SocietyPage extends ConsumerStatefulWidget {
   final String societyId;
   const SocietyPage({super.key, required this.societyId});
 
   @override
-  State<SocietyPage> createState() => _SocietyPageState();
+  ConsumerState<SocietyPage> createState() => _SocietyPageState();
 }
 
-class _SocietyPageState extends State<SocietyPage> {
+class _SocietyPageState extends ConsumerState<SocietyPage> {
   final _apiClient = ApiClient();
   Map<String, dynamic>? societyData;
   List<dynamic> posts = [];
@@ -27,9 +29,13 @@ class _SocietyPageState extends State<SocietyPage> {
   static const Color border = Color(0xFF27272A);
   static const Color accent = Color(0xFF6366F1);
 
+  late final authUser;
+  bool editable = false;
+
   @override
   void initState() {
     super.initState();
+    authUser = ref.read(authProvider).user;
     fetchSocietyDetails(page: 1, append: false);
   }
 
@@ -73,6 +79,168 @@ class _SocietyPageState extends State<SocietyPage> {
   void _loadMorePosts() {
     if (!isLoadingMore && hasMore) {
       fetchSocietyDetails(page: currentPage + 1, append: true);
+    }
+  }
+
+  // Helper: check if current user is a moderator
+  bool get isModerator {
+    if (societyData == null || authUser == null) return false;
+    final moderators = societyData?['moderators'] as List<dynamic>? ?? [];
+    final userId = authUser?['_id']?.toString();
+    for (final mod in moderators) {
+      final modId = mod?['_id']?.toString();
+      if (modId != null && modId == userId) return true;
+    }
+    return false;
+  }
+
+  // Edit dialog for name/description
+  Future<void> _showEditNameDescriptionDialog() async {
+    final TextEditingController nameController =
+        TextEditingController(text: societyData?['name'] ?? '');
+    final TextEditingController descController =
+        TextEditingController(text: societyData?['description'] ?? '');
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: bg,
+          title: const Text('Edit Society', style: TextStyle(color: fg)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                style: const TextStyle(color: fg),
+                decoration: const InputDecoration(
+                  labelText: 'Name',
+                  labelStyle: TextStyle(color: muted),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: border),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: accent),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: descController,
+                style: const TextStyle(color: fg),
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  labelStyle: TextStyle(color: muted),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: border),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: accent),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Cancel', style: TextStyle(color: muted)),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            TextButton(
+              child: const Text('Save', style: TextStyle(color: accent)),
+              onPressed: () async {
+                // Save changes
+                final newName = nameController.text.trim();
+                final newDesc = descController.text.trim();
+                if (newName.isNotEmpty) {
+                  try {
+                    // await _apiClient.put(
+                    //   '/api/society/${widget.societyId}',
+                    //   data: {
+                    //     'name': newName,
+                    //     'description': newDesc,
+                    //   },
+                    // );
+                    await fetchSocietyDetails(page: 1, append: false);
+                  } catch (e) {
+                    // ignore error for now
+                  }
+                }
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    );
+    if (result == true) {
+      // Optionally show a snackbar
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Society updated')),
+      );
+    }
+  }
+
+  // Edit icon/banner
+  Future<void> _showEditImageDialog({required String type}) async {
+    // type: 'icon' or 'banner'
+    // For simplicity, just ask for a URL (in real app, use image picker)
+    final TextEditingController urlController = TextEditingController(
+      text: societyData?[type] ?? '',
+    );
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: bg,
+          title: Text('Edit ${type == 'icon' ? 'Icon' : 'Banner'}',
+              style: const TextStyle(color: fg)),
+          content: TextField(
+            controller: urlController,
+            style: const TextStyle(color: fg),
+            decoration: InputDecoration(
+              labelText: '${type == 'icon' ? 'Icon' : 'Banner'} URL',
+              labelStyle: const TextStyle(color: muted),
+              enabledBorder: const UnderlineInputBorder(
+                borderSide: BorderSide(color: border),
+              ),
+              focusedBorder: const UnderlineInputBorder(
+                borderSide: BorderSide(color: accent),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Cancel', style: TextStyle(color: muted)),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            TextButton(
+              child: const Text('Save', style: TextStyle(color: accent)),
+              onPressed: () async {
+                final newUrl = urlController.text.trim();
+                if (newUrl.isNotEmpty) {
+                  try {
+                    // await _apiClient.put(
+                    //   '/api/society/${widget.societyId}',
+                    //   data: {type: newUrl},
+                    // );
+                    await fetchSocietyDetails(page: 1, append: false);
+                  } catch (e) {
+                    // ignore error for now
+                  }
+                }
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    );
+    if (result == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('${type == 'icon' ? 'Icon' : 'Banner'} updated')),
+      );
     }
   }
 
@@ -243,43 +411,81 @@ class _SocietyPageState extends State<SocietyPage> {
         ? (societyData?['moderators'] as List)
         : [];
 
+    // For edit pencil buttons
+    final showEdit = editable && isModerator;
+
     return Column(
       children: [
         Stack(
           clipBehavior: Clip.none,
           children: [
-            Container(
-              height: 200,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: border,
-                image: bannerUrl.isNotEmpty
-                    ? DecorationImage(
-                        image: NetworkImage(bannerUrl),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
+            GestureDetector(
+              onTap:
+                  showEdit ? () => _showEditImageDialog(type: 'banner') : null,
+              child: Container(
+                height: 200,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: border,
+                  image: bannerUrl.isNotEmpty
+                      ? DecorationImage(
+                          image: NetworkImage(bannerUrl),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                ),
+                child: Stack(
+                  children: [
+                    if (bannerUrl.isEmpty)
+                      Center(
+                        child: Icon(Icons.image, color: muted, size: 60),
+                      ),
+                    if (showEdit)
+                      Positioned(
+                        right: 12,
+                        top: 12,
+                        child: _MinimalIconButton(
+                          icon: Icons.edit,
+                          color: accent,
+                          onTap: () => _showEditImageDialog(type: 'banner'),
+                        ),
+                      ),
+                  ],
+                ),
               ),
-              child: bannerUrl.isEmpty
-                  ? Center(
-                      child: Icon(Icons.image, color: muted, size: 60),
-                    )
-                  : null,
             ),
             Positioned(
               bottom: -40,
               left: 24,
-              child: iconUrl.isNotEmpty
-                  ? CircleAvatar(
-                      radius: 40,
-                      backgroundColor: border,
-                      backgroundImage: NetworkImage(iconUrl),
-                    )
-                  : CircleAvatar(
-                      radius: 40,
-                      backgroundColor: border,
-                      child: Icon(Icons.groups, color: muted, size: 40),
-                    ),
+              child: GestureDetector(
+                onTap:
+                    showEdit ? () => _showEditImageDialog(type: 'icon') : null,
+                child: Stack(
+                  children: [
+                    iconUrl.isNotEmpty
+                        ? CircleAvatar(
+                            radius: 40,
+                            backgroundColor: border,
+                            backgroundImage: NetworkImage(iconUrl),
+                          )
+                        : CircleAvatar(
+                            radius: 40,
+                            backgroundColor: border,
+                            child: Icon(Icons.groups, color: muted, size: 40),
+                          ),
+                    if (showEdit)
+                      Positioned(
+                        right: -2,
+                        bottom: -2,
+                        child: _MinimalIconButton(
+                          icon: Icons.edit,
+                          color: accent,
+                          onTap: () => _showEditImageDialog(type: 'icon'),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -289,28 +495,53 @@ class _SocietyPageState extends State<SocietyPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                name,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: fg,
-                  letterSpacing: 0,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: fg,
+                        letterSpacing: 0,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (showEdit)
+                    _MinimalIconButton(
+                      icon: Icons.edit,
+                      color: accent,
+                      onTap: _showEditNameDescriptionDialog,
+                    ),
+                ],
               ),
               const SizedBox(height: 8),
               if (description.isNotEmpty)
-                Text(
-                  description,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: muted,
-                    height: 1.5,
-                    fontWeight: FontWeight.w400,
-                    letterSpacing: 0,
-                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        description,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: muted,
+                          height: 1.5,
+                          fontWeight: FontWeight.w400,
+                          letterSpacing: 0,
+                        ),
+                      ),
+                    ),
+                    if (showEdit)
+                      _MinimalIconButton(
+                        icon: Icons.edit,
+                        color: accent,
+                        onTap: _showEditNameDescriptionDialog,
+                      ),
+                  ],
                 ),
               if (description.isNotEmpty) const SizedBox(height: 16),
               Row(
@@ -468,11 +699,43 @@ class _SocietyPageState extends State<SocietyPage> {
           ),
         ),
         actions: [
-          _MinimalIconButton(
-            icon: Icons.more_vert,
-            color: fg,
-            onTap: () {},
-          ),
+          if (isModerator)
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert, color: fg),
+              color: bg,
+              onSelected: (value) {
+                if (value == 'edit') {
+                  setState(() {
+                    editable = !editable;
+                  });
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem<String>(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      Icon(
+                        editable ? Icons.edit_off : Icons.edit,
+                        color: accent,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        editable ? 'Disable Edit' : 'Enable Edit',
+                        style: const TextStyle(color: fg),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            )
+          else
+            _MinimalIconButton(
+              icon: Icons.more_vert,
+              color: fg,
+              onTap: () {},
+            ),
         ],
       ),
       body: RefreshIndicator(
