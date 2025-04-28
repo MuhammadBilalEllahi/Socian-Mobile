@@ -1,6 +1,7 @@
 import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'widgets/EditAnswer.dart';
 
 class AnswerView extends StatefulWidget {
   final String content;
@@ -20,6 +21,7 @@ class AnswerView extends StatefulWidget {
 class _AnswerViewState extends State<AnswerView> {
   final _commentTextController = TextEditingController();
   final _replyTextController = TextEditingController();
+  final _editAnswerController = TextEditingController();
   final _apiClient = ApiClient();
   List<dynamic> comments = [];
   bool isLoading = false;
@@ -37,6 +39,13 @@ class _AnswerViewState extends State<AnswerView> {
   // For storing replies per commentId
   Map<String, List<dynamic>> commentReplies = {};
   Map<String, bool> commentRepliesLoading = {};
+
+  // For edit/delete
+  bool isEditingAnswer = false;
+  bool isDeletingAnswer = false;
+  bool showEditDialog = false;
+  bool showDeleteDialog = false;
+  String? currentUserId; // Set after fetching answerData
 
   @override
   void initState() {
@@ -130,11 +139,18 @@ class _AnswerViewState extends State<AnswerView> {
           downVotes = response['downvotes'] ?? 0;
           userVoteType = null;
         }
+        // Set currentUserId for edit/delete check
+        String? userId;
+        if (response['answeredByUser'] is Map &&
+            response['answeredByUser']['_id'] != null) {
+          userId = response['answeredByUser']['_id'];
+        }
         setState(() {
           answerData = response;
           answerUpVotes = upVotes;
           answerDownVotes = downVotes;
           userAnswerVoteType = userVoteType;
+          currentUserId = userId;
         });
       }
     } catch (e) {}
@@ -392,10 +408,97 @@ class _AnswerViewState extends State<AnswerView> {
     }
   }
 
+  Future<void> _editAnswer(String editedContent, String userIdRef) async {
+    if (isEditingAnswer) return;
+    setState(() {
+      isEditingAnswer = true;
+    });
+    try {
+      final userIdRef = currentUserId;
+      final response = await _apiClient.post('/api/discussion/answer/edit', {
+        'answerId': widget.answerId,
+        'editedContent': editedContent,
+        'userIdRef': userIdRef,
+      });
+      if (response is Map && response['data'] != null) {
+        setState(() {
+          answerData = response['data'];
+          showEditDialog = false;
+        });
+        await _fetchAnswerData();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Answer edited successfully')),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(response['message'] ?? 'Failed to edit answer')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to edit answer: $e')),
+        );
+      }
+    }
+    setState(() {
+      isEditingAnswer = false;
+    });
+  }
+
+  Future<void> _deleteAnswer() async {
+    if (isDeletingAnswer) return;
+    setState(() {
+      isDeletingAnswer = true;
+    });
+    try {
+      final userIdRef = currentUserId;
+      final response = await _apiClient.post('/api/discussion/answer/delete', {
+        'answerId': widget.answerId,
+        'userIdRef': userIdRef,
+      });
+      if (response is Map &&
+          response['message'] == 'Answer deleted successfully') {
+        setState(() {
+          showDeleteDialog = false;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Answer deleted successfully')),
+          );
+          Navigator.of(context).pop(); // Go back after deletion
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content:
+                    Text(response['message'] ?? 'Failed to delete answer')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete answer: $e')),
+        );
+      }
+    }
+    setState(() {
+      isDeletingAnswer = false;
+    });
+  }
+
   @override
   void dispose() {
     _commentTextController.dispose();
     _replyTextController.dispose();
+    _editAnswerController.dispose();
     super.dispose();
   }
 
@@ -698,12 +801,19 @@ class _AnswerViewState extends State<AnswerView> {
     final name = user['name'] ?? 'Unknown';
     final username = user['username'] ?? '';
     final content = answer['content'] ?? '';
+    final userId = user['_id'] ?? '';
     // Use local state for upvotes/downvotes/userVoteType
     final upvotes = answerUpVotes;
     final downvotes = answerDownVotes;
     final isApproved = answer['isApproved'] == true;
     final isCorrect = answer['isCorrect'] == true;
     final answeredAt = answer['answeredAt']?.toString();
+    final isDeleted = answer['isDeleted'] == true;
+    final isEdited = answer['isEdited'] == true;
+
+    // Check if current user is the answer owner
+    final bool canEditOrDelete =
+        currentUserId != null && userId == currentUserId;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 16),
@@ -791,26 +901,93 @@ class _AnswerViewState extends State<AnswerView> {
                     ),
                   ),
                 ),
+              if (canEditOrDelete && !isDeleted)
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert, color: Color(0xFF71717A)),
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      _editAnswerController.text = content;
+                      setState(() {
+                        showEditDialog = true;
+                      });
+                    } else if (value == 'delete') {
+                      setState(() {
+                        showDeleteDialog = true;
+                      });
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit, size: 18, color: Color(0xFF71717A)),
+                          SizedBox(width: 8),
+                          Text('Edit'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete, size: 18, color: Colors.red),
+                          SizedBox(width: 8),
+                          Text('Delete'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
             ],
           ),
           const SizedBox(height: 18),
-          Text(
-            content,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Color(0xFF09090B),
-              fontWeight: FontWeight.w400,
-              letterSpacing: -0.1,
-              height: 1.5,
+          if (isDeleted)
+            const Text(
+              'This answer has been deleted.',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.red,
+                fontWeight: FontWeight.w500,
+                letterSpacing: -0.1,
+                height: 1.5,
+              ),
+            )
+          else
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  content,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF09090B),
+                    fontWeight: FontWeight.w400,
+                    letterSpacing: -0.1,
+                    height: 1.5,
+                  ),
+                ),
+                if (isEdited)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 4),
+                    child: Text(
+                      '(edited)',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF71717A),
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+              ],
             ),
-          ),
           const SizedBox(height: 20),
           Row(
             children: [
               // Upvote button
               InkWell(
                 borderRadius: BorderRadius.circular(6),
-                onTap: isVoting
+                onTap: isVoting || isDeleted
                     ? null
                     : () => _vote(
                         userAnswerVoteType == 'upvote' ? 'upvote' : 'upvote'),
@@ -853,7 +1030,7 @@ class _AnswerViewState extends State<AnswerView> {
               const SizedBox(width: 10),
               InkWell(
                 borderRadius: BorderRadius.circular(6),
-                onTap: isVoting
+                onTap: isVoting || isDeleted
                     ? null
                     : () => _vote(userAnswerVoteType == 'downvote'
                         ? 'downvote'
@@ -914,8 +1091,55 @@ class _AnswerViewState extends State<AnswerView> {
                 ),
             ],
           ),
+          // Edit dialog
+          if (showEditDialog)
+            EditAnswer(
+              initialContent: content,
+              isLoading: isEditingAnswer,
+              onSave: (edited, userIdRef) => _editAnswer(edited, userIdRef),
+              onCancel: () => setState(() => showEditDialog = false),
+            ),
+          // Delete dialog
+          if (showDeleteDialog) _buildDeleteDialog(context),
         ],
       ),
+    );
+  }
+
+  Widget _buildDeleteDialog(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Delete Answer'),
+      content: const Text(
+          'Are you sure you want to delete this answer? This cannot be undone.'),
+      actions: [
+        TextButton(
+          onPressed: isDeletingAnswer
+              ? null
+              : () {
+                  setState(() {
+                    showDeleteDialog = false;
+                  });
+                },
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+            foregroundColor: Colors.white,
+          ),
+          onPressed: isDeletingAnswer ? null : _deleteAnswer,
+          child: isDeletingAnswer
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : const Text('Delete'),
+        ),
+      ],
     );
   }
 
