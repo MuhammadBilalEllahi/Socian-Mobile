@@ -54,41 +54,31 @@ class _MapsLookState extends State<MapsLook> {
       body: _currentPosition == null
           ? const Center(child: CircularProgressIndicator())
           : FlutterMap(
-        options: MapOptions(
-          initialCenter: _currentPosition ?? const LatLng(0.0, 0.0),
-          minZoom: 13.0,
-        ),
-        children: [
-          TileLayer(
-            urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-            // subdomains: ['a', 'b', 'c'],
-          ),
-          MarkerLayer(
-            markers: [
-              Marker(
-                point: _currentPosition!,
-                width: 80.0,
-                height: 80.0,
-                child: const Icon(Icons.location_pin, size: 40,color: Colors.red,),
+              options: MapOptions(
+                initialCenter: _currentPosition ?? const LatLng(0.0, 0.0),
+                minZoom: 13.0,
               ),
-            ],
-          ),
-        ],
-      ),
+              children: [
+                TileLayer(
+                  urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                  // subdomains: ['a', 'b', 'c'],
+                ),
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: _currentPosition!,
+                      width: 80.0,
+                      height: 80.0,
+                      child: const Icon(
+                        Icons.location_pin,
+                        size: 40,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
