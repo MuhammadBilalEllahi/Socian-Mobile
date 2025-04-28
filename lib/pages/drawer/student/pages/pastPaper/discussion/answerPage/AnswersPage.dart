@@ -1,6 +1,11 @@
-import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/discussion/answerPage/PastPaperInfoCard.dart';
+import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/discussion/answerPage/components/PastPaperInfoCard.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:flutter/material.dart';
+
+// Import for AddAnswer bottom sheet
+import 'components/AddAnswer.dart';
+import 'widgets/PastPapersHeader.dart';
+import 'widgets/AnswersList.dart';
 
 class AnswersPage extends StatefulWidget {
   const AnswersPage({super.key, required});
@@ -110,384 +115,85 @@ class _AnswersPageState extends State<AnswersPage> {
     final answerBackground =
         isDarkMode ? const Color(0xFF27272A) : const Color(0xFFF4F4F5);
 
+    // Get the current paper's toBeDiscussedId (paper['_id'])
+    String? toBeDiscussedId =
+        (papers.isNotEmpty && currentIndex < papers.length)
+            ? papers[currentIndex]['_id']
+            : null;
+
     return Scaffold(
+      backgroundColor: background,
+      appBar: AppBar(
         backgroundColor: background,
-        appBar: AppBar(
-          backgroundColor: background,
-          elevation: 0,
-          title: Text(
-            'Answers',
-            style: TextStyle(
-              color: foreground,
-              fontWeight: FontWeight.w600,
-              fontSize: 18,
-            ),
+        elevation: 0,
+        title: Text(
+          'Answers',
+          style: TextStyle(
+            color: foreground,
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
           ),
-          iconTheme: IconThemeData(color: foreground),
-          centerTitle: true,
         ),
-        body: Column(children: [
-          // Past Papers List Section
-          Container(
-            padding:
-                const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-            decoration: BoxDecoration(
-              color: background,
-              border: Border(
-                bottom: BorderSide(
-                  color: border,
-                  width: 1,
-                ),
+        iconTheme: IconThemeData(color: foreground),
+        centerTitle: true,
+      ),
+      body: Column(children: [
+        // Past Papers List Section
+        PastPapersHeader(
+          papers: papers,
+          pageController: _pageController,
+          onPageChanged: (index) => loadAnswers(index),
+        ),
+        // Answers Section
+        Expanded(
+          child: AnswersList(
+            answers: answers,
+            isLoading: isLoading,
+            primaryColor: primaryColor,
+            mutedForeground: mutedForeground,
+            cardBackground: cardBackground,
+            border: border,
+            foreground: foreground,
+            answerBackground: answerBackground,
+            moreCount: moreCount,
+            showFull: showFull,
+            onShowMoreToggle: (questionIndex, show) {
+              setState(() {
+                showFull = show;
+              });
+            },
+          ),
+        ),
+      ]),
+      floatingActionButton: toBeDiscussedId == null
+          ? null
+          : Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: mutedForeground),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: FloatingActionButton(
+                backgroundColor: background,
+                elevation: 2,
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => DraggableScrollableSheet(
+                      initialChildSize: 0.7,
+                      minChildSize: 0.5,
+                      maxChildSize: 0.9,
+                      expand: false,
+                      builder: (context, scrollController) => AddAnswer(
+                        toBeDiscussedId: toBeDiscussedId,
+                      ),
+                    ),
+                  );
+                },
+                child: Icon(Icons.add, color: foreground),
               ),
             ),
-            child: SizedBox(
-              height: 80,
-              child: papers.isEmpty
-                  ? Center(
-                      child: Text(
-                        'No papers available',
-                        style: TextStyle(
-                          color: mutedForeground,
-                          fontSize: 14,
-                        ),
-                      ),
-                    )
-                  : PageView.builder(
-                      controller: _pageController,
-                      itemCount: papers.length,
-                      physics: const BouncingScrollPhysics(),
-                      onPageChanged: (index) {
-                        loadAnswers(index);
-                      },
-                      itemBuilder: (context, index) {
-                        return PastPaperInfoCard(
-                          paper: papers[index],
-                          isFirst: index == 0,
-                          isLast: index == papers.length - 1,
-                          onPaperSelected: (url, name, year) {
-                            _pageController.animateToPage(
-                              index,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          },
-                          onChatBoxToggle: () {},
-                        );
-                      },
-                    ),
-            ),
-          ),
-          // Answers Section
-          Expanded(
-              child: isLoading
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CircularProgressIndicator(
-                            color: primaryColor,
-                            strokeWidth: 2,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Loading answers...',
-                            style: TextStyle(
-                              color: mutedForeground,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : answers.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.question_answer_outlined,
-                                size: 48,
-                                color: mutedForeground,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'No answers available',
-                                style: TextStyle(
-                                  color: mutedForeground,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(16.0),
-                          itemCount: answers.length,
-                          itemBuilder: (context, index) {
-                            final question = answers[index];
-
-                            return Container(
-                                margin: const EdgeInsets.only(bottom: 24.0),
-                                decoration: BoxDecoration(
-                                  color: cardBackground,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: border,
-                                    width: 1,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: isDarkMode
-                                          ? Colors.black.withOpacity(0.2)
-                                          : Colors.grey.withOpacity(0.1),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      // Question Header
-                                      Padding(
-                                        padding: const EdgeInsets.all(16.0),
-                                        child: Text(
-                                          'Q${question['questionNumberOrAlphabet']}: ${question['questionContent']}',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                            color: foreground,
-                                            height: 1.4,
-                                          ),
-                                        ),
-                                      ),
-                                      // Answers
-                                      ListView.builder(
-                                          shrinkWrap: true,
-                                          physics:
-                                              const NeverScrollableScrollPhysics(),
-                                          itemCount: question['answers'] != null
-                                              ? ((question['answers'] as List)
-                                                              .length <
-                                                          moreCount ||
-                                                      showFull)
-                                                  ? (question['answers']
-                                                          as List)
-                                                      .length
-                                                  : moreCount
-                                              : 0,
-                                          itemBuilder: (context, index) {
-                                            final answer =
-                                                question['answers'][index];
-                                            return Container(
-                                              margin: const EdgeInsets.only(
-                                                  bottom: 8.0),
-                                              padding:
-                                                  const EdgeInsets.all(16.0),
-                                              decoration: BoxDecoration(
-                                                color: answerBackground,
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                              ),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  // Answer Content with User Avatar
-                                                  RichText(
-                                                      textAlign:
-                                                          TextAlign.start,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      maxLines: 4,
-                                                      text: TextSpan(children: [
-                                                        WidgetSpan(
-                                                            child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .only(
-                                                                  right: 4),
-                                                          child: CircleAvatar(
-                                                            radius: 12,
-                                                            backgroundImage:
-                                                                NetworkImage(
-                                                              answer['answeredByUser']
-                                                                          [
-                                                                          'profile']
-                                                                      [
-                                                                      'picture'] ??
-                                                                  'https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg',
-                                                            ),
-                                                          ),
-                                                        )),
-                                                        TextSpan(
-                                                          spellOut: true,
-                                                          text: answer[
-                                                                  'content'] ??
-                                                              '',
-                                                          style: TextStyle(
-                                                            fontSize: 14,
-                                                            color: foreground,
-                                                            height: 1.4,
-                                                          ),
-                                                        ),
-                                                      ])),
-                                                  const SizedBox(height: 12),
-                                                  // Voting and Comments Section
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Row(
-                                                        mainAxisSize:
-                                                            MainAxisSize.min,
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Icon(
-                                                            Icons.attach_file,
-                                                            size: 16,
-                                                            color:
-                                                                mutedForeground,
-                                                          ),
-                                                          const SizedBox(
-                                                              width: 4),
-                                                          Text(
-                                                            '${answer['upvotes']}',
-                                                            style: TextStyle(
-                                                              fontSize: 12,
-                                                              color:
-                                                                  mutedForeground,
-                                                            ),
-                                                          ),
-                                                          const SizedBox(
-                                                              width: 4),
-                                                          Icon(
-                                                            Icons.image,
-                                                            size: 16,
-                                                            color:
-                                                                mutedForeground,
-                                                          ),
-                                                          const SizedBox(
-                                                              width: 4),
-                                                          Text(
-                                                            '${answer['upvotes']}',
-                                                            style: TextStyle(
-                                                              fontSize: 12,
-                                                              color:
-                                                                  mutedForeground,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .end,
-                                                        children: [
-                                                          Icon(
-                                                            Icons
-                                                                .thumb_up_outlined,
-                                                            size: 16,
-                                                            color:
-                                                                mutedForeground,
-                                                          ),
-                                                          const SizedBox(
-                                                              width: 4),
-                                                          Text(
-                                                            '${answer['upvotes']}',
-                                                            style: TextStyle(
-                                                              fontSize: 12,
-                                                              color:
-                                                                  mutedForeground,
-                                                            ),
-                                                          ),
-                                                          const SizedBox(
-                                                              width: 16),
-                                                          Icon(
-                                                            Icons
-                                                                .thumb_down_outlined,
-                                                            size: 16,
-                                                            color:
-                                                                mutedForeground,
-                                                          ),
-                                                          const SizedBox(
-                                                              width: 4),
-                                                          Text(
-                                                            '${answer['downvotes']}',
-                                                            style: TextStyle(
-                                                              fontSize: 12,
-                                                              color:
-                                                                  mutedForeground,
-                                                            ),
-                                                          ),
-                                                          const SizedBox(
-                                                              width: 16),
-                                                          Icon(
-                                                            Icons
-                                                                .comment_outlined,
-                                                            size: 16,
-                                                            color:
-                                                                mutedForeground,
-                                                          ),
-                                                          const SizedBox(
-                                                              width: 4),
-                                                          Text(
-                                                            '${(answer['replies'] as List).length}',
-                                                            style: TextStyle(
-                                                              fontSize: 12,
-                                                              color:
-                                                                  mutedForeground,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  )
-                                                ],
-                                              ),
-                                            );
-                                          }),
-                                      if (question['answers'] != null &&
-                                          (question['answers'] as List).length >
-                                              moreCount)
-                                        GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              // moreCount = 10;
-                                              showFull = !showFull;
-                                            });
-                                          },
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 16.0,
-                                                vertical: 8.0),
-                                            child: Row(
-                                              children: [
-                                                Text(
-                                                  " ${showFull ? '-' : '+'} ${(question['answers'] as List).length - moreCount} answers",
-                                                  style: TextStyle(
-                                                    color: mutedForeground,
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 4),
-                                                Icon(
-                                                  Icons.arrow_forward_ios,
-                                                  size: 12,
-                                                  color: mutedForeground,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        )
-                                    ]));
-                          })),
-        ]));
+    );
   }
 }

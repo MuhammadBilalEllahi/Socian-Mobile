@@ -1,5 +1,5 @@
 import 'package:beyondtheclass/core/utils/constants.dart';
-import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/discussion/answerPage/AddAnswer.dart';
+import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/discussion/answerPage/components/AddAnswer.dart';
 import 'package:flutter/material.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
 
@@ -559,31 +559,6 @@ class _CommentsState extends State<Comments> {
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
-                Container(
-                  // padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: mutedForeground),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: IconButton(
-                      onPressed: () {
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          builder: (context) => DraggableScrollableSheet(
-                            initialChildSize: 0.7,
-                            minChildSize: 0.5,
-                            maxChildSize: 0.9,
-                            expand: false,
-                            builder: (context, scrollController) => AddAnswer(
-                              toBeDiscussedId: widget.toBeDiscussedId,
-                            ),
-                          ),
-                        );
-                      },
-                      icon: Icon(Icons.add, color: foreground)),
-                ),
                 Expanded(
                   child: TextField(
                     controller: _commentController,
