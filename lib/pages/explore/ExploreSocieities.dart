@@ -108,9 +108,9 @@ class _ExploreSocietiesState extends ConsumerState<ExploreSocieties> {
       ...state.subscribedSocieties,
       ...state.publicSocieties,
       ...state.otherSocieties,
-      ...state.universitiesSocieties,
-      ...state.universitySocieties,
-      ...state.campusSocieties,
+      ...state.universitiesSocieties.items,
+      ...state.universitySocieties.items,
+      ...state.campusSocieties.items,
     ];
 
     // Filtering logic for search and dropdowns
@@ -204,9 +204,9 @@ class _ExploreSocietiesState extends ConsumerState<ExploreSocieties> {
                           ),
                         ),
                         HorizontalSocietiesList(
-                          societies: state.universitiesSocieties,
+                          societies: state.universitiesSocieties.items,
                           fields: ['university'],
-                          isLoading: state.isLoadingUniversities,
+                          isLoading: state.universitiesSocieties.isLoading,
                           fg: _fg,
                           cardBg: _cardBg,
                           border: _border,
@@ -214,6 +214,12 @@ class _ExploreSocietiesState extends ConsumerState<ExploreSocieties> {
                           chipBg: _chipBg,
                           chipFg: _chipFg,
                           filterFn: filterFn,
+                          hasMore: state.universitiesSocieties.hasMore,
+                          isLoadingMore:
+                              state.universitiesSocieties.isLoadingMore,
+                          onLoadMore: () => ref
+                              .read(societiesProvider.notifier)
+                              .fetchNextPage('universities'),
                         ),
                         Divider(
                           color: _border,
@@ -240,9 +246,9 @@ class _ExploreSocietiesState extends ConsumerState<ExploreSocieties> {
                           ),
                         ),
                         HorizontalSocietiesList(
-                          societies: state.universitySocieties,
+                          societies: state.universitySocieties.items,
                           fields: ['campus'],
-                          isLoading: state.isLoadingUniversity,
+                          isLoading: state.universitySocieties.isLoading,
                           fg: _fg,
                           cardBg: _cardBg,
                           border: _border,
@@ -250,6 +256,12 @@ class _ExploreSocietiesState extends ConsumerState<ExploreSocieties> {
                           chipBg: _chipBg,
                           chipFg: _chipFg,
                           filterFn: filterFn,
+                          hasMore: state.universitySocieties.hasMore,
+                          isLoadingMore:
+                              state.universitySocieties.isLoadingMore,
+                          onLoadMore: () => ref
+                              .read(societiesProvider.notifier)
+                              .fetchNextPage('university'),
                         ),
                         Divider(
                           color: _border,
@@ -270,9 +282,9 @@ class _ExploreSocietiesState extends ConsumerState<ExploreSocieties> {
                           ),
                         ),
                         HorizontalSocietiesList(
-                          societies: state.campusSocieties,
+                          societies: state.campusSocieties.items,
                           fields: ['campus-self'],
-                          isLoading: state.isLoadingCampus,
+                          isLoading: state.campusSocieties.isLoading,
                           fg: _fg,
                           cardBg: _cardBg,
                           border: _border,
@@ -280,6 +292,11 @@ class _ExploreSocietiesState extends ConsumerState<ExploreSocieties> {
                           chipBg: _chipBg,
                           chipFg: _chipFg,
                           filterFn: filterFn,
+                          hasMore: state.campusSocieties.hasMore,
+                          isLoadingMore: state.campusSocieties.isLoadingMore,
+                          onLoadMore: () => ref
+                              .read(societiesProvider.notifier)
+                              .fetchNextPage('campus'),
                         ),
                         Divider(
                           color: _border,
