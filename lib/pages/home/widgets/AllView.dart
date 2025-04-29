@@ -1,9 +1,9 @@
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/pages/drawer/student/StudentDrawer.dart';
+import 'package:beyondtheclass/pages/home/widgets/components/post/CreatePost.dart';
 import 'package:flutter/material.dart';
 import 'package:beyondtheclass/pages/home/widgets/campus/CampusPosts.dart';
 import 'package:beyondtheclass/pages/home/widgets/universities/AllUniversityPosts.dart';
-
 
 class AllView extends StatefulWidget {
   const AllView({super.key});
@@ -26,8 +26,9 @@ class _AllViewState extends State<AllView> with TickerProviderStateMixin {
     _tabController.dispose();
     super.dispose();
   }
+
   @override
-    Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -73,7 +74,8 @@ class _AllViewState extends State<AllView> with TickerProviderStateMixin {
                   child: TabBar(
                     controller: _tabController,
                     labelColor: isDark ? Colors.white : Colors.black,
-                    unselectedLabelColor: isDark ? Colors.grey[400] : Colors.grey[600],
+                    unselectedLabelColor:
+                        isDark ? Colors.grey[400] : Colors.grey[600],
                     indicatorColor: isDark ? Colors.white : Colors.black,
                     indicatorWeight: 3,
                     tabs: const [
@@ -110,7 +112,6 @@ class _AllViewState extends State<AllView> with TickerProviderStateMixin {
 
             AllUniversityPosts(),
 
-
             // Universities Tab
             // const LogoLoader(),
             // Center(
@@ -129,18 +130,12 @@ class _AllViewState extends State<AllView> with TickerProviderStateMixin {
         padding: const EdgeInsets.only(bottom: 60.0),
         child: FloatingActionButton(
           onPressed: () {
-  //           Navigator.push(
-  //             context,
-  //             MaterialPageRoute(
-  //               builder: (context) =>  const CreatePost(
-  // societies: [
-  //   {'id': '1', 'name': 'Computer Science Society'},
-  //   {'id': '2', 'name': 'Photography Club'},
-  //   // ... more societies
-  // ],),
-  //             ),
-  //           );
-         
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const CreatePost(),
+              ),
+            );
           },
           backgroundColor: isDark ? Colors.white : Colors.black,
           child: Icon(

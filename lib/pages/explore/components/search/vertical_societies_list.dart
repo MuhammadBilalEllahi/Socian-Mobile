@@ -1,5 +1,5 @@
 import 'package:beyondtheclass/pages/explore/SocietyProvider.dart';
-import 'package:beyondtheclass/pages/explore/components/vertical_shimmer_list.dart';
+import 'package:beyondtheclass/pages/explore/components/shimmer/vertical_shimmer_list.dart';
 import 'package:beyondtheclass/pages/explore/society.model.dart';
 import 'package:flutter/material.dart';
 import 'vertical_society_card.dart';

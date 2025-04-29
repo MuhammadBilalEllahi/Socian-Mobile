@@ -14,10 +14,10 @@ class SocietySelector extends StatelessWidget {
   });
 
   Map<String, dynamic>? _getSelectedSociety() {
-    if (selectedSocietyId == null) return null;
+    if (selectedSocietyId == null || societies.isEmpty) return null;
     return societies.firstWhere(
       (society) => society['id'] == selectedSocietyId,
-      orElse: () => societies.first,
+      orElse: () => {} as Map<String, dynamic>,
     );
   }
 
@@ -45,4 +45,4 @@ class SocietySelector extends StatelessWidget {
       ),
     );
   }
-} 
+}

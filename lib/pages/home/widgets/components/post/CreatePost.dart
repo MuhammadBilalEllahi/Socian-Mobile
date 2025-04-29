@@ -1,3 +1,4 @@
+import 'package:beyondtheclass/pages/explore/SocietyProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -21,11 +22,8 @@ import 'dart:async';
 enum PostType { personal, society }
 
 class CreatePost extends ConsumerStatefulWidget {
-  final List<Map<String, dynamic>> societies;
-
   const CreatePost({
     super.key,
-    required this.societies,
   });
 
   @override
@@ -37,7 +35,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
   final _titleController = TextEditingController();
   final _bodyController = TextEditingController();
   final _locationSearchController = TextEditingController();
-  
+
   PostType _postType = PostType.personal;
   String? _selectedSocietyId;
   final List<File> _mediaFiles = [];
@@ -81,7 +79,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
     try {
       final picker = ImagePicker();
       final XFile? pickedFile;
-      
+
       if (isVideo) {
         pickedFile = await picker.pickVideo(source: source);
       } else {
@@ -118,7 +116,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
       if (_isPlaying) {
         await _audioPlayer.stop();
       }
-      
+
       // Delete the previous voice note if it exists
       if (_voiceNote != null) {
         await _voiceNote!.delete();
@@ -151,8 +149,9 @@ class _CreatePostState extends ConsumerState<CreatePost> {
     try {
       if (await _audioRecorder.hasPermission()) {
         final tempDir = await getTemporaryDirectory();
-        final path = '${tempDir.path}/audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
-        
+        final path =
+            '${tempDir.path}/audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
+
         // Optimize recording configuration for better performance
         await _audioRecorder.start(
           const RecordConfig(
@@ -170,7 +169,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
           _waveform = [];
           _recordingDuration = Duration.zero;
         });
-        
+
         // Start the timer
         _recordingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
           setState(() {
@@ -179,22 +178,24 @@ class _CreatePostState extends ConsumerState<CreatePost> {
         });
 
         // Listen to amplitude changes with optimized interval
-        _audioRecorder.onAmplitudeChanged(const Duration(milliseconds: 50)).listen(
+        _audioRecorder
+            .onAmplitudeChanged(const Duration(milliseconds: 50))
+            .listen(
           (amp) {
             if (_isRecording) {
               setState(() {
                 // Normalize and scale the amplitude for better visualization
                 // amp.current is in dB, typically between -160 and 0
                 double normalizedValue = (amp.current + 160) / 160;
-                
+
                 // Apply non-linear scaling to make the waveform more dynamic
                 normalizedValue = normalizedValue * normalizedValue;
-                
+
                 // Ensure the value is between 0.1 and 1.0 for better visibility
                 normalizedValue = normalizedValue.clamp(0.1, 1.0);
-                
+
                 _waveform.add(normalizedValue);
-                
+
                 // Keep only the last 50 values to maintain a consistent width
                 if (_waveform.length > 50) {
                   _waveform.removeAt(0);
@@ -205,7 +206,8 @@ class _CreatePostState extends ConsumerState<CreatePost> {
           onError: (error) {
             print('Error listening to amplitude: $error');
           },
-          cancelOnError: true, // Stop listening on error to prevent buffer issues
+          cancelOnError:
+              true, // Stop listening on error to prevent buffer issues
         );
       }
     } catch (e) {
@@ -218,10 +220,10 @@ class _CreatePostState extends ConsumerState<CreatePost> {
   Future<void> _stopRecording() async {
     try {
       _recordingTimer?.cancel();
-      
+
       // Add a small delay before stopping to ensure all buffers are processed
       await Future.delayed(const Duration(milliseconds: 100));
-      
+
       final path = await _audioRecorder.stop();
       if (path != null) {
         setState(() {
@@ -332,7 +334,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
       if (_isPlaying) {
         await _audioPlayer.stop();
       }
-      
+
       // Delete the file if it exists
       if (_voiceNote != null) {
         await _voiceNote!.delete();
@@ -353,6 +355,19 @@ class _CreatePostState extends ConsumerState<CreatePost> {
 
   @override
   Widget build(BuildContext context) {
+    final societiesState = ref.watch(societiesProvider);
+    final societies = [
+      ...societiesState.subscribedSocieties,
+      ...societiesState.publicSocieties,
+    ];
+    // If you want to deduplicate by id:
+    final uniqueSocieties = {for (var s in societies) s.id: s}.values.toList();
+
+    // If your SocietySelector expects a list of maps:
+    final societyList = uniqueSocieties
+        .map((s) => {'id': s.id, 'name': s.name} as Map<String, dynamic>)
+        .toList();
+
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -432,7 +447,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
             ),
             if (_postType == PostType.society)
               SocietySelector(
-                societies: widget.societies,
+                societies: societyList,
                 selectedSocietyId: _selectedSocietyId,
                 onSocietySelected: (id) {
                   setState(() {
@@ -503,7 +518,8 @@ class _CreatePostState extends ConsumerState<CreatePost> {
             MediaControls(
               onImagePick: () => _pickMedia(ImageSource.gallery, false),
               onVideoPick: () => _pickMedia(ImageSource.gallery, true),
-              onVoiceNoteStart: _isVoiceSelected ? _startRecording : _selectVoice,
+              onVoiceNoteStart:
+                  _isVoiceSelected ? _startRecording : _selectVoice,
               onVoiceNoteStop: _stopRecording,
               isRecording: _isRecording,
               showMap: _showMap,
@@ -565,7 +581,8 @@ class _CreatePostState extends ConsumerState<CreatePost> {
                           position!.latitude,
                           position.longitude,
                         ),
-                        infoWindow: const InfoWindow(title: 'Selected Location'),
+                        infoWindow:
+                            const InfoWindow(title: 'Selected Location'),
                       ),
                     };
                   });
@@ -651,7 +668,7 @@ class _FullScreenMediaViewState extends State<FullScreenMediaView> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -677,7 +694,8 @@ class _FullScreenMediaViewState extends State<FullScreenMediaView> {
               alignment: Alignment.center,
               children: [
                 AspectRatio(
-                  aspectRatio: widget.videoControllers[file.path]!.value.aspectRatio,
+                  aspectRatio:
+                      widget.videoControllers[file.path]!.value.aspectRatio,
                   child: VideoPlayer(widget.videoControllers[file.path]!),
                 ),
                 IconButton(
