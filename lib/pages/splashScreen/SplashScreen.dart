@@ -131,7 +131,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       _buildInfoContainer(
                         AppAssets.splashBackground2,
                         'Student - Individuals',
-                        'Love me like you do, what are you waiting for',
+                        'Hic venit exemplum illud',
                         isDarkMode
                             ? const Color.fromARGB(255, 31, 31, 31)
                             : Colors.grey[200]!,
@@ -139,7 +139,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       _buildInfoContainer(
                         AppAssets.anime,
                         'Teacher - Individuals',
-                        'Love me like you do, what are you waiting for',
+                        'Hic venit exemplum illud',
                         isDarkMode
                             ? const Color.fromARGB(255, 31, 31, 31)
                             : Colors.grey[200]!,
@@ -147,7 +147,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       _buildInfoContainer(
                         AppAssets.profilePic,
                         'Alumni - Individuals',
-                        'Love me like you do, what are you waiting for',
+                        'Hic venit exemplum illud',
                         isDarkMode
                             ? const Color.fromARGB(255, 31, 31, 31)
                             : Colors.grey[200]!,
@@ -155,7 +155,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       _buildInfoContainer(
                         AppAssets.splashBackground2,
                         'Organization - Individuals',
-                        'Love me like you do, what are you waiting for',
+                        'Hic venit exemplum illud',
                         isDarkMode
                             ? const Color.fromARGB(255, 31, 31, 31)
                             : Colors.grey[200]!,
