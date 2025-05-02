@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
-import '../pages/commntDetailed/comment_details_page.dart';
+
 import 'gif_picker.dart';
 
 class TeacherComments extends StatefulWidget {
@@ -499,21 +499,16 @@ class _CommentItemState extends State<_CommentItem> {
     super.initState();
     final userId = _currentUserId(context);
     final userVotes = widget.comment['userVotes'];
+    // log("message1 user vote $userVotes \n $_userVote and ");
+
     if (userVotes != null && userId != null && userVotes is Map) {
       _userVote = userVotes[userId] as String?;
+      // log("message user vote $userVotes \n $_userVote and ${userVotes[userId]}");
     } else {
       _userVote = null;
     }
-    _upVotesCount = widget.comment['upvoteCount'] ??
-        widget.comment['upVotesCount'] ??
-        widget.comment['upVotes'] ??
-        widget.comment['upVotesCount'] ??
-        0;
-    _downVotesCount = widget.comment['downvoteCount'] ??
-        widget.comment['downVotesCount'] ??
-        widget.comment['downVotes'] ??
-        widget.comment['downVotesCount'] ??
-        0;
+    _upVotesCount = widget.comment['upVotesCount'] ?? 0;
+    _downVotesCount = widget.comment['downVotesCount'] ?? 0;
   }
 
   String? _currentUserId(BuildContext context) {
@@ -526,6 +521,27 @@ class _CommentItemState extends State<_CommentItem> {
     if (_isVoting) return;
     setState(() {
       _isVoting = true;
+      // Optimistic update
+      String? prevVote = _userVote;
+      if (_userVote == voteType) {
+        // Undo vote
+        if (voteType == 'upVote') _upVotesCount = (_upVotesCount ?? 1) - 1;
+        if (voteType == 'downVote') {
+          _downVotesCount = (_downVotesCount ?? 1) - 1;
+        }
+        _userVote = null;
+      } else {
+        if (voteType == 'upVote') {
+          _upVotesCount = (_upVotesCount ?? 0) + 1;
+          if (_userVote == 'downVote') {
+            _downVotesCount = (_downVotesCount ?? 1) - 1;
+          }
+        } else if (voteType == 'downVote') {
+          _downVotesCount = (_downVotesCount ?? 0) + 1;
+          if (_userVote == 'upVote') _upVotesCount = (_upVotesCount ?? 1) - 1;
+        }
+        _userVote = voteType;
+      }
     });
     final userId = _currentUserId(context);
     if (userId == null) {
@@ -547,31 +563,10 @@ class _CommentItemState extends State<_CommentItem> {
       });
       return;
     }
-    // Optimistic update
+    // Save previous state for revert
     String? prevVote = _userVote;
     int prevUp = _upVotesCount ?? 0;
     int prevDown = _downVotesCount ?? 0;
-    if (_userVote == voteType) {
-      // Undo vote
-      setState(() {
-        _userVote = null;
-        if (voteType == 'upVote') _upVotesCount = (_upVotesCount ?? 1) - 1;
-        if (voteType == 'downVote')
-          _downVotesCount = (_downVotesCount ?? 1) - 1;
-      });
-    } else {
-      setState(() {
-        _userVote = voteType;
-        if (voteType == 'upVote') {
-          _upVotesCount = (_upVotesCount ?? 0) + 1;
-          if (prevVote == 'downVote')
-            _downVotesCount = (_downVotesCount ?? 1) - 1;
-        } else if (voteType == 'downVote') {
-          _downVotesCount = (_downVotesCount ?? 0) + 1;
-          if (prevVote == 'upVote') _upVotesCount = (_upVotesCount ?? 1) - 1;
-        }
-      });
-    }
     try {
       final apiClient = ApiClient();
       final response = await apiClient.post(
@@ -582,7 +577,8 @@ class _CommentItemState extends State<_CommentItem> {
           'voteType': voteType,
         },
       );
-      if (response != null && response is Map) {
+      if (response.isNotEmpty) {
+        log("RESPONSE FROM VOTE $response");
         setState(() {
           _upVotesCount = response['upVotesCount'] ?? _upVotesCount;
           _downVotesCount = response['downVotesCount'] ?? _downVotesCount;
@@ -619,6 +615,9 @@ class _CommentItemState extends State<_CommentItem> {
     final name = user['name'] ?? 'Anonymous';
     final isDeleted = user['_id'] == null;
     final isAnonymous = widget.comment['isAnonymous'] ?? false;
+
+    log("_________________\n _____________ \n Comment " +
+        widget.comment.toString());
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -721,28 +720,36 @@ class _CommentItemState extends State<_CommentItem> {
               children: [
                 _VoteButton(
                   icon: Icons.arrow_upward_rounded,
-                  count: _upVotesCount ?? widget.comment['upvoteCount'] ?? 0,
+                  count: _upVotesCount ?? 0,
                   isDark: widget.isDark,
                   onPressed: _isVoting ? null : () => _handleVote('upVote'),
-                  isSelected: _userVote == 'upVote',
+                  isSelected: _userVote?.toLowerCase() == 'upvote',
                 ),
                 const SizedBox(width: 16),
                 _VoteButton(
                   icon: Icons.arrow_downward_rounded,
-                  count:
-                      _downVotesCount ?? widget.comment['downvoteCount'] ?? 0,
+                  count: _downVotesCount ?? 0,
                   isDark: widget.isDark,
                   onPressed: _isVoting ? null : () => _handleVote('downVote'),
-                  isSelected: _userVote == 'downVote',
+                  isSelected: _userVote?.toLowerCase() == 'downvote',
                 ),
                 const SizedBox(width: 16),
                 TextButton.icon(
                   onPressed: () {
+                    // Pass the updated comment map with latest votes and userVotes
+                    final updatedComment =
+                        Map<String, dynamic>.from(widget.comment)
+                          ..['upVotesCount'] = _upVotesCount
+                          ..['downVotesCount'] = _downVotesCount
+                          ..['userVotes'] = {
+                            ...?widget.comment['userVotes'],
+                            _currentUserId(context): _userVote
+                          };
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => CommentDetailsPage(
-                          comment: widget.comment,
+                          comment: updatedComment,
                           teacherId: widget.teacherId,
                           isDark: widget.isDark,
                         ),

@@ -10,9 +10,9 @@ class ReplyReplyItem extends StatefulWidget {
   final Function(String, String) onReaction;
   final Function(Map<String, dynamic>, String, bool) onReplyAdded;
   final Function(String, String, bool) onReplyRemoved;
-  
+
   final String? parentUsername;
-  
+
   final String feedbackCommentId;
 
   const ReplyReplyItem({
@@ -24,7 +24,7 @@ class ReplyReplyItem extends StatefulWidget {
     required this.onReplyAdded,
     required this.onReplyRemoved,
     required this.feedbackCommentId,
-    this.parentUsername, 
+    this.parentUsername,
   });
 
   @override
@@ -36,23 +36,23 @@ class _ReplyReplyItemState extends State<ReplyReplyItem> {
   String _replyTo = '';
   final List<Map<String, dynamic>> _nestedReplies = [];
 
-  void _handleReplyAdded(Map<String, dynamic> reply, String parentId, bool isReplyToReply) {
+  void _handleReplyAdded(
+      Map<String, dynamic> reply, String parentId, bool isReplyToReply) {
     // If this is a server response with a permanent ID
     if (reply['_id'] != null && !reply['_id'].toString().contains('T')) {
       setState(() {
         // Find and replace the temporary reply in the widget's reply if it matches
-        if (widget.reply['_id'].toString().contains('T') && 
+        if (widget.reply['_id'].toString().contains('T') &&
             widget.reply['comment'] == reply['comment']) {
           widget.reply.addAll(reply);
         }
-        
+
         // Also update nested replies if any
-        final index = _nestedReplies.indexWhere((r) => 
-          r['_id'] != null && 
-          r['_id'].toString().contains('T') && 
-          r['comment'] == reply['comment']
-        );
-        
+        final index = _nestedReplies.indexWhere((r) =>
+            r['_id'] != null &&
+            r['_id'].toString().contains('T') &&
+            r['comment'] == reply['comment']);
+
         if (index != -1) {
           _nestedReplies[index] = reply;
         } else {
@@ -76,12 +76,13 @@ class _ReplyReplyItemState extends State<ReplyReplyItem> {
     final user = widget.reply['user'] ?? {};
     final name = user['name'] ?? '[deleted]';
     final isDeleted = user['_id'] == null;
-    
+
     final date = widget.reply['updatedAt'] ?? widget.reply['createdAt'] ?? '';
     final replyText = widget.reply['comment'] ?? widget.reply['text'] ?? '';
     final gifUrl = widget.reply['gifUrl'] ?? '';
     final reactions = widget.reply['reactions'] as Map<String, dynamic>? ?? {};
-    final isTemporary = widget.reply['_id'] != null && widget.reply['_id'].toString().contains('T');
+    final isTemporary = widget.reply['_id'] != null &&
+        widget.reply['_id'].toString().contains('T');
 
     return Opacity(
       opacity: isTemporary ? 0.6 : 1.0,
@@ -90,7 +91,9 @@ class _ReplyReplyItemState extends State<ReplyReplyItem> {
         decoration: BoxDecoration(
           border: Border(
             left: BorderSide(
-              color: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
+              color: widget.isDark
+                  ? Colors.white.withOpacity(0.1)
+                  : Colors.black.withOpacity(0.1),
               width: 2,
             ),
           ),
@@ -109,11 +112,16 @@ class _ReplyReplyItemState extends State<ReplyReplyItem> {
                         children: [
                           CircleAvatar(
                             radius: 12,
-                            backgroundColor: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
+                            backgroundColor: widget.isDark
+                                ? Colors.white.withOpacity(0.1)
+                                : Colors.black.withOpacity(0.05),
                             child: Text(
-                              user['name'] != null ? user['name'][0].toUpperCase() : '#',
+                              user['name'] != null
+                                  ? user['name'][0].toUpperCase()
+                                  : '#',
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: widget.isDark ? Colors.white : Colors.black,
+                                color:
+                                    widget.isDark ? Colors.white : Colors.black,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -126,10 +134,14 @@ class _ReplyReplyItemState extends State<ReplyReplyItem> {
                                   name,
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     fontWeight: FontWeight.w600,
-                                    color: isDeleted ? theme.colorScheme.onSurface.withOpacity(0.5) : null,
+                                    color: isDeleted
+                                        ? theme.colorScheme.onSurface
+                                            .withOpacity(0.5)
+                                        : null,
                                   ),
                                 ),
-                                if (!isDeleted && user['isVerified'] == true) ...[
+                                if (!isDeleted &&
+                                    user['isVerified'] == true) ...[
                                   const SizedBox(width: 4),
                                   const Icon(
                                     Icons.verified_rounded,
@@ -151,7 +163,8 @@ class _ReplyReplyItemState extends State<ReplyReplyItem> {
                                   Text(
                                     DateFormatter.formatDate(date),
                                     style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.5),
                                     ),
                                   ),
                               ],
@@ -163,13 +176,18 @@ class _ReplyReplyItemState extends State<ReplyReplyItem> {
                       Row(
                         children: [
                           if (widget.reply['replyTo'] != null) ...[
-                            Text('@${widget.reply['replyTo']['name']} ',
-                              style: theme.textTheme.bodyMedium?.copyWith(color: Colors.blue.shade300),
+                            Text(
+                              '@${widget.reply['replyTo']['name']} ',
+                              style: theme.textTheme.bodyMedium
+                                  ?.copyWith(color: Colors.blue.shade300),
                             ),
                           ],
-                          Text(
-                            replyText,
-                            style: theme.textTheme.bodyMedium,
+                          Flexible(
+                            child: Text(
+                              replyText,
+                              style: theme.textTheme.bodyMedium,
+                              softWrap: true,
+                            ),
                           ),
                         ],
                       ),
@@ -183,7 +201,6 @@ class _ReplyReplyItemState extends State<ReplyReplyItem> {
                     ),
                 ],
               ),
-
               if (gifUrl != null && gifUrl.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 ClipRRect(
@@ -207,7 +224,6 @@ class _ReplyReplyItemState extends State<ReplyReplyItem> {
                   ),
                 ),
               ],
-              
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -227,30 +243,30 @@ class _ReplyReplyItemState extends State<ReplyReplyItem> {
                           count: reactions[reaction['type']] ?? 0,
                           isDark: widget.isDark,
                           isSelected: false,
-                          onPressed: () => widget.onReaction(widget.reply['_id'], reaction['type'] as String),
+                          onPressed: () => widget.onReaction(
+                              widget.reply['_id'], reaction['type'] as String),
                         ),
                     ],
                   ),
-                   
-                  if (!isDeleted) IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _showReplyBox = !_showReplyBox;
-                        _replyTo = widget.reply['user']['_id'];
-                        debugPrint('replyTo: $_replyTo ${widget.reply['user']['name']}');
-                      });
-                    },
-                    style: IconButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size.zero,
-                      iconSize: 20,
+                  if (!isDeleted)
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _showReplyBox = !_showReplyBox;
+                          _replyTo = widget.reply['user']['_id'];
+                          debugPrint(
+                              'replyTo: $_replyTo ${widget.reply['user']['name']}');
+                        });
+                      },
+                      style: IconButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: Size.zero,
+                        iconSize: 20,
+                      ),
+                      icon: const Icon(Icons.reply_outlined),
                     ),
-                    icon: const Icon(Icons.reply_outlined),
-                  ),
-               
                 ],
               ),
-
               if (_showReplyBox && !isDeleted)
                 ReplyBox(
                   parentId: widget.feedbackCommentId,
@@ -268,4 +284,4 @@ class _ReplyReplyItemState extends State<ReplyReplyItem> {
       ),
     );
   }
-} 
+}
