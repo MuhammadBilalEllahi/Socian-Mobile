@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/DepartmentPage.dart';
 import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/PastPapers.dart';
 import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/SubjectsView.dart';
 import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/discussion/DiscussionView.dart';
@@ -29,8 +32,9 @@ import 'package:beyondtheclass/pages/profile/settings/SettingsPage.dart';
 class RouteGuard {
   static Route<dynamic>? onGenerateRoute(
       RouteSettings settings, WidgetRef ref) {
-    final auth = ref.read(authProvider);
-    final userRole = auth.role;
+    final auth = ref.watch(authProvider);
+    debugPrint("The role is ${auth.user}");
+    final userRole = auth.user?['role'] ?? '';
 
     // List of routes that don't require authentication
     final publicRoutes = [
@@ -124,6 +128,7 @@ class RouteGuard {
           AppRoutes.mapMainPage: const MapsLook(),
           AppRoutes.profileMainPage: const ProfilePage(),
           AppRoutes.pastPaperScreen: const PastPapers(),
+          AppRoutes.departmentScreen: const DepartmentPage(),
           AppRoutes.subjectsInDepartmentScreen: const SubjectsView(),
           AppRoutes.discussionViewScreen: const DiscussionView(),
           AppRoutes.answersPage: const AnswersPage(),

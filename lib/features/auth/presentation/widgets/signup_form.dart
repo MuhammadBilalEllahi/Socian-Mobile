@@ -84,10 +84,22 @@ class _SignUpFormState extends State<SignUpForm> {
       if (value == null || value.isEmpty) {
         return 'Please enter an email';
       }
-      final emailRegex = RegExp(selectedRegex ?? '');
-      if (!emailRegex.hasMatch(value)) {
-        return 'Please enter a valid email address';
+
+      if (AppRoles.student == widget.role) {
+        final emailRegex = RegExp(selectedRegex ?? '');
+        if (!emailRegex.hasMatch(value)) {
+          return 'Please enter a valid email address';
+        }
+      } else if (AppRoles.teacher == widget.role) {
+        final result = value
+            .toString()
+            .split('@')[1]
+            .allMatches(selectedDomain.toString());
+        if (result.isEmpty) {
+          return 'Please enter a valid email address';
+        }
       }
+
       return null;
     };
   }
@@ -230,6 +242,7 @@ class _SignUpFormState extends State<SignUpForm> {
                         List<Map<String, dynamic>>.from(
                             selectedUni['departments'] ?? []);
 
+                    selectedDomain = selectedUni['domain'];
                     selectedRegex = selectedUni['regex'];
                   });
                 },

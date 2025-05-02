@@ -13,9 +13,10 @@ class ApiConstants {
   // This below is ort forwarding url from localhost:8080. create your own every time
 
   static Map<int, String> urlMap = {
+    -4: "http://10.135.58.129:8080", // localhost
     -3: 'https://j9kfnb6c-8080.inc1.devtunnels.ms', //bilal
     -2: 'https://w7x50p90-8080.inc1.devtunnels.ms',
-    -1: "http://10.135.49.240:8080", // localhost
+    -1: "http://10.135.58.129:8080", // localhost
     0: "https://api.beyondtheclass.me", // production
 
     1: "http://192.168.1.1:8080",
@@ -32,7 +33,7 @@ class ApiConstants {
     12: "http://192.168.1.12:8080",
   };
 
-  static int _currentUrlIndex = 2;
+  static int _currentUrlIndex = 3;
   static const String _urlIndexCacheKey = 'current_url_index';
 
   static Future<void> initializeBaseUrl() async {
@@ -140,6 +141,8 @@ class AppRoutes {
   static const String mapMainPage = '/map';
   static const String profileMainPage = '/profile';
   static const String pastPaperScreen = '/past-papers';
+
+  static const String departmentScreen = '/department-screen';
   static const String subjectsInDepartmentScreen = '/subjects-in-department';
   static const String discussionViewScreen = '/discussion-view';
   static const String settings = '/settings';

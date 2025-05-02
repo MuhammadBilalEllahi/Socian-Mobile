@@ -25,26 +25,28 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
     return Drawer(
       width: MediaQuery.of(context).size.width * 0.85,
       child: Container(
-          decoration: BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: isDarkMode ? [
-                      const Color(0xFF1A1A1A),
-                      const Color(0xFF2D2D2D),
-                    ] : [
-                      Colors.white,
-                      const Color(0xFFF5F5F5),
-                    ],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: (isDarkMode ? Colors.black : Colors.grey).withOpacity(0.2),
-                blurRadius: 20,
-                spreadRadius: 5,
-              ),
-            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isDarkMode
+                ? [
+                    const Color(0xFF1A1A1A),
+                    const Color(0xFF2D2D2D),
+                  ]
+                : [
+                    Colors.white,
+                    const Color(0xFFF5F5F5),
+                  ],
           ),
+          boxShadow: [
+            BoxShadow(
+              color: (isDarkMode ? Colors.black : Colors.grey).withOpacity(0.2),
+              blurRadius: 20,
+              spreadRadius: 5,
+            ),
+          ],
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -55,13 +57,15 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: isDarkMode ? [
-                    Colors.white.withOpacity(0.1),
-                    Colors.white.withOpacity(0.05),
-                  ] : [
-                    Colors.grey.withOpacity(0.1),
-                    Colors.grey.withOpacity(0.05),
-                  ],
+                  colors: isDarkMode
+                      ? [
+                          Colors.white.withOpacity(0.1),
+                          Colors.white.withOpacity(0.05),
+                        ]
+                      : [
+                          Colors.grey.withOpacity(0.1),
+                          Colors.grey.withOpacity(0.05),
+                        ],
                 ),
               ),
               child: Column(
@@ -107,22 +111,27 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             gradient: LinearGradient(
-                              colors: isDarkMode ? [
-                                Colors.white.withOpacity(0.2),
-                                Colors.white.withOpacity(0.1),
-                              ] : [
-                                Colors.grey.withOpacity(0.2),
-                                Colors.grey.withOpacity(0.1),
-                              ],
+                              colors: isDarkMode
+                                  ? [
+                                      Colors.white.withOpacity(0.2),
+                                      Colors.white.withOpacity(0.1),
+                                    ]
+                                  : [
+                                      Colors.grey.withOpacity(0.2),
+                                      Colors.grey.withOpacity(0.1),
+                                    ],
                             ),
                           ),
                           child: CircleAvatar(
                             radius: 24,
-                            backgroundColor: isDarkMode ? const Color(0xFF2A2A2A) : Colors.grey[200],
+                            backgroundColor: isDarkMode
+                                ? const Color(0xFF2A2A2A)
+                                : Colors.grey[200],
                             child: Icon(
                               Icons.person,
                               size: 28,
-                              color: isDarkMode ? Colors.white70 : Colors.black54,
+                              color:
+                                  isDarkMode ? Colors.white70 : Colors.black54,
                             ),
                           ),
                         ),
@@ -136,7 +145,8 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
-                                  color: isDarkMode ? Colors.white : Colors.black,
+                                  color:
+                                      isDarkMode ? Colors.white : Colors.black,
                                 ),
                               ),
                               const SizedBox(height: 4),
@@ -146,12 +156,16 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                                     '@$username',
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color: (isDarkMode ? Colors.white : Colors.black).withOpacity(0.7),
+                                      color: (isDarkMode
+                                              ? Colors.white
+                                              : Colors.black)
+                                          .withOpacity(0.7),
                                     ),
                                   ),
                                   const SizedBox(width: 8),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 2),
                                     decoration: BoxDecoration(
                                       color: Colors.amber,
                                       borderRadius: BorderRadius.circular(10),
@@ -176,7 +190,8 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                 ],
               ),
             ),
-            Divider(color: isDarkMode ? Colors.white24 : Colors.black12, height: 1),
+            Divider(
+                color: isDarkMode ? Colors.white24 : Colors.black12, height: 1),
             // Menu Items
             Expanded(
               child: ListView(
@@ -224,12 +239,7 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                     icon: Icons.description,
                     title: "Past Papers",
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const DepartmentPage(),
-                        ),
-                      );
+                      Navigator.pushNamed(context, AppRoutes.departmentScreen);
                     },
                     isDarkMode: isDarkMode,
                   ),
@@ -243,13 +253,15 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: isDarkMode ? [
-                    Colors.white.withOpacity(0.05),
-                    Colors.white.withOpacity(0.02),
-                  ] : [
-                    Colors.grey.withOpacity(0.05),
-                    Colors.grey.withOpacity(0.02),
-                  ],
+                  colors: isDarkMode
+                      ? [
+                          Colors.white.withOpacity(0.05),
+                          Colors.white.withOpacity(0.02),
+                        ]
+                      : [
+                          Colors.grey.withOpacity(0.05),
+                          Colors.grey.withOpacity(0.02),
+                        ],
                 ),
               ),
               child: Row(
@@ -259,7 +271,8 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                     'Beyond The Class',
                     style: TextStyle(
                       fontSize: 14,
-                      color: (isDarkMode ? Colors.white : Colors.black).withOpacity(0.5),
+                      color: (isDarkMode ? Colors.white : Colors.black)
+                          .withOpacity(0.5),
                     ),
                   ),
                 ],

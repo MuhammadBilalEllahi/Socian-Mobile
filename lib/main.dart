@@ -28,13 +28,13 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
+      onGenerateRoute: (settings) => RouteGuard.onGenerateRoute(settings, ref),
       debugShowCheckedModeBanner: false,
       title: AppConstants.appName,
       themeMode: ThemeMode.system,
       theme: AppThemes.lightTheme,
       darkTheme: AppThemes.darkTheme,
       initialRoute: AppRoutes.splashScreen,
-      onGenerateRoute: (settings) => RouteGuard.onGenerateRoute(settings, ref),
     );
   }
 }
