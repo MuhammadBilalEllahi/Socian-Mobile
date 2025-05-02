@@ -248,9 +248,11 @@ class _PostCardState extends State<PostCard> {
         CircleAvatar(
           radius: 18,
           backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
-          backgroundImage: widget.post['author'] != null && widget.post['author']['profile'] != null
+          backgroundImage: widget.post['author'] != null &&
+                  widget.post['author']['profile'] != null
               ? NetworkImage(widget.post['author']['profile']['picture'] ?? '')
-              : const AssetImage('assets/default_profile_picture.png') as ImageProvider,
+              : const AssetImage('assets/default_profile_picture.png')
+                  as ImageProvider,
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -306,32 +308,31 @@ class _PostCardState extends State<PostCard> {
   }
 
   Widget _buildPostContent(bool isDark) {
-    return Padding(padding: const EdgeInsets.only(left: 6), 
-    child:
-    Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          widget.post['title'] ?? '',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: isDark ? Colors.white : Colors.black,
-            height: 1.2,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          widget.post['body'] ?? '',
-          style: TextStyle(
-            fontSize: 14,
-            height: 1.4,
-            color: isDark ? Colors.white : Colors.black,
-          ),
-        ),
-      ],
-    )
-  );
+    return Padding(
+        padding: const EdgeInsets.only(left: 6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.post['title'] ?? '',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: isDark ? Colors.white : Colors.black,
+                height: 1.2,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              widget.post['body'] ?? '',
+              style: TextStyle(
+                fontSize: 14,
+                height: 1.4,
+                color: isDark ? Colors.white : Colors.black,
+              ),
+            ),
+          ],
+        ));
   }
 
   Widget _buildActionButtons() {
