@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/pages/drawer/student/pages/teachersReviews/pages/comment_details_page.dart';
 import 'package:flutter/material.dart';
@@ -17,10 +18,10 @@ class TeacherComments extends StatefulWidget {
   });
 
   @override
-  State<TeacherComments> createState() => _TeacherCommentsState();
+  State<TeacherComments> createState() => TeacherCommentsState();
 }
 
-class _TeacherCommentsState extends State<TeacherComments> {
+class TeacherCommentsState extends State<TeacherComments> {
   final _commentController = TextEditingController();
   List<Map<String, dynamic>> _comments = [];
   int _rating = 0;
@@ -40,6 +41,41 @@ class _TeacherCommentsState extends State<TeacherComments> {
     super.dispose();
   }
 
+  // Add optimistic comment support
+  void addOptimisticComment(Map<String, dynamic> optimisticComment,
+      {required Future<bool> Function() confirm}) async {
+    final userId = optimisticComment['user']?['_id'];
+    setState(() {
+      // Remove any existing comment from the same user
+      _comments = _comments.where((c) => c['user']?['_id'] != userId).toList();
+      // Add the optimistic comment to the top
+      _comments = [optimisticComment, ..._comments];
+    });
+    final index =
+        _comments.indexWhere((c) => c['_id'] == optimisticComment['_id']);
+    final success = await confirm();
+    if (!mounted) return;
+    if (success) {
+      setState(() {
+        if (index >= 0 && index < _comments.length) {
+          _comments[index]['opacity'] = 1.0;
+          _comments[index]['optimistic'] = false;
+        }
+      });
+    } else {
+      setState(() {
+        _comments.removeWhere((c) => c['_id'] == optimisticComment['_id']);
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Failed to post comment'),
+              backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
   Future<void> _fetchComments() async {
     setState(() {
       _isLoading = true;
@@ -52,7 +88,7 @@ class _TeacherCommentsState extends State<TeacherComments> {
         queryParameters: {'id': widget.teacherId},
       );
 
-      debugPrint("comments response: $response");
+      log("comments response: $response");
       setState(() {
         _comments = List<Map<String, dynamic>>.from(response);
         _isLoading = false;
@@ -60,7 +96,6 @@ class _TeacherCommentsState extends State<TeacherComments> {
     } catch (e) {
       setState(() {
         _isLoading = false;
-        
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -73,82 +108,82 @@ class _TeacherCommentsState extends State<TeacherComments> {
     }
   }
 
-  Future<void> _submitComment(WidgetRef ref) async {
-    if (_commentController.text.trim().isEmpty || _rating == 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please provide both a rating and a comment'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
+  // Future<void> _submitComment(WidgetRef ref) async {
+  //   if (_commentController.text.trim().isEmpty || _rating == 0) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //         content: Text('Please provide both a rating and a comment'),
+  //         backgroundColor: Colors.red,
+  //       ),
+  //     );
+  //     return;
+  //   }
 
-    setState(() {
-      _isSubmitting = true;
-    });
+  //   setState(() {
+  //     _isSubmitting = true;
+  //   });
 
-    try {
-      final user = ref.read(authProvider).user;
-      if (user == null) {
-        throw Exception('User not authenticated');
-      }
+  //   try {
+  //     final user = ref.read(authProvider).user;
+  //     if (user == null) {
+  //       throw Exception('User not authenticated');
+  //     }
 
-      final ApiClient apiClient = ApiClient();
+  //     final ApiClient apiClient = ApiClient();
 
-      debugPrint("rating: $_rating");
-      debugPrint("comment: ${_commentController.text.trim()}");
-      debugPrint("isAnonymous: $_isAnonymous");
-      debugPrint("user: $user");
-      debugPrint("teacherId: ${widget.teacherId}");
-      debugPrint("userId: ${user['_id']}");
-      
-      await apiClient.post(
-        '/api/teacher/rate',
-        {
-          'teacherId': widget.teacherId,
-          'userId': user['_id'],
-          'rating': _rating,
-          'feedback': _commentController.text.trim(),
-          'hideUser': _isAnonymous,
-        },
-      );
+  //     debugPrint("rating: $_rating");
+  //     debugPrint("comment: ${_commentController.text.trim()}");
+  //     debugPrint("isAnonymous: $_isAnonymous");
+  //     debugPrint("user: $user");
+  //     debugPrint("teacherId: ${widget.teacherId}");
+  //     debugPrint("userId: ${user['_id']}");
 
-      // Clear form and show success message
-      _commentController.clear();
-      setState(() {
-        _rating = 0;
-        _isAnonymous = false;
-      });
+  //     await apiClient.post(
+  //       '/api/teacher/rate',
+  //       {
+  //         'teacherId': widget.teacherId,
+  //         'userId': user['_id'],
+  //         'rating': _rating,
+  //         'feedback': _commentController.text.trim(),
+  //         'hideUser': _isAnonymous,
+  //       },
+  //     );
 
-      // Fetch updated comments
-      // await _fetchComments();
+  //     // Clear form and show success message
+  //     _commentController.clear();
+  //     setState(() {
+  //       _rating = 0;
+  //       _isAnonymous = false;
+  //     });
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Comment posted successfully'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to post comment: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSubmitting = false;
-        });
-      }
-    }
-  }
+  //     // Fetch updated comments
+  //     // await _fetchComments();
+
+  //     if (mounted) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         const SnackBar(
+  //           content: Text('Comment posted successfully'),
+  //           backgroundColor: Colors.green,
+  //         ),
+  //       );
+  //     }
+  //   } catch (e) {
+  //     if (mounted) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(
+  //           content: Text('Failed to post comment: ${e.toString()}'),
+  //           backgroundColor: Colors.red,
+  //         ),
+  //       );
+  //     }
+  //   } finally {
+  //     if (mounted) {
+  //       setState(() {
+  //         _isSubmitting = false;
+  //       });
+  //     }
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -169,199 +204,215 @@ class _TeacherCommentsState extends State<TeacherComments> {
           ),
         ),
         const SizedBox(height: 16),
-        
+
         // Comment Box
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Container(
-            decoration: BoxDecoration(
-              // color: Colors.yellow,
-              color: Colors.transparent,
-              // color: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
-              ),
-            ),
-            child: Column(
-              children: [
-                // Rating Selector
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
-                      ),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Rate your experience',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: List.generate(5, (index) {
-                          final starValue = index + 1;
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _rating = starValue;
-                              });
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 4),
-                              child: Icon(
-                                _rating >= starValue 
-                                    ? Icons.star_rounded
-                                    : Icons.star_outline_rounded,
-                                size: 32,
-                                color: _rating >= starValue
-                                    ? const Color(0xFFFFD700)
-                                    : isDark 
-                                        ? Colors.white.withOpacity(0.3)
-                                        : Colors.black.withOpacity(0.3),
-                              ),
-                            ),
-                          );
-                        }),
-                      ),
-                    ],
-                  ),
-                ),
-                // Comment TextField
-                TextField(
-                  controller: _commentController,
-                  style: theme.textTheme.bodyLarge,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    hintText: 'Write a comment...',
-                    hintStyle: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.5),
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.all(16),
-                  ),
-                ),
-                // Anonymous Checkbox
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border(
-                      top: BorderSide(
-                        color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
-                      ),
-                    ),
-                  ),
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                  child: Row(
-                    children: [
-                      InkWell(
-                        onTap: () {
-                          setState(() {
-                            _isAnonymous = !_isAnonymous;
-                          });
-                        },
-                        borderRadius: BorderRadius.circular(4),
-                        child: Container(
-                          width: 18,
-                          height: 18,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(
-                              color: _isAnonymous
-                                  ? (isDark ? Colors.white : Colors.black)
-                                  : (isDark ? Colors.white.withOpacity(0.3) : Colors.black.withOpacity(0.3)),
-                              width: 1.5,
-                            ),
-                            color: _isAnonymous
-                                ? (isDark ? Colors.white : Colors.black)
-                                : Colors.transparent,
-                          ),
-                          child: _isAnonymous
-                              ? Icon(
-                                  Icons.check,
-                                  size: 14,
-                                  color: isDark ? Colors.black : Colors.white,
-                                )
-                              : null,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Comment anonymously',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: isDark ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Submit Button Container
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border(
-                      top: BorderSide(
-                        color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
-                      ),
-                    ),
-                  ),
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Be respectful in comments',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.5),
-                        ),
-                      ),
-                      Consumer(
-                        builder: (context, ref, child) {
-                          return TextButton(
-                            onPressed: _isSubmitting 
-                              ? null 
-                              : () => _submitComment(ref),
-                            style: TextButton.styleFrom(
-                              backgroundColor: isDark ? Colors.white.withOpacity(0.1) : Colors.black,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: _isSubmitting
-                              ? SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      isDark ? Colors.white : Colors.white,
-                                    ),
-                                  ),
-                                )
-                              : Text(
-                                  'Comment',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: isDark ? Colors.white : Colors.white,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 24),
+        // Padding(
+        //   padding: const EdgeInsets.symmetric(horizontal: 24),
+        //   child: Container(
+        //     decoration: BoxDecoration(
+        //       // color: Colors.yellow,
+        //       color: Colors.transparent,
+        //       // color: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
+        //       borderRadius: BorderRadius.circular(16),
+        //       border: Border.all(
+        //         color: isDark
+        //             ? Colors.white.withOpacity(0.1)
+        //             : Colors.black.withOpacity(0.1),
+        //       ),
+        //     ),
+        //     child: Column(
+        //       children: [
+        //         // Rating Selector
+        //         Container(
+        //           padding: const EdgeInsets.all(16),
+        //           decoration: BoxDecoration(
+        //             border: Border(
+        //               bottom: BorderSide(
+        //                 color: isDark
+        //                     ? Colors.white.withOpacity(0.1)
+        //                     : Colors.black.withOpacity(0.1),
+        //               ),
+        //             ),
+        //           ),
+        //           child: Column(
+        //             crossAxisAlignment: CrossAxisAlignment.start,
+        //             children: [
+        //               Text(
+        //                 'Rate your experience',
+        //                 style: theme.textTheme.bodyMedium?.copyWith(
+        //                   fontWeight: FontWeight.w500,
+        //                 ),
+        //               ),
+        //               const SizedBox(height: 8),
+        //               Row(
+        //                 children: List.generate(5, (index) {
+        //                   final starValue = index + 1;
+        //                   return GestureDetector(
+        //                     onTap: () {
+        //                       setState(() {
+        //                         _rating = starValue;
+        //                       });
+        //                     },
+        //                     child: Padding(
+        //                       padding: const EdgeInsets.only(right: 4),
+        //                       child: Icon(
+        //                         _rating >= starValue
+        //                             ? Icons.star_rounded
+        //                             : Icons.star_outline_rounded,
+        //                         size: 32,
+        //                         color: _rating >= starValue
+        //                             ? const Color(0xFFFFD700)
+        //                             : isDark
+        //                                 ? Colors.white.withOpacity(0.3)
+        //                                 : Colors.black.withOpacity(0.3),
+        //                       ),
+        //                     ),
+        //                   );
+        //                 }),
+        //               ),
+        //             ],
+        //           ),
+        //         ),
+        //         // Comment TextField
+        //         TextField(
+        //           controller: _commentController,
+        //           style: theme.textTheme.bodyLarge,
+        //           maxLines: 3,
+        //           decoration: InputDecoration(
+        //             hintText: 'Write a comment...',
+        //             hintStyle: theme.textTheme.bodyLarge?.copyWith(
+        //               color: theme.colorScheme.onSurface.withOpacity(0.5),
+        //             ),
+        //             border: InputBorder.none,
+        //             contentPadding: const EdgeInsets.all(16),
+        //           ),
+        //         ),
+        //         // Anonymous Checkbox
+        //         Container(
+        //           decoration: BoxDecoration(
+        //             border: Border(
+        //               top: BorderSide(
+        //                 color: isDark
+        //                     ? Colors.white.withOpacity(0.1)
+        //                     : Colors.black.withOpacity(0.1),
+        //               ),
+        //             ),
+        //           ),
+        //           padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+        //           child: Row(
+        //             children: [
+        //               InkWell(
+        //                 onTap: () {
+        //                   setState(() {
+        //                     _isAnonymous = !_isAnonymous;
+        //                   });
+        //                 },
+        //                 borderRadius: BorderRadius.circular(4),
+        //                 child: Container(
+        //                   width: 18,
+        //                   height: 18,
+        //                   decoration: BoxDecoration(
+        //                     borderRadius: BorderRadius.circular(4),
+        //                     border: Border.all(
+        //                       color: _isAnonymous
+        //                           ? (isDark ? Colors.white : Colors.black)
+        //                           : (isDark
+        //                               ? Colors.white.withOpacity(0.3)
+        //                               : Colors.black.withOpacity(0.3)),
+        //                       width: 1.5,
+        //                     ),
+        //                     color: _isAnonymous
+        //                         ? (isDark ? Colors.white : Colors.black)
+        //                         : Colors.transparent,
+        //                   ),
+        //                   child: _isAnonymous
+        //                       ? Icon(
+        //                           Icons.check,
+        //                           size: 14,
+        //                           color: isDark ? Colors.black : Colors.white,
+        //                         )
+        //                       : null,
+        //                 ),
+        //               ),
+        //               const SizedBox(width: 8),
+        //               Text(
+        //                 'Comment anonymously',
+        //                 style: theme.textTheme.bodyMedium?.copyWith(
+        //                   color: isDark
+        //                       ? Colors.white.withOpacity(0.7)
+        //                       : Colors.black.withOpacity(0.7),
+        //                 ),
+        //               ),
+        //             ],
+        //           ),
+        //         ),
+        //         // Submit Button Container
+        //         Container(
+        //           decoration: BoxDecoration(
+        //             border: Border(
+        //               top: BorderSide(
+        //                 color: isDark
+        //                     ? Colors.white.withOpacity(0.1)
+        //                     : Colors.black.withOpacity(0.1),
+        //               ),
+        //             ),
+        //           ),
+        //           padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+        //           child: Row(
+        //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //             children: [
+        //               Text(
+        //                 'Be respectful in comments',
+        //                 style: theme.textTheme.bodySmall?.copyWith(
+        //                   color: theme.colorScheme.onSurface.withOpacity(0.5),
+        //                 ),
+        //               ),
+        //               Consumer(
+        //                 builder: (context, ref, child) {
+        //                   return TextButton(
+        //                     onPressed: _isSubmitting
+        //                         ? null
+        //                         : () => _submitComment(ref),
+        //                     style: TextButton.styleFrom(
+        //                       backgroundColor: isDark
+        //                           ? Colors.white.withOpacity(0.1)
+        //                           : Colors.black,
+        //                       padding: const EdgeInsets.symmetric(
+        //                           horizontal: 16, vertical: 8),
+        //                       shape: RoundedRectangleBorder(
+        //                         borderRadius: BorderRadius.circular(8),
+        //                       ),
+        //                     ),
+        //                     child: _isSubmitting
+        //                         ? SizedBox(
+        //                             height: 20,
+        //                             width: 20,
+        //                             child: CircularProgressIndicator(
+        //                               strokeWidth: 2,
+        //                               valueColor: AlwaysStoppedAnimation<Color>(
+        //                                 isDark ? Colors.white : Colors.white,
+        //                               ),
+        //                             ),
+        //                           )
+        //                         : Text(
+        //                             'Comment',
+        //                             style: theme.textTheme.bodyMedium?.copyWith(
+        //                               color:
+        //                                   isDark ? Colors.white : Colors.white,
+        //                               fontWeight: FontWeight.w500,
+        //                             ),
+        //                           ),
+        //                   );
+        //                 },
+        //               ),
+        //             ],
+        //           ),
+        //         ),
+        //       ],
+        //     ),
+        //   ),
+        // ),
+        // const SizedBox(height: 24),
 
         // Comments List
         if (_isLoading)
@@ -381,25 +432,32 @@ class _TeacherCommentsState extends State<TeacherComments> {
               color: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
               border: Border.symmetric(
                 horizontal: BorderSide(
-                  color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
+                  color: isDark
+                      ? Colors.white.withOpacity(0.1)
+                      : Colors.black.withOpacity(0.1),
                 ),
               ),
             ),
             child: Column(
               children: [
                 for (var i = 0; i < _comments.length; i++) ...[
-                  _CommentItem(
-                    comment: _comments[i],
-                    isDark: isDark,
-                    teacherId: widget.teacherId,
-                    onReplySubmitted: _fetchComments,
-                    showReplies: true,
+                  Opacity(
+                    opacity: (_comments[i]['opacity'] ?? 1.0) as double,
+                    child: _CommentItem(
+                      comment: _comments[i],
+                      isDark: isDark,
+                      teacherId: widget.teacherId,
+                      onReplySubmitted: _fetchComments,
+                      showReplies: true,
+                    ),
                   ),
                   if (i < _comments.length - 1)
                     Divider(
                       height: 1,
                       thickness: 1,
-                      color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
+                      color: isDark
+                          ? Colors.white.withOpacity(0.1)
+                          : Colors.black.withOpacity(0.1),
                     ),
                 ],
               ],
@@ -431,6 +489,128 @@ class _CommentItem extends StatefulWidget {
 
 class _CommentItemState extends State<_CommentItem> {
   final bool _showReplyBox = false;
+  bool _isVoting = false;
+  String? _userVote; // 'upVote', 'downVote', or null
+  int? _upVotesCount;
+  int? _downVotesCount;
+
+  @override
+  void initState() {
+    super.initState();
+    final userId = _currentUserId(context);
+    final userVotes = widget.comment['userVotes'];
+    if (userVotes != null && userId != null && userVotes is Map) {
+      _userVote = userVotes[userId] as String?;
+    } else {
+      _userVote = null;
+    }
+    _upVotesCount = widget.comment['upvoteCount'] ??
+        widget.comment['upVotesCount'] ??
+        widget.comment['upVotes'] ??
+        widget.comment['upVotesCount'] ??
+        0;
+    _downVotesCount = widget.comment['downvoteCount'] ??
+        widget.comment['downVotesCount'] ??
+        widget.comment['downVotes'] ??
+        widget.comment['downVotesCount'] ??
+        0;
+  }
+
+  String? _currentUserId(BuildContext context) {
+    final container = ProviderScope.containerOf(context, listen: false);
+    final user = container.read(authProvider).user;
+    return user != null ? user['_id'] as String? : null;
+  }
+
+  Future<void> _handleVote(String voteType) async {
+    if (_isVoting) return;
+    setState(() {
+      _isVoting = true;
+    });
+    final userId = _currentUserId(context);
+    if (userId == null) {
+      setState(() {
+        _isVoting = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('You must be logged in to vote.'),
+            backgroundColor: Colors.red),
+      );
+      return;
+    }
+    final reviewId = widget.comment['_id'];
+    final userIdOther = widget.comment['user']?['_id'];
+    if (reviewId == null || userIdOther == null) {
+      setState(() {
+        _isVoting = false;
+      });
+      return;
+    }
+    // Optimistic update
+    String? prevVote = _userVote;
+    int prevUp = _upVotesCount ?? 0;
+    int prevDown = _downVotesCount ?? 0;
+    if (_userVote == voteType) {
+      // Undo vote
+      setState(() {
+        _userVote = null;
+        if (voteType == 'upVote') _upVotesCount = (_upVotesCount ?? 1) - 1;
+        if (voteType == 'downVote')
+          _downVotesCount = (_downVotesCount ?? 1) - 1;
+      });
+    } else {
+      setState(() {
+        _userVote = voteType;
+        if (voteType == 'upVote') {
+          _upVotesCount = (_upVotesCount ?? 0) + 1;
+          if (prevVote == 'downVote')
+            _downVotesCount = (_downVotesCount ?? 1) - 1;
+        } else if (voteType == 'downVote') {
+          _downVotesCount = (_downVotesCount ?? 0) + 1;
+          if (prevVote == 'upVote') _upVotesCount = (_upVotesCount ?? 1) - 1;
+        }
+      });
+    }
+    try {
+      final apiClient = ApiClient();
+      final response = await apiClient.post(
+        '/api/teacher/reviews/feedbacks/vote',
+        {
+          'reviewId': reviewId,
+          'userIdOther': userIdOther,
+          'voteType': voteType,
+        },
+      );
+      if (response != null && response is Map) {
+        setState(() {
+          _upVotesCount = response['upVotesCount'] ?? _upVotesCount;
+          _downVotesCount = response['downVotesCount'] ?? _downVotesCount;
+          if (response['noneSelected'] == true) {
+            _userVote = null;
+          } else {
+            _userVote = voteType;
+          }
+        });
+      }
+    } catch (e) {
+      // Revert optimistic update
+      setState(() {
+        _userVote = prevVote;
+        _upVotesCount = prevUp;
+        _downVotesCount = prevDown;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Failed to vote. Please try again.'),
+            backgroundColor: Colors.red),
+      );
+    } finally {
+      setState(() {
+        _isVoting = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -450,7 +630,9 @@ class _CommentItemState extends State<_CommentItem> {
             children: [
               CircleAvatar(
                 radius: 16,
-                backgroundColor: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
+                backgroundColor: widget.isDark
+                    ? Colors.white.withOpacity(0.1)
+                    : Colors.black.withOpacity(0.05),
                 child: Text(
                   name[0].toUpperCase(),
                   style: theme.textTheme.bodyMedium?.copyWith(
@@ -474,10 +656,15 @@ class _CommentItemState extends State<_CommentItem> {
                               isAnonymous ? 'Anonymous' : name,
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.w600,
-                                color: isDeleted ? theme.colorScheme.onSurface.withOpacity(0.5) : null,
+                                color: isDeleted
+                                    ? theme.colorScheme.onSurface
+                                        .withOpacity(0.5)
+                                    : null,
                               ),
                             ),
-                            if (!isDeleted && !isAnonymous && user['isVerified'] == true) ...[
+                            if (!isDeleted &&
+                                !isAnonymous &&
+                                user['isVerified'] == true) ...[
                               const SizedBox(width: 4),
                               const Icon(
                                 Icons.verified_rounded,
@@ -498,7 +685,7 @@ class _CommentItemState extends State<_CommentItem> {
                                 size: 16,
                                 color: index < (widget.comment['rating'] as int)
                                     ? const Color(0xFFFFD700)
-                                    : widget.isDark 
+                                    : widget.isDark
                                         ? Colors.white.withOpacity(0.3)
                                         : Colors.black.withOpacity(0.3),
                               );
@@ -507,9 +694,9 @@ class _CommentItemState extends State<_CommentItem> {
                       ],
                     ),
                     Text(
-                      widget.comment['updatedAt'] != null 
-                        ? _formatDate(widget.comment['updatedAt'])
-                        : '',
+                      widget.comment['updatedAt'] != null
+                          ? _formatDate(widget.comment['updatedAt'])
+                          : '',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurface.withOpacity(0.5),
                       ),
@@ -534,16 +721,19 @@ class _CommentItemState extends State<_CommentItem> {
               children: [
                 _VoteButton(
                   icon: Icons.arrow_upward_rounded,
-                  count: widget.comment['upvoteCount'] ?? 0,
+                  count: _upVotesCount ?? widget.comment['upvoteCount'] ?? 0,
                   isDark: widget.isDark,
-                  onPressed: () {},
+                  onPressed: _isVoting ? null : () => _handleVote('upVote'),
+                  isSelected: _userVote == 'upVote',
                 ),
                 const SizedBox(width: 16),
                 _VoteButton(
                   icon: Icons.arrow_downward_rounded,
-                  count: widget.comment['downvoteCount'] ?? 0,
+                  count:
+                      _downVotesCount ?? widget.comment['downvoteCount'] ?? 0,
                   isDark: widget.isDark,
-                  onPressed: () {},
+                  onPressed: _isVoting ? null : () => _handleVote('downVote'),
+                  isSelected: _userVote == 'downVote',
                 ),
                 const SizedBox(width: 16),
                 TextButton.icon(
@@ -560,7 +750,9 @@ class _CommentItemState extends State<_CommentItem> {
                     );
                   },
                   style: TextButton.styleFrom(
-                    foregroundColor: widget.isDark ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7),
+                    foregroundColor: widget.isDark
+                        ? Colors.white.withOpacity(0.7)
+                        : Colors.black.withOpacity(0.7),
                     padding: EdgeInsets.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
@@ -572,7 +764,9 @@ class _CommentItemState extends State<_CommentItem> {
                     'View Replies',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w500,
-                      color: widget.isDark ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7),
+                      color: widget.isDark
+                          ? Colors.white.withOpacity(0.7)
+                          : Colors.black.withOpacity(0.7),
                     ),
                   ),
                 ),
@@ -664,7 +858,9 @@ class _ReplyItemState extends State<_ReplyItem> {
       decoration: BoxDecoration(
         border: Border(
           left: BorderSide(
-            color: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
+            color: widget.isDark
+                ? Colors.white.withOpacity(0.1)
+                : Colors.black.withOpacity(0.1),
             width: 2,
           ),
         ),
@@ -678,7 +874,9 @@ class _ReplyItemState extends State<_ReplyItem> {
               children: [
                 CircleAvatar(
                   radius: 12,
-                  backgroundColor: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
+                  backgroundColor: widget.isDark
+                      ? Colors.white.withOpacity(0.1)
+                      : Colors.black.withOpacity(0.05),
                   child: Text(
                     (isAnonymous ? 'A' : name[0]).toUpperCase(),
                     style: theme.textTheme.bodySmall?.copyWith(
@@ -695,10 +893,14 @@ class _ReplyItemState extends State<_ReplyItem> {
                         isAnonymous ? 'Anonymous' : name,
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: isDeleted ? theme.colorScheme.onSurface.withOpacity(0.5) : null,
+                          color: isDeleted
+                              ? theme.colorScheme.onSurface.withOpacity(0.5)
+                              : null,
                         ),
                       ),
-                      if (!isDeleted && !isAnonymous && user['isVerified'] == true) ...[
+                      if (!isDeleted &&
+                          !isAnonymous &&
+                          user['isVerified'] == true) ...[
                         const SizedBox(width: 4),
                         const Icon(
                           Icons.verified_rounded,
@@ -757,11 +959,13 @@ class _ReplyItemState extends State<_ReplyItem> {
                       ),
                     // Show existing reactions from others
                     for (final reaction in _reactions)
-                      if ((widget.reply['reactions']?[reaction['type']] ?? 0) > 0 &&
+                      if ((widget.reply['reactions']?[reaction['type']] ?? 0) >
+                              0 &&
                           _selectedReaction?['type'] != reaction['type'])
                         _ReactionButton(
                           emoji: reaction['emoji'] as String,
-                          count: widget.reply['reactions']?[reaction['type']] ?? 0,
+                          count:
+                              widget.reply['reactions']?[reaction['type']] ?? 0,
                           isDark: widget.isDark,
                           isSelected: false,
                           onPressed: () {
@@ -782,13 +986,17 @@ class _ReplyItemState extends State<_ReplyItem> {
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: widget.isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
+                            color: widget.isDark
+                                ? Colors.white.withOpacity(0.05)
+                                : Colors.black.withOpacity(0.05),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(
                             Icons.add_reaction_outlined,
                             size: 20,
-                            color: widget.isDark ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7),
+                            color: widget.isDark
+                                ? Colors.white.withOpacity(0.7)
+                                : Colors.black.withOpacity(0.7),
                           ),
                         ),
                       ),
@@ -802,7 +1010,9 @@ class _ReplyItemState extends State<_ReplyItem> {
                     });
                   },
                   style: TextButton.styleFrom(
-                    foregroundColor: widget.isDark ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7),
+                    foregroundColor: widget.isDark
+                        ? Colors.white.withOpacity(0.7)
+                        : Colors.black.withOpacity(0.7),
                     padding: EdgeInsets.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
@@ -824,17 +1034,22 @@ class _ReplyItemState extends State<_ReplyItem> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: widget.isDark ? Colors.white.withOpacity(0.05) : Colors.white,
+                  color: widget.isDark
+                      ? Colors.white.withOpacity(0.05)
+                      : Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
+                    color: widget.isDark
+                        ? Colors.white.withOpacity(0.1)
+                        : Colors.black.withOpacity(0.1),
                   ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     for (final reaction in _reactions) ...[
-                      if (reaction != _reactions.first) const SizedBox(width: 8),
+                      if (reaction != _reactions.first)
+                        const SizedBox(width: 8),
                       InkWell(
                         onTap: () {
                           setState(() {
@@ -846,7 +1061,9 @@ class _ReplyItemState extends State<_ReplyItem> {
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: widget.isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
+                            color: widget.isDark
+                                ? Colors.white.withOpacity(0.05)
+                                : Colors.black.withOpacity(0.05),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -882,7 +1099,7 @@ class _ReplyItemState extends State<_ReplyItem> {
 
   String _formatDate(String dateStr) {
     if (dateStr.isEmpty) return '';
-    
+
     final date = DateTime.parse(dateStr);
     final now = DateTime.now();
     final difference = now.difference(date);
@@ -945,15 +1162,16 @@ class _ReplyBoxState extends State<_ReplyBox> {
       }
 
       final ApiClient apiClient = ApiClient();
-      final endpoint = widget.isReplyToReply 
-        ? '/api/teacher/reply/reply/feedback'
-        : '/api/teacher/reply/feedback';
+      final endpoint = widget.isReplyToReply
+          ? '/api/teacher/reply/reply/feedback'
+          : '/api/teacher/reply/feedback';
 
       final response = await apiClient.post(
         endpoint,
         {
           'teacherId': widget.teacherId,
-          widget.isReplyToReply ? 'feedbackCommentId' : 'feedbackReviewId': widget.parentId,
+          widget.isReplyToReply ? 'feedbackCommentId' : 'feedbackReviewId':
+              widget.parentId,
           'feedbackComment': replyController.text.trim(),
           'gifUrl': selectedGifUrl ?? '',
           'mentions': mentions,
@@ -1029,7 +1247,8 @@ class _ReplyBoxState extends State<_ReplyBox> {
         );
 
         setState(() {
-          mentionSuggestions = List<Map<String, dynamic>>.from(response['users']);
+          mentionSuggestions =
+              List<Map<String, dynamic>>.from(response['users']);
           showMentionsList = true;
         });
       } catch (e) {
@@ -1067,7 +1286,9 @@ class _ReplyBoxState extends State<_ReplyBox> {
         color: widget.isDark ? Colors.white.withOpacity(0.05) : Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
+          color: widget.isDark
+              ? Colors.white.withOpacity(0.1)
+              : Colors.black.withOpacity(0.1),
         ),
       ),
       child: Column(
@@ -1109,7 +1330,9 @@ class _ReplyBoxState extends State<_ReplyBox> {
                   });
                 },
                 icon: const Icon(Icons.gif_box_outlined),
-                color: widget.isDark ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7),
+                color: widget.isDark
+                    ? Colors.white.withOpacity(0.7)
+                    : Colors.black.withOpacity(0.7),
               ),
               Expanded(
                 child: TextField(
@@ -1131,33 +1354,37 @@ class _ReplyBoxState extends State<_ReplyBox> {
                   return TextButton(
                     onPressed: isSubmitting ? null : () => submitReply(ref),
                     style: TextButton.styleFrom(
-                      backgroundColor: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black,
+                      backgroundColor: widget.isDark
+                          ? Colors.white.withOpacity(0.1)
+                          : Colors.black,
                       shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.only(
                           topRight: Radius.circular(11),
                           bottomRight: Radius.circular(11),
                         ),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                     ),
                     child: isSubmitting
-                      ? SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              widget.isDark ? Colors.white : Colors.white,
+                        ? SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                widget.isDark ? Colors.white : Colors.white,
+                              ),
+                            ),
+                          )
+                        : Text(
+                            'Reply',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color:
+                                  widget.isDark ? Colors.white : Colors.white,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                        )
-                      : Text(
-                          'Reply',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: widget.isDark ? Colors.white : Colors.white,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
                   );
                 },
               ),
@@ -1170,7 +1397,9 @@ class _ReplyBoxState extends State<_ReplyBox> {
               decoration: BoxDecoration(
                 border: Border(
                   top: BorderSide(
-                    color: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
+                    color: widget.isDark
+                        ? Colors.white.withOpacity(0.1)
+                        : Colors.black.withOpacity(0.1),
                   ),
                 ),
               ),
@@ -1191,7 +1420,9 @@ class _ReplyBoxState extends State<_ReplyBox> {
               decoration: BoxDecoration(
                 border: Border(
                   top: BorderSide(
-                    color: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
+                    color: widget.isDark
+                        ? Colors.white.withOpacity(0.1)
+                        : Colors.black.withOpacity(0.1),
                   ),
                 ),
               ),
@@ -1203,7 +1434,9 @@ class _ReplyBoxState extends State<_ReplyBox> {
                   return ListTile(
                     leading: CircleAvatar(
                       radius: 16,
-                      backgroundColor: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
+                      backgroundColor: widget.isDark
+                          ? Colors.white.withOpacity(0.1)
+                          : Colors.black.withOpacity(0.05),
                       child: Text(
                         user['name'][0].toUpperCase(),
                         style: theme.textTheme.bodyMedium?.copyWith(
@@ -1239,13 +1472,15 @@ class _VoteButton extends StatelessWidget {
   final IconData icon;
   final int count;
   final bool isDark;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
+  final bool isSelected;
 
   const _VoteButton({
     required this.icon,
     required this.count,
     required this.isDark,
     required this.onPressed,
+    this.isSelected = false,
   });
 
   @override
@@ -1258,8 +1493,21 @@ class _VoteButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
+          color: isSelected
+              ? (isDark
+                  ? Colors.white.withOpacity(0.12)
+                  : Colors.black.withOpacity(0.12))
+              : (isDark
+                  ? Colors.white.withOpacity(0.05)
+                  : Colors.black.withOpacity(0.05)),
           borderRadius: BorderRadius.circular(8),
+          border: isSelected
+              ? Border.all(
+                  color: isDark
+                      ? Colors.white.withOpacity(0.2)
+                      : Colors.black.withOpacity(0.2),
+                )
+              : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -1267,14 +1515,22 @@ class _VoteButton extends StatelessWidget {
             Icon(
               icon,
               size: 16,
-              color: isDark ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7),
+              color: isSelected
+                  ? (isDark ? Colors.white : Colors.black)
+                  : (isDark
+                      ? Colors.white.withOpacity(0.7)
+                      : Colors.black.withOpacity(0.7)),
             ),
             const SizedBox(width: 4),
             Text(
               count.toString(),
               style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w500,
-                color: isDark ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7),
+                fontWeight: FontWeight.w600,
+                color: isSelected
+                    ? (isDark ? Colors.white : Colors.black)
+                    : (isDark
+                        ? Colors.white.withOpacity(0.7)
+                        : Colors.black.withOpacity(0.7)),
               ),
             ),
           ],
@@ -1310,12 +1566,18 @@ class _ReactionButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
           color: isSelected
-              ? (isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1))
-              : (isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05)),
+              ? (isDark
+                  ? Colors.white.withOpacity(0.1)
+                  : Colors.black.withOpacity(0.1))
+              : (isDark
+                  ? Colors.white.withOpacity(0.05)
+                  : Colors.black.withOpacity(0.05)),
           borderRadius: BorderRadius.circular(8),
           border: isSelected
               ? Border.all(
-                  color: isDark ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.2),
+                  color: isDark
+                      ? Colors.white.withOpacity(0.2)
+                      : Colors.black.withOpacity(0.2),
                 )
               : null,
         ),
@@ -1329,7 +1591,9 @@ class _ReactionButton extends StatelessWidget {
                 count.toString(),
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w500,
-                  color: isDark ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7),
+                  color: isDark
+                      ? Colors.white.withOpacity(0.7)
+                      : Colors.black.withOpacity(0.7),
                 ),
               ),
             ],
@@ -1338,4 +1602,4 @@ class _ReactionButton extends StatelessWidget {
       ),
     );
   }
-} 
+}

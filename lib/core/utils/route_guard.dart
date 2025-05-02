@@ -133,6 +133,7 @@ class RouteGuard {
           AppRoutes.subjectsInDepartmentScreen: const SubjectsView(),
           AppRoutes.discussionViewScreen: const DiscussionView(),
           AppRoutes.answersPage: const AnswersPage(),
+          AppRoutes.teacherReviewPage: const TeachersPage(),
           AppRoutes.scheduleGatherings: const ScheduledGatherings(),
           ...commonRoutes,
         };

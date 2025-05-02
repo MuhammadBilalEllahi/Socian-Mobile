@@ -11,7 +11,8 @@ class ProfileDropDown extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final foreground = isDarkMode ? Colors.white : const Color(0xFF09090B);
-    final mutedForeground = isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+    final mutedForeground =
+        isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
     const primary = Color(0xFF8B5CF6);
 
     return Row(
@@ -24,7 +25,9 @@ class ProfileDropDown extends ConsumerWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: BorderSide(
-              color: isDarkMode ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+              color: isDarkMode
+                  ? const Color(0xFF27272A)
+                  : const Color(0xFFE4E4E7),
             ),
           ),
           onSelected: (value) {
@@ -94,7 +97,7 @@ class ProfileDropDown extends ConsumerWidget {
                   const Icon(Icons.logout, color: Color(0xFFEC4899)),
                   const SizedBox(width: 8),
                   Text(
-                    "Logout",
+                    "Logoute",
                     style: TextStyle(color: foreground),
                   ),
                 ],

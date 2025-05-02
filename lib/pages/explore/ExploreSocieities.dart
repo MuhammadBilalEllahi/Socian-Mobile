@@ -89,20 +89,42 @@ class _ExploreSocietiesState extends ConsumerState<ExploreSocieties> {
     });
   }
 
-  Color get _bg => Colors.black;
-  Color get _fg => Colors.white;
-  Color get _cardBg => const Color(0xFF18181B);
-  Color get _border => const Color(0xFF27272A);
-  Color get _muted => const Color(0xFF71717A);
-  Color get _accent => Colors.white;
-  Color get _joinedBg => const Color(0xFF27272A);
-  Color get _joinedFg => Colors.white;
-  Color get _chipBg => const Color(0xFF27272A);
-  Color get _chipFg => Colors.white;
+  // Light theme colors
+  Color get _bg => Theme.of(context).brightness == Brightness.light
+      ? Colors.white
+      : Colors.black;
+  Color get _fg => Theme.of(context).brightness == Brightness.light
+      ? Colors.black
+      : Colors.white;
+  Color get _cardBg => Theme.of(context).brightness == Brightness.light
+      ? const Color(0xFFF8F8F8)
+      : const Color(0xFF18181B);
+  Color get _border => Theme.of(context).brightness == Brightness.light
+      ? const Color(0xFFE5E5E5)
+      : const Color(0xFF27272A);
+  Color get _muted => Theme.of(context).brightness == Brightness.light
+      ? const Color(0xFF71717A)
+      : const Color(0xFFA1A1AA);
+  Color get _accent => Theme.of(context).brightness == Brightness.light
+      ? Colors.black
+      : Colors.white;
+  Color get _joinedBg => Theme.of(context).brightness == Brightness.light
+      ? const Color(0xFFF1F1F1)
+      : const Color(0xFF27272A);
+  Color get _joinedFg => Theme.of(context).brightness == Brightness.light
+      ? Colors.black
+      : Colors.white;
+  Color get _chipBg => Theme.of(context).brightness == Brightness.light
+      ? const Color(0xFFF1F1F1)
+      : const Color(0xFF27272A);
+  Color get _chipFg => Theme.of(context).brightness == Brightness.light
+      ? Colors.black
+      : Colors.white;
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(societiesProvider);
+    final notifier = ref.read(societiesProvider.notifier);
     final auth = ref.read(authProvider);
     final allSocieties = [
       ...state.subscribedSocieties,
@@ -139,173 +161,181 @@ class _ExploreSocietiesState extends ConsumerState<ExploreSocieties> {
     }
 
     return Scaffold(
+      // appBar: AppBar(),
       backgroundColor: _bg,
       body: Padding(
         padding: const EdgeInsets.only(top: 30),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              const SizedBox(height: 12),
-              custom.SearchBar(
-                controller: searchController,
-                focusNode: searchFocusNode,
-                fg: _fg,
-                cardBg: _cardBg,
-                muted: _muted,
-                border: _border,
-                accent: _accent,
-                onClear: () => setState(() => searchController.clear()),
-              ),
-              FilterBar(
-                allSocieties: allSocieties,
-                selectedUniversity: selectedUniversity,
-                selectedCampus: selectedCampus,
-                selectedAllows: selectedAllows,
-                onUniversityChanged: (value) => setState(() {
-                  selectedUniversity = value;
-                  selectedCampus = null;
-                }),
-                onCampusChanged: (value) =>
-                    setState(() => selectedCampus = value),
-                onAllowsChanged: (value) =>
-                    setState(() => selectedAllows = value),
-                fg: _fg,
-                cardBg: _cardBg,
-                muted: _muted,
-                border: _border,
-                accent: _accent,
-              ),
-              const SizedBox(height: 8),
-              isSearchActive
-                  ? VerticalSocietiesList(
-                      state: state,
-                      fg: _fg,
-                      cardBg: _cardBg,
-                      border: _border,
-                      muted: _muted,
-                      joinedBg: _joinedBg,
-                      joinedFg: _joinedFg,
-                      filterFn: filterFn,
-                    )
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 4),
-                          child: Text(
-                            "Accross pakistan",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: _fg,
-                              letterSpacing: -0.5,
+        child: RefreshIndicator(
+          onRefresh: () async {
+            await notifier.fetchAllSocieties();
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              children: [
+                const SizedBox(height: 12),
+                custom.SearchBar(
+                  controller: searchController,
+                  focusNode: searchFocusNode,
+                  fg: _fg,
+                  cardBg: _cardBg,
+                  muted: _muted,
+                  border: _border,
+                  accent: _accent,
+                  onClear: () => setState(() => searchController.clear()),
+                ),
+                FilterBar(
+                  allSocieties: allSocieties,
+                  selectedUniversity: selectedUniversity,
+                  selectedCampus: selectedCampus,
+                  selectedAllows: selectedAllows,
+                  onUniversityChanged: (value) => setState(() {
+                    selectedUniversity = value;
+                    selectedCampus = null;
+                  }),
+                  onCampusChanged: (value) =>
+                      setState(() => selectedCampus = value),
+                  onAllowsChanged: (value) =>
+                      setState(() => selectedAllows = value),
+                  fg: _fg,
+                  cardBg: _cardBg,
+                  muted: _muted,
+                  border: _border,
+                  accent: _accent,
+                ),
+                const SizedBox(height: 8),
+                isSearchActive
+                    ? VerticalSocietiesList(
+                        state: state,
+                        fg: _fg,
+                        cardBg: _cardBg,
+                        border: _border,
+                        muted: _muted,
+                        joinedBg: _joinedBg,
+                        joinedFg: _joinedFg,
+                        filterFn: filterFn,
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 4),
+                            child: Text(
+                              "Accross pakistan",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: _fg,
+                                letterSpacing: -0.5,
+                              ),
                             ),
                           ),
-                        ),
-                        HorizontalSocietiesList(
-                          societies: state.universitiesSocieties.items,
-                          fields: ['university'],
-                          isLoading: state.universitiesSocieties.isLoading,
-                          fg: _fg,
-                          cardBg: _cardBg,
-                          border: _border,
-                          muted: _muted,
-                          chipBg: _chipBg,
-                          chipFg: _chipFg,
-                          filterFn: filterFn,
-                          hasMore: state.universitiesSocieties.hasMore,
-                          isLoadingMore:
-                              state.universitiesSocieties.isLoadingMore,
-                          onLoadMore: () => ref
-                              .read(societiesProvider.notifier)
-                              .fetchNextPage('universities'),
-                        ),
-                        Divider(
-                          color: _border,
-                          thickness: 1,
-                          height: 24,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 4),
-                          child: Text(
-                            "All Over " +
-                                (auth.user?['references']['university']['name']
-                                        ?.toString()
-                                        .toLowerCase()
-                                        .replaceFirstMapped(RegExp(r'^[a-z]'),
-                                            (m) => m[0]!.toUpperCase()) ??
-                                    'your campus'),
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: _fg,
-                              letterSpacing: -0.5,
+                          HorizontalSocietiesList(
+                            societies: state.universitiesSocieties.items,
+                            fields: ['university'],
+                            isLoading: state.universitiesSocieties.isLoading,
+                            fg: _fg,
+                            cardBg: _cardBg,
+                            border: _border,
+                            muted: _muted,
+                            chipBg: _chipBg,
+                            chipFg: _chipFg,
+                            filterFn: filterFn,
+                            hasMore: state.universitiesSocieties.hasMore,
+                            isLoadingMore:
+                                state.universitiesSocieties.isLoadingMore,
+                            onLoadMore: () => ref
+                                .read(societiesProvider.notifier)
+                                .fetchNextPage('universities'),
+                          ),
+                          Divider(
+                            color: _border,
+                            thickness: 1,
+                            height: 24,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 4),
+                            child: Text(
+                              "All Over " +
+                                  (auth.user?['references']['university']
+                                              ['name']
+                                          ?.toString()
+                                          .toLowerCase()
+                                          .replaceFirstMapped(RegExp(r'^[a-z]'),
+                                              (m) => m[0]!.toUpperCase()) ??
+                                      'your campus'),
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: _fg,
+                                letterSpacing: -0.5,
+                              ),
                             ),
                           ),
-                        ),
-                        HorizontalSocietiesList(
-                          societies: state.universitySocieties.items,
-                          fields: ['campus'],
-                          isLoading: state.universitySocieties.isLoading,
-                          fg: _fg,
-                          cardBg: _cardBg,
-                          border: _border,
-                          muted: _muted,
-                          chipBg: _chipBg,
-                          chipFg: _chipFg,
-                          filterFn: filterFn,
-                          hasMore: state.universitySocieties.hasMore,
-                          isLoadingMore:
-                              state.universitySocieties.isLoadingMore,
-                          onLoadMore: () => ref
-                              .read(societiesProvider.notifier)
-                              .fetchNextPage('university'),
-                        ),
-                        Divider(
-                          color: _border,
-                          thickness: 1,
-                          height: 24,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 4),
-                          child: Text(
-                            "All Societies in Your Campus",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: _fg,
-                              letterSpacing: -0.5,
+                          HorizontalSocietiesList(
+                            societies: state.universitySocieties.items,
+                            fields: ['campus'],
+                            isLoading: state.universitySocieties.isLoading,
+                            fg: _fg,
+                            cardBg: _cardBg,
+                            border: _border,
+                            muted: _muted,
+                            chipBg: _chipBg,
+                            chipFg: _chipFg,
+                            filterFn: filterFn,
+                            hasMore: state.universitySocieties.hasMore,
+                            isLoadingMore:
+                                state.universitySocieties.isLoadingMore,
+                            onLoadMore: () => ref
+                                .read(societiesProvider.notifier)
+                                .fetchNextPage('university'),
+                          ),
+                          Divider(
+                            color: _border,
+                            thickness: 1,
+                            height: 24,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 4),
+                            child: Text(
+                              "All Societies in Your Campus",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: _fg,
+                                letterSpacing: -0.5,
+                              ),
                             ),
                           ),
-                        ),
-                        HorizontalSocietiesList(
-                          societies: state.campusSocieties.items,
-                          fields: ['campus-self'],
-                          isLoading: state.campusSocieties.isLoading,
-                          fg: _fg,
-                          cardBg: _cardBg,
-                          border: _border,
-                          muted: _muted,
-                          chipBg: _chipBg,
-                          chipFg: _chipFg,
-                          filterFn: filterFn,
-                          hasMore: state.campusSocieties.hasMore,
-                          isLoadingMore: state.campusSocieties.isLoadingMore,
-                          onLoadMore: () => ref
-                              .read(societiesProvider.notifier)
-                              .fetchNextPage('campus'),
-                        ),
-                        Divider(
-                          color: _border,
-                          thickness: 1,
-                          height: 24,
-                        ),
-                      ],
-                    ),
-            ],
+                          HorizontalSocietiesList(
+                            societies: state.campusSocieties.items,
+                            fields: ['campus-self'],
+                            isLoading: state.campusSocieties.isLoading,
+                            fg: _fg,
+                            cardBg: _cardBg,
+                            border: _border,
+                            muted: _muted,
+                            chipBg: _chipBg,
+                            chipFg: _chipFg,
+                            filterFn: filterFn,
+                            hasMore: state.campusSocieties.hasMore,
+                            isLoadingMore: state.campusSocieties.isLoadingMore,
+                            onLoadMore: () => ref
+                                .read(societiesProvider.notifier)
+                                .fetchNextPage('campus'),
+                          ),
+                          Divider(
+                            color: _border,
+                            thickness: 1,
+                            height: 24,
+                          ),
+                        ],
+                      ),
+              ],
+            ),
           ),
         ),
       ),

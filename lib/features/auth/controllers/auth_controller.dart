@@ -9,7 +9,8 @@ class AuthController extends StateNotifier<AuthState> {
   final AuthUseCases authUseCases;
   bool _isDisposed = false;
 
-  AuthController({required this.authUseCases}) : super(const AuthState(isLoading: true)) {
+  AuthController({required this.authUseCases})
+      : super(const AuthState(isLoading: true)) {
     // Initialize token loading after the widget tree is built
     Future.microtask(() => _loadToken());
   }
@@ -28,7 +29,7 @@ class AuthController extends StateNotifier<AuthState> {
     try {
       final token = await SecureStorageService.instance.getToken();
       if (!mounted) return;
-      
+
       if (token != null && !JwtDecoder.isExpired(token)) {
         final user = JwtDecoder.decode(token);
         if (!mounted) return;
@@ -66,7 +67,7 @@ class AuthController extends StateNotifier<AuthState> {
     try {
       final response = await authUseCases.login(email, password);
       if (!mounted) return;
-      
+
       final token = response['access_token'];
       final user = JwtDecoder.decode(token);
       if (user.isNotEmpty && mounted) {
@@ -91,12 +92,11 @@ class AuthController extends StateNotifier<AuthState> {
       await SecureStorageService.instance.saveToken(token);
       if (!mounted) return;
       state = state.copyWith(
-        user: user,
-        token: token,
-        isLoading: false,
-        error: null,
-        role: user['role'] ?? AppRoles.student
-      );
+          user: user,
+          token: token,
+          isLoading: false,
+          error: null,
+          role: user['role'] ?? AppRoles.student);
     } catch (e) {
       if (!mounted) return;
       state = state.copyWith(error: e.toString(), isLoading: false);

@@ -7,7 +7,7 @@ class OriginalComment extends StatelessWidget {
   final Map<String, dynamic> comment;
   final String teacherId;
   final bool isDark;
-  final Function(String, bool) onVote;
+  final Function(String, String, String) onVote;
   final Function(Map<String, dynamic>, String, bool) onReplyAdded;
   final Function(String, String, bool) onReplyRemoved;
 
@@ -39,7 +39,9 @@ class OriginalComment extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 16,
-                backgroundColor: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
+                backgroundColor: isDark
+                    ? Colors.white.withOpacity(0.1)
+                    : Colors.black.withOpacity(0.05),
                 child: Text(
                   name[0].toUpperCase(),
                   style: theme.textTheme.bodyMedium?.copyWith(
@@ -63,10 +65,15 @@ class OriginalComment extends StatelessWidget {
                               isAnonymous ? 'Anonymous' : name,
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.w600,
-                                color: isDeleted ? theme.colorScheme.onSurface.withOpacity(0.5) : null,
+                                color: isDeleted
+                                    ? theme.colorScheme.onSurface
+                                        .withOpacity(0.5)
+                                    : null,
                               ),
                             ),
-                            if (!isDeleted && !isAnonymous && user['isVerified'] == true) ...[
+                            if (!isDeleted &&
+                                !isAnonymous &&
+                                user['isVerified'] == true) ...[
                               const SizedBox(width: 4),
                               const Icon(
                                 Icons.verified_rounded,
@@ -87,7 +94,7 @@ class OriginalComment extends StatelessWidget {
                                 size: 16,
                                 color: index < (comment['rating'] as int)
                                     ? const Color(0xFFFFD700)
-                                    : isDark 
+                                    : isDark
                                         ? Colors.white.withOpacity(0.3)
                                         : Colors.black.withOpacity(0.3),
                               );
@@ -96,9 +103,9 @@ class OriginalComment extends StatelessWidget {
                       ],
                     ),
                     Text(
-                      comment['updatedAt'] != null 
-                        ? DateFormatter.formatDate(comment['updatedAt'])
-                        : '',
+                      comment['updatedAt'] != null
+                          ? DateFormatter.formatDate(comment['updatedAt'])
+                          : '',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurface.withOpacity(0.5),
                       ),
@@ -125,14 +132,16 @@ class OriginalComment extends StatelessWidget {
                   icon: Icons.arrow_upward_rounded,
                   count: comment['upvoteCount'] ?? 0,
                   isDark: isDark,
-                  onPressed: () => onVote(comment['_id'], true),
+                  onPressed: () =>
+                      onVote(comment['_id'], comment['user']['_id'], 'upvote'),
                 ),
                 const SizedBox(width: 16),
                 VoteButton(
                   icon: Icons.arrow_downward_rounded,
                   count: comment['downvoteCount'] ?? 0,
                   isDark: isDark,
-                  onPressed: () => onVote(comment['_id'], false),
+                  onPressed: () => onVote(
+                      comment['_id'], comment['user']['_id'], 'downvote'),
                 ),
               ],
             ),
@@ -153,4 +162,4 @@ class OriginalComment extends StatelessWidget {
       ),
     );
   }
-} 
+}

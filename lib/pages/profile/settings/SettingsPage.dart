@@ -1,3 +1,4 @@
+import 'package:beyondtheclass/pages/explore/SocietyProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
@@ -19,7 +20,7 @@ class SettingsPage extends ConsumerWidget {
         elevation: 0,
         leading: IconButton(
           icon: Icon(
-            Icons.arrow_back, 
+            Icons.arrow_back,
             color: isDarkMode ? Colors.white : Colors.black,
             size: 22,
           ),
@@ -38,14 +39,16 @@ class SettingsPage extends ConsumerWidget {
         children: [
           // Profile Section
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             child: Row(
               children: [
                 CircleAvatar(
                   radius: 32,
                   backgroundImage: user?['profile']?['picture'] != null
                       ? NetworkImage(user!['profile']['picture'])
-                      : const AssetImage('assets/images/profilepic2.jpg') as ImageProvider,
+                      : const AssetImage('assets/images/profilepic2.jpg')
+                          as ImageProvider,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -177,6 +180,8 @@ class SettingsPage extends ConsumerWidget {
                 () async {
                   await ref.read(authProvider.notifier).logout();
                   if (context.mounted) {
+                    ref.invalidate(authProvider);
+                    ref.invalidate(societiesProvider);
                     Navigator.pushNamedAndRemoveUntil(
                       context,
                       AppRoutes.authScreen,
@@ -249,4 +254,4 @@ class SettingsPage extends ConsumerWidget {
       onTap: onTap,
     );
   }
-} 
+}
