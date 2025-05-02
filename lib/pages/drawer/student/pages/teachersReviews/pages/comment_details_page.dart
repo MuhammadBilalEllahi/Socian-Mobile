@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,8 +46,7 @@ class _CommentDetailsPageState extends State<CommentDetailsPage> {
         queryParameters: {'feedbackCommentId': widget.comment['_id']},
       );
 
-      debugPrint(
-          "response /api/teacher/reply/feedback: ${response.toString()}");
+      log("response /api/teacher/reply/feedback: ${response.toString()}");
       setState(() {
         _replies = List<Map<String, dynamic>>.from(
             response['replies']['replies'] ?? []);
@@ -60,31 +61,6 @@ class _CommentDetailsPageState extends State<CommentDetailsPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to load replies: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _handleVote(
-      String commentId, String userIdOther, String voteType) async {
-    try {
-      final ApiClient apiClient = ApiClient();
-      await apiClient.post(
-        '/api/teacher/reviews/feedbacks/vote',
-        {
-          'reviewId': commentId,
-          'userIdOther': userIdOther,
-          'voteType': voteType,
-        },
-      );
-      _fetchReplies();
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to vote: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -192,7 +168,6 @@ class _CommentDetailsPageState extends State<CommentDetailsPage> {
               comment: widget.comment,
               teacherId: widget.teacherId,
               isDark: widget.isDark,
-              onVote: _handleVote,
               onReplyAdded: _addReplyOptimistically,
               onReplyRemoved: _removeOptimisticReply,
             ),

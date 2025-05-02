@@ -45,11 +45,13 @@ class _ReplyItemState extends ConsumerState<ReplyItem> {
     });
 
     try {
-      final response = await apiClient.get('/api/teacher/reply/reply/feedback?feedbackCommentId=${widget.reply['_id']}');
+      final response = await apiClient.get(
+          '/api/teacher/reply/reply/feedback?feedbackCommentId=${widget.reply['_id']}');
       debugPrint('response reply replies: $response');
       final data = response['replies']['replies'] as List;
       debugPrint('data reply replies: $data');
-      final mappedReplies = data.map((reply) => Map<String, dynamic>.from(reply as Map)).toList();
+      final mappedReplies =
+          data.map((reply) => Map<String, dynamic>.from(reply as Map)).toList();
       debugPrint('mappedReplies: $mappedReplies');
       setState(() {
         _replyReplies = mappedReplies;
@@ -63,7 +65,8 @@ class _ReplyItemState extends ConsumerState<ReplyItem> {
     }
   }
 
-  void _handleReplyAdded(Map<String, dynamic> reply, String parentId, bool isReplyToReply) {
+  void _handleReplyAdded(
+      Map<String, dynamic> reply, String parentId, bool isReplyToReply) {
     final userMap = ref.read(authProvider).user;
     if (userMap == null) return;
 
@@ -71,12 +74,11 @@ class _ReplyItemState extends ConsumerState<ReplyItem> {
     if (reply['_id'] != null && !reply['_id'].toString().contains('T')) {
       setState(() {
         // Find the temporary reply by checking if the ID contains a timestamp format
-        final index = _replyReplies.indexWhere((r) => 
-          r['_id'] != null && 
-          r['_id'].toString().contains('T') && 
-          r['comment'] == reply['comment']
-        );
-        
+        final index = _replyReplies.indexWhere((r) =>
+            r['_id'] != null &&
+            r['_id'].toString().contains('T') &&
+            r['comment'] == reply['comment']);
+
         if (index != -1) {
           // Replace the temporary reply with the server response
           _replyReplies[index] = reply;
@@ -121,8 +123,10 @@ class _ReplyItemState extends ConsumerState<ReplyItem> {
     final date = widget.reply['updatedAt'] ?? widget.reply['createdAt'] ?? '';
     final replyText = widget.reply['comment'] ?? widget.reply['text'] ?? '';
     final gifUrl = widget.reply['gifUrl'] ?? '';
-    final reactions = Map<String, dynamic>.from(widget.reply['reactions'] as Map? ?? {});
-    final isTemporary = widget.reply['_id'] != null && widget.reply['_id'].toString().contains('T');
+    final reactions =
+        Map<String, dynamic>.from(widget.reply['reactions'] as Map? ?? {});
+    final isTemporary = widget.reply['_id'] != null &&
+        widget.reply['_id'].toString().contains('T');
 
     return Opacity(
       opacity: isTemporary ? 0.6 : 1.0,
@@ -131,7 +135,9 @@ class _ReplyItemState extends ConsumerState<ReplyItem> {
         decoration: BoxDecoration(
           border: Border(
             top: BorderSide(
-              color: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
+              color: widget.isDark
+                  ? Colors.white.withOpacity(0.1)
+                  : Colors.black.withOpacity(0.1),
               width: 2,
             ),
           ),
@@ -150,11 +156,19 @@ class _ReplyItemState extends ConsumerState<ReplyItem> {
                         children: [
                           CircleAvatar(
                             radius: 12,
-                            backgroundColor: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
+                            backgroundColor: widget.isDark
+                                ? Colors.white.withOpacity(0.1)
+                                : Colors.black.withOpacity(0.05),
                             child: Text(
-                              (isAnonymous ? 'A' :user['name'] != null ? user['name'][0]: '#').toUpperCase(),
+                              (isAnonymous
+                                      ? 'A'
+                                      : user['name'] != null
+                                          ? user['name'][0]
+                                          : '#')
+                                  .toUpperCase(),
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: widget.isDark ? Colors.white : Colors.black,
+                                color:
+                                    widget.isDark ? Colors.white : Colors.black,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -163,14 +177,16 @@ class _ReplyItemState extends ConsumerState<ReplyItem> {
                           Expanded(
                             child: Row(
                               children: [
-                                Text(
-                                  isAnonymous ? 'Anonymous' : name,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: isDeleted ? theme.colorScheme.onSurface.withOpacity(0.5) : null,
-                                  ),
-                                ),
-                                if (!isDeleted && !isAnonymous && user['isVerified'] == true) ...[
+                                // Text(
+                                //   isAnonymous ? 'Anonymous' : name,
+                                //   style: theme.textTheme.bodySmall?.copyWith(
+                                //     fontWeight: FontWeight.w600,
+                                //     color: isDeleted ? theme.colorScheme.onSurface.withOpacity(0.5) : null,
+                                //   ),
+                                // ),
+                                if (!isDeleted &&
+                                    !isAnonymous &&
+                                    user['isVerified'] == true) ...[
                                   const SizedBox(width: 4),
                                   const Icon(
                                     Icons.verified_rounded,
@@ -192,7 +208,8 @@ class _ReplyItemState extends ConsumerState<ReplyItem> {
                                   Text(
                                     DateFormatter.formatDate(date),
                                     style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.5),
                                     ),
                                   ),
                               ],
@@ -232,7 +249,6 @@ class _ReplyItemState extends ConsumerState<ReplyItem> {
                         child: Icon(
                           Icons.broken_image_outlined,
                           color: theme.colorScheme.onSurface.withOpacity(0.5),
-
                         ),
                       ),
                     ),
@@ -258,15 +274,15 @@ class _ReplyItemState extends ConsumerState<ReplyItem> {
                           count: reactions[reaction['type']] ?? 0,
                           isDark: widget.isDark,
                           isSelected: false,
-                          onPressed: () => widget.onReaction(widget.reply['_id'], reaction['type'] as String),
+                          onPressed: () => widget.onReaction(
+                              widget.reply['_id'], reaction['type'] as String),
                         ),
                     ],
                   ),
-                  
-                  Wrap(
-                    spacing: -10,
-                    children: [
-                      if(widget.reply['replies'] != null && widget.reply['replies'].length > 0)  IconButton(
+                  Wrap(spacing: -10, children: [
+                    if (widget.reply['replies'] != null &&
+                        widget.reply['replies'].length > 0)
+                      IconButton(
                         onPressed: () {
                           setState(() {
                             _showReplyReplies = !_showReplyReplies;
@@ -280,9 +296,12 @@ class _ReplyItemState extends ConsumerState<ReplyItem> {
                           minimumSize: Size.zero,
                           iconSize: 20,
                         ),
-                        icon: Icon(_showReplyReplies ? Icons.remove_rounded : Icons.add_rounded),
+                        icon: Icon(_showReplyReplies
+                            ? Icons.remove_rounded
+                            : Icons.add_rounded),
                       ),
-                      if (!isDeleted) IconButton(
+                    if (!isDeleted)
+                      IconButton(
                         onPressed: () {
                           setState(() {
                             _showReplyBox = !_showReplyBox;
@@ -295,12 +314,10 @@ class _ReplyItemState extends ConsumerState<ReplyItem> {
                         ),
                         icon: const Icon(Icons.reply_rounded),
                       ),
-                    ])
-                  ],
+                  ])
+                ],
               ),
-              
               const SizedBox(height: 8),
-              
               if (_showReplyBox && !isDeleted)
                 ReplyBox(
                   parentId: widget.reply['_id'],
@@ -310,7 +327,6 @@ class _ReplyItemState extends ConsumerState<ReplyItem> {
                   onReplyAdded: _handleReplyAdded,
                   onReplyRemoved: widget.onReplyRemoved,
                 ),
-
               if (_showReplyReplies && _isLoadingReplies)
                 const Padding(
                   padding: EdgeInsets.all(8.0),
@@ -318,15 +334,15 @@ class _ReplyItemState extends ConsumerState<ReplyItem> {
                 )
               else if (_showReplyReplies)
                 ..._replyReplies.map((reply) => ReplyReplyItem(
-                  feedbackCommentId: widget.reply['_id'],
-                  reply: Map<String, dynamic>.from(reply),
-                  isDark: widget.isDark,
-                  teacherId: widget.teacherId,
-                  onReaction: widget.onReaction,
-                  onReplyAdded: widget.onReplyAdded,
-                  onReplyRemoved: widget.onReplyRemoved,
-                  parentUsername: widget.reply['user']?['name'] ?? '',
-                )),
+                      feedbackCommentId: widget.reply['_id'],
+                      reply: Map<String, dynamic>.from(reply),
+                      isDark: widget.isDark,
+                      teacherId: widget.teacherId,
+                      onReaction: widget.onReaction,
+                      onReplyAdded: widget.onReplyAdded,
+                      onReplyRemoved: widget.onReplyRemoved,
+                      parentUsername: widget.reply['user']?['name'] ?? '',
+                    )),
             ],
           ),
         ),
