@@ -1,4 +1,3 @@
-
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/pages/explore/SocietyProvider.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
@@ -23,6 +22,7 @@ import 'widgets/media_preview.dart';
 import 'widgets/voice_note_section.dart';
 import 'widgets/media_controls.dart';
 import 'dart:async';
+import 'package:http_parser/http_parser.dart';
 
 enum PostType { personal, society }
 
@@ -354,23 +354,36 @@ class _CreatePostState extends ConsumerState<CreatePost> {
             'societyId': _selectedSocietyId,
         };
 
+        // Handle media files
         if (_mediaFiles.isNotEmpty) {
           data['file'] = await Future.wait(
-            _mediaFiles.map((file) async => await MultipartFile.fromFile(
-                  file.path,
-                  filename: file.path.split('/').last,
-                )),
+            _mediaFiles.map((file) async {
+              final fileType =
+                  file.path.toLowerCase().endsWith('.mp4') ? 'video' : 'image';
+              return MultipartFile.fromFile(
+                file.path,
+                filename:
+                    '${DateTime.now().millisecondsSinceEpoch}_${file.path.split('/').last}',
+                contentType: MediaType.parse(
+                    fileType == 'video' ? 'video/mp4' : 'image/jpeg'),
+              );
+            }),
           );
         }
 
+        // Handle voice note
         if (_voiceNote != null) {
-          data['file'] = [
-            ...(data['file'] ?? []),
-            await MultipartFile.fromFile(
-              _voiceNote!.path,
-              filename: _voiceNote!.path.split('/').last,
-            ),
-          ];
+          final voiceFile = await MultipartFile.fromFile(
+            _voiceNote!.path,
+            filename: '${DateTime.now().millisecondsSinceEpoch}_voice.m4a',
+            contentType: MediaType.parse('audio/m4a'),
+          );
+
+          if (data['file'] != null) {
+            data['file'] = [...data['file'], voiceFile];
+          } else {
+            data['file'] = [voiceFile];
+          }
         }
 
         final endpoint = _postType == PostType.society
@@ -378,12 +391,15 @@ class _CreatePostState extends ConsumerState<CreatePost> {
             : '/api/posts/create-indiv';
         debugPrint('Request URL: ${ApiConstants.baseUrl}$endpoint');
         debugPrint('Request Data: $data');
-final response = await _apiClient.postFormData(endpoint, data);
-debugPrint('Response: $response');
 
-ScaffoldMessenger.of(context).showSnackBar(
-  SnackBar(content: Text(response['message'] ?? 'Post created successfully')),
-);
+        final response = await _apiClient.postFormData(endpoint, data);
+        debugPrint('Response: $response');
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content:
+                  Text(response['message'] ?? 'Post created successfully')),
+        );
         Navigator.pop(context);
       } catch (e) {
         debugPrint('Error creating post: $e');
