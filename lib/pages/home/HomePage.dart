@@ -2,12 +2,12 @@ import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/pages/bottomBar/MyBottomNavBar.dart';
 import 'package:beyondtheclass/pages/explore/ExploreSocieities.dart';
 import 'package:beyondtheclass/pages/explore/MapsPage.dart';
-import 'package:beyondtheclass/pages/StudentPages/home/widgets/campus/CampusPosts.dart';
+
 import 'package:beyondtheclass/pages/gps/GpsInitialPage.dart';
 import 'package:beyondtheclass/pages/home/widgets/campus/CampusPosts.dart';
 import 'package:beyondtheclass/pages/message/Messages.dart';
 import 'package:beyondtheclass/pages/profile/ProfilePage.dart';
-import 'package:beyondtheclass/providers/page_provider.dart';
+import 'package:beyondtheclass/pages/providers/page_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shorebird_code_push/shorebird_code_push.dart';

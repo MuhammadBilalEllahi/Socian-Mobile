@@ -148,6 +148,7 @@ class AppRoutes {
   static const String settings = '/settings';
   static const String answersPage = '/past-paper/answers';
   static const String scheduleGatherings = '/scheduled-gatherings';
+  static const String teacherReviewPage = '/teacher-review';
   // Teacher routes
   static const String teacherHome = '/teacher/home';
   static const String teacherProfile = '/teacher/profile';

@@ -1,9 +1,8 @@
 import 'package:beyondtheclass/core/utils/constants.dart';
-import 'package:beyondtheclass/pages/StudentPages/home/widgets/campus/CampusPosts.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/DepartmentPage.dart';
 import 'package:beyondtheclass/pages/drawer/student/pages/teachersReviews/TeachersPage.dart';
-import 'package:beyondtheclass/providers/page_provider.dart';
+import 'package:beyondtheclass/pages/providers/page_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -220,12 +219,7 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                     icon: Icons.rate_review,
                     title: "Teacher's Reviews",
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const TeachersPage(),
-                        ),
-                      );
+                      Navigator.pushNamed(context, AppRoutes.teacherReviewPage);
                     },
                     isDarkMode: isDarkMode,
                   ),
