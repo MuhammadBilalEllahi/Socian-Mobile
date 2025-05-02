@@ -1,4 +1,7 @@
+
+import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/pages/explore/SocietyProvider.dart';
+import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,6 +12,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:io';
 import 'widgets/user_info_section.dart';
 import 'widgets/post_type_selector.dart';
@@ -22,9 +27,7 @@ import 'dart:async';
 enum PostType { personal, society }
 
 class CreatePost extends ConsumerStatefulWidget {
-  const CreatePost({
-    super.key,
-  });
+  const CreatePost({super.key});
 
   @override
   ConsumerState<CreatePost> createState() => _CreatePostState();
@@ -54,6 +57,9 @@ class _CreatePostState extends ConsumerState<CreatePost> {
   List<String> _searchResults = [];
   Duration _recordingDuration = Duration.zero;
   Timer? _recordingTimer;
+  bool _isLoading = false;
+
+  final _apiClient = ApiClient(); // Initialize ApiClient
 
   @override
   void initState() {
@@ -96,6 +102,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
         });
       }
     } catch (e) {
+      debugPrint('Error picking media: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error picking media: $e')),
       );
@@ -112,16 +119,12 @@ class _CreatePostState extends ConsumerState<CreatePost> {
 
   Future<void> _selectVoice() async {
     try {
-      // Stop playback if playing
       if (_isPlaying) {
         await _audioPlayer.stop();
       }
-
-      // Delete the previous voice note if it exists
       if (_voiceNote != null) {
         await _voiceNote!.delete();
       }
-
       setState(() {
         _mediaFiles.clear();
         for (var controller in _videoControllers.values) {
@@ -139,6 +142,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
         _waveform = [];
       });
     } catch (e) {
+      debugPrint('Error preparing voice recording: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error preparing voice recording: $e')),
       );
@@ -151,52 +155,36 @@ class _CreatePostState extends ConsumerState<CreatePost> {
         final tempDir = await getTemporaryDirectory();
         final path =
             '${tempDir.path}/audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
-
-        // Optimize recording configuration for better performance
         await _audioRecorder.start(
           const RecordConfig(
             encoder: AudioEncoder.aacLc,
-            bitRate: 64000, // Reduced from 128000 for better buffer handling
-            sampleRate: 22050, // Reduced from 44100 for better performance
-            numChannels: 1, // Mono recording for smaller file size
-            autoGain: true, // Enable auto gain control
+            bitRate: 64000,
+            sampleRate: 22050,
+            numChannels: 1,
+            autoGain: true,
           ),
           path: path,
         );
-
         setState(() {
           _isRecording = true;
           _waveform = [];
           _recordingDuration = Duration.zero;
         });
-
-        // Start the timer
         _recordingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
           setState(() {
             _recordingDuration += const Duration(seconds: 1);
           });
         });
-
-        // Listen to amplitude changes with optimized interval
         _audioRecorder
             .onAmplitudeChanged(const Duration(milliseconds: 50))
             .listen(
           (amp) {
             if (_isRecording) {
               setState(() {
-                // Normalize and scale the amplitude for better visualization
-                // amp.current is in dB, typically between -160 and 0
                 double normalizedValue = (amp.current + 160) / 160;
-
-                // Apply non-linear scaling to make the waveform more dynamic
                 normalizedValue = normalizedValue * normalizedValue;
-
-                // Ensure the value is between 0.1 and 1.0 for better visibility
                 normalizedValue = normalizedValue.clamp(0.1, 1.0);
-
                 _waveform.add(normalizedValue);
-
-                // Keep only the last 50 values to maintain a consistent width
                 if (_waveform.length > 50) {
                   _waveform.removeAt(0);
                 }
@@ -204,13 +192,13 @@ class _CreatePostState extends ConsumerState<CreatePost> {
             }
           },
           onError: (error) {
-            print('Error listening to amplitude: $error');
+            debugPrint('Error listening to amplitude: $error');
           },
-          cancelOnError:
-              true, // Stop listening on error to prevent buffer issues
+          cancelOnError: true,
         );
       }
     } catch (e) {
+      debugPrint('Error starting recording: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error starting recording: $e')),
       );
@@ -220,10 +208,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
   Future<void> _stopRecording() async {
     try {
       _recordingTimer?.cancel();
-
-      // Add a small delay before stopping to ensure all buffers are processed
       await Future.delayed(const Duration(milliseconds: 100));
-
       final path = await _audioRecorder.stop();
       if (path != null) {
         setState(() {
@@ -233,6 +218,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
         });
       }
     } catch (e) {
+      debugPrint('Error stopping recording: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error stopping recording: $e')),
       );
@@ -241,7 +227,6 @@ class _CreatePostState extends ConsumerState<CreatePost> {
 
   Future<void> _playPauseVoiceNote() async {
     if (_voiceNote == null) return;
-
     try {
       if (_isPlaying) {
         await _audioPlayer.pause();
@@ -252,6 +237,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
         _isPlaying = !_isPlaying;
       });
     } catch (e) {
+      debugPrint('Error playing voice note: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error playing voice note: $e')),
       );
@@ -267,7 +253,6 @@ class _CreatePostState extends ConsumerState<CreatePost> {
           return;
         }
       }
-
       final position = await Geolocator.getCurrentPosition();
       setState(() {
         _currentPosition = position;
@@ -280,6 +265,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
         };
       });
     } catch (e) {
+      debugPrint('Error getting location: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error getting location: $e')),
       );
@@ -287,14 +273,8 @@ class _CreatePostState extends ConsumerState<CreatePost> {
   }
 
   Future<void> _searchLocations(String query) async {
-    // Implement location search using Google Places API
-    // For now, using dummy data
     setState(() {
-      _searchResults = [
-        'Location 1',
-        'Location 2',
-        'Location 3',
-      ];
+      _searchResults = ['Location 1', 'Location 2', 'Location 3'];
     });
   }
 
@@ -330,16 +310,12 @@ class _CreatePostState extends ConsumerState<CreatePost> {
 
   Future<void> _deleteVoiceNote() async {
     try {
-      // Stop playback if playing
       if (_isPlaying) {
         await _audioPlayer.stop();
       }
-
-      // Delete the file if it exists
       if (_voiceNote != null) {
         await _voiceNote!.delete();
       }
-
       setState(() {
         _voiceNote = null;
         _isPlaying = false;
@@ -347,9 +323,82 @@ class _CreatePostState extends ConsumerState<CreatePost> {
         _waveform = [];
       });
     } catch (e) {
+      debugPrint('Error deleting voice note: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error deleting voice note: $e')),
       );
+    }
+  }
+
+  Future<void> _createPost() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        final user = ref.read(authProvider).user;
+        final userId = user?['_id'];
+        debugPrint('User: $user');
+        debugPrint('UserId: $userId');
+
+        if (userId == null) {
+          throw Exception('User ID is null. Check authProvider configuration.');
+        }
+
+        final data = <String, dynamic>{
+          'title': _titleController.text,
+          'author': userId,
+          if (_bodyController.text.isNotEmpty) 'body': _bodyController.text,
+          if (_postType == PostType.society && _selectedSocietyId != null)
+            'societyId': _selectedSocietyId,
+        };
+
+        if (_mediaFiles.isNotEmpty) {
+          data['file'] = await Future.wait(
+            _mediaFiles.map((file) async => await MultipartFile.fromFile(
+                  file.path,
+                  filename: file.path.split('/').last,
+                )),
+          );
+        }
+
+        if (_voiceNote != null) {
+          data['file'] = [
+            ...(data['file'] ?? []),
+            await MultipartFile.fromFile(
+              _voiceNote!.path,
+              filename: _voiceNote!.path.split('/').last,
+            ),
+          ];
+        }
+
+        final endpoint = _postType == PostType.society
+            ? '/api/posts/create'
+            : '/api/posts/create-indiv';
+        debugPrint('Request URL: ${ApiConstants.baseUrl}$endpoint');
+        debugPrint('Request Data: $data');
+final response = await _apiClient.postFormData(endpoint, data);
+debugPrint('Response: $response');
+
+ScaffoldMessenger.of(context).showSnackBar(
+  SnackBar(content: Text(response['message'] ?? 'Post created successfully')),
+);
+        Navigator.pop(context);
+      } catch (e) {
+        debugPrint('Error creating post: $e');
+        if (e is DioException) {
+          debugPrint('Dio Error: ${e.response?.data}');
+          debugPrint('Status Code: ${e.response?.statusCode}');
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error creating post: $e')),
+        );
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -360,10 +409,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
       ...societiesState.subscribedSocieties,
       ...societiesState.publicSocieties,
     ];
-    // If you want to deduplicate by id:
     final uniqueSocieties = {for (var s in societies) s.id: s}.values.toList();
-
-    // If your SocietySelector expects a list of maps:
     final societyList = uniqueSocieties
         .map((s) => {'id': s.id, 'name': s.name} as Map<String, dynamic>)
         .toList();
@@ -392,12 +438,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              if (_formKey.currentState?.validate() ?? false) {
-                // TODO: Implement post creation
-                Navigator.pop(context);
-              }
-            },
+            onPressed: _isLoading ? null : _createPost,
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               backgroundColor: isDark ? Colors.white : Colors.black,
@@ -405,13 +446,22 @@ class _CreatePostState extends ConsumerState<CreatePost> {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: Text(
-              'Post',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: isDark ? Colors.black : Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            child: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.black,
+                    ),
+                  )
+                : Text(
+                    'Post',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: isDark ? Colors.black : Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
           ),
         ],
       ),
@@ -527,7 +577,6 @@ class _CreatePostState extends ConsumerState<CreatePost> {
                 if (_postType == PostType.society) {
                   setState(() {
                     if (!_showMap) {
-                      // Clear media when enabling map
                       _mediaFiles.clear();
                       for (var controller in _videoControllers.values) {
                         controller.dispose();
@@ -600,10 +649,7 @@ class WaveformPainter extends CustomPainter {
   final List<double> waveform;
   final Color color;
 
-  WaveformPainter({
-    required this.waveform,
-    required this.color,
-  });
+  WaveformPainter({required this.waveform, required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -736,4 +782,11 @@ class _FullScreenMediaViewState extends State<FullScreenMediaView> {
       ),
     );
   }
+}
+
+class SecureStorageService {
+  // Placeholder for token retrieval
+  static final SecureStorageService instance = SecureStorageService._();
+  SecureStorageService._();
+  Future<String?> getToken() async => 'your_jwt_token_here';
 }
