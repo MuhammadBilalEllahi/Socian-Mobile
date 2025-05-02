@@ -18,6 +18,7 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
     String name = auth.user?['name'] ?? "";
+    final role = auth.user!['role'];
     String username = auth.user?['username'] ?? "";
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
@@ -215,14 +216,26 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                     onTap: () => Navigator.of(context).pop(),
                     isDarkMode: isDarkMode,
                   ),
-                  _buildDrawerItem(
-                    icon: Icons.rate_review,
-                    title: "Teacher's Reviews",
-                    onTap: () {
-                      Navigator.pushNamed(context, AppRoutes.teacherReviewPage);
-                    },
-                    isDarkMode: isDarkMode,
-                  ),
+                  if (role == AppRoles.teacher)
+                    _buildDrawerItem(
+                      icon: Icons.rate_review,
+                      title: "My Reviews",
+                      onTap: () {
+                        Navigator.pushNamed(
+                            context, AppRoutes.selfReviewTeacher);
+                      },
+                      isDarkMode: isDarkMode,
+                    ),
+                  if (role == AppRoles.student)
+                    _buildDrawerItem(
+                      icon: Icons.rate_review,
+                      title: "Teacher's Reviews",
+                      onTap: () {
+                        Navigator.pushNamed(
+                            context, AppRoutes.teacherReviewPage);
+                      },
+                      isDarkMode: isDarkMode,
+                    ),
                   _buildDrawerItem(
                     icon: Icons.restaurant,
                     title: "Cafe Information Services",

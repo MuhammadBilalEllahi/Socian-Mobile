@@ -153,6 +153,7 @@ class AppRoutes {
   static const String teacherHome = '/teacher/home';
   static const String teacherProfile = '/teacher/profile';
   static const String teacherFeedbacks = '/teacher/feedbacks';
+  static const String selfReviewTeacher = '/teacher/self/reviews';
 
   // Alumni routes
   static const String alumniHome = '/alumni/home';

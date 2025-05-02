@@ -6,6 +6,7 @@ import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/SubjectsView
 import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/discussion/DiscussionView.dart';
 import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/discussion/answerPage/AnswersPage.dart';
 import 'package:beyondtheclass/pages/drawer/student/pages/teachersReviews/TeachersPage.dart';
+import 'package:beyondtheclass/pages/drawer/teacher/review/TeacherSelfReview.dart';
 import 'package:beyondtheclass/pages/gps/ScheduledGatherings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -142,6 +143,7 @@ class RouteGuard {
           AppRoutes.teacherHome: const HomePage(),
           // AppRoutes.teacherProfile: const TeacherProfile(),
           // AppRoutes.teacherFeedbacks: const TeacherFeedbacks(),
+          AppRoutes.selfReviewTeacher: const TeacherSelfReview(),
           AppRoutes.teacherReviewPage: const TeachersPage(),
           ...commonRoutes,
         };
