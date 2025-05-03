@@ -673,23 +673,36 @@ class _CommentItemState extends State<_CommentItem> {
                             ],
                           ],
                         ),
-                        // Rating Stars
-                        if (widget.comment['rating'] != null)
-                          Row(
-                            children: List.generate(5, (index) {
-                              return Icon(
-                                index < (widget.comment['rating'] as int)
-                                    ? Icons.star_rounded
-                                    : Icons.star_outline_rounded,
-                                size: 16,
-                                color: index < (widget.comment['rating'] as int)
-                                    ? const Color(0xFFFFD700)
-                                    : widget.isDark
-                                        ? Colors.white.withOpacity(0.3)
-                                        : Colors.black.withOpacity(0.3),
-                              );
-                            }),
-                          ),
+                        Row(
+                          children: [
+                            if (widget.comment['favouritedByTeacher'] == true)
+                              const Icon(
+                                Icons.favorite,
+                                size: 18,
+                              ),
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            // Rating Stars
+                            if (widget.comment['rating'] != null)
+                              Row(
+                                children: List.generate(5, (index) {
+                                  return Icon(
+                                    index < (widget.comment['rating'] as int)
+                                        ? Icons.star_rounded
+                                        : Icons.star_outline_rounded,
+                                    size: 16,
+                                    color: index <
+                                            (widget.comment['rating'] as int)
+                                        ? const Color(0xFFFFD700)
+                                        : widget.isDark
+                                            ? Colors.white.withOpacity(0.3)
+                                            : Colors.black.withOpacity(0.3),
+                                  );
+                                }),
+                              ),
+                          ],
+                        )
                       ],
                     ),
                     Text(

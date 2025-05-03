@@ -75,6 +75,44 @@ class _TeacherSelfReviewState extends ConsumerState<TeacherSelfReview> {
     }
   }
 
+  Future<bool> toggleFavorite(String ratingId) async {
+    try {
+      // Find the feedback item in the list
+      final feedbackIndex = _feedbacks.indexWhere((f) => f['_id'] == ratingId);
+      if (feedbackIndex == -1) return false;
+
+      // Optimistically update the UI
+      setState(() {
+        _feedbacks[feedbackIndex]['favouritedByTeacher'] =
+            !_feedbacks[feedbackIndex]['favouritedByTeacher'];
+      });
+
+      final response = await _apiClient.post(
+          '/api/teacher/feedback/comment/favorite', {'ratingId': ratingId});
+
+      // Update with actual server response
+      setState(() {
+        _feedbacks[feedbackIndex]['favouritedByTeacher'] =
+            response['rating']['favouritedByTeacher'] ?? false;
+      });
+
+      return response['rating']['favouritedByTeacher'] ?? false;
+    } catch (e) {
+      // Revert optimistic update on error
+      final feedbackIndex = _feedbacks.indexWhere((f) => f['_id'] == ratingId);
+      if (feedbackIndex != -1) {
+        setState(() {
+          _feedbacks[feedbackIndex]['favouritedByTeacher'] =
+              !_feedbacks[feedbackIndex]['favouritedByTeacher'];
+        });
+      }
+      setState(() {
+        _error = e.toString();
+      });
+    }
+    return false;
+  }
+
   Future<void> _showReplyBottomSheet(Map<String, dynamic> feedback) async {
     _replyController.text = feedback['teacherDirectComment']?['comment'] ?? '';
 
@@ -498,6 +536,39 @@ class _TeacherSelfReviewState extends ConsumerState<TeacherSelfReview> {
               color: mutedTextColor,
             ),
           ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  toggleFavorite(feedback['_id']);
+                },
+                child: Icon(
+                  feedback['favouritedByTeacher']
+                      ? Icons.favorite
+                      : Icons.favorite_outline_outlined,
+                  color: feedback['favouritedByTeacher']
+                      ? Colors.red
+                      : mutedTextColor,
+                ),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => _showReplyBottomSheet(feedback),
+                  child: Text(
+                    feedback['teacherDirectComment'] != null &&
+                            feedback['teacherDirectComment'].isNotEmpty
+                        ? 'Edit Reply'
+                        : 'Reply to Feedback',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: textColor,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
           if (feedback['teacherDirectComment'] != null &&
               feedback['teacherDirectComment'].isNotEmpty) ...[
             const SizedBox(height: 16),
@@ -547,23 +618,6 @@ class _TeacherSelfReviewState extends ConsumerState<TeacherSelfReview> {
               ),
             ),
           ],
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () => _showReplyBottomSheet(feedback),
-              child: Text(
-                feedback['teacherDirectComment'] != null &&
-                        feedback['teacherDirectComment'].isNotEmpty
-                    ? 'Edit Reply'
-                    : 'Reply to Feedback',
-                style: TextStyle(
-                  color: theme.primaryColor,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
