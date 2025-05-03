@@ -5,11 +5,12 @@
 // 4. teacher message to all students
 // content upload by teacher like pdf, links, books url or pdf for students
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
-import 'dart:developer' as developer;
 
 class TeacherSelfReview extends ConsumerStatefulWidget {
   const TeacherSelfReview({super.key});
@@ -23,11 +24,19 @@ class _TeacherSelfReviewState extends ConsumerState<TeacherSelfReview> {
   Map<String, dynamic>? _teacherData;
   List<Map<String, dynamic>> _feedbacks = [];
   String? _error;
+  final TextEditingController _replyController = TextEditingController();
+  final ApiClient _apiClient = ApiClient();
 
   @override
   void initState() {
     super.initState();
     _fetchTeacherData();
+  }
+
+  @override
+  void dispose() {
+    _replyController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchTeacherData() async {
@@ -46,14 +55,16 @@ class _TeacherSelfReviewState extends ConsumerState<TeacherSelfReview> {
       final response = await apiClient.get(
         '/api/teacher/account/feedbacks',
         queryParameters: {
-          'teacherId': user['_id'],
+          'teacherId': user['teacherConnectivities']['teacherModal'],
         },
       );
+      log("TEacher data $response");
 
       setState(() {
         _teacherData = response['teacher'];
         _feedbacks =
             List<Map<String, dynamic>>.from(response['feedbacks'] ?? []);
+        // log("THERE SHOULD BE teacherDirectComment in feedbacks $_feedbacks");
         _isLoading = false;
       });
     } catch (e) {
@@ -62,6 +73,122 @@ class _TeacherSelfReviewState extends ConsumerState<TeacherSelfReview> {
         _isLoading = false;
       });
     }
+  }
+
+  Future<void> _showReplyBottomSheet(Map<String, dynamic> feedback) async {
+    _replyController.text = feedback['teacherDirectComment']?['comment'] ?? '';
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(20),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Reply to Feedback',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _replyController,
+                maxLines: 4,
+                decoration: InputDecoration(
+                  hintText: 'Write your reply...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey[900]
+                      : Colors.grey[100],
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    if (_replyController.text.trim().isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Please enter a reply'),
+                        ),
+                      );
+                      return;
+                    }
+
+                    try {
+                      final user = ref.read(authProvider).user;
+                      if (user == null) {
+                        throw Exception('User not authenticated');
+                      }
+
+                      await _apiClient.post(
+                        '/api/teacher/feedback/comment/teacher',
+                        {
+                          'comment': _replyController.text.trim(),
+                          'ratingId': feedback['_id'],
+                        },
+                      );
+
+                      if (mounted) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Reply sent successfully'),
+                          ),
+                        );
+                        _fetchTeacherData();
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Error: ${e.toString()}'),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text('Send Reply'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -296,69 +423,9 @@ class _TeacherSelfReviewState extends ConsumerState<TeacherSelfReview> {
                             physics: const NeverScrollableScrollPhysics(),
                             itemCount: _feedbacks.length,
                             itemBuilder: (context, index) {
-                              final feedback = _feedbacks[index];
-                              return Container(
-                                margin: const EdgeInsets.only(bottom: 16),
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: surfaceColor,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: borderColor),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          feedback['user']?['name'] ??
-                                              'Anonymous',
-                                          style: theme.textTheme.titleMedium
-                                              ?.copyWith(
-                                            color: textColor,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        Row(
-                                          children:
-                                              List.generate(5, (starIndex) {
-                                            return Icon(
-                                              starIndex <
-                                                      (feedback['rating'] ?? 0)
-                                                  ? Icons.star_rounded
-                                                  : Icons.star_outline_rounded,
-                                              size: 16,
-                                              color: starIndex <
-                                                      (feedback['rating'] ?? 0)
-                                                  ? const Color(0xFFFFD700)
-                                                  : mutedTextColor,
-                                            );
-                                          }),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      feedback['feedback'] ?? '',
-                                      style:
-                                          theme.textTheme.bodyMedium?.copyWith(
-                                        color: textColor,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      feedback['updatedAt'] != null
-                                          ? _formatDate(feedback['updatedAt'])
-                                          : '',
-                                      style:
-                                          theme.textTheme.bodySmall?.copyWith(
-                                        color: mutedTextColor,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              return _buildFeedbackItem(
+                                context,
+                                _feedbacks[index],
                               );
                             },
                           ),
@@ -366,6 +433,139 @@ class _TeacherSelfReviewState extends ConsumerState<TeacherSelfReview> {
                     ),
                   ),
                 ),
+    );
+  }
+
+  Widget _buildFeedbackItem(
+      BuildContext context, Map<String, dynamic> feedback) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black;
+    final mutedTextColor = isDark ? Colors.grey[400]! : Colors.grey[600]!;
+
+    log("message ${feedback}");
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.grey[900] : Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Anonymous',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: textColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Row(
+                children: List.generate(5, (starIndex) {
+                  return Icon(
+                    starIndex < (feedback['rating'] ?? 0)
+                        ? Icons.star_rounded
+                        : Icons.star_outline_rounded,
+                    size: 16,
+                    color: starIndex < (feedback['rating'] ?? 0)
+                        ? const Color(0xFFFFD700)
+                        : mutedTextColor,
+                  );
+                }),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            feedback['feedback'] ?? '',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: textColor,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            feedback['updatedAt'] != null
+                ? _formatDate(feedback['updatedAt'])
+                : '',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: mutedTextColor,
+            ),
+          ),
+          if (feedback['teacherDirectComment'] != null &&
+              feedback['teacherDirectComment'].isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.grey[800] : Colors.grey[100],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.reply,
+                        size: 16,
+                        color: mutedTextColor,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Your Reply',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: mutedTextColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        _formatDate(
+                            feedback['teacherDirectComment']['createdAt']),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: mutedTextColor,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    feedback['teacherDirectComment']['comment'],
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: textColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => _showReplyBottomSheet(feedback),
+              child: Text(
+                feedback['teacherDirectComment'] != null &&
+                        feedback['teacherDirectComment'].isNotEmpty
+                    ? 'Edit Reply'
+                    : 'Reply to Feedback',
+                style: TextStyle(
+                  color: theme.primaryColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
