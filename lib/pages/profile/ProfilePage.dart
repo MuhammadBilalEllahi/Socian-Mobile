@@ -1027,78 +1027,6 @@
 //   }
 // }
 
-// // import 'package:flutter/material.dart';
-
-// // import 'widgets/AboutMeProfile.dart';
-// // import 'widgets/CarouselProfilePage.dart';
-// // import 'widgets/ProfileDropDown.dart';
-// // import 'widgets/ProfileIdentity.dart';
-// // import 'widgets/StatsBoxProfile.dart';
-
-// // class ProfilePage extends StatefulWidget {
-// //   const ProfilePage({super.key});
-
-// //   @override
-// //   State<ProfilePage> createState() => _ProfilePageState();
-// // }
-
-// // class _ProfilePageState extends State<ProfilePage> {
-
-// //   @override
-// //   Widget build(BuildContext context) {
-// //     double screenWidth = MediaQuery.of(context).size.width;
-// //     return Scaffold(
-// //       body: Container(
-// //         // color: Colors.lightGreenAccent,
-// //         child: SingleChildScrollView(
-// //           child: Column(
-// //             mainAxisAlignment: MainAxisAlignment.start,
-// //             crossAxisAlignment: CrossAxisAlignment.center,
-// //             children: [
-// //               SizedBox(height: screenWidth/16,),
-
-// //               const ProfileDropDown(),
-
-// //               const ProfileIdentity(),
-// //               const SizedBox(height: 15,),
-// //               const Row(
-// //                 mainAxisAlignment: MainAxisAlignment.center,
-// //                 children: [
-// //                   StatsBoxProfile(),
-// //                 ],
-// //               ),
-          
-// //               const SizedBox(height: 15,),
-          
-// //               // About Me
-// //               const SingleChildScrollView(
-          
-// //                   scrollDirection: Axis.horizontal,
-// //                   child: Row(
-// //                 children: [
-// //                   AboutMeProfile(),
-// //                   // AboutMeProfile(),
-// //                   // AboutMeProfile(),
-// //                 ],
-// //               )),
-// //               const Text("Highlights",style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold),),
-// //               const CarouselProfilePage(),
-// //               const SizedBox(height: 10,),
-// //               const Text("Posts",style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold),),
-
-// //               const SizedBox(height: 150,),
-// //             ],
-
-// //           ),
-// //         ),
-// //       ),
-// //     );
-// //   }
-// // }
-
-
-
-
 
 
 
@@ -1106,11 +1034,11 @@
 
 
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
+import 'package:beyondtheclass/pages/home/widgets/campus/widgets/PostCard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
-import 'package:intl/intl.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   final String? userId; // Optional userId for viewing other profiles
@@ -1227,85 +1155,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
       itemCount: _posts.length,
       itemBuilder: (context, index) {
         final post = _posts[index];
-        final createdAt = DateTime.parse(post['createdAt']);
-        final formattedDate = DateFormat('yyyy-MM-dd').format(createdAt);
         debugPrint('Post $index media: ${post['media']}');
-        return Card(
-          color: accent,
-          margin: const EdgeInsets.only(bottom: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: border),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (post["society"] != null)
-                  Text(
-                    post["society"]["name"],
-                    style: const TextStyle(
-                      color: Color(0xFF8B5CF6),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                if (post["society"] != null) const SizedBox(height: 8),
-                Text(
-                  post["body"] ?? '',
-                  style: TextStyle(color: foreground),
-                ),
-                if (post['media'] != null && post['media'] is List && post['media'].isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      post['media'][0].toString(),
-                      width: double.infinity,
-                      height: 200,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        width: double.infinity,
-                        height: 200,
-                        color: mutedForeground.withOpacity(0.1),
-                        child: const Center(
-                          child: Text('Failed to load image', style: TextStyle(color: Colors.grey)),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      formattedDate,
-                      style: TextStyle(color: mutedForeground, fontSize: 12),
-                    ),
-                    Row(
-                      children: [
-                        const Icon(Icons.favorite, color: Color(0xFFEC4899), size: 16),
-                        const SizedBox(width: 4),
-                        Text(
-                          post["voteId"]?["upVotesCount"]?.toString() ?? '0',
-                          style: TextStyle(color: foreground),
-                        ),
-                        const SizedBox(width: 16),
-                        Icon(Icons.comment, color: mutedForeground, size: 16),
-                        const SizedBox(width: 4),
-                        Text(
-                          post["commentsCount"]?.toString() ?? '0',
-                          style: TextStyle(color: foreground),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
+        debugPrint('Post $index media type: ${post['media']?.runtimeType}');
+        return PostCard(post: post);
       },
     );
   }
