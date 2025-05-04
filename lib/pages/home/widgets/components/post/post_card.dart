@@ -1,3 +1,4 @@
+import 'package:beyondtheclass/pages/profile/ProfilePage.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
@@ -803,12 +804,24 @@ class _PostDetailPageState extends State<PostDetailPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                author['name'] ?? '{Deleted}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                  color: foreground,
+                              GestureDetector(
+                                onTap: author['_id'] != null && author['username']?.isNotEmpty == true
+                                            ? () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => ProfilePage(userId: author['_id']),
+                                                  ),
+                                                );
+                                              }
+                                            : null,
+                                child: Text(
+                                  author['name'] ?? '{Deleted}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                    color: foreground,
+                                  ),
                                 ),
                               ),
                               Text(
@@ -1261,3 +1274,13 @@ class _CommentRepliesPageState extends State<CommentRepliesPage> {
     );
   }
 }
+
+
+
+
+
+
+
+
+
+
