@@ -208,7 +208,15 @@ class _TeacherSelfReviewState extends ConsumerState<TeacherSelfReview> {
   }
 
   Future<void> _showReplyBottomSheet(Map<String, dynamic> feedback) async {
-    _replyController.text = feedback['teacherDirectComment']?['comment'] ?? '';
+    log("message $feedback meow ${feedback['teacherDirectComment']}");
+    if (feedback['teacherDirectComment'] is Map<String, dynamic>) {
+      _replyController.text =
+          feedback['teacherDirectComment']?['comment'] ?? '';
+    } else {
+      _replyController.clear(); // or set to default string
+    }
+
+    log("HERE");
 
     await showModalBottomSheet(
       context: context,
@@ -234,7 +242,7 @@ class _TeacherSelfReviewState extends ConsumerState<TeacherSelfReview> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Reply to Feedback',
+                    'Reply to 3Feedback',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -1016,7 +1024,10 @@ class _TeacherSelfReviewState extends ConsumerState<TeacherSelfReview> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () => _showReplyBottomSheet(feedback),
+                  onPressed: () => {
+                    log("PRINTING $feedback"),
+                    _showReplyBottomSheet(feedback)
+                  },
                   child: Text(
                     feedback['teacherDirectComment'] != null &&
                             feedback['teacherDirectComment'].isNotEmpty
