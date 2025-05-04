@@ -69,6 +69,7 @@ dependencies:
   web_socket_channel: ^3.0.2
   socket_io_client: ^3.1.1
   dart_jsonwebtoken: ^3.2.0
+  timeago: 3.2.2
 
 dev_dependencies:
   flutter_test:
