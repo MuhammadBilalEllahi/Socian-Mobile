@@ -799,10 +799,3 @@ class _FullScreenMediaViewState extends State<FullScreenMediaView> {
     );
   }
 }
-
-class SecureStorageService {
-  // Placeholder for token retrieval
-  static final SecureStorageService instance = SecureStorageService._();
-  SecureStorageService._();
-  Future<String?> getToken() async => 'your_jwt_token_here';
-}
