@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:beyondtheclass/pages/drawer/student/pages/cafeInformation/CafesHome.dart';
 import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/DepartmentPage.dart';
 import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/PastPapers.dart';
 import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/SubjectsView.dart';
@@ -136,6 +137,7 @@ class RouteGuard {
           AppRoutes.answersPage: const AnswersPage(),
           AppRoutes.teacherReviewPage: const TeachersPage(),
           AppRoutes.scheduleGatherings: const ScheduledGatherings(),
+          AppRoutes.cafeReviewsHome: const CafesHome(),
           ...commonRoutes,
         };
       case AppRoles.teacher:

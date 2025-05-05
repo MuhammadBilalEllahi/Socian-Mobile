@@ -670,6 +670,8 @@ class _CommentItemState extends State<_CommentItem> {
                                 size: 16,
                                 color: Colors.blue,
                               ),
+                              if (widget.comment['isEdited'] == true)
+                                Text('(Edited)'),
                             ],
                           ],
                         ),
@@ -726,6 +728,61 @@ class _CommentItemState extends State<_CommentItem> {
               style: theme.textTheme.bodyMedium,
             ),
           ),
+          if (widget.comment['teacherDirectComment'] != null)
+            Container(
+              margin: const EdgeInsets.only(left: 44, top: 8),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: widget.isDark
+                    ? Colors.white.withOpacity(0.05)
+                    : Colors.black.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: widget.isDark
+                      ? Colors.white.withOpacity(0.1)
+                      : Colors.black.withOpacity(0.1),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.school_rounded,
+                        size: 16,
+                        color: widget.isDark
+                            ? Colors.white.withOpacity(0.7)
+                            : Colors.black.withOpacity(0.7),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Teacher Response',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: widget.isDark
+                                  ? Colors.white.withOpacity(0.7)
+                                  : Colors.black.withOpacity(0.7),
+                            ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    widget.comment['teacherDirectComment']['comment'],
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _formatDate(
+                        widget.comment['teacherDirectComment']['createdAt']),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        ),
+                  ),
+                ],
+              ),
+            ),
           const SizedBox(height: 12),
           Padding(
             padding: const EdgeInsets.only(left: 44),

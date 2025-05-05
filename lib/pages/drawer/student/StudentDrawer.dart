@@ -239,7 +239,8 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                   _buildDrawerItem(
                     icon: Icons.restaurant,
                     title: "Cafe Information Services",
-                    onTap: () => Navigator.of(context).pop(),
+                    onTap: () =>
+                        Navigator.pushNamed(context, AppRoutes.cafeReviewsHome),
                     isDarkMode: isDarkMode,
                   ),
                   _buildDrawerItem(
