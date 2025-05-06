@@ -1,7 +1,5 @@
-// import 'dart:math';
 import 'dart:developer';
 import 'dart:io';
-
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:beyondtheclass/pages/home/widgets/campus/widgets/PostCard.dart';
 import 'package:dio/dio.dart';
@@ -46,14 +44,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
     final auth = ref.read(authProvider);
     final isOwnProfile =
         widget.userId == null || widget.userId == auth.user?['_id'];
-    _tabController = TabController(length: isOwnProfile ? 3 : 2, vsync: this);
+    _tabController = TabController(length: isOwnProfile ? 2 : 2, vsync: this);
     _fetchDetailedProfileData();
   }
 
   void _loadBasicProfile() {
     final auth = ref.read(authProvider);
     log('${auth.user}');
-    // log(auth.user);
+
     final userId = widget.userId ?? auth.user?['_id'];
 
     if (userId == null) {
