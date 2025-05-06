@@ -1,12 +1,17 @@
 // import 'dart:math';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:beyondtheclass/pages/home/widgets/campus/widgets/PostCard.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:beyondtheclass/pages/profile/ProfileImageUploadPage.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   final String? userId;
@@ -28,6 +33,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
   List<dynamic> _posts = [];
   List<dynamic> _societies = [];
   List<dynamic> _connections = [];
+  late File _mediaFile;
 
   bool _isLoadingDetails = true;
   String? _errorMessage;
@@ -319,6 +325,45 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
     );
   }
 
+  Future<void> uploadProfilePicture() async {
+    try {
+      final data = <String, dynamic>{'file': ''};
+
+      if (_mediaFile != null) {
+        data['file'] = await MultipartFile.fromFile(
+          _mediaFile.path,
+          filename:
+              '${DateTime.now().millisecondsSinceEpoch}_${_mediaFile.path.split('/').last}',
+          contentType: MediaType.parse('image/jpeg'),
+        );
+      }
+
+      final response =
+          _apiClient.putFormData(ApiConstants.uploadProfilePic, data);
+      log("Profile pic response $response");
+    } catch (e) {}
+  }
+
+  Future<void> _pickMedia(ImageSource source, bool isVideo) async {
+    try {
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ProfileImageUploadPage(),
+        ),
+      );
+
+      if (result == true) {
+        // Refresh profile data if image was updated successfully
+      }
+    } catch (e) {
+      debugPrint('Error picking media: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error picking media: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
@@ -414,17 +459,30 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                               width: 2,
                             ),
                           ),
-                          child: CircleAvatar(
-                            radius: 30,
-                            backgroundColor: accent,
-                            backgroundImage:
-                                _basicProfile?['profile']['picture'] != null
-                                    ? NetworkImage(
-                                        _basicProfile!['profile']['picture'])
-                                    : const AssetImage(
-                                            "assets/images/profilepic2.jpg")
-                                        as ImageProvider,
-                          ),
+                          child: Stack(children: [
+                            if (isOwnProfile)
+                              Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: GestureDetector(
+                                      onTap: () => _pickMedia(
+                                          ImageSource.gallery, false),
+                                      child: Icon(
+                                        Icons.edit,
+                                        size: 20,
+                                      ))),
+                            CircleAvatar(
+                              radius: 30,
+                              backgroundColor: accent,
+                              backgroundImage:
+                                  auth.user?['profile']?['picture'] != null
+                                      ? NetworkImage(
+                                          auth.user!['profile']['picture'])
+                                      : const AssetImage(
+                                              "assets/images/profilepic2.jpg")
+                                          as ImageProvider,
+                            )
+                          ]),
                         ),
                       ],
                     ),
@@ -440,8 +498,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                         ),
                       ],
                     ),
-                                        const SizedBox(height: 8),
-
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         Text(
@@ -450,9 +507,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                         ),
                         // SizedBox(width: 10,),
 
-                        Text(' - ${auth.user?['university']['departmentId']['name']}',                          
-                        style: TextStyle(color: mutedForeground),
-),
+                        Text(
+                          ' - ${auth.user?['university']['departmentId']['name']}',
+                          style: TextStyle(color: mutedForeground),
+                        ),
                       ],
                     ),
                     if (_basicProfile?['profile']['bio']?.isNotEmpty ??

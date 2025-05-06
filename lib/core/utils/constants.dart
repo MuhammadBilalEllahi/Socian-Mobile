@@ -33,7 +33,7 @@ class ApiConstants {
     12: "http://192.168.1.12:8080",
   };
 
-  static int _currentUrlIndex = -2;
+  static int _currentUrlIndex = 7;
   static const String _urlIndexCacheKey = 'current_url_index';
 
   static Future<void> initializeBaseUrl() async {
@@ -77,6 +77,7 @@ class ApiConstants {
   static const String universityAndCampusNames =
       '$apiAccessible/universities/grouped/campus';
   static const String usernames = '$apiAccessible/usernames';
+  static const String uploadProfilePic = '/api/user/update/picture';
 
   static const String pastpaper = '/pastpaper';
   // static const String subjectPastpapers = '$api$pastpaper/all-pastpapers-in-subject/67839bd37b4bcea6d564a5f8';

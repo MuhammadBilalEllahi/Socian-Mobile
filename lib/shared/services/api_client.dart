@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 
 import 'package:beyondtheclass/core/utils/constants.dart';
@@ -9,9 +8,10 @@ class ApiClient {
   final Dio _dio;
 
   ApiClient({Dio? dio})
-      : _dio = dio ?? Dio(BaseOptions(
-          baseUrl: ApiConstants.baseUrl,
-        ));
+      : _dio = dio ??
+            Dio(BaseOptions(
+              baseUrl: ApiConstants.baseUrl,
+            ));
 
   Future<Map<String, dynamic>> post(
     String endpoint,
@@ -72,6 +72,39 @@ class ApiClient {
     }
   }
 
+  Future<Map<String, dynamic>> putFormData(
+    String endpoint,
+    Map<String, dynamic> data, {
+    Map<String, String>? headers,
+  }) async {
+    try {
+      final defaultHeaders = {
+        "x-platform": "app",
+        "Content-Type": "multipart/form-data",
+      };
+
+      final token = await SecureStorageService.instance.getToken();
+
+      final mergedHeaders = {
+        ...defaultHeaders,
+        if (token != null) "Authorization": "Bearer $token",
+        if (headers != null) ...headers,
+      };
+
+      FormData formData = FormData.fromMap(data);
+
+      final response = await _dio.put(
+        endpoint,
+        data: formData,
+        options: Options(headers: mergedHeaders),
+      );
+
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
   Future<T> get<T>(
     String endpoint, {
     Map<String, String>? headers,
@@ -105,8 +138,8 @@ class ApiClient {
     Map<String, String>? headers,
     Map<String, dynamic>? queryParameters,
   }) async {
-    return get<Map<String, dynamic>>(
-        endpoint, headers: headers, queryParameters: queryParameters);
+    return get<Map<String, dynamic>>(endpoint,
+        headers: headers, queryParameters: queryParameters);
   }
 
   Future<List<dynamic>> getList(
@@ -114,8 +147,8 @@ class ApiClient {
     Map<String, String>? headers,
     Map<String, dynamic>? queryParameters,
   }) async {
-    return get<List<dynamic>>(
-        endpoint, headers: headers, queryParameters: queryParameters);
+    return get<List<dynamic>>(endpoint,
+        headers: headers, queryParameters: queryParameters);
   }
 
   Future<Map<String, dynamic>> delete(
@@ -171,9 +204,6 @@ class ApiClient {
       throw ApiException('Failed to fetch current user ID: $e');
     }
   }
-
-
-  
 }
 
 class ApiException implements Exception {
