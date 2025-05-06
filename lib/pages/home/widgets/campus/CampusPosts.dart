@@ -162,8 +162,22 @@ class _CampusPostsState extends ConsumerState<CampusPosts> with SingleTickerProv
         final post = postState.posts[index];
         return PostCard(
           post: post,
+          // flairText: "Computer Science",
         );
       },
     );
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
