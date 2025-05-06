@@ -1,3 +1,4 @@
+
 import 'dart:convert';
 
 import 'package:beyondtheclass/core/utils/constants.dart';
@@ -9,9 +10,7 @@ class ApiClient {
 
   ApiClient({Dio? dio})
       : _dio = dio ?? Dio(BaseOptions(
-        baseUrl: ApiConstants.baseUrl,
-      // connectTimeout: const Duration(seconds: 5), // Updated to Duration
-      // receiveTimeout: const Duration(seconds: 5), //NO NEED FOR NOW
+          baseUrl: ApiConstants.baseUrl,
         ));
 
   Future<Map<String, dynamic>> post(
@@ -21,67 +20,57 @@ class ApiClient {
   }) async {
     try {
       final defaultHeaders = {"x-platform": "app"};
-          final token = await SecureStorageService.instance.getToken();
+      final token = await SecureStorageService.instance.getToken();
 
-
-      // Merge default headers with any provided custom headers
-      final mergedHeaders = {...defaultHeaders, 
-      if (token != null) "Authorization": "Bearer $token",
-      if (headers != null) ...headers};
-
-
+      final mergedHeaders = {
+        ...defaultHeaders,
+        if (token != null) "Authorization": "Bearer $token",
+        if (headers != null) ...headers
+      };
 
       final response = await _dio.post(
         endpoint,
         data: jsonEncode(data),
         options: Options(headers: mergedHeaders),
       );
-//       print("its $response");
-//  print("\n and its ${response.data}");
       return response.data as Map<String, dynamic>;
     } catch (e) {
       throw ApiException.fromDioError(e);
     }
   }
 
-
   Future<Map<String, dynamic>> postFormData(
-  String endpoint,
-  Map<String, dynamic> data, {
-  Map<String, String>? headers,
-}) async {
-  try {
-    final defaultHeaders = {
-      "x-platform": "app",
-      "Content-Type": "multipart/form-data",
-    };
+    String endpoint,
+    Map<String, dynamic> data, {
+    Map<String, String>? headers,
+  }) async {
+    try {
+      final defaultHeaders = {
+        "x-platform": "app",
+        "Content-Type": "multipart/form-data",
+      };
 
-    
-          final token = await SecureStorageService.instance.getToken();
+      final token = await SecureStorageService.instance.getToken();
 
-    final mergedHeaders = {
-      ...defaultHeaders,
-      if (token != null) "Authorization": "Bearer $token",
-      if (headers != null) ...headers,
-    };
+      final mergedHeaders = {
+        ...defaultHeaders,
+        if (token != null) "Authorization": "Bearer $token",
+        if (headers != null) ...headers,
+      };
 
-    // Convert data into `FormData`
-    FormData formData = FormData.fromMap(data);
+      FormData formData = FormData.fromMap(data);
 
-    final response = await _dio.post(
-      endpoint,
-      data: formData,
-      options: Options(headers: mergedHeaders),
-    );
+      final response = await _dio.post(
+        endpoint,
+        data: formData,
+        options: Options(headers: mergedHeaders),
+      );
 
-    return response.data as Map<String, dynamic>;
-  } catch (e) {
-    throw ApiException.fromDioError(e);
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      throw ApiException.fromDioError(e);
+    }
   }
-}
-
-
-
 
   Future<T> get<T>(
     String endpoint, {
@@ -89,119 +78,99 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
-      // print("Ae $endpoint");
       final defaultHeaders = {"x-platform": "app"};
-          final token = await SecureStorageService.instance.getToken();
+      final token = await SecureStorageService.instance.getToken();
 
-      // Merge default headers with any provided custom headers
-      final mergedHeaders = {...defaultHeaders,
-            if (token != null) "Authorization": "Bearer $token",
-       if (headers != null) ...headers};
+      final mergedHeaders = {
+        ...defaultHeaders,
+        if (token != null) "Authorization": "Bearer $token",
+        if (headers != null) ...headers
+      };
 
-// print("A /${_dio.httpClientAdapter}");
-// print("Ah $mergedHeaders");
       final response = await _dio.get(
         endpoint,
         queryParameters: queryParameters,
         options: Options(headers: mergedHeaders),
       );
-      
-      // print(endpoint);
-      // print("$response");
 
-      return response.data as T ;
+      return response.data as T;
     } catch (e) {
       print("Error in DIO GET $e");
       throw ApiException.fromDioError(e);
     }
   }
 
-Future<Map<String, dynamic>> getMap(
-  String endpoint, {
-  Map<String, String>? headers,
-  Map<String, dynamic>? queryParameters,
-}) async {
-  return get<Map<String, dynamic>>(endpoint, headers: headers, queryParameters: queryParameters);
-}
+  Future<Map<String, dynamic>> getMap(
+    String endpoint, {
+    Map<String, String>? headers,
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    return get<Map<String, dynamic>>(
+        endpoint, headers: headers, queryParameters: queryParameters);
+  }
 
-Future<List<dynamic>> getList(
-  String endpoint, {
-  Map<String, String>? headers,
-  Map<String, dynamic>? queryParameters,
-}) async {
-  // print("Ar $endpoint ");
-  return get<List<dynamic>>(endpoint, headers: headers, queryParameters: queryParameters);
-}
+  Future<List<dynamic>> getList(
+    String endpoint, {
+    Map<String, String>? headers,
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    return get<List<dynamic>>(
+        endpoint, headers: headers, queryParameters: queryParameters);
+  }
 
+  Future<Map<String, dynamic>> delete(
+    String endpoint, {
+    Map<String, String>? headers,
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    final defaultHeaders = {"x-platform": "app"};
+    final token = await SecureStorageService.instance.getToken();
 
-
-Future<Map<String, dynamic>> delete(
-  String endpoint, {
-  Map<String, String>? headers,
-  Map<String, dynamic>? queryParameters,
-}) async {
-  final defaultHeaders = {"x-platform": "app"};
-          final token = await SecureStorageService.instance.getToken();
-
-
-      // Merge default headers with any provided custom headers
-      final mergedHeaders = {...defaultHeaders, 
+    final mergedHeaders = {
+      ...defaultHeaders,
       if (token != null) "Authorization": "Bearer $token",
-      if (headers != null) ...headers};
+      if (headers != null) ...headers
+    };
 
-  final response = await _dio.delete(endpoint, options: Options(headers: mergedHeaders), queryParameters: queryParameters); 
-  return response.data as Map<String, dynamic>;
-}
+    final response = await _dio.delete(endpoint,
+        options: Options(headers: mergedHeaders),
+        queryParameters: queryParameters);
+    return response.data as Map<String, dynamic>;
+  }
 
+  Future<Map<String, dynamic>> patch(
+    String endpoint,
+    Map<String, dynamic>? data, {
+    Map<String, String>? headers,
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    final defaultHeaders = {"x-platform": "app"};
+    final token = await SecureStorageService.instance.getToken();
 
-Future<Map<String, dynamic>> patch(
-  String endpoint,
-  Map<String, dynamic>? data, {
-  Map<String, String>? headers,
-  Map<String, dynamic>? queryParameters,
-  
-}) async {
-  final defaultHeaders = {"x-platform": "app"};
-          final token = await SecureStorageService.instance.getToken();
-
-
-      // Merge default headers with any provided custom headers
-      final mergedHeaders = {...defaultHeaders, 
+    final mergedHeaders = {
+      ...defaultHeaders,
       if (token != null) "Authorization": "Bearer $token",
-      if (headers != null) ...headers};
-      final response = await _dio.patch(endpoint, data: data, options: Options(headers: mergedHeaders), queryParameters: queryParameters); 
-      return response.data as Map<String, dynamic>;
-}
+      if (headers != null) ...headers
+    };
+    final response = await _dio.patch(endpoint,
+        data: data,
+        options: Options(headers: mergedHeaders),
+        queryParameters: queryParameters);
+    return response.data as Map<String, dynamic>;
+  }
 
-// Future<Map<String, dynamic>> getMap(
-//   String endpoint, {
-//   Map<String, String>? headers,
-//   Map<String, dynamic>? queryParameters,
-// }) async {
-//   try {
-//     final response = await get(endpoint, headers: headers, queryParameters: queryParameters);
-//     // ignore: unnecessary_cast
-//     return response as Map<String, dynamic>;
-//   } catch (e) {
-//     throw ApiException.fromDioError(e);
-//   }
-// }
-
-// Future<List<dynamic>> getList(
-//   String endpoint, {
-//   Map<String, String>? headers,
-//   Map<String, dynamic>? queryParameters,
-// }) async {
-//   try {
-//     final response = await get(endpoint, headers: headers, queryParameters: queryParameters);
-//     print("DATA$response");
-//     return response as List<dynamic>;
-//   } catch (e) {
-//     throw ApiException.fromDioError(e);
-//   }
-// }
-
-
+  Future<String> getCurrentUserId() async {
+    try {
+      final response = await getMap('/api/user/me');
+      final userId = response['_id'] as String?;
+      if (userId == null) {
+        throw ApiException('User ID not found in response');
+      }
+      return userId;
+    } catch (e) {
+      throw ApiException('Failed to fetch current user ID: $e');
+    }
+  }
 }
 
 class ApiException implements Exception {
@@ -235,8 +204,7 @@ class ApiException implements Exception {
 class ExternalApiClient {
   final Dio _dio;
 
-  ExternalApiClient({Dio? dio})
-      : _dio = dio ?? Dio();
+  ExternalApiClient({Dio? dio}) : _dio = dio ?? Dio();
 
   Future<Map<String, dynamic>> get(
     String url, {
@@ -272,6 +240,3 @@ class ExternalApiClient {
     }
   }
 }
-
-
-

@@ -69,6 +69,48 @@ class _PostCardState extends State<PostCard> {
     }
   }
 
+  Future<void> _deletePost(String postId) async {
+    try {
+      final response = await _apiClient.delete('/api/posts/delete', queryParameters: {
+        'postId': postId,
+      });
+      debugPrint('Delete post response: $response');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Post deleted successfully')),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      debugPrint('Error deleting post: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete post: $e')),
+      );
+    }
+  }
+
+  Future<void> _showDeleteConfirmation(String postId) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Post'),
+        content: const Text('Are you sure you want to delete this post? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete == true) {
+      await _deletePost(postId);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final media = widget.post['media'] as List?;
@@ -113,17 +155,16 @@ class _PostCardState extends State<PostCard> {
   Widget _buildUserInfo(bool isDark, String formattedDate) {
     final isSocietyPost = widget.post['society'] != null && widget.post['society']['name'] != null;
     final societyName = isSocietyPost ? widget.post['society']['name'] : '';
+    final author = widget.post['author'] ?? {};
 
     return Row(
       children: [
         CircleAvatar(
           radius: 18,
           backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
-          backgroundImage: widget.post['author'] != null &&
-                  widget.post['author']['profile'] != null
-              ? NetworkImage(widget.post['author']['profile']['picture'] ?? '')
-              : const AssetImage('assets/default_profile_picture.png')
-                  as ImageProvider,
+          backgroundImage: author['profile'] != null
+              ? NetworkImage(author['profile']['picture'] ?? '')
+              : const AssetImage('assets/default_profile_picture.png') as ImageProvider,
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -133,7 +174,7 @@ class _PostCardState extends State<PostCard> {
               Row(
                 children: [
                   Text(
-                    widget.post['author']?['name'] ?? '{Deleted}',
+                    author['name'] ?? '{Deleted}',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 12,
@@ -163,7 +204,7 @@ class _PostCardState extends State<PostCard> {
               Row(
                 children: [
                   Text(
-                    '@${widget.post['author']?['username'] ?? ''}',
+                    '@${author['username'] ?? ''}',
                     style: TextStyle(
                       color: isDark ? Colors.grey[400] : Colors.grey[600],
                       fontSize: 10,
@@ -191,8 +232,28 @@ class _PostCardState extends State<PostCard> {
             color: isDark ? Colors.white : Colors.black,
             size: 20,
           ),
-          onPressed: () {
-            // TODO: Show post options
+          onPressed: () async {
+            final currentUserId = await _apiClient.getCurrentUserId();
+            if (author['_id'] == currentUserId) {
+              showModalBottomSheet(
+                context: context,
+                builder: (context) => SafeArea(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.delete, color: Colors.red),
+                        title: const Text('Delete Post'),
+                        onTap: () {
+                          Navigator.pop(context);
+                          _showDeleteConfirmation(widget.post['_id']);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
           },
         ),
       ],
@@ -393,6 +454,77 @@ class _PostDetailPageState extends State<PostDetailPage> {
     }
   }
 
+  Future<void> _deletePost(String postId) async {
+    try {
+      final response = await _apiClient.delete('/api/posts/delete', queryParameters: {
+        'postId': postId,
+      });
+      debugPrint('Delete post response: $response');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Post deleted successfully')),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      debugPrint('Error deleting post: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete post: $e')),
+      );
+    }
+  }
+
+  Future<void> _deleteComment(String commentId) async {
+    try {
+      final response = await _apiClient.delete('/api/posts/post/comment', queryParameters: {
+        'commentId': commentId,
+      });
+      debugPrint('Delete comment response: $response');
+      setState(() {
+        _comments.removeWhere((c) => c['_id'] == commentId);
+        widget.post['commentsCount'] = (widget.post['commentsCount'] ?? 1) - 1;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Comment deleted successfully')),
+      );
+    } catch (e) {
+      debugPrint('Error deleting comment: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete comment: $e')),
+      );
+    }
+  }
+
+  Future<void> _showDeleteConfirmation({String? postId, String? commentId}) async {
+    final isPost = postId != null;
+    final id = postId ?? commentId!;
+    final type = isPost ? 'Post' : 'Comment';
+
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Delete $type'),
+        content: Text('Are you sure you want to delete this $type? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete == true) {
+      if (isPost) {
+        await _deletePost(id);
+      } else {
+        await _deleteComment(id);
+      }
+    }
+  }
+
   Future<void> _refreshComments() async {
     setState(() {
       _commentsFuture = _fetchComments(widget.post['_id']);
@@ -406,7 +538,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
       });
       debugPrint('Comments response: $response');
       if (response is List && response.isNotEmpty) {
-        final comments = response[0]['comments'] ?? [];
+        final comments = response[0]['comments']?.where((c) => !(c['isDeleted'] ?? false)).toList() ?? [];
         setState(() {
           _comments = comments;
         });
@@ -476,8 +608,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
     final background = isDark ? const Color(0xFF09090B) : Colors.white;
     final foreground = isDark ? Colors.white : const Color(0xFF09090B);
     final muted = isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5);
-    final mutedForeground =
-        isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+    final mutedForeground = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
     final border = isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
     final accent = isDark ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
 
@@ -522,20 +653,18 @@ class _PostDetailPageState extends State<PostDetailPage> {
     );
   }
 
-  Widget _buildUserInfo(
-      Color foreground, Color mutedForeground, String formattedDate) {
+  Widget _buildUserInfo(Color foreground, Color mutedForeground, String formattedDate) {
     final isSocietyPost = widget.post['society'] != null && widget.post['society']['name'] != null;
     final societyName = isSocietyPost ? widget.post['society']['name'] : '';
+    final author = widget.post['author'] ?? {};
 
     return Row(
       children: [
         CircleAvatar(
           radius: 24,
-          backgroundImage: widget.post['author'] != null &&
-                  widget.post['author']['profile'] != null
-              ? NetworkImage(widget.post['author']['profile']['picture'] ?? '')
-              : const AssetImage('assets/default_profile_picture.png')
-                  as ImageProvider,
+          backgroundImage: author['profile'] != null
+              ? NetworkImage(author['profile']['picture'] ?? '')
+              : const AssetImage('assets/default_profile_picture.png') as ImageProvider,
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -545,7 +674,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
               Row(
                 children: [
                   Text(
-                    widget.post['author']?['name'] ?? '{Deleted}',
+                    author['name'] ?? '{Deleted}',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
@@ -575,7 +704,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
               Row(
                 children: [
                   Text(
-                    '@${widget.post['author']?['username'] ?? ''}',
+                    '@${author['username'] ?? ''}',
                     style: TextStyle(
                       color: mutedForeground,
                       fontSize: 14,
@@ -603,8 +732,28 @@ class _PostDetailPageState extends State<PostDetailPage> {
             color: foreground,
             size: 24,
           ),
-          onPressed: () {
-            // TODO: Show post options
+          onPressed: () async {
+            final currentUserId = await _apiClient.getCurrentUserId();
+            if (author['_id'] == currentUserId) {
+              showModalBottomSheet(
+                context: context,
+                builder: (context) => SafeArea(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.delete, color: Colors.red),
+                        title: const Text('Delete Post'),
+                        onTap: () {
+                          Navigator.pop(context);
+                          _showDeleteConfirmation(postId: widget.post['_id']);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
           },
         ),
       ],
@@ -671,8 +820,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
     );
   }
 
-  Widget _buildCommentsSection(
-      Color foreground, Color mutedForeground, Color border, Color accent, Color background) {
+  Widget _buildCommentsSection(Color foreground, Color mutedForeground, Color border, Color accent, Color background) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -795,9 +943,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
                           radius: 16,
                           backgroundImage: author['profile'] != null
                               ? NetworkImage(author['profile']['picture'] ?? '')
-                              : const AssetImage(
-                                  'assets/default_profile_picture.png',
-                                ) as ImageProvider,
+                              : const AssetImage('assets/default_profile_picture.png') as ImageProvider,
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -806,15 +952,15 @@ class _PostDetailPageState extends State<PostDetailPage> {
                             children: [
                               GestureDetector(
                                 onTap: author['_id'] != null && author['username']?.isNotEmpty == true
-                                            ? () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) => ProfilePage(userId: author['_id']),
-                                                  ),
-                                                );
-                                              }
-                                            : null,
+                                    ? () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => ProfilePage(userId: author['_id']),
+                                          ),
+                                        );
+                                      }
+                                    : null,
                                 child: Text(
                                   author['name'] ?? '{Deleted}',
                                   style: TextStyle(
@@ -840,8 +986,28 @@ class _PostDetailPageState extends State<PostDetailPage> {
                             color: mutedForeground,
                             size: 20,
                           ),
-                          onPressed: () {
-                            // TODO: Show comment options
+                          onPressed: () async {
+                            final currentUserId = await _apiClient.getCurrentUserId();
+                            if (author['_id'] == currentUserId) {
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (context) => SafeArea(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      ListTile(
+                                        leading: const Icon(Icons.delete, color: Colors.red),
+                                        title: const Text('Delete Comment'),
+                                        onTap: () {
+                                          Navigator.pop(context);
+                                          _showDeleteConfirmation(commentId: commentId);}
+                                        ),
+                                      
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
                           },
                         ),
                       ],
@@ -859,18 +1025,14 @@ class _PostDetailPageState extends State<PostDetailPage> {
                     Row(
                       children: [
                         PostStatItem(
-                          icon: _isCommentLiked[commentId]!
-                              ? Icons.favorite
-                              : Icons.favorite_outline,
+                          icon: _isCommentLiked[commentId]! ? Icons.favorite : Icons.favorite_outline,
                           count: voteId['upVotesCount'] ?? 0,
                           onTap: () => _voteComment(commentId, 'upvote'),
                           isActive: _isCommentLiked[commentId]!,
                         ),
                         const SizedBox(width: 16),
                         PostStatItem(
-                          icon: _isCommentDisliked[commentId]!
-                              ? Icons.thumb_down
-                              : Icons.thumb_down_outlined,
+                          icon: _isCommentDisliked[commentId]! ? Icons.thumb_down : Icons.thumb_down_outlined,
                           count: voteId['downVotesCount'] ?? 0,
                           onTap: () => _voteComment(commentId, 'downvote'),
                           isActive: _isCommentDisliked[commentId]!,
@@ -890,9 +1052,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
                             );
                           },
                           child: Text(
-                            replyCount == 0
-                                ? 'Reply'
-                                : '$replyCount repl${replyCount == 1 ? 'y' : 'ies'}',
+                            replyCount == 0 ? 'Reply' : '$replyCount repl${replyCount == 1 ? 'y' : 'ies'}',
                             style: TextStyle(
                               color: mutedForeground,
                               fontSize: 12,
@@ -936,6 +1096,14 @@ class _CommentRepliesPageState extends State<CommentRepliesPage> {
   final Map<String, bool> _isReplyLiked = {};
   final Map<String, bool> _isReplyDisliked = {};
   final Map<String, bool> _isReplyVoting = {};
+  List<dynamic> _replies = [];
+  late Future<List<dynamic>> _repliesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _repliesFuture = _fetchReplies(widget.commentId);
+  }
 
   Future<List<dynamic>> _fetchReplies(String commentId) async {
     try {
@@ -943,11 +1111,21 @@ class _CommentRepliesPageState extends State<CommentRepliesPage> {
         'commentId': commentId,
       });
       debugPrint('Replies response: $response');
-      return response ?? [];
+      final replies = response?.where((r) => !(r['isDeleted'] ?? false)).toList() ?? [];
+      setState(() {
+        _replies = replies;
+      });
+      return replies;
     } catch (e) {
-      debugPrint('Error fetching replies: $e');
+      // debug_simulation('Error fetching replies: $e');
       throw Exception('Failed to load replies: $e');
     }
+  }
+
+  Future<void> _refreshReplies() async {
+    setState(() {
+      _repliesFuture = _fetchReplies(widget.commentId);
+    });
   }
 
   Future<void> _postReply(String postId, String commentId, String comment) async {
@@ -970,7 +1148,7 @@ class _CommentRepliesPageState extends State<CommentRepliesPage> {
       });
       debugPrint('Post reply response: $response');
       _replyController.clear();
-      setState(() {});
+      await _refreshReplies();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Reply posted successfully')),
       );
@@ -1002,6 +1180,11 @@ class _CommentRepliesPageState extends State<CommentRepliesPage> {
       debugPrint('Reply vote response: $response');
 
       setState(() {
+        final replyIndex = _replies.indexWhere((r) => r['_id'] == replyId);
+        if (replyIndex != -1) {
+          _replies[replyIndex]['voteId']['upVotesCount'] = response['upVotesCount'];
+          _replies[replyIndex]['voteId']['downVotesCount'] = response['downVotesCount'];
+        }
         _isReplyLiked[replyId] = voteType == 'upvote' && response['noneSelected'] != true;
         _isReplyDisliked[replyId] = voteType == 'downvote' && response['noneSelected'] != true;
         if (response['noneSelected'] == true) {
@@ -1025,6 +1208,50 @@ class _CommentRepliesPageState extends State<CommentRepliesPage> {
     }
   }
 
+  Future<void> _deleteReply(String replyId) async {
+    try {
+      final response = await _apiClient.delete('/api/posts/post/reply/comment', queryParameters: {
+        'replyId': replyId,
+      });
+      debugPrint('Delete reply response: $response');
+      setState(() {
+        _replies.removeWhere((r) => r['_id'] == replyId);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Reply deleted successfully')),
+      );
+    } catch (e) {
+      debugPrint('Error deleting reply: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete reply: $e')),
+      );
+    }
+  }
+
+  Future<void> _showDeleteConfirmation(String replyId) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Reply'),
+        content: const Text('Are you sure you want to delete this reply? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete == true) {
+      await _deleteReply(replyId);
+    }
+  }
+
   @override
   void dispose() {
     _replyController.dispose();
@@ -1038,8 +1265,7 @@ class _CommentRepliesPageState extends State<CommentRepliesPage> {
     final background = isDark ? const Color(0xFF09090B) : Colors.white;
     final foreground = isDark ? Colors.white : const Color(0xFF09090B);
     final muted = isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5);
-    final mutedForeground =
-        isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+    final mutedForeground = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
     final border = isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
     final accent = isDark ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
 
@@ -1107,11 +1333,7 @@ class _CommentRepliesPageState extends State<CommentRepliesPage> {
                   TextButton(
                     onPressed: _isPostingReply
                         ? null
-                        : () => _postReply(
-                              widget.postId,
-                              widget.commentId,
-                              _replyController.text,
-                            ),
+                        : () => _postReply(widget.postId, widget.commentId, _replyController.text),
                     style: TextButton.styleFrom(
                       backgroundColor: foreground,
                       foregroundColor: background,
@@ -1138,7 +1360,7 @@ class _CommentRepliesPageState extends State<CommentRepliesPage> {
               ),
               const SizedBox(height: 16),
               FutureBuilder<List<dynamic>>(
-                future: _fetchReplies(widget.commentId),
+                future: _repliesFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -1190,9 +1412,7 @@ class _CommentRepliesPageState extends State<CommentRepliesPage> {
                                   radius: 16,
                                   backgroundImage: author['profile'] != null
                                       ? NetworkImage(author['profile']['picture'] ?? '')
-                                      : const AssetImage(
-                                          'assets/default_profile_picture.png',
-                                        ) as ImageProvider,
+                                      : const AssetImage('assets/default_profile_picture.png') as ImageProvider,
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
@@ -1223,8 +1443,28 @@ class _CommentRepliesPageState extends State<CommentRepliesPage> {
                                     color: mutedForeground,
                                     size: 20,
                                   ),
-                                  onPressed: () {
-                                    // TODO: Show reply options
+                                  onPressed: () async {
+                                    final currentUserId = await _apiClient.getCurrentUserId();
+                                    if (author['_id'] == currentUserId) {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        builder: (context) => SafeArea(
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              ListTile(
+                                                leading: const Icon(Icons.delete, color: Colors.red),
+                                                title: const Text('Delete Reply'),
+                                                onTap: () {
+                                                  Navigator.pop(context);
+                                                  _showDeleteConfirmation(replyId);}
+                                                ),
+                                              
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    }
                                   },
                                 ),
                               ],
@@ -1242,18 +1482,14 @@ class _CommentRepliesPageState extends State<CommentRepliesPage> {
                             Row(
                               children: [
                                 PostStatItem(
-                                  icon: _isReplyLiked[replyId]!
-                                      ? Icons.favorite
-                                      : Icons.favorite_outline,
+                                  icon: _isReplyLiked[replyId]! ? Icons.favorite : Icons.favorite_outline,
                                   count: voteId['upVotesCount'] ?? 0,
                                   onTap: () => _voteReply(replyId, 'upvote'),
                                   isActive: _isReplyLiked[replyId]!,
                                 ),
                                 const SizedBox(width: 16),
                                 PostStatItem(
-                                  icon: _isReplyDisliked[replyId]!
-                                      ? Icons.thumb_down
-                                      : Icons.thumb_down_outlined,
+                                  icon: _isReplyDisliked[replyId]! ? Icons.thumb_down : Icons.thumb_down_outlined,
                                   count: voteId['downVotesCount'] ?? 0,
                                   onTap: () => _voteReply(replyId, 'downvote'),
                                   isActive: _isReplyDisliked[replyId]!,
@@ -1274,13 +1510,3 @@ class _CommentRepliesPageState extends State<CommentRepliesPage> {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
