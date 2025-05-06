@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:typed_data';
-import 'dart:ui' as ui;
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -26,9 +24,9 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
   IO.Socket? _socket;
   GoogleMapController? _mapController;
   LatLng? _userLocation;
-  Map<String, BitmapDescriptor> _gatheringIcons = {};
-  Set<Marker> _markers = {};
   Set<Circle> _circles = {};
+  Map<String, Color> _gatheringColors = {};
+  bool _isDropdownOpen = false;
   static const LatLng _defaultLocation = LatLng(37.7749, -122.4194);
 
   @override
@@ -192,26 +190,22 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
   }
 
   Future<void> _updateMapElements() async {
-    final newMarkers = <Marker>{};
     final newCircles = <Circle>{};
+    final newColors = <String, Color>{};
 
     for (var gathering in _currentGatherings) {
       final gatheringId = gathering['_id']?.toString() ?? '';
-      final title = gathering['title']?.toString() ?? 'Untitled';
       final location = LatLng(
         double.tryParse(gathering['location']?['latitude']?.toString() ?? '') ?? 0.0,
         double.tryParse(gathering['location']?['longitude']?.toString() ?? '') ?? 0.0,
       );
       final radius = int.tryParse(gathering['radius']?.toString() ?? '') ?? 100;
-      final attendeesCount = (gathering['attendees'] as List<dynamic>?)?.length ?? 0;
-
-      // Generate or retrieve icon
-      if (!_gatheringIcons.containsKey(gatheringId)) {
-        _gatheringIcons[gatheringId] = await _createGatheringIcon(gatheringId, title, attendeesCount);
-      }
 
       // Generate deterministic color based on gathering ID
       final color = _generateColor(gatheringId);
+
+      // Store color for menu
+      newColors[gatheringId] = color;
 
       // Add circle
       newCircles.add(
@@ -224,28 +218,11 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
           strokeWidth: 2,
         ),
       );
-
-      // Add marker with info window
-      newMarkers.add(
-        Marker(
-          markerId: MarkerId(gatheringId),
-          position: location,
-          icon: _gatheringIcons[gatheringId] ?? BitmapDescriptor.defaultMarker,
-          infoWindow: InfoWindow(
-            title: title,
-            snippet: '${attendeesCount} ${attendeesCount == 1 ? 'attendee' : 'attendees'}',
-          ),
-          onTap: () {
-            // Show info window when marker is tapped
-            _mapController?.showMarkerInfoWindow(MarkerId(gatheringId));
-          },
-        ),
-      );
     }
 
     setState(() {
-      _markers = newMarkers;
       _circles = newCircles;
+      _gatheringColors = newColors;
     });
   }
 
@@ -257,89 +234,6 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
       random.nextInt(256),
       1.0,
     );
-  }
-
-  Future<BitmapDescriptor> _createGatheringIcon(String gatheringId, String title, int attendeesCount) async {
-    final pictureRecorder = ui.PictureRecorder();
-    final canvas = Canvas(pictureRecorder);
-    final color = _generateColor(gatheringId);
-    final paint = Paint()..color = color;
-    
-    // Use a larger canvas size to accommodate more text
-    const size = 150.0;
-    const padding = 8.0;
-    const borderRadius = 12.0;
-    
-    // Draw rounded rectangle background
-    final rect = Rect.fromLTWH(0, 0, size, size);
-    // final rrect = RoundedRectangleBorder(
-    //   borderRadius: BorderRadius.circular(borderRadius),
-    // ).toRRect(rect);
-
-
-    // canvas.drawRRect(rrect , paint);
-    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(borderRadius));
-canvas.drawRRect(rrect , paint);
-
-
-    // Calculate text dimensions
-    final textPainter = TextPainter(
-      textDirection: TextDirection.ltr,
-      maxLines: 2,
-      ellipsis: '...',
-    );
-    
-    // Draw title (with word wrapping)
-    final titleStyle = TextStyle(
-      color: Colors.white,
-      fontSize: 20,
-      fontWeight: FontWeight.bold,
-    );
-    
-    textPainter.text = TextSpan(
-      text: title,
-      style: titleStyle,
-    );
-    textPainter.layout(maxWidth: size - padding * 2);
-    
-    // Draw title (clipped if too long)
-    final titleOffset = Offset(padding, padding);
-    final titleRect = Rect.fromLTWH(
-      padding, 
-      padding, 
-      size - padding * 2, 
-      min(textPainter.height * 2, size * 0.6) // Max 2 lines or 60% of height
-    );
-    
-    canvas.saveLayer(titleRect, Paint());
-    canvas.clipRect(titleRect);
-    textPainter.paint(canvas, titleOffset);
-    canvas.restore();
-    
-    // Draw attendee count below title
-    final attendeeText = '${attendeesCount} ${attendeesCount == 1 ? 'attendee' : 'attendees'}';
-    final attendeeStyle = TextStyle(
-      color: Colors.white,
-      fontSize: 18,
-    );
-    
-    textPainter.text = TextSpan(
-      text: attendeeText,
-      style: attendeeStyle,
-    );
-    textPainter.layout(maxWidth: size - padding * 2);
-    
-    final attendeeOffset = Offset(
-      padding,
-      padding + min(textPainter.height * 2, size * 0.6) + 4,
-    );
-    textPainter.paint(canvas, attendeeOffset);
-    
-    // Convert to image and create descriptor
-    final picture = pictureRecorder.endRecording();
-    final img = await picture.toImage(size.toInt(), size.toInt());
-    final bytes = await img.toByteData(format: ui.ImageByteFormat.png);
-    return BitmapDescriptor.fromBytes(bytes!.buffer.asUint8List());
   }
 
   @override
@@ -459,17 +353,101 @@ canvas.drawRRect(rrect , paint);
                           },
                           myLocationEnabled: true,
                           myLocationButtonEnabled: true,
-                          markers: _markers,
+                          markers: {}, // No markers
                           circles: _circles,
                         ),
-                        // Add a button to center on user location
-                        Positioned(
-                          bottom: 20,
-                          right: 20,
-                          child: FloatingActionButton(
-                            backgroundColor: primaryColor,
-                            onPressed: _updateMapCamera,
-                            child: Icon(Icons.my_location, color: Colors.white),
+                         Positioned(
+                          left: 10,
+                          top: kToolbarHeight + MediaQuery.of(context).padding.top + 10, // Below AppBar
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            width: MediaQuery.of(context).size.width * 0.5, // 50% of screen width
+                            height: _isDropdownOpen
+                                ? MediaQuery.of(context).size.height * 0.6 // Max 60% height when open
+                                : 50.0, // Fixed height when closed
+                            decoration: BoxDecoration(
+                              color: background.withOpacity(0.9),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      _isDropdownOpen = !_isDropdownOpen;
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'Details',
+                                          style: TextStyle(
+                                            color: foreground,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Icon(
+                                          _isDropdownOpen ? Icons.expand_less : Icons.expand_more,
+                                          color: foreground,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                if (_isDropdownOpen)
+                                  Expanded(
+                                    child: ListView.builder(
+                                      padding: const EdgeInsets.all(8),
+                                      itemCount: _currentGatherings.length,
+                                      itemBuilder: (context, index) {
+                                        final gathering = _currentGatherings[index];
+                                        final gatheringId = gathering['_id']?.toString() ?? '';
+                                        final title = gathering['title']?.toString() ?? 'Untitled';
+                                        final attendeesCount = (gathering['attendees'] as List<dynamic>?)?.length ?? 0;
+                                        final color = _gatheringColors[gatheringId] ?? Colors.grey;
+
+                                        return Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                title,
+                                                style: TextStyle(
+                                                  color: color,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                attendeesCount == 1 ? '1 joinee' : '$attendeesCount joinees',
+                                                style: TextStyle(
+                                                  color: mutedForeground,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ),
                         ),
                       ],

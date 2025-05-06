@@ -507,116 +507,121 @@ class _CreateNewGatheringState extends ConsumerState<CreateNewGathering> {
 
         final response = await _apiClient.post('/api/gatherings', data);
 
-        // Show success dialog
-        if (mounted) {
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) {
-              final isDarkMode =
-                  Theme.of(context).brightness == Brightness.dark;
-              final background = isDarkMode
-                  ? const Color(0xFF000000)
-                  : const Color(0xFFFFFFFF);
-              final foreground = isDarkMode
-                  ? const Color(0xFFFFFFFF)
-                  : const Color(0xFF000000);
-              final muted = isDarkMode
-                  ? const Color(0xFF1A1A1A)
-                  : const Color(0xFFF5F5F5);
-              final border = isDarkMode
-                  ? const Color(0xFF262626)
-                  : const Color(0xFFE5E5E5);
-              final cardShadow = isDarkMode
-                  ? Colors.black.withOpacity(0.1)
-                  : Colors.black.withOpacity(0.05);
 
-              return Dialog(
-                backgroundColor: Colors.transparent,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: background,
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: border),
-                    boxShadow: [
-                      BoxShadow(
-                        color: cardShadow,
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: muted,
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        child: Icon(
-                          Icons.check_circle,
-                          color: foreground,
-                          size: 32,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Great!',
-                        style: TextStyle(
-                          color: foreground,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Your gathering has been created successfully.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: foreground,
-                          fontSize: 14,
-                          letterSpacing: -0.3,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: foreground,
-                            foregroundColor: background,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            elevation: 0,
-                          ),
-                          onPressed: () {
-                            Navigator.pushNamedAndRemoveUntil(context,
-                                AppRoutes.scheduleGatherings, (route) => false);
-                          },
-                          child: const Text(
-                            'View Gatherings',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              letterSpacing: -0.3,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
+        if (mounted){
+          Navigator.pop(context);
         }
+        // Show success dialog
+        // if (mounted) {
+        //   showDialog(
+        //     context: context,
+        //     barrierDismissible: false,
+        //     builder: (context) {
+        //       final isDarkMode =
+        //           Theme.of(context).brightness == Brightness.dark;
+        //       final background = isDarkMode
+        //           ? const Color(0xFF000000)
+        //           : const Color(0xFFFFFFFF);
+        //       final foreground = isDarkMode
+        //           ? const Color(0xFFFFFFFF)
+        //           : const Color(0xFF000000);
+        //       final muted = isDarkMode
+        //           ? const Color(0xFF1A1A1A)
+        //           : const Color(0xFFF5F5F5);
+        //       final border = isDarkMode
+        //           ? const Color(0xFF262626)
+        //           : const Color(0xFFE5E5E5);
+        //       final cardShadow = isDarkMode
+        //           ? Colors.black.withOpacity(0.1)
+        //           : Colors.black.withOpacity(0.05);
+
+        //       return Dialog(
+        //         backgroundColor: Colors.transparent,
+        //         child: Container(
+        //           decoration: BoxDecoration(
+        //             color: background,
+        //             borderRadius: BorderRadius.circular(6),
+        //             border: Border.all(color: border),
+        //             boxShadow: [
+        //               BoxShadow(
+        //                 color: cardShadow,
+        //                 blurRadius: 4,
+        //                 offset: const Offset(0, 2),
+        //               ),
+        //             ],
+        //           ),
+        //           padding: const EdgeInsets.all(24),
+        //           child: Column(
+        //             mainAxisSize: MainAxisSize.min,
+        //             children: [
+        //               Container(
+        //                 width: 48,
+        //                 height: 48,
+        //                 decoration: BoxDecoration(
+        //                   color: muted,
+        //                   borderRadius: BorderRadius.circular(24),
+        //                 ),
+        //                 child: Icon(
+        //                   Icons.check_circle,
+        //                   color: foreground,
+        //                   size: 32,
+        //                 ),
+        //               ),
+        //               const SizedBox(height: 16),
+        //               Text(
+        //                 'Great!',
+        //                 style: TextStyle(
+        //                   color: foreground,
+        //                   fontSize: 20,
+        //                   fontWeight: FontWeight.w500,
+        //                   letterSpacing: -0.5,
+        //                 ),
+        //               ),
+        //               const SizedBox(height: 8),
+        //               Text(
+        //                 'Your gathering has been created successfully.',
+        //                 textAlign: TextAlign.center,
+        //                 style: TextStyle(
+        //                   color: foreground,
+        //                   fontSize: 14,
+        //                   letterSpacing: -0.3,
+        //                 ),
+        //               ),
+        //               const SizedBox(height: 24),
+        //               SizedBox(
+        //                 width: double.infinity,
+        //                 child: ElevatedButton(
+        //                   style: ElevatedButton.styleFrom(
+        //                     backgroundColor: foreground,
+        //                     foregroundColor: background,
+        //                     padding: const EdgeInsets.symmetric(vertical: 12),
+        //                     shape: RoundedRectangleBorder(
+        //                       borderRadius: BorderRadius.circular(6),
+        //                     ),
+        //                     elevation: 0,
+        //                   ),
+        //                   onPressed: () {
+        //                     Navigator.pushNamedAndRemoveUntil(context,
+        //                         AppRoutes.scheduleGatherings, (route) => false);
+                            
+        //                   },
+        //                   child: const Text(
+        //                     'View Gatherings',
+        //                     style: TextStyle(
+        //                       fontSize: 14,
+        //                       fontWeight: FontWeight.w500,
+        //                       letterSpacing: -0.3,
+        //                     ),
+        //                   ),
+        //                 ),
+        //               ),
+        //             ],
+        //           ),
+        //         ),
+        //       );
+        //     },
+        //   );
+        // }
       } catch (e) {
         setState(() {
           _errorMessage = 'Failed to create gathering';
