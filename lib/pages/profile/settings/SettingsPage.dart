@@ -89,55 +89,40 @@ class SettingsPage extends ConsumerWidget {
                 },
                 isDarkMode,
               ),
-              _buildListTile(
-                'Privacy',
-                Icons.lock_outline,
-                () {
-                  // Navigate to privacy settings
-                },
-                isDarkMode,
-              ),
-              _buildListTile(
-                'Security',
-                Icons.security,
-                () {
-                  // Navigate to security settings
-                },
-                isDarkMode,
-              ),
+              
             ],
           ),
 
           // App Settings
-          _buildSection(
-            'Preferences',
-            [
-              _buildListTile(
-                'Notifications',
-                Icons.notifications_outlined,
-                () {
-                  // Navigate to notification settings
-                },
-                isDarkMode,
-              ),
-              _buildListTile(
-                'Appearance',
-                Icons.palette_outlined,
-                () {
-                  // Navigate to theme settings
-                },
-                isDarkMode,
-              ),
-              _buildListTile(
-                'Language',
-                Icons.language,
-                () {
-                  // Navigate to language settings
-                },
-                isDarkMode,
-              ),
-            ],
-          ),
+          // _buildSection(
+          //   'Preferences',
+          //   [
+              // _buildListTile(
+              //   'Notifications',
+              //   Icons.notifications_outlined,
+              //   () {
+              //     // Navigate to notification settings
+              //   },
+              //   isDarkMode,
+              // ),
+              // _buildListTile(
+              //   'Appearance',
+              //   Icons.palette_outlined,
+              //   () {
+              //     // Navigate to theme settings
+              //   },
+              //   isDarkMode,
+              // ),
+              // _buildListTile(
+              //   'Language',
+              //   Icons.language,
+              //   () {
+              //     // Navigate to language settings
+              //   },
+              //   isDarkMode,
+              // ),
+          //   ],
+          // ),
 
           // Help & About
           _buildSection(
@@ -166,14 +151,14 @@ class SettingsPage extends ConsumerWidget {
           _buildSection(
             'Account Actions',
             [
-              _buildListTile(
-                'Switch Account',
-                Icons.switch_account,
-                () {
-                  // Handle account switching
-                },
-                isDarkMode,
-              ),
+              // _buildListTile(
+              //   'Switch Account',
+              //   Icons.switch_account,
+              //   () {
+              //     // Handle account switching
+              //   },
+              //   isDarkMode,
+              // ),
               _buildListTile(
                 'Log Out',
                 Icons.logout,

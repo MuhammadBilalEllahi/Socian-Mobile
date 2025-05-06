@@ -159,12 +159,24 @@ class _PostCardState extends State<PostCard> {
 
     return Row(
       children: [
-        CircleAvatar(
-          radius: 18,
-          backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
-          backgroundImage: author['profile'] != null
-              ? NetworkImage(author['profile']['picture'] ?? '')
-              : const AssetImage('assets/default_profile_picture.png') as ImageProvider,
+        GestureDetector(
+          onTap: author['_id'] != null && author['username']?.isNotEmpty == true
+              ? () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProfilePage(userId: author['_id']),
+                    ),
+                  );
+                }
+              : null,
+          child: CircleAvatar(
+            radius: 18,
+            backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
+            backgroundImage: author['profile'] != null
+                ? NetworkImage(author['profile']['picture'] ?? '')
+                : const AssetImage('assets/default_profile_picture.png') as ImageProvider,
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -173,12 +185,24 @@ class _PostCardState extends State<PostCard> {
             children: [
               Row(
                 children: [
-                  Text(
-                    author['name'] ?? '{Deleted}',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                      color: isDark ? Colors.white : Colors.black,
+                  GestureDetector(
+                    onTap: author['_id'] != null && author['username']?.isNotEmpty == true
+                        ? () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProfilePage(userId: author['_id']),
+                              ),
+                            );
+                          }
+                        : null,
+                    child: Text(
+                      author['name'] ?? '{Deleted}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
                     ),
                   ),
                   if (isSocietyPost) ...[
@@ -203,11 +227,23 @@ class _PostCardState extends State<PostCard> {
               const SizedBox(height: 1),
               Row(
                 children: [
-                  Text(
-                    '@${author['username'] ?? ''}',
-                    style: TextStyle(
-                      color: isDark ? Colors.grey[400] : Colors.grey[600],
-                      fontSize: 10,
+                  GestureDetector(
+                    onTap: author['_id'] != null && author['username']?.isNotEmpty == true
+                        ? () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProfilePage(userId: author['_id']),
+                              ),
+                            );
+                          }
+                        : null,
+                    child: Text(
+                      '@${author['username'] ?? ''}',
+                      style: TextStyle(
+                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                        fontSize: 10,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -318,15 +354,7 @@ class _PostCardState extends State<PostCard> {
           },
           isActive: false,
         ),
-        PostStatItem(
-          icon: Icons.repeat,
-          count: 0,
-          onTap: () {
-            // TODO: Implement repost
-          },
-          isActive: false,
-        ),
-      ],
+        ],
     );
   }
 }
@@ -660,11 +688,23 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
     return Row(
       children: [
-        CircleAvatar(
-          radius: 24,
-          backgroundImage: author['profile'] != null
-              ? NetworkImage(author['profile']['picture'] ?? '')
-              : const AssetImage('assets/default_profile_picture.png') as ImageProvider,
+        GestureDetector(
+          onTap: author['_id'] != null && author['username']?.isNotEmpty == true
+              ? () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProfilePage(userId: author['_id']),
+                    ),
+                  );
+                }
+              : null,
+          child: CircleAvatar(
+            radius: 24,
+            backgroundImage: author['profile'] != null
+                ? NetworkImage(author['profile']['picture'] ?? '')
+                : const AssetImage('assets/default_profile_picture.png') as ImageProvider,
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -673,12 +713,24 @@ class _PostDetailPageState extends State<PostDetailPage> {
             children: [
               Row(
                 children: [
-                  Text(
-                    author['name'] ?? '{Deleted}',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                      color: foreground,
+                  GestureDetector(
+                    onTap: author['_id'] != null && author['username']?.isNotEmpty == true
+                        ? () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProfilePage(userId: author['_id']),
+                              ),
+                            );
+                          }
+                        : null,
+                    child: Text(
+                      author['name'] ?? '{Deleted}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        color: foreground,
+                      ),
                     ),
                   ),
                   if (isSocietyPost) ...[
@@ -703,11 +755,23 @@ class _PostDetailPageState extends State<PostDetailPage> {
               const SizedBox(height: 4),
               Row(
                 children: [
-                  Text(
-                    '@${author['username'] ?? ''}',
-                    style: TextStyle(
-                      color: mutedForeground,
-                      fontSize: 14,
+                  GestureDetector(
+                    onTap: author['_id'] != null && author['username']?.isNotEmpty == true
+                        ? () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProfilePage(userId: author['_id']),
+                              ),
+                            );
+                          }
+                        : null,
+                    child: Text(
+                      '@${author['username'] ?? ''}',
+                      style: TextStyle(
+                        color: mutedForeground,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -939,11 +1003,23 @@ class _PostDetailPageState extends State<PostDetailPage> {
                   children: [
                     Row(
                       children: [
-                        CircleAvatar(
-                          radius: 16,
-                          backgroundImage: author['profile'] != null
-                              ? NetworkImage(author['profile']['picture'] ?? '')
-                              : const AssetImage('assets/default_profile_picture.png') as ImageProvider,
+                        GestureDetector(
+                          onTap: author['_id'] != null && author['username']?.isNotEmpty == true
+                              ? () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ProfilePage(userId: author['_id']),
+                                    ),
+                                  );
+                                }
+                              : null,
+                          child: CircleAvatar(
+                            radius: 16,
+                            backgroundImage: author['profile'] != null
+                                ? NetworkImage(author['profile']['picture'] ?? '')
+                                : const AssetImage('assets/default_profile_picture.png') as ImageProvider,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -970,11 +1046,23 @@ class _PostDetailPageState extends State<PostDetailPage> {
                                   ),
                                 ),
                               ),
-                              Text(
-                                '@${author['username'] ?? ''} • $timeAgo',
-                                style: TextStyle(
-                                  color: mutedForeground,
-                                  fontSize: 12,
+                              GestureDetector(
+                                onTap: author['_id'] != null && author['username']?.isNotEmpty == true
+                                    ? () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => ProfilePage(userId: author['_id']),
+                                          ),
+                                        );
+                                      }
+                                    : null,
+                                child: Text(
+                                  '@${author['username'] ?? ''} • $timeAgo',
+                                  style: TextStyle(
+                                    color: mutedForeground,
+                                    fontSize: 12,
+                                  ),
                                 ),
                               ),
                             ],
@@ -1000,9 +1088,9 @@ class _PostDetailPageState extends State<PostDetailPage> {
                                         title: const Text('Delete Comment'),
                                         onTap: () {
                                           Navigator.pop(context);
-                                          _showDeleteConfirmation(commentId: commentId);}
-                                        ),
-                                      
+                                          _showDeleteConfirmation(commentId: commentId);
+                                        },
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -1117,7 +1205,7 @@ class _CommentRepliesPageState extends State<CommentRepliesPage> {
       });
       return replies;
     } catch (e) {
-      // debug_simulation('Error fetching replies: $e');
+      debugPrint('Error fetching replies: $e');
       throw Exception('Failed to load replies: $e');
     }
   }
@@ -1408,30 +1496,66 @@ class _CommentRepliesPageState extends State<CommentRepliesPage> {
                           children: [
                             Row(
                               children: [
-                                CircleAvatar(
-                                  radius: 16,
-                                  backgroundImage: author['profile'] != null
-                                      ? NetworkImage(author['profile']['picture'] ?? '')
-                                      : const AssetImage('assets/default_profile_picture.png') as ImageProvider,
+                                GestureDetector(
+                                  onTap: author['_id'] != null && author['username']?.isNotEmpty == true
+                                      ? () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => ProfilePage(userId: author['_id']),
+                                            ),
+                                          );
+                                        }
+                                      : null,
+                                  child: CircleAvatar(
+                                    radius: 16,
+                                    backgroundImage: author['profile'] != null
+                                        ? NetworkImage(author['profile']['picture'] ?? '')
+                                        : const AssetImage('assets/default_profile_picture.png') as ImageProvider,
+                                  ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        author['name'] ?? '{Deleted}',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 14,
-                                          color: foreground,
+                                      GestureDetector(
+                                        onTap: author['_id'] != null && author['username']?.isNotEmpty == true
+                                            ? () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => ProfilePage(userId: author['_id']),
+                                                  ),
+                                                );
+                                              }
+                                            : null,
+                                        child: Text(
+                                          author['name'] ?? '{Deleted}',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 14,
+                                            color: foreground,
+                                          ),
                                         ),
                                       ),
-                                      Text(
-                                        '@${author['username'] ?? ''} • $timeAgo',
-                                        style: TextStyle(
-                                          color: mutedForeground,
-                                          fontSize: 12,
+                                      GestureDetector(
+                                        onTap: author['_id'] != null && author['username']?.isNotEmpty == true
+                                            ? () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => ProfilePage(userId: author['_id']),
+                                                  ),
+                                                );
+                                              }
+                                            : null,
+                                        child: Text(
+                                          '@${author['username'] ?? ''} • $timeAgo',
+                                          style: TextStyle(
+                                            color: mutedForeground,
+                                            fontSize: 12,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -1457,9 +1581,9 @@ class _CommentRepliesPageState extends State<CommentRepliesPage> {
                                                 title: const Text('Delete Reply'),
                                                 onTap: () {
                                                   Navigator.pop(context);
-                                                  _showDeleteConfirmation(replyId);}
-                                                ),
-                                              
+                                                  _showDeleteConfirmation(replyId);
+                                                },
+                                              ),
                                             ],
                                           ),
                                         ),
