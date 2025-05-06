@@ -1,3 +1,6 @@
+// import 'dart:math';
+import 'dart:developer';
+
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:beyondtheclass/pages/home/widgets/campus/widgets/PostCard.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +17,8 @@ class ProfilePage extends ConsumerStatefulWidget {
   _ProfilePageState createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProviderStateMixin {
+class _ProfilePageState extends ConsumerState<ProfilePage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _apiClient = ApiClient();
 
@@ -34,15 +38,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
     // Load basic profile immediately from auth provider
     _loadBasicProfile();
     final auth = ref.read(authProvider);
-    final isOwnProfile = widget.userId == null || widget.userId == auth.user?['_id'];
+    final isOwnProfile =
+        widget.userId == null || widget.userId == auth.user?['_id'];
     _tabController = TabController(length: isOwnProfile ? 3 : 2, vsync: this);
     _fetchDetailedProfileData();
   }
 
   void _loadBasicProfile() {
     final auth = ref.read(authProvider);
+    log('${auth.user}');
+    // log(auth.user);
     final userId = widget.userId ?? auth.user?['_id'];
-    
+
     if (userId == null) {
       setState(() {
         _errorMessage = 'User not logged in';
@@ -87,15 +94,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
       // Fetch detailed profile data in parallel
       final results = await Future.wait([
         _apiClient.get('/api/user/profile', queryParameters: {'id': userId}),
-        _apiClient.get('/api/user/subscribedSocieties', queryParameters: {'id': userId}),
-        _apiClient.get('/api/user/connections', queryParameters: {'id': userId}),
+        _apiClient.get('/api/user/subscribedSocieties',
+            queryParameters: {'id': userId}),
+        _apiClient
+            .get('/api/user/connections', queryParameters: {'id': userId}),
       ]);
 
       final profileResponse = results[0];
       final societiesResponse = results[1];
       final connectionsResponse = results[2];
 
-      if (profileResponse.containsKey('error') || profileResponse['profile'] == null) {
+      if (profileResponse.containsKey('error') ||
+          profileResponse['profile'] == null) {
         setState(() {
           _isLoadingDetails = false;
           _errorMessage = profileResponse['error'] ?? 'User not found';
@@ -110,7 +120,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
             .toList();
         _societies = societiesResponse['joinedSocieties'] ?? [];
         _connections = connectionsResponse['connections'] ?? [];
-        
+
         // If we didn't have basic profile (viewing someone else's profile), set it now
         if (_basicProfile == null) {
           _basicProfile = {
@@ -124,7 +134,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
             }
           };
         }
-        
+
         _isLoadingDetails = false;
       });
     } catch (e) {
@@ -156,12 +166,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
     super.dispose();
   }
 
-  Widget _buildPostsTab(Color background, Color foreground, Color border, Color mutedForeground, Color accent) {
+  Widget _buildPostsTab(Color background, Color foreground, Color border,
+      Color mutedForeground, Color accent) {
     if (_isLoadingDetails) {
       return const Center(child: CircularProgressIndicator());
     }
     if (_posts.isEmpty) {
-      return Center(child: Text('No posts yet', style: TextStyle(color: mutedForeground)));
+      return Center(
+          child:
+              Text('No posts yet', style: TextStyle(color: mutedForeground)));
     }
     return ListView.builder(
       padding: const EdgeInsets.all(8.0),
@@ -173,12 +186,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
     );
   }
 
-  Widget _buildSocietyTab(Color background, Color foreground, Color border, Color mutedForeground, Color accent, Color primary) {
+  Widget _buildSocietyTab(Color background, Color foreground, Color border,
+      Color mutedForeground, Color accent, Color primary) {
     if (_isLoadingDetails) {
       return const Center(child: CircularProgressIndicator());
     }
     if (_societies.isEmpty) {
-      return Center(child: Text('No societies joined', style: TextStyle(color: mutedForeground)));
+      return Center(
+          child: Text('No societies joined',
+              style: TextStyle(color: mutedForeground)));
     }
     return ListView.builder(
       padding: const EdgeInsets.all(8.0),
@@ -209,7 +225,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: primary,
                         borderRadius: BorderRadius.circular(12),
@@ -225,9 +242,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  'A community for enthusiasts.',
-                  style: TextStyle(color: mutedForeground)),
+                Text('A community for enthusiasts.',
+                    style: TextStyle(color: mutedForeground)),
                 const SizedBox(height: 16),
                 Text(
                   'Activities:',
@@ -239,14 +255,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
-                  children: ['Events', 'Workshops'].map((activity) => Chip(
-                    label: Text(
-                      activity,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    backgroundColor: Colors.grey[800],
-                    labelStyle: const TextStyle(color: Colors.white),
-                  )).toList(),
+                  children: ['Events', 'Workshops']
+                      .map((activity) => Chip(
+                            label: Text(
+                              activity,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            backgroundColor: Colors.grey[800],
+                            labelStyle: const TextStyle(color: Colors.white),
+                          ))
+                      .toList(),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -259,14 +277,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
-                  children: ['Networking', 'Skills'].map((benefit) => Chip(
-                    label: Text(
-                      benefit,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    backgroundColor: Colors.green[900],
-                    labelStyle: const TextStyle(color: Colors.white),
-                  )).toList(),
+                  children: ['Networking', 'Skills']
+                      .map((benefit) => Chip(
+                            label: Text(
+                              benefit,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            backgroundColor: Colors.green[900],
+                            labelStyle: const TextStyle(color: Colors.white),
+                          ))
+                      .toList(),
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
@@ -307,10 +327,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
     // Custom theme colors
     final background = isDarkMode ? const Color(0xFF09090B) : Colors.white;
     final foreground = isDarkMode ? Colors.white : const Color(0xFF09090B);
-    final muted = isDarkMode ? const Color(0xFF27272A) : const Color(0xFFF4F4F5);
-    final mutedForeground = isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
-    final border = isDarkMode ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
-    final accent = isDarkMode ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
+    final muted =
+        isDarkMode ? const Color(0xFF27272A) : const Color(0xFFF4F4F5);
+    final mutedForeground =
+        isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+    final border =
+        isDarkMode ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+    final accent =
+        isDarkMode ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
     const primary = Color(0xFF8B5CF6);
 
     if (_errorMessage != null) {
@@ -333,7 +357,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
       );
     }
 
-    final isOwnProfile = widget.userId == null || widget.userId == auth.user?['_id'];
+    final isOwnProfile =
+        widget.userId == null || widget.userId == auth.user?['_id'];
+    final user = ref.watch(authProvider);
 
     return Scaffold(
       backgroundColor: background,
@@ -374,7 +400,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                               ),
                               Text(
                                 '@${_basicProfile?['username'] ?? 'unknown'}',
-                                style: TextStyle(color: mutedForeground, fontSize: 14),
+                                style: TextStyle(
+                                    color: mutedForeground, fontSize: 14),
                               ),
                             ],
                           ),
@@ -390,9 +417,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                           child: CircleAvatar(
                             radius: 30,
                             backgroundColor: accent,
-                            backgroundImage: _basicProfile?['profile']['picture'] != null
-                                ? NetworkImage(_basicProfile!['profile']['picture'])
-                                : const AssetImage("assets/images/profilepic2.jpg") as ImageProvider,
+                            backgroundImage:
+                                _basicProfile?['profile']['picture'] != null
+                                    ? NetworkImage(
+                                        _basicProfile!['profile']['picture'])
+                                    : const AssetImage(
+                                            "assets/images/profilepic2.jpg")
+                                        as ImageProvider,
                           ),
                         ),
                       ],
@@ -400,7 +431,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                     const SizedBox(height: 16),
                     Row(
                       children: [
-                        Icon(Icons.calendar_today, color: mutedForeground, size: 16),
+                        Icon(Icons.calendar_today,
+                            color: mutedForeground, size: 16),
                         const SizedBox(width: 8),
                         Text(
                           'Joined ${_basicProfile?['joined'] ?? 'Unknown'}',
@@ -408,7 +440,23 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                         ),
                       ],
                     ),
-                    if (_basicProfile?['profile']['bio']?.isNotEmpty ?? false) ...[
+                                        const SizedBox(height: 8),
+
+                    Row(
+                      children: [
+                        Text(
+                          '${auth.user?['university']['campusId']['name']}',
+                          style: TextStyle(color: mutedForeground),
+                        ),
+                        // SizedBox(width: 10,),
+
+                        Text(' - ${auth.user?['university']['departmentId']['name']}',                          
+                        style: TextStyle(color: mutedForeground),
+),
+                      ],
+                    ),
+                    if (_basicProfile?['profile']['bio']?.isNotEmpty ??
+                        false) ...[
                       const SizedBox(height: 16),
                       Text(
                         _basicProfile!['profile']['bio'],
@@ -416,7 +464,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                       ),
                     ],
                     const SizedBox(height: 16),
-                    _isLoadingDetails 
+                    _isLoadingDetails
                         ? const CircularProgressIndicator()
                         : RichText(
                             text: TextSpan(
@@ -437,7 +485,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                           ),
                     if (!isOwnProfile && !_isLoadingDetails) ...[
                       const SizedBox(height: 16),
-                      _buildConnectButton(_basicProfile!['_id'], primary, foreground),
+                      _buildConnectButton(
+                          _basicProfile!['_id'], primary, foreground),
                     ],
                   ],
                 ),
@@ -455,7 +504,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                   tabs: [
                     const Tab(text: 'Posts'),
                     const Tab(text: 'Societies'),
-                    
                   ],
                 ),
                 background,
@@ -466,9 +514,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
         body: TabBarView(
           controller: _tabController,
           children: [
-            _buildPostsTab(background, foreground, border, mutedForeground, accent),
-            _buildSocietyTab(background, foreground, border, mutedForeground, accent, primary),
-          
+            _buildPostsTab(
+                background, foreground, border, mutedForeground, accent),
+            _buildSocietyTab(background, foreground, border, mutedForeground,
+                accent, primary),
           ],
         ),
       ),
@@ -488,7 +537,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => _tabBar.preferredSize.height;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
       color: _background,
       child: _tabBar,
@@ -500,9 +550,3 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     return false;
   }
 }
-
-
-
-
-
-
