@@ -1,11 +1,12 @@
+
 import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -225,20 +226,12 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
         ),
       );
 
-      // Add marker with info window
+      // Add marker
       newMarkers.add(
         Marker(
           markerId: MarkerId(gatheringId),
           position: location,
           icon: _gatheringIcons[gatheringId] ?? BitmapDescriptor.defaultMarker,
-          infoWindow: InfoWindow(
-            title: title,
-            snippet: '${attendeesCount} ${attendeesCount == 1 ? 'attendee' : 'attendees'}',
-          ),
-          onTap: () {
-            // Show info window when marker is tapped
-            _mapController?.showMarkerInfoWindow(MarkerId(gatheringId));
-          },
         ),
       );
     }
@@ -262,80 +255,56 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
   Future<BitmapDescriptor> _createGatheringIcon(String gatheringId, String title, int attendeesCount) async {
     final pictureRecorder = ui.PictureRecorder();
     final canvas = Canvas(pictureRecorder);
-    final color = _generateColor(gatheringId);
-    final paint = Paint()..color = color;
-    
-    // Use a larger canvas size to accommodate more text
-    const size = 150.0;
-    const padding = 8.0;
-    const borderRadius = 12.0;
-    
-    // Draw rounded rectangle background
-    final rect = Rect.fromLTWH(0, 0, size, size);
-    // final rrect = RoundedRectangleBorder(
-    //   borderRadius: BorderRadius.circular(borderRadius),
-    // ).toRRect(rect);
+    final paint = Paint()..color = _generateColor(gatheringId);
+    const size = 100.0;
 
+    // Draw circle
+    canvas.drawCircle(const Offset(size / 2, size / 2), size / 2, paint);
 
-    // canvas.drawRRect(rrect , paint);
-    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(borderRadius));
-canvas.drawRRect(rrect , paint);
+    // Truncate title if too long
+    final displayTitle = title.length > 20 ? '${title.substring(0, 17)}...' : title;
 
+    // Format attendee count
+    final attendeeText = attendeesCount == 1 ? '1 attendee' : '$attendeesCount attendees';
 
-    // Calculate text dimensions
-    final textPainter = TextPainter(
+    // Draw title
+    final titlePainter = TextPainter(
+      text: TextSpan(
+        text: displayTitle,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
       textDirection: TextDirection.ltr,
-      maxLines: 2,
-      ellipsis: '...',
+      textAlign: TextAlign.center,
     );
-    
-    // Draw title (with word wrapping)
-    final titleStyle = TextStyle(
-      color: Colors.white,
-      fontSize: 20,
-      fontWeight: FontWeight.bold,
+    titlePainter.layout(maxWidth: size - 8);
+    titlePainter.paint(
+      canvas,
+      Offset((size - titlePainter.width) / 2, (size / 2) - titlePainter.height - 4),
     );
-    
-    textPainter.text = TextSpan(
-      text: title,
-      style: titleStyle,
+
+    // Draw attendee count
+    final attendeePainter = TextPainter(
+      text: TextSpan(
+        text: attendeeText,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.normal,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
     );
-    textPainter.layout(maxWidth: size - padding * 2);
-    
-    // Draw title (clipped if too long)
-    final titleOffset = Offset(padding, padding);
-    final titleRect = Rect.fromLTWH(
-      padding, 
-      padding, 
-      size - padding * 2, 
-      min(textPainter.height * 2, size * 0.6) // Max 2 lines or 60% of height
+    attendeePainter.layout(maxWidth: size - 8);
+    attendeePainter.paint(
+      canvas,
+      Offset((size - attendeePainter.width) / 2, (size / 2) + 4),
     );
-    
-    canvas.saveLayer(titleRect, Paint());
-    canvas.clipRect(titleRect);
-    textPainter.paint(canvas, titleOffset);
-    canvas.restore();
-    
-    // Draw attendee count below title
-    final attendeeText = '${attendeesCount} ${attendeesCount == 1 ? 'attendee' : 'attendees'}';
-    final attendeeStyle = TextStyle(
-      color: Colors.white,
-      fontSize: 18,
-    );
-    
-    textPainter.text = TextSpan(
-      text: attendeeText,
-      style: attendeeStyle,
-    );
-    textPainter.layout(maxWidth: size - padding * 2);
-    
-    final attendeeOffset = Offset(
-      padding,
-      padding + min(textPainter.height * 2, size * 0.6) + 4,
-    );
-    textPainter.paint(canvas, attendeeOffset);
-    
-    // Convert to image and create descriptor
+
     final picture = pictureRecorder.endRecording();
     final img = await picture.toImage(size.toInt(), size.toInt());
     final bytes = await img.toByteData(format: ui.ImageByteFormat.png);
@@ -446,33 +415,19 @@ canvas.drawRRect(rrect , paint);
                         ],
                       ),
                     )
-                  : Stack(
-                      children: [
-                        GoogleMap(
-                          initialCameraPosition: CameraPosition(
-                            target: _userLocation ?? _defaultLocation,
-                            zoom: 14,
-                          ),
-                          onMapCreated: (controller) {
-                            _mapController = controller;
-                            _updateMapCamera();
-                          },
-                          myLocationEnabled: true,
-                          myLocationButtonEnabled: true,
-                          markers: _markers,
-                          circles: _circles,
-                        ),
-                        // Add a button to center on user location
-                        Positioned(
-                          bottom: 20,
-                          right: 20,
-                          child: FloatingActionButton(
-                            backgroundColor: primaryColor,
-                            onPressed: _updateMapCamera,
-                            child: Icon(Icons.my_location, color: Colors.white),
-                          ),
-                        ),
-                      ],
+                  : GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: _userLocation ?? _defaultLocation,
+                        zoom: 14,
+                      ),
+                      onMapCreated: (controller) {
+                        _mapController = controller;
+                        _updateMapCamera();
+                      },
+                      myLocationEnabled: true,
+                      myLocationButtonEnabled: true,
+                      markers: _markers,
+                      circles: _circles,
                     ),
     );
   }
@@ -531,3 +486,19 @@ class Location {
     );
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

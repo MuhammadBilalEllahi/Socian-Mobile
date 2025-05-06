@@ -287,15 +287,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
     );
   }
 
-  Widget _buildBlockedTab(Color background, Color foreground, Color mutedForeground) {
-    return Center(
-      child: Text(
-        'No blocked users',
-        style: TextStyle(color: mutedForeground, fontSize: 16),
-      ),
-    );
-  }
-
   Widget _buildConnectButton(String userId, Color primary, Color foreground) {
     return ElevatedButton(
       onPressed: () => _sendConnectRequest(userId),
@@ -463,8 +454,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
                   indicatorColor: primary,
                   tabs: [
                     const Tab(text: 'Posts'),
-                    const Tab(text: 'Society'),
-                    if (isOwnProfile) const Tab(text: 'Blocked'),
+                    const Tab(text: 'Societies'),
+                    
                   ],
                 ),
                 background,
@@ -477,8 +468,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> with SingleTickerProv
           children: [
             _buildPostsTab(background, foreground, border, mutedForeground, accent),
             _buildSocietyTab(background, foreground, border, mutedForeground, accent, primary),
-            if (isOwnProfile)
-              _buildBlockedTab(background, foreground, mutedForeground),
+          
           ],
         ),
       ),
@@ -510,10 +500,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     return false;
   }
 }
-
-
-
-
 
 
 
