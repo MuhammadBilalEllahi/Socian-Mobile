@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:beyondtheclass/pages/profile/settings/ServerSelectionPage.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -89,40 +90,28 @@ class SettingsPage extends ConsumerWidget {
                 },
                 isDarkMode,
               ),
-              
             ],
           ),
 
           // App Settings
-          // _buildSection(
-          //   'Preferences',
-          //   [
-              // _buildListTile(
-              //   'Notifications',
-              //   Icons.notifications_outlined,
-              //   () {
-              //     // Navigate to notification settings
-              //   },
-              //   isDarkMode,
-              // ),
-              // _buildListTile(
-              //   'Appearance',
-              //   Icons.palette_outlined,
-              //   () {
-              //     // Navigate to theme settings
-              //   },
-              //   isDarkMode,
-              // ),
-              // _buildListTile(
-              //   'Language',
-              //   Icons.language,
-              //   () {
-              //     // Navigate to language settings
-              //   },
-              //   isDarkMode,
-              // ),
-          //   ],
-          // ),
+          _buildSection(
+            'Preferences',
+            [
+              _buildListTile(
+                'Server Selection',
+                Icons.cloud_outlined,
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ServerSelectionPage(),
+                    ),
+                  );
+                },
+                isDarkMode,
+              ),
+            ],
+          ),
 
           // Help & About
           _buildSection(
