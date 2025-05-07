@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:math' as math;
 import 'dart:io';
+import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 
 class PostMedia extends StatefulWidget {
   final List<dynamic>? media;
@@ -18,7 +20,7 @@ class PostMedia extends StatefulWidget {
 
 class _PostMediaState extends State<PostMedia>
     with SingleTickerProviderStateMixin {
-  VideoPlayerController? _videoController;
+  CachedVideoPlayerPlusController? _videoController;
   AudioPlayer? _audioPlayer;
   bool _isPlaying = false;
   Duration _duration = Duration.zero;
@@ -45,10 +47,22 @@ class _PostMediaState extends State<PostMedia>
         orElse: () => null,
       );
       if (video != null) {
-        _videoController = VideoPlayerController.network(video['url'])
-          ..initialize().then((_) {
+        _videoController = CachedVideoPlayerPlusController.networkUrl(
+          Uri.parse(video['url']),
+          httpHeaders: {
+            'Connection': 'keep-alive',
+          },
+          invalidateCacheIfOlderThan: const Duration(minutes: 10),
+        );
+        _videoController!.addListener(() {
+          if (mounted) setState(() {});
+        });
+        _videoController!.initialize().then((_) {
+          if (mounted) {
             setState(() {});
-          });
+            _videoController!.setLooping(true);
+          }
+        });
       }
     }
   }
@@ -99,6 +113,9 @@ class _PostMediaState extends State<PostMedia>
 
   @override
   void dispose() {
+    _videoController?.removeListener(() {
+      if (mounted) setState(() {});
+    });
     _videoController?.dispose();
     _audioPlayer?.dispose();
     _waveformController.dispose();
@@ -141,49 +158,33 @@ class _PostMediaState extends State<PostMedia>
           ),
         ],
       ),
-      child: Stack(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.network(
-              item['url'],
-              width: double.infinity,
-              height: 300,
-              fit: BoxFit.cover,
-            ),
-          ),
-          Positioned(
-            bottom: 8,
-            right: 8,
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => FullScreenMediaView(
-                        mediaFiles: [item['url']],
-                        initialIndex: 0,
-                        videoControllers: {},
-                        isImage: true,
-                      ),
-                    ),
-                  );
-                },
-                icon: const Icon(
-                  Icons.fullscreen,
-                  color: Colors.white,
-                  size: 20,
-                ),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => FullScreenMediaView(
+                mediaFiles: [item['url']],
+                initialIndex: 0,
+                videoControllers: {},
+                isImage: true,
               ),
             ),
+          );
+        },
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: CachedNetworkImage(
+            imageUrl: item['url'],
+            width: double.infinity,
+            height: 300,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => const Center(
+              child: CircularProgressIndicator(),
+            ),
+            errorWidget: (context, url, error) => const Icon(Icons.error),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -212,7 +213,7 @@ class _PostMediaState extends State<PostMedia>
                 _videoController!.value.isInitialized)
               AspectRatio(
                 aspectRatio: _videoController!.value.aspectRatio,
-                child: VideoPlayer(_videoController!),
+                child: CachedVideoPlayerPlus(_videoController!),
               )
             else
               const SizedBox(
@@ -529,7 +530,7 @@ class WaveformPainter extends CustomPainter {
 
 class FullScreenMediaView extends StatefulWidget {
   final List<String> mediaFiles;
-  final Map<String, VideoPlayerController> videoControllers;
+  final Map<String, CachedVideoPlayerPlusController> videoControllers;
   final int initialIndex;
   final bool isImage;
 
@@ -553,12 +554,32 @@ class _FullScreenMediaViewState extends State<FullScreenMediaView> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: widget.initialIndex);
+    // Add listeners to all video controllers
+    widget.videoControllers.values.forEach((controller) {
+      controller.addListener(() {
+        if (mounted) setState(() {});
+      });
+    });
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    // Remove listeners from all video controllers
+    widget.videoControllers.values.forEach((controller) {
+      controller.removeListener(() {
+        if (mounted) setState(() {});
+      });
+    });
     super.dispose();
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+
+    return "$minutes:$seconds";
   }
 
   @override
@@ -587,7 +608,8 @@ class _FullScreenMediaViewState extends State<FullScreenMediaView> {
                       AspectRatio(
                         aspectRatio:
                             widget.videoControllers[file]!.value.aspectRatio,
-                        child: VideoPlayer(widget.videoControllers[file]!),
+                        child: CachedVideoPlayerPlus(
+                            widget.videoControllers[file]!),
                       ),
                       if (_showControls)
                         Positioned(
@@ -697,9 +719,14 @@ class _FullScreenMediaViewState extends State<FullScreenMediaView> {
                   });
                 },
                 child: Center(
-                  child: Image.network(
-                    file,
+                  child: CachedNetworkImage(
+                    imageUrl: file,
                     fit: BoxFit.contain,
+                    placeholder: (context, url) => const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    errorWidget: (context, url, error) =>
+                        const Icon(Icons.error),
                   ),
                 ),
               );
@@ -717,24 +744,17 @@ class _FullScreenMediaViewState extends State<FullScreenMediaView> {
                   icon: const Icon(Icons.close, color: Colors.white),
                   onPressed: () => Navigator.pop(context),
                 ),
-                actions: [
-                  IconButton(
-                    icon:
-                        const Icon(Icons.fullscreen_exit, color: Colors.white),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
+                // actions: [
+                //   IconButton(
+                //     icon:
+                //         const Icon(Icons.fullscreen_exit, color: Colors.white),
+                //     onPressed: () => Navigator.pop(context),
+                //   ),
+                // ],
               ),
             ),
         ],
       ),
     );
-  }
-
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
-    final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return "$minutes:$seconds";
   }
 }

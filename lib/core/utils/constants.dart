@@ -33,7 +33,7 @@ class ApiConstants {
     12: "http://192.168.1.12:8080",
   };
 
-  static int _currentUrlIndex = -2;
+  static int _currentUrlIndex = 7;
   static const String _urlIndexCacheKey = 'current_url_index';
 
   static Future<void> initializeBaseUrl() async {
@@ -223,6 +223,15 @@ class IntroStatus {
     final prefs = AppPrefs();
     await prefs.setBool(_keyFor(introStatusEmun), true);
   }
+}
+
+enum Flairs {
+  university(0),
+  campus(1),
+  department(2);
+
+  final int value;
+  const Flairs(this.value);
 }
 
 enum RiveThumb {

@@ -39,7 +39,7 @@
 //   Widget build(BuildContext context) {
 //     final postState = ref.watch(postProvider);
 //     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
 //     return RefreshIndicator(
 //       onRefresh: () async {
 //         await ref.read(postProvider.notifier).fetchPosts();
@@ -169,18 +169,6 @@
 //   }
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
 import 'package:beyondtheclass/components/loader.dart';
 import 'package:beyondtheclass/pages/drawer/student/StudentDrawer.dart';
 import 'package:beyondtheclass/pages/home/widgets/universities/AllUniversityPosts.dart';
@@ -193,6 +181,7 @@ import 'package:beyondtheclass/shared/services/api_client.dart';
 import '../components/post/post.dart';
 import 'package:beyondtheclass/core/usecases/PostProvider.dart';
 import 'package:shimmer/shimmer.dart';
+import 'dart:developer';
 
 class CampusPosts extends ConsumerStatefulWidget {
   const CampusPosts({super.key});
@@ -201,7 +190,8 @@ class CampusPosts extends ConsumerStatefulWidget {
   ConsumerState<CampusPosts> createState() => _CampusPostsState();
 }
 
-class _CampusPostsState extends ConsumerState<CampusPosts> with SingleTickerProviderStateMixin {
+class _CampusPostsState extends ConsumerState<CampusPosts>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -223,7 +213,7 @@ class _CampusPostsState extends ConsumerState<CampusPosts> with SingleTickerProv
   Widget build(BuildContext context) {
     final postState = ref.watch(postProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return RefreshIndicator(
       onRefresh: () async {
         await ref.read(postProvider.notifier).fetchPosts();
@@ -242,7 +232,8 @@ class _CampusPostsState extends ConsumerState<CampusPosts> with SingleTickerProv
             baseColor: isDark ? Colors.grey[800]! : Colors.grey[300]!,
             highlightColor: isDark ? Colors.grey[700]! : Colors.grey[100]!,
             child: Container(
-              margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              margin:
+                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
               height: 200,
               decoration: BoxDecoration(
                 color: isDark ? Colors.grey[900] : Colors.white,
@@ -353,36 +344,10 @@ class _CampusPostsState extends ConsumerState<CampusPosts> with SingleTickerProv
         }
 
         // Fetch user data for author
-        return FutureBuilder<Map<String, dynamic>?>(
-          future: UserInfoProvider.getUserData(ref, post['author']['_id']),
-          builder: (context, snapshot) {
-            String flairText = '';
-
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SizedBox(
-                height: 200,
-                child: Center(child: CircularProgressIndicator()),
-              );
-            }
-
-            if (snapshot.hasError) {
-              debugPrint('Error fetching user data for post $index: ${snapshot.error}');
-              flairText = '';
-            } else if (snapshot.hasData && snapshot.data != null) {
-              final userData = snapshot.data!;
-              flairText = userData['university']?['departmentId']?['name']?.toString() ?? '';
-              // flairText = userData['name']?.toString() ?? '';
-              debugPrint('User data for post $index: $userData, flairText: $flairText');
-            } else {
-              debugPrint('No user data for post $index');
-              flairText = '';
-            }
-
-            return PostCard(
-              post: post,
-              flairType: 0,
-            );
-          },
+        log("VALUE OF FLAIR TYPE ${Flairs.campus.value}");
+        return PostCard(
+          post: post,
+          flairType: Flairs.campus.value,
         );
       },
     );

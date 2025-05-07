@@ -1,7 +1,8 @@
 import 'dart:developer';
 import 'dart:io';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
-import 'package:beyondtheclass/pages/home/widgets/campus/widgets/PostCard.dart';
+import 'package:beyondtheclass/pages/home/widgets/components/post/post.dart';
+// import 'package:beyondtheclass/pages/home/widgets/campus/widgets/PostCard.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -185,7 +186,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
       itemCount: _posts.length,
       itemBuilder: (context, index) {
         final post = _posts[index];
-        return PostCard(post: post);
+        return PostCard(
+          post: post,
+          flairType: Flairs.campus.value,
+        );
       },
     );
   }
@@ -473,9 +477,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                               radius: 30,
                               backgroundColor: accent,
                               backgroundImage:
-                                  auth.user?['profile']?['picture'] != null
+                                  _basicProfile?['profile']?['picture'] != null
                                       ? NetworkImage(
-                                          auth.user!['profile']['picture'])
+                                          _basicProfile!['profile']['picture'])
                                       : const AssetImage(
                                               "assets/images/profilepic2.jpg")
                                           as ImageProvider,
@@ -510,6 +514,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                           style: TextStyle(color: mutedForeground),
                         ),
                       ],
+                    ),
+                    Text(
+                      '${auth.user?['role']}',
+                      style: TextStyle(color: mutedForeground),
                     ),
                     if (_basicProfile?['profile']['bio']?.isNotEmpty ??
                         false) ...[

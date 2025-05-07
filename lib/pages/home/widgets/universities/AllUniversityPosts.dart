@@ -1,6 +1,8 @@
+import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:beyondtheclass/pages/home/widgets/components/post/post.dart';
 import 'package:flutter/material.dart';
 import 'package:beyondtheclass/pages/home/widgets/universities/service/AllUniversityService.dart';
-import 'package:beyondtheclass/pages/home/widgets/universities/widgets/PostCard.dart';
+// import 'package:beyondtheclass/pages/home/widgets/universities/widgets/PostCard.dart';
 
 class AllUniversityPosts extends StatefulWidget {
   const AllUniversityPosts({super.key});
@@ -14,7 +16,6 @@ class _AllUniversityPostsState extends State<AllUniversityPosts> {
 
   @override
   void initState() {
-    
     super.initState();
     _fetchPosts();
   }
@@ -30,14 +31,14 @@ class _AllUniversityPostsState extends State<AllUniversityPosts> {
 
   @override
   Widget build(BuildContext context) {
-        
-
-      return   ListView.builder(
-        padding: const EdgeInsets.all(0),
-        itemCount: _posts.length,
-        itemBuilder: (context, index) {
-          return PostCard(post: _posts[index],);
-        },
+    return ListView.builder(
+      padding: const EdgeInsets.all(0),
+      itemCount: _posts.length,
+      itemBuilder: (context, index) {
+        return PostCard(
+            post: _posts[index], flairType: Flairs.university.value);
+        // PostCard(post: _posts[index],);
+      },
     );
   }
 }
