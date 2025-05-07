@@ -36,7 +36,7 @@ class _AllUniversityPostsState extends State<AllUniversityPosts> {
         padding: const EdgeInsets.all(0),
         itemCount: _posts.length,
         itemBuilder: (context, index) {
-          return PostCard(post: _posts[index]);
+          return PostCard(post: _posts[index],);
         },
     );
   }
@@ -104,7 +104,7 @@ class _AllUniversityPostsState extends State<AllUniversityPosts> {
 //                 '';
 //         return PostCard(
 //           post: _posts[index],
-//           flairText: universityName, // Pass university name as flair
+//           flairType: 1, // Pass university name as flair
 //         );
 //       },
 //     );

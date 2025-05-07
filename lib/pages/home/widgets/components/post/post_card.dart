@@ -10,10 +10,12 @@
 
 // class PostCard extends StatefulWidget {
 //   final dynamic post;
+//   final String? flairText;
 
 //   const PostCard({
 //     super.key,
 //     required this.post,
+//     this.flairText,
 //   });
 
 //   @override
@@ -71,7 +73,8 @@
 
 //   Future<void> _deletePost(String postId) async {
 //     try {
-//       final response = await _apiClient.delete('/api/posts/delete', queryParameters: {
+//       final response = await _apiClient.delete('/api/posts/delete',
+//           queryParameters: {
 //         'postId': postId,
 //       });
 //       debugPrint('Delete post response: $response');
@@ -92,7 +95,8 @@
 //       context: context,
 //       builder: (context) => AlertDialog(
 //         title: const Text('Delete Post'),
-//         content: const Text('Are you sure you want to delete this post? This action cannot be undone.'),
+//         content: const Text(
+//             'Are you sure you want to delete this post? This action cannot be undone.'),
 //         actions: [
 //           TextButton(
 //             onPressed: () => Navigator.pop(context, false),
@@ -131,7 +135,8 @@
 //               Navigator.push(
 //                 context,
 //                 MaterialPageRoute(
-//                   builder: (context) => PostDetailPage(post: widget.post),
+//                   builder: (context) =>
+//                       PostDetailPage(post: widget.post, flairText: widget.flairText),
 //                 ),
 //               );
 //             },
@@ -153,7 +158,8 @@
 //   }
 
 //   Widget _buildUserInfo(bool isDark, String formattedDate) {
-//     final isSocietyPost = widget.post['society'] != null && widget.post['society']['name'] != null;
+//     final isSocietyPost =
+//         widget.post['society'] != null && widget.post['society']['name'] != null;
 //     final societyName = isSocietyPost ? widget.post['society']['name'] : '';
 //     final author = widget.post['author'] ?? {};
 
@@ -175,7 +181,8 @@
 //             backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
 //             backgroundImage: author['profile'] != null
 //                 ? NetworkImage(author['profile']['picture'] ?? '')
-//                 : const AssetImage('assets/default_profile_picture.png') as ImageProvider,
+//                 : const AssetImage('assets/default_profile_picture.png')
+//                     as ImageProvider,
 //           ),
 //         ),
 //         const SizedBox(width: 12),
@@ -186,12 +193,14 @@
 //               Row(
 //                 children: [
 //                   GestureDetector(
-//                     onTap: author['_id'] != null && author['username']?.isNotEmpty == true
+//                     onTap: author['_id'] != null &&
+//                             author['username']?.isNotEmpty == true
 //                         ? () {
 //                             Navigator.push(
 //                               context,
 //                               MaterialPageRoute(
-//                                 builder: (context) => ProfilePage(userId: author['_id']),
+//                                 builder: (context) =>
+//                                     ProfilePage(userId: author['_id']),
 //                               ),
 //                             );
 //                           }
@@ -205,6 +214,25 @@
 //                       ),
 //                     ),
 //                   ),
+//                   if (widget.flairText != null) ...[
+//                     const SizedBox(width: 4),
+//                     Container(
+//                       padding: const EdgeInsets.symmetric(
+//                           horizontal: 6, vertical: 2),
+//                       decoration: BoxDecoration(
+//                         color: isDark ? Colors.blue[700] : Colors.blue[500],
+//                         borderRadius: BorderRadius.circular(4),
+//                       ),
+//                       child: Text(
+//                         widget.flairText!,
+//                         style: const TextStyle(
+//                           color: Colors.white,
+//                           fontSize: 10,
+//                           fontWeight: FontWeight.w500,
+//                         ),
+//                       ),
+//                     ),
+//                   ],
 //                   if (isSocietyPost) ...[
 //                     const SizedBox(width: 4),
 //                     Icon(
@@ -228,12 +256,14 @@
 //               Row(
 //                 children: [
 //                   GestureDetector(
-//                     onTap: author['_id'] != null && author['username']?.isNotEmpty == true
+//                     onTap: author['_id'] != null &&
+//                             author['username']?.isNotEmpty == true
 //                         ? () {
 //                             Navigator.push(
 //                               context,
 //                               MaterialPageRoute(
-//                                 builder: (context) => ProfilePage(userId: author['_id']),
+//                                 builder: (context) =>
+//                                     ProfilePage(userId: author['_id']),
 //                               ),
 //                             );
 //                           }
@@ -348,23 +378,26 @@
 //             Navigator.push(
 //               context,
 //               MaterialPageRoute(
-//                 builder: (context) => PostDetailPage(post: widget.post),
+//                 builder: (context) =>
+//                     PostDetailPage(post: widget.post, flairText: widget.flairText),
 //               ),
 //             );
 //           },
 //           isActive: false,
 //         ),
-//         ],
+//       ],
 //     );
 //   }
 // }
 
 // class PostDetailPage extends StatefulWidget {
 //   final dynamic post;
+//   final String? flairText;
 
 //   const PostDetailPage({
 //     super.key,
 //     required this.post,
+//     this.flairText,
 //   });
 
 //   @override
@@ -451,15 +484,19 @@
 //       setState(() {
 //         final commentIndex = _comments.indexWhere((c) => c['_id'] == commentId);
 //         if (commentIndex != -1) {
-//           _comments[commentIndex]['voteId']['upVotesCount'] = response['upVotesCount'];
-//           _comments[commentIndex]['voteId']['downVotesCount'] = response['downVotesCount'];
+//           _comments[commentIndex]['voteId']['upVotesCount'] =
+//               response['upVotesCount'];
+//           _comments[commentIndex]['voteId']['downVotesCount'] =
+//               response['downVotesCount'];
 
 //           if (response['noneSelected'] == true) {
 //             _isCommentLiked[commentId] = false;
 //             _isCommentDisliked[commentId] = false;
 //           } else {
-//             _isCommentLiked[commentId] = voteType == 'upvote' && response['noneSelected'] != true;
-//             _isCommentDisliked[commentId] = voteType == 'downvote' && response['noneSelected'] != true;
+//             _isCommentLiked[commentId] =
+//                 voteType == 'upvote' && response['noneSelected'] != true;
+//             _isCommentDisliked[commentId] =
+//                 voteType == 'downvote' && response['noneSelected'] != true;
 //           }
 //         } else {
 //           debugPrint('Comment with ID $commentId not found in _comments');
@@ -484,7 +521,8 @@
 
 //   Future<void> _deletePost(String postId) async {
 //     try {
-//       final response = await _apiClient.delete('/api/posts/delete', queryParameters: {
+//       final response = await _apiClient.delete('/api/posts/delete',
+//           queryParameters: {
 //         'postId': postId,
 //       });
 //       debugPrint('Delete post response: $response');
@@ -502,7 +540,8 @@
 
 //   Future<void> _deleteComment(String commentId) async {
 //     try {
-//       final response = await _apiClient.delete('/api/posts/post/comment', queryParameters: {
+//       final response = await _apiClient.delete('/api/posts/post/comment',
+//           queryParameters: {
 //         'commentId': commentId,
 //       });
 //       debugPrint('Delete comment response: $response');
@@ -530,7 +569,8 @@
 //       context: context,
 //       builder: (context) => AlertDialog(
 //         title: Text('Delete $type'),
-//         content: Text('Are you sure you want to delete this $type? This action cannot be undone.'),
+//         content: Text(
+//             'Are you sure you want to delete this $type? This action cannot be undone.'),
 //         actions: [
 //           TextButton(
 //             onPressed: () => Navigator.pop(context, false),
@@ -561,12 +601,16 @@
 
 //   Future<List<dynamic>> _fetchComments(String postId) async {
 //     try {
-//       final response = await _apiClient.getList('/api/posts/post/comments', queryParameters: {
+//       final response = await _apiClient.getList('/api/posts/post/comments',
+//           queryParameters: {
 //         'postId': postId,
 //       });
 //       debugPrint('Comments response: $response');
 //       if (response is List && response.isNotEmpty) {
-//         final comments = response[0]['comments']?.where((c) => !(c['isDeleted'] ?? false)).toList() ?? [];
+//         final comments = response[0]['comments']
+//                 ?.where((c) => !(c['isDeleted'] ?? false))
+//                 .toList() ??
+//             [];
 //         setState(() {
 //           _comments = comments;
 //         });
@@ -673,7 +717,8 @@
 //               const SizedBox(height: 16),
 //               _buildActionButtons(foreground, mutedForeground),
 //               const SizedBox(height: 16),
-//               _buildCommentsSection(foreground, mutedForeground, border, accent, background),
+//               _buildCommentsSection(
+//                   foreground, mutedForeground, border, accent, background),
 //             ],
 //           ),
 //         ),
@@ -682,7 +727,8 @@
 //   }
 
 //   Widget _buildUserInfo(Color foreground, Color mutedForeground, String formattedDate) {
-//     final isSocietyPost = widget.post['society'] != null && widget.post['society']['name'] != null;
+//     final isSocietyPost =
+//         widget.post['society'] != null && widget.post['society']['name'] != null;
 //     final societyName = isSocietyPost ? widget.post['society']['name'] : '';
 //     final author = widget.post['author'] ?? {};
 
@@ -703,7 +749,8 @@
 //             radius: 24,
 //             backgroundImage: author['profile'] != null
 //                 ? NetworkImage(author['profile']['picture'] ?? '')
-//                 : const AssetImage('assets/default_profile_picture.png') as ImageProvider,
+//                 : const AssetImage('assets/default_profile_picture.png')
+//                     as ImageProvider,
 //           ),
 //         ),
 //         const SizedBox(width: 12),
@@ -714,12 +761,14 @@
 //               Row(
 //                 children: [
 //                   GestureDetector(
-//                     onTap: author['_id'] != null && author['username']?.isNotEmpty == true
+//                     onTap: author['_id'] != null &&
+//                             author['username']?.isNotEmpty == true
 //                         ? () {
 //                             Navigator.push(
 //                               context,
 //                               MaterialPageRoute(
-//                                 builder: (context) => ProfilePage(userId: author['_id']),
+//                                 builder: (context) =>
+//                                     ProfilePage(userId: author['_id']),
 //                               ),
 //                             );
 //                           }
@@ -733,6 +782,26 @@
 //                       ),
 //                     ),
 //                   ),
+//                   if (widget.flairText != null) ...[
+//                     const SizedBox(width: 4),
+//                     Container(
+//                       padding: const EdgeInsets.symmetric(
+//                           horizontal: 6, vertical: 2),
+//                       decoration: BoxDecoration(
+//                         // color: isDark ? Colors.blue[700] : Colors.blue[500],
+//                         color:  Colors.blue[500],
+//                         borderRadius: BorderRadius.circular(4),
+//                       ),
+//                       child: Text(
+//                         widget.flairText!,
+//                         style: const TextStyle(
+//                           color: Colors.white,
+//                           fontSize: 12,
+//                           fontWeight: FontWeight.w500,
+//                         ),
+//                       ),
+//                     ),
+//                   ],
 //                   if (isSocietyPost) ...[
 //                     const SizedBox(width: 4),
 //                     Icon(
@@ -756,12 +825,14 @@
 //               Row(
 //                 children: [
 //                   GestureDetector(
-//                     onTap: author['_id'] != null && author['username']?.isNotEmpty == true
+//                     onTap: author['_id'] != null &&
+//                             author['username']?.isNotEmpty == true
 //                         ? () {
 //                             Navigator.push(
 //                               context,
 //                               MaterialPageRoute(
-//                                 builder: (context) => ProfilePage(userId: author['_id']),
+//                                 builder: (context) =>
+//                                     ProfilePage(userId: author['_id']),
 //                               ),
 //                             );
 //                           }
@@ -1004,12 +1075,14 @@
 //                     Row(
 //                       children: [
 //                         GestureDetector(
-//                           onTap: author['_id'] != null && author['username']?.isNotEmpty == true
+//                           onTap: author['_id'] != null &&
+//                                   author['username']?.isNotEmpty == true
 //                               ? () {
 //                                   Navigator.push(
 //                                     context,
 //                                     MaterialPageRoute(
-//                                       builder: (context) => ProfilePage(userId: author['_id']),
+//                                       builder: (context) =>
+//                                           ProfilePage(userId: author['_id']),
 //                                     ),
 //                                   );
 //                                 }
@@ -1018,7 +1091,9 @@
 //                             radius: 16,
 //                             backgroundImage: author['profile'] != null
 //                                 ? NetworkImage(author['profile']['picture'] ?? '')
-//                                 : const AssetImage('assets/default_profile_picture.png') as ImageProvider,
+//                                 : const AssetImage(
+//                                     'assets/default_profile_picture.png')
+//                                     as ImageProvider,
 //                           ),
 //                         ),
 //                         const SizedBox(width: 12),
@@ -1027,12 +1102,14 @@
 //                             crossAxisAlignment: CrossAxisAlignment.start,
 //                             children: [
 //                               GestureDetector(
-//                                 onTap: author['_id'] != null && author['username']?.isNotEmpty == true
+//                                 onTap: author['_id'] != null &&
+//                                         author['username']?.isNotEmpty == true
 //                                     ? () {
 //                                         Navigator.push(
 //                                           context,
 //                                           MaterialPageRoute(
-//                                             builder: (context) => ProfilePage(userId: author['_id']),
+//                                             builder: (context) =>
+//                                                 ProfilePage(userId: author['_id']),
 //                                           ),
 //                                         );
 //                                       }
@@ -1047,12 +1124,14 @@
 //                                 ),
 //                               ),
 //                               GestureDetector(
-//                                 onTap: author['_id'] != null && author['username']?.isNotEmpty == true
+//                                 onTap: author['_id'] != null &&
+//                                         author['username']?.isNotEmpty == true
 //                                     ? () {
 //                                         Navigator.push(
 //                                           context,
 //                                           MaterialPageRoute(
-//                                             builder: (context) => ProfilePage(userId: author['_id']),
+//                                             builder: (context) =>
+//                                                 ProfilePage(userId: author['_id']),
 //                                           ),
 //                                         );
 //                                       }
@@ -1084,11 +1163,13 @@
 //                                     mainAxisSize: MainAxisSize.min,
 //                                     children: [
 //                                       ListTile(
-//                                         leading: const Icon(Icons.delete, color: Colors.red),
+//                                         leading:
+//                                             const Icon(Icons.delete, color: Colors.red),
 //                                         title: const Text('Delete Comment'),
 //                                         onTap: () {
 //                                           Navigator.pop(context);
-//                                           _showDeleteConfirmation(commentId: commentId);
+//                                           _showDeleteConfirmation(
+//                                               commentId: commentId);
 //                                         },
 //                                       ),
 //                                     ],
@@ -1113,14 +1194,18 @@
 //                     Row(
 //                       children: [
 //                         PostStatItem(
-//                           icon: _isCommentLiked[commentId]! ? Icons.favorite : Icons.favorite_outline,
+//                           icon: _isCommentLiked[commentId]!
+//                               ? Icons.favorite
+//                               : Icons.favorite_outline,
 //                           count: voteId['upVotesCount'] ?? 0,
 //                           onTap: () => _voteComment(commentId, 'upvote'),
 //                           isActive: _isCommentLiked[commentId]!,
 //                         ),
 //                         const SizedBox(width: 16),
 //                         PostStatItem(
-//                           icon: _isCommentDisliked[commentId]! ? Icons.thumb_down : Icons.thumb_down_outlined,
+//                           icon: _isCommentDisliked[commentId]!
+//                               ? Icons.thumb_down
+//                               : Icons.thumb_down_outlined,
 //                           count: voteId['downVotesCount'] ?? 0,
 //                           onTap: () => _voteComment(commentId, 'downvote'),
 //                           isActive: _isCommentDisliked[commentId]!,
@@ -1140,7 +1225,9 @@
 //                             );
 //                           },
 //                           child: Text(
-//                             replyCount == 0 ? 'Reply' : '$replyCount repl${replyCount == 1 ? 'y' : 'ies'}',
+//                             replyCount == 0
+//                                 ? 'Reply'
+//                                 : '$replyCount repl${replyCount == 1 ? 'y' : 'ies'}',
 //                             style: TextStyle(
 //                               color: mutedForeground,
 //                               fontSize: 12,
@@ -1195,11 +1282,15 @@
 
 //   Future<List<dynamic>> _fetchReplies(String commentId) async {
 //     try {
-//       final response = await _apiClient.getList('/api/posts/post/comment/replies', queryParameters: {
+//       final response = await _apiClient.getList('/api/posts/post/comment/replies',
+//           queryParameters: {
 //         'commentId': commentId,
 //       });
 //       debugPrint('Replies response: $response');
-//       final replies = response?.where((r) => !(r['isDeleted'] ?? false)).toList() ?? [];
+//       final replies = response
+//               ?.where((r) => !(r['isDeleted'] ?? false))
+//               .toList() ??
+//           [];
 //       setState(() {
 //         _replies = replies;
 //       });
@@ -1271,10 +1362,13 @@
 //         final replyIndex = _replies.indexWhere((r) => r['_id'] == replyId);
 //         if (replyIndex != -1) {
 //           _replies[replyIndex]['voteId']['upVotesCount'] = response['upVotesCount'];
-//           _replies[replyIndex]['voteId']['downVotesCount'] = response['downVotesCount'];
+//           _replies[replyIndex]['voteId']['downVotesCount'] =
+//               response['downVotesCount'];
 //         }
-//         _isReplyLiked[replyId] = voteType == 'upvote' && response['noneSelected'] != true;
-//         _isReplyDisliked[replyId] = voteType == 'downvote' && response['noneSelected'] != true;
+//         _isReplyLiked[replyId] =
+//             voteType == 'upvote' && response['noneSelected'] != true;
+//         _isReplyDisliked[replyId] =
+//             voteType == 'downvote' && response['noneSelected'] != true;
 //         if (response['noneSelected'] == true) {
 //           _isReplyLiked[replyId] = false;
 //           _isReplyDisliked[replyId] = false;
@@ -1298,7 +1392,8 @@
 
 //   Future<void> _deleteReply(String replyId) async {
 //     try {
-//       final response = await _apiClient.delete('/api/posts/post/reply/comment', queryParameters: {
+//       final response = await _apiClient.delete('/api/posts/post/reply/comment',
+//           queryParameters: {
 //         'replyId': replyId,
 //       });
 //       debugPrint('Delete reply response: $response');
@@ -1321,7 +1416,8 @@
 //       context: context,
 //       builder: (context) => AlertDialog(
 //         title: const Text('Delete Reply'),
-//         content: const Text('Are you sure you want to delete this reply? This action cannot be undone.'),
+//         content: const Text(
+//             'Are you sure you want to delete this reply? This action cannot be undone.'),
 //         actions: [
 //           TextButton(
 //             onPressed: () => Navigator.pop(context, false),
@@ -1421,11 +1517,13 @@
 //                   TextButton(
 //                     onPressed: _isPostingReply
 //                         ? null
-//                         : () => _postReply(widget.postId, widget.commentId, _replyController.text),
+//                         : () => _postReply(
+//                             widget.postId, widget.commentId, _replyController.text),
 //                     style: TextButton.styleFrom(
 //                       backgroundColor: foreground,
 //                       foregroundColor: background,
-//                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+//                       padding:
+//                           const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
 //                       shape: RoundedRectangleBorder(
 //                         borderRadius: BorderRadius.circular(8),
 //                       ),
@@ -1497,12 +1595,14 @@
 //                             Row(
 //                               children: [
 //                                 GestureDetector(
-//                                   onTap: author['_id'] != null && author['username']?.isNotEmpty == true
+//                                   onTap: author['_id'] != null &&
+//                                           author['username']?.isNotEmpty == true
 //                                       ? () {
 //                                           Navigator.push(
 //                                             context,
 //                                             MaterialPageRoute(
-//                                               builder: (context) => ProfilePage(userId: author['_id']),
+//                                               builder: (context) =>
+//                                                   ProfilePage(userId: author['_id']),
 //                                             ),
 //                                           );
 //                                         }
@@ -1510,8 +1610,11 @@
 //                                   child: CircleAvatar(
 //                                     radius: 16,
 //                                     backgroundImage: author['profile'] != null
-//                                         ? NetworkImage(author['profile']['picture'] ?? '')
-//                                         : const AssetImage('assets/default_profile_picture.png') as ImageProvider,
+//                                         ? NetworkImage(
+//                                             author['profile']['picture'] ?? '')
+//                                         : const AssetImage(
+//                                             'assets/default_profile_picture.png')
+//                                             as ImageProvider,
 //                                   ),
 //                                 ),
 //                                 const SizedBox(width: 12),
@@ -1520,12 +1623,16 @@
 //                                     crossAxisAlignment: CrossAxisAlignment.start,
 //                                     children: [
 //                                       GestureDetector(
-//                                         onTap: author['_id'] != null && author['username']?.isNotEmpty == true
+//                                         onTap: author['_id'] != null &&
+//                                                 author['username']?.isNotEmpty ==
+//                                                     true
 //                                             ? () {
 //                                                 Navigator.push(
 //                                                   context,
 //                                                   MaterialPageRoute(
-//                                                     builder: (context) => ProfilePage(userId: author['_id']),
+//                                                     builder: (context) =>
+//                                                         ProfilePage(
+//                                                             userId: author['_id']),
 //                                                   ),
 //                                                 );
 //                                               }
@@ -1540,12 +1647,16 @@
 //                                         ),
 //                                       ),
 //                                       GestureDetector(
-//                                         onTap: author['_id'] != null && author['username']?.isNotEmpty == true
+//                                         onTap: author['_id'] != null &&
+//                                                 author['username']?.isNotEmpty ==
+//                                                     true
 //                                             ? () {
 //                                                 Navigator.push(
 //                                                   context,
 //                                                   MaterialPageRoute(
-//                                                     builder: (context) => ProfilePage(userId: author['_id']),
+//                                                     builder: (context) =>
+//                                                         ProfilePage(
+//                                                             userId: author['_id']),
 //                                                   ),
 //                                                 );
 //                                               }
@@ -1568,7 +1679,8 @@
 //                                     size: 20,
 //                                   ),
 //                                   onPressed: () async {
-//                                     final currentUserId = await _apiClient.getCurrentUserId();
+//                                     final currentUserId =
+//                                         await _apiClient.getCurrentUserId();
 //                                     if (author['_id'] == currentUserId) {
 //                                       showModalBottomSheet(
 //                                         context: context,
@@ -1577,7 +1689,9 @@
 //                                             mainAxisSize: MainAxisSize.min,
 //                                             children: [
 //                                               ListTile(
-//                                                 leading: const Icon(Icons.delete, color: Colors.red),
+//                                                 leading: const Icon(
+//                                                     Icons.delete,
+//                                                     color: Colors.red),
 //                                                 title: const Text('Delete Reply'),
 //                                                 onTap: () {
 //                                                   Navigator.pop(context);
@@ -1606,14 +1720,18 @@
 //                             Row(
 //                               children: [
 //                                 PostStatItem(
-//                                   icon: _isReplyLiked[replyId]! ? Icons.favorite : Icons.favorite_outline,
+//                                   icon: _isReplyLiked[replyId]!
+//                                       ? Icons.favorite
+//                                       : Icons.favorite_outline,
 //                                   count: voteId['upVotesCount'] ?? 0,
 //                                   onTap: () => _voteReply(replyId, 'upvote'),
 //                                   isActive: _isReplyLiked[replyId]!,
 //                                 ),
 //                                 const SizedBox(width: 16),
 //                                 PostStatItem(
-//                                   icon: _isReplyDisliked[replyId]! ? Icons.thumb_down : Icons.thumb_down_outlined,
+//                                   icon: _isReplyDisliked[replyId]!
+//                                       ? Icons.thumb_down
+//                                       : Icons.thumb_down_outlined,
 //                                   count: voteId['downVotesCount'] ?? 0,
 //                                   onTap: () => _voteReply(replyId, 'downvote'),
 //                                   isActive: _isReplyDisliked[replyId]!,
@@ -1656,11 +1774,10 @@
 
 
 
-///////////////////////////////////////////
-
-
+import 'package:beyondtheclass/shared/services/infoProvider.dart';
 import 'package:beyondtheclass/pages/profile/ProfilePage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
@@ -1669,21 +1786,21 @@ import 'date_badge.dart';
 import 'post_media.dart';
 import 'post_stat_item.dart';
 
-class PostCard extends StatefulWidget {
+class PostCard extends ConsumerStatefulWidget {
   final dynamic post;
-  final String? flairText;
+  final int flairType;
 
   const PostCard({
     super.key,
     required this.post,
-    this.flairText,
+    required this.flairType,
   });
 
   @override
-  State<PostCard> createState() => _PostCardState();
+  ConsumerState<PostCard> createState() => _PostCardState();
 }
 
-class _PostCardState extends State<PostCard> {
+class _PostCardState extends ConsumerState<PostCard> {
   bool isLiked = false;
   bool isDisliked = false;
   bool isVoting = false;
@@ -1796,8 +1913,10 @@ class _PostCardState extends State<PostCard> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      PostDetailPage(post: widget.post, flairText: widget.flairText),
+                  builder: (context) => PostDetailPage(
+                    post: widget.post,
+                    flairType: widget.flairType,
+                  ),
                 ),
               );
             },
@@ -1875,25 +1994,51 @@ class _PostCardState extends State<PostCard> {
                       ),
                     ),
                   ),
-                  if (widget.flairText != null) ...[
-                    const SizedBox(width: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.blue[700] : Colors.blue[500],
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        widget.flairText!,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
+                  FutureBuilder<Map<String, dynamic>?>(
+                    future: UserInfoProvider.getUserData(ref, author['_id'] ?? ''),
+                    builder: (context, snapshot) {
+                      String flairText = '';
+                      if (snapshot.hasData && snapshot.data != null) {
+                        final userData = snapshot.data!;
+                        flairText = widget.flairType == 0
+                            ? (userData['university']?['name']?.toString() ?? '')
+                            : (userData['university']?['departmentId']?['name']
+                                    ?.toString() ??
+                                '');
+                        debugPrint(
+                            'Flair text for author ${author['_id']}: $flairText (flairType: ${widget.flairType})');
+                      } else if (snapshot.hasError) {
+                        debugPrint(
+                            'Error fetching user data for author ${author['_id']}: ${snapshot.error}');
+                      }
+
+                      if (flairText.isNotEmpty) {
+                        return Padding(
+                          padding: const EdgeInsets.only(left: 4),
+                          child: Container(
+                            constraints: const BoxConstraints(maxWidth: 150),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: isDark ? Colors.blue[700] : Colors.blue[500],
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: Colors.yellow), // Debug
+                            ),
+                            child: Text(
+                              flairText,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
                   if (isSocietyPost) ...[
                     const SizedBox(width: 4),
                     Icon(
@@ -2039,8 +2184,10 @@ class _PostCardState extends State<PostCard> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) =>
-                    PostDetailPage(post: widget.post, flairText: widget.flairText),
+                builder: (context) => PostDetailPage(
+                  post: widget.post,
+                  flairType: widget.flairType,
+                ),
               ),
             );
           },
@@ -2051,21 +2198,21 @@ class _PostCardState extends State<PostCard> {
   }
 }
 
-class PostDetailPage extends StatefulWidget {
+class PostDetailPage extends ConsumerStatefulWidget {
   final dynamic post;
-  final String? flairText;
+  final int flairType;
 
   const PostDetailPage({
     super.key,
     required this.post,
-    this.flairText,
+    required this.flairType,
   });
 
   @override
-  State<PostDetailPage> createState() => _PostDetailPageState();
+  ConsumerState<PostDetailPage> createState() => _PostDetailPageState();
 }
 
-class _PostDetailPageState extends State<PostDetailPage> {
+class _PostDetailPageState extends ConsumerState<PostDetailPage> {
   bool isLiked = false;
   bool isDisliked = false;
   bool isVoting = false;
@@ -2443,26 +2590,51 @@ class _PostDetailPageState extends State<PostDetailPage> {
                       ),
                     ),
                   ),
-                  if (widget.flairText != null) ...[
-                    const SizedBox(width: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        // color: isDark ? Colors.blue[700] : Colors.blue[500],
-                        color:  Colors.blue[500],
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        widget.flairText!,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
+                  FutureBuilder<Map<String, dynamic>?>(
+                    future: UserInfoProvider.getUserData(ref, author['_id'] ?? ''),
+                    builder: (context, snapshot) {
+                      String flairText = '';
+                      if (snapshot.hasData && snapshot.data != null) {
+                        final userData = snapshot.data!;
+                        flairText = widget.flairType == 0
+                            ? (userData['university']?['name']?.toString() ?? '')
+                            : (userData['university']?['departmentId']?['name']
+                                    ?.toString() ??
+                                '');
+                        debugPrint(
+                            'Flair text for author ${author['_id']}: $flairText (flairType: ${widget.flairType})');
+                      } else if (snapshot.hasError) {
+                        debugPrint(
+                            'Error fetching user data for author ${author['_id']}: ${snapshot.error}');
+                      }
+
+                      if (flairText.isNotEmpty) {
+                        return Padding(
+                          padding: const EdgeInsets.only(left: 4),
+                          child: Container(
+                            constraints: const BoxConstraints(maxWidth: 150),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.blue[500],
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: Colors.yellow), // Debug
+                            ),
+                            child: Text(
+                              flairText,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
                   if (isSocietyPost) ...[
                     const SizedBox(width: 4),
                     Icon(
@@ -2616,7 +2788,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
     );
   }
 
-  Widget _buildCommentsSection(Color foreground, Color mutedForeground, Color border, Color accent, Color background) {
+  Widget _buildCommentsSection(
+      Color foreground, Color mutedForeground, Color border, Color accent, Color background) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -3105,311 +3278,240 @@ class _CommentRepliesPageState extends State<CommentRepliesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final background = isDark ? const Color(0xFF09090B) : Colors.white;
-    final foreground = isDark ? Colors.white : const Color(0xFF09090B);
-    final muted = isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5);
-    final mutedForeground = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
-    final border = isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
-    final accent = isDark ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
+  final background = isDark ? const Color(0xFF09090B) : Colors.white;
+  final foreground = isDark ? Colors.white : const Color(0xFF09090B);
+  final muted = isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5);
+  final mutedForeground = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+  final border = isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+  final accent = isDark ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
 
-    return Scaffold(
+  return Scaffold(
+    backgroundColor: background,
+    appBar: AppBar(
       backgroundColor: background,
-      appBar: AppBar(
-        backgroundColor: background,
-        elevation: 0,
-        title: Text(
-          'Replies to ${widget.commentAuthor}',
-          style: TextStyle(color: foreground),
-        ),
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: foreground,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
+      elevation: 0,
+      title: Text(
+        'Replies to ${widget.commentAuthor}',
+        style: TextStyle(color: foreground),
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back, color: foreground),
+        onPressed: () => Navigator.pop(context),
+      ),
+    ),
+    body: SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Replies',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: foreground),
+          ),
+          const SizedBox(height: 16),
+          Row(
             children: [
-              Text(
-                'Replies',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: foreground,
+              Expanded(
+                child: TextField(
+                  controller: _replyController,
+                  decoration: InputDecoration(
+                    hintText: 'Write a reply...',
+                    hintStyle: TextStyle(color: mutedForeground),
+                    filled: true,
+                    fillColor: accent,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: border),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: foreground),
+                    ),
+                  ),
+                  style: TextStyle(color: foreground),
+                  maxLines: 3,
+                  minLines: 1,
                 ),
               ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _replyController,
-                      decoration: InputDecoration(
-                        hintText: 'Write a reply...',
-                        hintStyle: TextStyle(color: mutedForeground),
-                        filled: true,
-                        fillColor: accent,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: border),
+              const SizedBox(width: 8),
+              TextButton(
+                onPressed: _isPostingReply
+                    ? null
+                    : () => _postReply(widget.postId, widget.commentId, _replyController.text),
+                style: TextButton.styleFrom(
+                  backgroundColor: foreground,
+                  foregroundColor: background,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: _isPostingReply
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation(Colors.white),
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: border),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: foreground),
-                        ),
-                      ),
-                      style: TextStyle(color: foreground),
-                      maxLines: 3,
-                      minLines: 1,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  TextButton(
-                    onPressed: _isPostingReply
-                        ? null
-                        : () => _postReply(
-                            widget.postId, widget.commentId, _replyController.text),
-                    style: TextButton.styleFrom(
-                      backgroundColor: foreground,
-                      foregroundColor: background,
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: _isPostingReply
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation(Colors.white),
-                            ),
-                          )
-                        : const Text(
-                            'Post',
-                            style: TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              FutureBuilder<List<dynamic>>(
-                future: _repliesFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(
-                      child: Text(
-                        'Failed to load replies',
-                        style: TextStyle(color: mutedForeground),
-                      ),
-                    );
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Center(
-                      child: Text(
-                        'No replies yet',
-                        style: TextStyle(color: mutedForeground),
-                      ),
-                    );
-                  }
-
-                  final replies = snapshot.data!;
-                  return ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: replies.length,
-                    separatorBuilder: (context, index) => Divider(
-                      color: border,
-                      height: 24,
-                    ),
-                    itemBuilder: (context, index) {
-                      final reply = replies[index];
-                      final author = reply['author'] ?? {};
-                      final voteId = reply['voteId'] ?? {};
-                      final replyId = reply['_id'];
-                      final createdAt = DateTime.parse(reply['createdAt']);
-                      final timeAgo = timeago.format(createdAt, locale: 'en_short');
-
-                      _isReplyLiked[replyId] ??= false;
-                      _isReplyDisliked[replyId] ??= false;
-                      _isReplyVoting[replyId] ??= false;
-
-                      return Padding(
-                        padding: const EdgeInsets.only(left: 16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                GestureDetector(
-                                  onTap: author['_id'] != null &&
-                                          author['username']?.isNotEmpty == true
-                                      ? () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  ProfilePage(userId: author['_id']),
-                                            ),
-                                          );
-                                        }
-                                      : null,
-                                  child: CircleAvatar(
-                                    radius: 16,
-                                    backgroundImage: author['profile'] != null
-                                        ? NetworkImage(
-                                            author['profile']['picture'] ?? '')
-                                        : const AssetImage(
-                                            'assets/default_profile_picture.png')
-                                            as ImageProvider,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      GestureDetector(
-                                        onTap: author['_id'] != null &&
-                                                author['username']?.isNotEmpty ==
-                                                    true
-                                            ? () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        ProfilePage(
-                                                            userId: author['_id']),
-                                                  ),
-                                                );
-                                              }
-                                            : null,
-                                        child: Text(
-                                          author['name'] ?? '{Deleted}',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 14,
-                                            color: foreground,
-                                          ),
-                                        ),
-                                      ),
-                                      GestureDetector(
-                                        onTap: author['_id'] != null &&
-                                                author['username']?.isNotEmpty ==
-                                                    true
-                                            ? () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        ProfilePage(
-                                                            userId: author['_id']),
-                                                  ),
-                                                );
-                                              }
-                                            : null,
-                                        child: Text(
-                                          '@${author['username'] ?? ''} • $timeAgo',
-                                          style: TextStyle(
-                                            color: mutedForeground,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: Icon(
-                                    Icons.more_horiz,
-                                    color: mutedForeground,
-                                    size: 20,
-                                  ),
-                                  onPressed: () async {
-                                    final currentUserId =
-                                        await _apiClient.getCurrentUserId();
-                                    if (author['_id'] == currentUserId) {
-                                      showModalBottomSheet(
-                                        context: context,
-                                        builder: (context) => SafeArea(
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              ListTile(
-                                                leading: const Icon(
-                                                    Icons.delete,
-                                                    color: Colors.red),
-                                                title: const Text('Delete Reply'),
-                                                onTap: () {
-                                                  Navigator.pop(context);
-                                                  _showDeleteConfirmation(replyId);
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                  },
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              reply['comment'] ?? '',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: foreground,
-                                height: 1.4,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                PostStatItem(
-                                  icon: _isReplyLiked[replyId]!
-                                      ? Icons.favorite
-                                      : Icons.favorite_outline,
-                                  count: voteId['upVotesCount'] ?? 0,
-                                  onTap: () => _voteReply(replyId, 'upvote'),
-                                  isActive: _isReplyLiked[replyId]!,
-                                ),
-                                const SizedBox(width: 16),
-                                PostStatItem(
-                                  icon: _isReplyDisliked[replyId]!
-                                      ? Icons.thumb_down
-                                      : Icons.thumb_down_outlined,
-                                  count: voteId['downVotesCount'] ?? 0,
-                                  onTap: () => _voteReply(replyId, 'downvote'),
-                                  isActive: _isReplyDisliked[replyId]!,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                },
+                      )
+                    : const Text('Post', style: TextStyle(fontWeight: FontWeight.w600)),
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 16),
+          FutureBuilder<List<dynamic>>(
+            future: _repliesFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Failed to load replies', style: TextStyle(color: mutedForeground)));
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return Center(child: Text('No replies yet', style: TextStyle(color: mutedForeground)));
+              }
+
+              final replies = snapshot.data!;
+              return ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: replies.length,
+                separatorBuilder: (context, index) => Divider(color: border, height: 24),
+                itemBuilder: (context, index) {
+                  final reply = replies[index];
+                  final author = reply['author'] ?? {};
+                  final voteId = reply['voteId'] ?? {};
+                  final replyId = reply['_id'];
+                  final createdAt = DateTime.tryParse(reply['createdAt'] ?? '') ?? DateTime.now();
+                  final timeAgo = timeago.format(createdAt, locale: 'en_short');
+
+                  _isReplyLiked[replyId] ??= false;
+                  _isReplyDisliked[replyId] ??= false;
+                  _isReplyVoting[replyId] ??= false;
+
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            GestureDetector(
+                              onTap: author['_id'] != null
+                                  ? () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ProfilePage(userId: author['_id']),
+                                        ),
+                                      )
+                                  : null,
+                              child: CircleAvatar(
+                                radius: 16,
+                                backgroundImage: author['profile'] != null
+                                    ? NetworkImage(author['profile']['picture'] ?? '')
+                                    : const AssetImage('assets/default_profile_picture.png') as ImageProvider,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  GestureDetector(
+                                    onTap: author['_id'] != null
+                                        ? () => Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => ProfilePage(userId: author['_id']),
+                                              ),
+                                            )
+                                        : null,
+                                    child: Text(
+                                      author['name'] ?? '{Deleted}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                        color: foreground,
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    '@${author['username'] ?? ''} • $timeAgo',
+                                    style: TextStyle(color: mutedForeground, fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.more_horiz, color: mutedForeground, size: 20),
+                              onPressed: () async {
+                                final currentUserId = await _apiClient.getCurrentUserId();
+                                if (author['_id'] == currentUserId) {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    builder: (context) => SafeArea(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          ListTile(
+                                            leading: const Icon(Icons.delete, color: Colors.red),
+                                            title: const Text('Delete Reply'),
+                                            onTap: () {
+                                              Navigator.pop(context);
+                                              _showDeleteConfirmation(replyId);
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          reply['comment'] ?? '',
+                          style: TextStyle(fontSize: 14, color: foreground, height: 1.4),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            PostStatItem(
+                              icon: _isReplyLiked[replyId]!
+                                  ? Icons.favorite
+                                  : Icons.favorite_outline,
+                              count: voteId['upVotesCount'] ?? 0,
+                              onTap: () => _voteReply(replyId, 'upvote'),
+                              isActive: _isReplyLiked[replyId]!,
+                            ),
+                            const SizedBox(width: 16),
+                            PostStatItem(
+                              icon: _isReplyDisliked[replyId]!
+                                  ? Icons.thumb_down
+                                  : Icons.thumb_down_outlined,
+                              count: voteId['downVotesCount'] ?? 0,
+                              onTap: () => _voteReply(replyId, 'downvote'),
+                              isActive: _isReplyDisliked[replyId]!,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 }
