@@ -1,4 +1,5 @@
 import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:beyondtheclass/pages/profile/ProfilePage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +9,7 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'date_badge.dart';
 import 'post_media.dart';
 import 'post_stat_item.dart';
+import 'package:beyondtheclass/pages/home/widgets/components/post/CreatePost.dart';
 
 class PostCard extends ConsumerStatefulWidget {
   final dynamic post;
@@ -28,6 +30,9 @@ class _PostCardState extends ConsumerState<PostCard> {
   bool isDisliked = false;
   bool isVoting = false;
   final _apiClient = ApiClient();
+
+  late final authUser;
+  late final currentUserId;
 
   Future<void> _votePost(String voteType) async {
     if (isVoting) return;
@@ -80,15 +85,28 @@ class _PostCardState extends ConsumerState<PostCard> {
         'postId': postId,
       });
       debugPrint('Delete post response: $response');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Post deleted successfully')),
-      );
-      Navigator.pop(context);
+
+      // Show success message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Post deleted successfully')),
+        );
+
+        // Pop back to the previous screen
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+      }
     } catch (e) {
       debugPrint('Error deleting post: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to delete post: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to delete post. Please try again later.'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
 
@@ -123,6 +141,8 @@ class _PostCardState extends ConsumerState<PostCard> {
     final createdAt = DateTime.parse(widget.post['createdAt']);
     final formattedDate = DateFormat('MMM d, y').format(createdAt);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    authUser = ref.read(authProvider).user;
+    currentUserId = authUser?['_id'];
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
@@ -304,7 +324,6 @@ class _PostCardState extends ConsumerState<PostCard> {
             size: 20,
           ),
           onPressed: () async {
-            final currentUserId = await _apiClient.getCurrentUserId();
             if (author['_id'] == currentUserId) {
               showModalBottomSheet(
                 context: context,
@@ -313,11 +332,46 @@ class _PostCardState extends ConsumerState<PostCard> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       ListTile(
+                        leading: const Icon(Icons.edit, color: Colors.blue),
+                        title: const Text('Edit Post'),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CreatePost(
+                                isEditing: true,
+                                postData: widget.post,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      ListTile(
                         leading: const Icon(Icons.delete, color: Colors.red),
                         title: const Text('Delete Post'),
                         onTap: () {
                           Navigator.pop(context);
                           _showDeleteConfirmation(widget.post['_id']);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            } else {
+              showModalBottomSheet(
+                context: context,
+                builder: (context) => SafeArea(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.report, color: Colors.orange),
+                        title: const Text('Report Post'),
+                        onTap: () {
+                          Navigator.pop(context);
+                          _showReportDialog(widget.post['_id']);
                         },
                       ),
                     ],
@@ -395,6 +449,58 @@ class _PostCardState extends ConsumerState<PostCard> {
       ],
     );
   }
+
+  Future<void> _showReportDialog(String postId) async {
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Report Post'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: const Text('Spam'),
+              onTap: () => Navigator.pop(context, 'Spam'),
+            ),
+            ListTile(
+              title: const Text('Inappropriate Content'),
+              onTap: () => Navigator.pop(context, 'Inappropriate Content'),
+            ),
+            ListTile(
+              title: const Text('Harassment'),
+              onTap: () => Navigator.pop(context, 'Harassment'),
+            ),
+            ListTile(
+              title: const Text('Other'),
+              onTap: () => Navigator.pop(context, 'Other'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (reason != null) {
+      try {
+        final response = await _apiClient.post('/api/posts/report', {
+          'postId': postId,
+          'reason': reason,
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Post reported successfully')),
+          );
+        }
+      } catch (e) {
+        debugPrint('Error reporting post: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to report post')),
+          );
+        }
+      }
+    }
+  }
 }
 
 class PostDetailPage extends ConsumerStatefulWidget {
@@ -423,11 +529,15 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
   final Map<String, bool> _isCommentVoting = {};
   List<dynamic> _comments = [];
   late Future<List<dynamic>> _commentsFuture;
+  late final authUser;
+  late final currentUserId;
 
   @override
   void initState() {
     super.initState();
     _commentsFuture = _fetchComments(widget.post['_id']);
+    authUser = ref.read(authProvider).user;
+    currentUserId = authUser?['_id'];
   }
 
   Future<void> _votePost(String voteType) async {
@@ -534,15 +644,28 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
         'postId': postId,
       });
       debugPrint('Delete post response: $response');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Post deleted successfully')),
-      );
-      Navigator.pop(context);
+
+      // Show success message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Post deleted successfully')),
+        );
+
+        // Pop back to the previous screen
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+      }
     } catch (e) {
       debugPrint('Error deleting post: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to delete post: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to delete post. Please try again later.'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
 
@@ -876,7 +999,6 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
             size: 24,
           ),
           onPressed: () async {
-            final currentUserId = await _apiClient.getCurrentUserId();
             if (author['_id'] == currentUserId) {
               showModalBottomSheet(
                 context: context,
@@ -885,11 +1007,46 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       ListTile(
+                        leading: const Icon(Icons.edit, color: Colors.blue),
+                        title: const Text('Edit Post'),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CreatePost(
+                                isEditing: true,
+                                postData: widget.post,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      ListTile(
                         leading: const Icon(Icons.delete, color: Colors.red),
                         title: const Text('Delete Post'),
                         onTap: () {
                           Navigator.pop(context);
                           _showDeleteConfirmation(postId: widget.post['_id']);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            } else {
+              showModalBottomSheet(
+                context: context,
+                builder: (context) => SafeArea(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.report, color: Colors.orange),
+                        title: const Text('Report Post'),
+                        onTap: () {
+                          Navigator.pop(context);
+                          _showReportDialog(widget.post['_id']);
                         },
                       ),
                     ],
@@ -1166,8 +1323,6 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                             size: 20,
                           ),
                           onPressed: () async {
-                            final currentUserId =
-                                await _apiClient.getCurrentUserId();
                             if (author['_id'] == currentUserId) {
                               showModalBottomSheet(
                                 context: context,
@@ -1259,9 +1414,61 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
       ],
     );
   }
+
+  Future<void> _showReportDialog(String postId) async {
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Report Post'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: const Text('Spam'),
+              onTap: () => Navigator.pop(context, 'Spam'),
+            ),
+            ListTile(
+              title: const Text('Inappropriate Content'),
+              onTap: () => Navigator.pop(context, 'Inappropriate Content'),
+            ),
+            ListTile(
+              title: const Text('Harassment'),
+              onTap: () => Navigator.pop(context, 'Harassment'),
+            ),
+            ListTile(
+              title: const Text('Other'),
+              onTap: () => Navigator.pop(context, 'Other'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (reason != null) {
+      try {
+        final response = await _apiClient.post('/api/posts/report', {
+          'postId': postId,
+          'reason': reason,
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Post reported successfully')),
+          );
+        }
+      } catch (e) {
+        debugPrint('Error reporting post: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to report post')),
+          );
+        }
+      }
+    }
+  }
 }
 
-class CommentRepliesPage extends StatefulWidget {
+class CommentRepliesPage extends ConsumerStatefulWidget {
   final String postId;
   final String commentId;
   final String commentAuthor;
@@ -1274,10 +1481,10 @@ class CommentRepliesPage extends StatefulWidget {
   });
 
   @override
-  State<CommentRepliesPage> createState() => _CommentRepliesPageState();
+  ConsumerState<CommentRepliesPage> createState() => _CommentRepliesPageState();
 }
 
-class _CommentRepliesPageState extends State<CommentRepliesPage> {
+class _CommentRepliesPageState extends ConsumerState<CommentRepliesPage> {
   final _apiClient = ApiClient();
   final _replyController = TextEditingController();
   bool _isPostingReply = false;
@@ -1286,11 +1493,15 @@ class _CommentRepliesPageState extends State<CommentRepliesPage> {
   final Map<String, bool> _isReplyVoting = {};
   List<dynamic> _replies = [];
   late Future<List<dynamic>> _repliesFuture;
+  late final authUser;
+  late final currentUserId;
 
   @override
   void initState() {
     super.initState();
     _repliesFuture = _fetchReplies(widget.commentId);
+    authUser = ref.read(authProvider).user;
+    currentUserId = authUser?['_id'];
   }
 
   Future<List<dynamic>> _fetchReplies(String commentId) async {
@@ -1651,8 +1862,6 @@ class _CommentRepliesPageState extends State<CommentRepliesPage> {
                                 icon: Icon(Icons.more_horiz,
                                     color: mutedForeground, size: 20),
                                 onPressed: () async {
-                                  final currentUserId =
-                                      await _apiClient.getCurrentUserId();
                                   if (author['_id'] == currentUserId) {
                                     showModalBottomSheet(
                                       context: context,

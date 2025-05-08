@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/pages/explore/SocietyProvider.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
@@ -23,11 +25,19 @@ import 'widgets/voice_note_section.dart';
 import 'widgets/media_controls.dart';
 import 'dart:async';
 import 'package:http_parser/http_parser.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 enum PostType { personal, society }
 
 class CreatePost extends ConsumerStatefulWidget {
-  const CreatePost({super.key});
+  final bool isEditing;
+  final Map<String, dynamic>? postData;
+
+  const CreatePost({
+    super.key,
+    this.isEditing = false,
+    this.postData,
+  });
 
   @override
   ConsumerState<CreatePost> createState() => _CreatePostState();
@@ -58,6 +68,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
   Duration _recordingDuration = Duration.zero;
   Timer? _recordingTimer;
   bool _isLoading = false;
+  List<Map<String, dynamic>> _existingMedia = [];
 
   final _apiClient = ApiClient(); // Initialize ApiClient
 
@@ -65,6 +76,25 @@ class _CreatePostState extends ConsumerState<CreatePost> {
   void initState() {
     super.initState();
     _audioRecorder = AudioRecorder();
+
+    if (widget.isEditing && widget.postData != null) {
+      _titleController.text = widget.postData!['title'] ?? '';
+      _bodyController.text = widget.postData!['body'] ?? '';
+
+      // Set post type
+      if (widget.postData!['society'] != null) {
+        _postType = PostType.society;
+        _selectedSocietyId = widget.postData!['society']['_id'];
+      }
+
+      // Handle existing media
+      if (widget.postData!['media'] != null) {
+        setState(() {
+          _existingMedia =
+              List<Map<String, dynamic>>.from(widget.postData!['media']);
+        });
+      }
+    }
   }
 
   @override
@@ -285,27 +315,97 @@ class _CreatePostState extends ConsumerState<CreatePost> {
     });
   }
 
-  void _removeMedia(int index) {
-    final file = _mediaFiles[index];
-    final controller = _videoControllers[file.path];
-    controller?.dispose();
-    _videoControllers.remove(file.path);
-    setState(() {
-      _mediaFiles.removeAt(index);
-    });
+  void _removeMedia(int index, bool isExistingMedia) {
+    log('isExistingMedia: $isExistingMedia  index: $index');
+    if (isExistingMedia) {
+      final existingMediaIndex = index;
+      setState(() {
+        _existingMedia.removeAt(existingMediaIndex);
+      });
+    } else {
+      final newMediaIndex = index - _existingMedia.length;
+      final file = _mediaFiles[newMediaIndex];
+      final controller = _videoControllers[file.path];
+      controller?.dispose();
+      _videoControllers.remove(file.path);
+      setState(() {
+        _mediaFiles.removeAt(newMediaIndex);
+      });
+    }
   }
 
-  void _showFullScreenMedia(int index) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => FullScreenMediaView(
-          mediaFiles: _mediaFiles,
-          initialIndex: index,
-          videoControllers: _videoControllers,
+  void _showFullScreenMedia(int index, bool isExistingMedia) {
+    if (isExistingMedia) {
+      // Handle showing full screen for existing media
+      final mediaItem = _existingMedia[index];
+      if (mediaItem['type']?.startsWith('image/') ?? false) {
+        // Show image in full screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Scaffold(
+              backgroundColor: Colors.black,
+              appBar: AppBar(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                leading: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+              body: Center(
+                child: CachedNetworkImage(
+                  imageUrl: mediaItem['url'],
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ),
+        );
+      } else if (mediaItem['type']?.startsWith('video/') ?? false) {
+        // Show video in full screen
+        final controller = VideoPlayerController.network(mediaItem['url']);
+        controller.initialize().then((_) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Scaffold(
+                backgroundColor: Colors.black,
+                appBar: AppBar(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  leading: IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white),
+                    onPressed: () {
+                      controller.dispose();
+                      Navigator.pop(context);
+                    },
+                  ),
+                ),
+                body: Center(
+                  child: AspectRatio(
+                    aspectRatio: controller.value.aspectRatio,
+                    child: VideoPlayer(controller),
+                  ),
+                ),
+              ),
+            ),
+          );
+        });
+      }
+    } else {
+      // Handle showing full screen for new media files
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => FullScreenMediaView(
+            mediaFiles: _mediaFiles,
+            initialIndex: index,
+            videoControllers: _videoControllers,
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   Future<void> _deleteVoiceNote() async {
@@ -354,7 +454,18 @@ class _CreatePostState extends ConsumerState<CreatePost> {
             'societyId': _selectedSocietyId,
         };
 
-        // Handle media files
+        // Handle media list (both existing and new)
+        if (widget.isEditing &&
+            widget.postData != null &&
+            widget.postData!['media'] != null) {
+          // For editing, send the updated media list
+          data['mediaList'] = _existingMedia;
+        } else if (!widget.isEditing && _existingMedia.isNotEmpty) {
+          // For new posts with existing media
+          data['mediaList'] = _existingMedia;
+        }
+
+        // Handle new media files
         if (_mediaFiles.isNotEmpty) {
           data['file'] = await Future.wait(
             _mediaFiles.map((file) async {
@@ -386,29 +497,43 @@ class _CreatePostState extends ConsumerState<CreatePost> {
           }
         }
 
-        final endpoint = _postType == PostType.society
-            ? '/api/posts/create'
-            : '/api/posts/create-indiv';
+        String endpoint;
+        if (widget.isEditing) {
+          endpoint = '/api/posts/post/edit/${widget.postData!['_id']}';
+        } else {
+          endpoint = _postType == PostType.society
+              ? '/api/posts/create'
+              : '/api/posts/create-indiv';
+        }
+
         debugPrint('Request URL: ${ApiConstants.baseUrl}$endpoint');
         debugPrint('Request Data: $data');
 
-        final response = await _apiClient.postFormData(endpoint, data);
+        final response = widget.isEditing
+            ? await _apiClient.putFormData(endpoint, data)
+            : await _apiClient.postFormData(endpoint, data);
+
         debugPrint('Response: $response');
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content:
-                  Text(response['message'] ?? 'Post created successfully')),
+              content: Text(response['message'] ??
+                  (widget.isEditing
+                      ? 'Post updated successfully'
+                      : 'Post created successfully'))),
         );
         Navigator.pop(context);
       } catch (e) {
-        debugPrint('Error creating post: $e');
+        debugPrint(
+            'Error ${widget.isEditing ? 'updating' : 'creating'} post: $e');
         if (e is DioException) {
           debugPrint('Dio Error: ${e.response?.data}');
           debugPrint('Status Code: ${e.response?.statusCode}');
         }
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error creating post: $e')),
+          SnackBar(
+              content: Text(
+                  'Error ${widget.isEditing ? 'updating' : 'creating'} post: $e')),
         );
       } finally {
         setState(() {
@@ -446,7 +571,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'New Post',
+          widget.isEditing ? 'Update Post' : 'New Post',
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w600,
             letterSpacing: -0.5,
@@ -472,7 +597,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
                     ),
                   )
                 : Text(
-                    'Post',
+                    widget.isEditing ? 'Update' : 'Post',
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: isDark ? Colors.black : Colors.white,
                       fontWeight: FontWeight.w600,
@@ -574,8 +699,9 @@ class _CreatePostState extends ConsumerState<CreatePost> {
                 ],
               ),
             ),
-            if (_mediaFiles.isNotEmpty)
+            if (_mediaFiles.isNotEmpty || _existingMedia.isNotEmpty)
               MediaPreview(
+                existingMedia: _existingMedia,
                 mediaFiles: _mediaFiles,
                 videoControllers: _videoControllers,
                 onMediaTap: _showFullScreenMedia,
@@ -791,7 +917,7 @@ class _FullScreenMediaViewState extends State<FullScreenMediaView> {
                 : Icon(
                     Icons.video_library,
                     size: 64,
-                    color: theme.colorScheme.primary,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
           );
         },
