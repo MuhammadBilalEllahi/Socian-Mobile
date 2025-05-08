@@ -28,6 +28,8 @@ class _PostMediaState extends State<PostMedia>
   late AnimationController _waveformController;
   final List<double> _waveform =
       List.generate(50, (index) => math.Random().nextDouble() * 0.5 + 0.5);
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
 
   @override
   void initState() {
@@ -119,6 +121,7 @@ class _PostMediaState extends State<PostMedia>
     _videoController?.dispose();
     _audioPlayer?.dispose();
     _waveformController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -129,20 +132,60 @@ class _PostMediaState extends State<PostMedia>
       return const SizedBox.shrink();
     }
 
-    return Container(
-      margin: const EdgeInsets.only(top: 0),
-      child: Column(
-        children: widget.media!.map((item) {
-          if (item['type']?.startsWith('image/') ?? false) {
-            return _buildImageItem(item);
-          } else if (item['type']?.startsWith('video/') ?? false) {
-            return _buildVideoItem();
-          } else if (item['type']?.startsWith('audio/') ?? false) {
-            return _buildAudioItem();
-          }
-          return const SizedBox.shrink();
-        }).toList(),
-      ),
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.only(top: 0),
+          height: 350,
+          child: Stack(
+            children: [
+              PageView.builder(
+                controller: _pageController,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentPage = index;
+                  });
+                },
+                itemCount: widget.media!.length,
+                itemBuilder: (context, index) {
+                  final item = widget.media![index];
+                  if (item['type']?.startsWith('image/') ?? false) {
+                    return _buildImageItem(item);
+                  } else if (item['type']?.startsWith('video/') ?? false) {
+                    return _buildVideoItem();
+                  } else if (item['type']?.startsWith('audio/') ?? false) {
+                    return _buildAudioItem();
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+              if (widget.media!.length > 1)
+                Positioned(
+                  bottom: 8,
+                  left: 0,
+                  right: 0,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      widget.media!.length,
+                      (index) => Container(
+                        width: 8,
+                        height: 8,
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: _currentPage == index
+                              ? Colors.white
+                              : Colors.white.withOpacity(0.5),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -178,7 +221,7 @@ class _PostMediaState extends State<PostMedia>
           child: CachedNetworkImage(
             imageUrl: item['url'],
             width: double.infinity,
-            height: 300,
+            height: 350,
             fit: BoxFit.contain,
             placeholder: (context, url) => const Center(
               child: CircularProgressIndicator(),

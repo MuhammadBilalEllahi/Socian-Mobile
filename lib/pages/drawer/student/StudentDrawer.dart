@@ -205,12 +205,6 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                     isDarkMode: isDarkMode,
                   ),
                   _buildDrawerItem(
-                    icon: Icons.location_city,
-                    title: "Inter Campuses",
-                    onTap: () => Navigator.of(context).pop(),
-                    isDarkMode: isDarkMode,
-                  ),
-                  _buildDrawerItem(
                     icon: Icons.people,
                     title: "Alumni",
                     onTap: () => Navigator.of(context).pop(),

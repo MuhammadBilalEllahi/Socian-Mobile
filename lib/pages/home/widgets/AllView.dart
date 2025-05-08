@@ -4,6 +4,7 @@ import 'package:beyondtheclass/pages/home/widgets/components/post/CreatePost.dar
 import 'package:flutter/material.dart';
 import 'package:beyondtheclass/pages/home/widgets/campus/CampusPosts.dart';
 import 'package:beyondtheclass/pages/home/widgets/universities/AllUniversityPosts.dart';
+import 'package:beyondtheclass/pages/home/widgets/intracampus/IntraCampus.dart';
 
 class AllView extends StatefulWidget {
   const AllView({super.key});
@@ -14,9 +15,10 @@ class AllView extends StatefulWidget {
 
 class _AllViewState extends State<AllView> with TickerProviderStateMixin {
   late TabController _tabController;
+  bool _isCampusView = true;
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
   }
@@ -78,17 +80,36 @@ class _AllViewState extends State<AllView> with TickerProviderStateMixin {
                         isDark ? Colors.grey[400] : Colors.grey[600],
                     indicatorColor: isDark ? Colors.white : Colors.black,
                     indicatorWeight: 3,
-                    tabs: const [
+                    tabs: [
                       Tab(
-                        child: Text(
-                          'Campus',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _isCampusView = !_isCampusView;
+                            });
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                _isCampusView ? 'Campus' : 'IntraCampus',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(
+                                _isCampusView
+                                    ? Icons.arrow_drop_down
+                                    : Icons.arrow_drop_up,
+                                size: 20,
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      Tab(
+                      const Tab(
                         child: Text(
                           'Universities',
                           style: TextStyle(
@@ -106,23 +127,10 @@ class _AllViewState extends State<AllView> with TickerProviderStateMixin {
         },
         body: TabBarView(
           controller: _tabController,
-          children: const [
-            // Campus Tab
-            CampusPosts(),
-
-            AllUniversityPosts(),
-
-            // Universities Tab
-            // const LogoLoader(),
-            // Center(
-            //   child: Text(
-            //     'Coming Soon',
-            //     style: TextStyle(
-            //       color: isDark ? Colors.white : Colors.black,
-            //       fontSize: 16,
-            //     ),
-            //   ),
-            // ),
+          children: [
+            // Campus/IntraCampus Tab
+            _isCampusView ? const CampusPosts() : const IntraCampus(),
+            const AllUniversityPosts(),
           ],
         ),
       ),

@@ -9,6 +9,7 @@ import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/discussion/a
 import 'package:beyondtheclass/pages/drawer/student/pages/teachersReviews/TeachersPage.dart';
 import 'package:beyondtheclass/pages/drawer/teacher/review/TeacherSelfReview.dart';
 import 'package:beyondtheclass/pages/gps/ScheduledGatherings.dart';
+import 'package:beyondtheclass/pages/home/widgets/intracampus/IntraCampus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
@@ -138,6 +139,7 @@ class RouteGuard {
           AppRoutes.teacherReviewPage: const TeachersPage(),
           AppRoutes.scheduleGatherings: const ScheduledGatherings(),
           AppRoutes.cafeReviewsHome: const CafesHome(),
+          AppRoutes.intraCampus: const IntraCampus(),
           ...commonRoutes,
         };
       case AppRoles.teacher:

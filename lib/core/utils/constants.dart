@@ -89,6 +89,7 @@ class ApiConstants {
 
   static const String posts = '/posts';
   static const String postsCampus = '$api$posts/campus/all';
+  static const String intraCampusPosts = '$api$posts/campuses/all';
 
   static const String users = '/users';
   static const String searchUsers = '$api$users/search';
@@ -151,6 +152,7 @@ class AppRoutes {
   static const String scheduleGatherings = '/scheduled-gatherings';
   static const String teacherReviewPage = '/teacher-review';
   static const String cafeReviewsHome = '/cafe-reviews-page';
+  static const String intraCampus = '/intra-campus';
 
   // Teacher routes
   static const String teacherHome = '/teacher/home';
