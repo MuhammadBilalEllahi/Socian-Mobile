@@ -19,7 +19,7 @@ class PostMedia extends StatefulWidget {
 }
 
 class _PostMediaState extends State<PostMedia>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   CachedVideoPlayerPlusController? _videoController;
   AudioPlayer? _audioPlayer;
   bool _isPlaying = false;
@@ -124,6 +124,7 @@ class _PostMediaState extends State<PostMedia>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     if (widget.media == null || widget.media!.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -178,7 +179,7 @@ class _PostMediaState extends State<PostMedia>
             imageUrl: item['url'],
             width: double.infinity,
             height: 300,
-            fit: BoxFit.cover,
+            fit: BoxFit.contain,
             placeholder: (context, url) => const Center(
               child: CircularProgressIndicator(),
             ),
@@ -194,6 +195,7 @@ class _PostMediaState extends State<PostMedia>
 
     return Container(
       margin: const EdgeInsets.only(bottom: 0),
+      height: 350,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
@@ -211,13 +213,18 @@ class _PostMediaState extends State<PostMedia>
           children: [
             if (_videoController != null &&
                 _videoController!.value.isInitialized)
-              AspectRatio(
-                aspectRatio: _videoController!.value.aspectRatio,
-                child: CachedVideoPlayerPlus(_videoController!),
+              SizedBox(
+                height: 350,
+                child: Center(
+                  child: AspectRatio(
+                    aspectRatio: _videoController!.value.aspectRatio,
+                    child: CachedVideoPlayerPlus(_videoController!),
+                  ),
+                ),
               )
             else
               const SizedBox(
-                height: 300,
+                height: 350,
                 child: Center(child: CircularProgressIndicator()),
               ),
             if (_videoController != null &&
@@ -466,6 +473,9 @@ class _PostMediaState extends State<PostMedia>
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 class WaveformPainter extends CustomPainter {
