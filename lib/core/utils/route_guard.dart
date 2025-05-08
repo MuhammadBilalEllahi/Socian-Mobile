@@ -122,6 +122,13 @@ class RouteGuard {
   static Map<String, Widget> _getRoutesForRole(String? role) {
     final commonRoutes = {
       AppRoutes.settings: const SettingsPage(),
+      AppRoutes.cafeReviewsHome: const CafesHome(),
+      AppRoutes.intraCampus: const IntraCampus(),
+      AppRoutes.pastPaperScreen: const PastPapers(),
+      AppRoutes.profileMainPage: const ProfilePage(),
+      AppRoutes.departmentScreen: const DepartmentPage(),
+      AppRoutes.subjectsInDepartmentScreen: const SubjectsView(),
+      AppRoutes.discussionViewScreen: const DiscussionView(),
     };
 
     switch (role) {
@@ -130,16 +137,16 @@ class RouteGuard {
           AppRoutes.home: const HomePage(),
           AppRoutes.messagesMainPage: const Messages(),
           AppRoutes.mapMainPage: const MapsLook(),
-          AppRoutes.profileMainPage: const ProfilePage(),
-          AppRoutes.pastPaperScreen: const PastPapers(),
-          AppRoutes.departmentScreen: const DepartmentPage(),
-          AppRoutes.subjectsInDepartmentScreen: const SubjectsView(),
-          AppRoutes.discussionViewScreen: const DiscussionView(),
+          // AppRoutes.profileMainPage: const ProfilePage(),
+          // AppRoutes.pastPaperScreen: const PastPapers(),
+          // AppRoutes.departmentScreen: const DepartmentPage(),
+          // AppRoutes.subjectsInDepartmentScreen: const SubjectsView(),
+          // AppRoutes.discussionViewScreen: const DiscussionView(),
           AppRoutes.answersPage: const AnswersPage(),
           AppRoutes.teacherReviewPage: const TeachersPage(),
           AppRoutes.scheduleGatherings: const ScheduledGatherings(),
-          AppRoutes.cafeReviewsHome: const CafesHome(),
-          AppRoutes.intraCampus: const IntraCampus(),
+          // AppRoutes.cafeReviewsHome: const CafesHome(),
+          // AppRoutes.intraCampus: const IntraCampus(),
           ...commonRoutes,
         };
       case AppRoles.teacher:
