@@ -132,7 +132,7 @@ class _ChatBoxState extends ConsumerState<ChatBox> {
                 Icon(Icons.people, color: foreground, size: 18),
                 const SizedBox(width: 6),
                 Text(
-                  'Users in chat: $usersCount',
+                  'Users in chat: $usersCount $discussionId',
                   style: TextStyle(color: foreground, fontSize: 14),
                 ),
               ],

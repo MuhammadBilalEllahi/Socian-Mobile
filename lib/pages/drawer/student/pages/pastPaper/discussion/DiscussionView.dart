@@ -10,6 +10,7 @@ import 'PastPaperInfoCard.dart';
 import 'PdfViewer.dart';
 import 'commentSection/Comments.dart';
 import 'components/ChatBox.dart';
+import 'dart:developer' as developer;
 
 class DiscussionView extends StatefulWidget {
   const DiscussionView({super.key});
@@ -31,10 +32,12 @@ class _DiscussionViewState extends State<DiscussionView> {
   String? currentPdfUrl;
   File? pdfFile;
   int currentIndex = 0;
+  int currentFileIndex = 0;
   bool isCommentsVisible = true;
   bool isPdfExpanded = false;
   bool chatBoxVisible = false;
   String? activeChatBoxId;
+  String? activePdfId;
 
   @override
   void initState() {
@@ -53,7 +56,15 @@ class _DiscussionViewState extends State<DiscussionView> {
     if (_pageController.page != null) {
       final newIndex = _pageController.page!.round();
       if (newIndex != currentIndex) {
-        loadPaper(newIndex);
+        setState(() {
+          currentIndex = newIndex;
+          if (papers.isNotEmpty &&
+              papers[currentIndex]['files'] != null &&
+              papers[currentIndex]['files'].isNotEmpty) {
+            activePdfId = papers[currentIndex]['files'][0]['_id'];
+            loadPaper(currentIndex);
+          }
+        });
       }
     }
   }
@@ -82,13 +93,40 @@ class _DiscussionViewState extends State<DiscussionView> {
       final paper = papers[index];
       debugPrint("DATAof $paper");
       id = paper['_id'];
-      // isCommentsVisible = false;
-      if (paper['file'] != null && paper['file']['url'] != null) {
-        final url =
-            "${ApiConstants.baseUrl}/api/uploads/${paper['file']['url']}";
+      if (paper['files'] != null && paper['files'].isNotEmpty) {
+        final file = paper['files'].firstWhere(
+          (f) => f['_id'] == activePdfId,
+          orElse: () => paper['files'][0],
+        );
+        final url = "${ApiConstants.baseUrl}/api/uploads/${file['url']}";
+        developer.log("1.PDF URL: $url");
         setState(() {
           currentPdfUrl = url;
           currentIndex = index;
+        });
+        if (currentPdfUrl != null) {
+          final file = await createFileOfPdfUrl(currentPdfUrl!);
+          setState(() {
+            pdfFile = file;
+          });
+        }
+      }
+    }
+  }
+
+  void loadFile(String fileId) async {
+    if (currentIndex >= 0 && currentIndex < papers.length) {
+      final paper = papers[currentIndex];
+      if (paper['files'] != null) {
+        final file = paper['files'].firstWhere(
+          (f) => f['_id'] == fileId,
+          orElse: () => paper['files'][0],
+        );
+        final url = "${ApiConstants.baseUrl}/api/uploads/${file['url']}";
+        developer.log("2.PDF URL: $url");
+        setState(() {
+          currentPdfUrl = url;
+          activePdfId = fileId;
         });
         if (currentPdfUrl != null) {
           final file = await createFileOfPdfUrl(currentPdfUrl!);
@@ -295,8 +333,55 @@ class _DiscussionViewState extends State<DiscussionView> {
                   height: isPdfExpanded
                       ? MediaQuery.of(context).size.height * 0.7
                       : MediaQuery.of(context).size.height * 0.4,
-                  child: PdfViewer(
-                    pdfFile: pdfFile,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: PdfViewer(
+                          pdfFile: pdfFile,
+                        ),
+                      ),
+                      if (papers.isNotEmpty &&
+                          papers[currentIndex]['files'] != null &&
+                          papers[currentIndex]['files'].length > 1)
+                        Container(
+                          height: 50,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: papers[currentIndex]['files'].length,
+                            itemBuilder: (context, index) {
+                              final file = papers[currentIndex]['files'][index];
+                              final isSelected = file['_id'] == activePdfId;
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 4),
+                                child: ElevatedButton(
+                                  onPressed: () => loadFile(file['_id']),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: isSelected
+                                        ? Theme.of(context).primaryColor
+                                        : Theme.of(context).cardColor,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'File ${index + 1}',
+                                    style: TextStyle(
+                                      color: isSelected
+                                          ? Colors.white
+                                          : Theme.of(context)
+                                              .textTheme
+                                              .bodyLarge
+                                              ?.color,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 // Past Papers List Section
