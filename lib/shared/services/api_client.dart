@@ -204,6 +204,34 @@ class ApiClient {
       throw ApiException('Failed to fetch current user ID: $e');
     }
   }
+
+
+  // Add this method to your ApiClient class
+Future<Map<String, dynamic>> put(
+  String endpoint,
+  Map<String, dynamic> data, {
+  Map<String, String>? headers,
+}) async {
+  try {
+    final defaultHeaders = {"x-platform": "app"};
+    final token = await SecureStorageService.instance.getToken();
+
+    final mergedHeaders = {
+      ...defaultHeaders,
+      if (token != null) "Authorization": "Bearer $token",
+      if (headers != null) ...headers,
+    };
+
+    final response = await _dio.put(
+      endpoint,
+      data: jsonEncode(data),
+      options: Options(headers: mergedHeaders),
+    );
+    return response.data as Map<String, dynamic>;
+  } catch (e) {
+    throw ApiException.fromDioError(e);
+  }
+}
 }
 
 class ApiException implements Exception {
@@ -229,6 +257,11 @@ class ApiException implements Exception {
     }
     return ApiException("Unexpected error: $error");
   }
+
+
+
+
+
 
   @override
   String toString() => message;
@@ -272,4 +305,6 @@ class ExternalApiClient {
       throw ApiException.fromDioError(e);
     }
   }
+
+  
 }
