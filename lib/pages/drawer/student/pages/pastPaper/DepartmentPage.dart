@@ -56,6 +56,8 @@ class _DepartmentPageState extends State<DepartmentPage> {
         .toList();
   }
 
+  final TextEditingController _fileNameController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;

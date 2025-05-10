@@ -7,7 +7,7 @@ class AppThemes {
     brightness: Brightness.light,
     // Customize other light theme properties as needed
     // primaryColor: Colors.greenAccent,
-    scaffoldBackgroundColor: Colors.teal.shade50,
+    scaffoldBackgroundColor: Colors.white70,
     // bottomNavigationBarTheme: const BottomNavigationBarThemeData(
     //   backgroundColor: Colors.blue,
     //
