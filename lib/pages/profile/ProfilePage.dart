@@ -9,8 +9,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:http_parser/http_parser.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:beyondtheclass/pages/profile/ProfileImageUploadPage.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   final String? userId;
@@ -346,26 +344,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
     } catch (e) {}
   }
 
-  Future<void> _pickMedia(ImageSource source, bool isVideo) async {
-    try {
-      final result = await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const ProfileImageUploadPage(),
-        ),
-      );
-
-      if (result == true) {
-        // Refresh profile data if image was updated successfully
-      }
-    } catch (e) {
-      debugPrint('Error picking media: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error picking media: $e')),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
@@ -454,26 +432,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                           ),
                         ),
                         Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: primary,
-                              width: 2,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: primary,
+                                width: 2,
+                              ),
                             ),
-                          ),
-                          child: Stack(children: [
-                            if (isOwnProfile)
-                              Positioned(
-                                  top: 0,
-                                  right: 0,
-                                  child: GestureDetector(
-                                      onTap: () => _pickMedia(
-                                          ImageSource.gallery, false),
-                                      child: Icon(
-                                        Icons.edit,
-                                        size: 20,
-                                      ))),
-                            CircleAvatar(
+                            child: CircleAvatar(
                               radius: 30,
                               backgroundColor: accent,
                               backgroundImage:
@@ -483,9 +449,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                                       : const AssetImage(
                                               "assets/images/profilepic2.jpg")
                                           as ImageProvider,
-                            )
-                          ]),
-                        ),
+                            )),
                       ],
                     ),
                     const SizedBox(height: 16),

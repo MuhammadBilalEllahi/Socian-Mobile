@@ -10,6 +10,7 @@ import 'package:beyondtheclass/pages/drawer/student/pages/teachersReviews/Teache
 import 'package:beyondtheclass/pages/drawer/teacher/review/TeacherSelfReview.dart';
 import 'package:beyondtheclass/pages/gps/ScheduledGatherings.dart';
 import 'package:beyondtheclass/pages/home/widgets/intracampus/IntraCampus.dart';
+import 'package:beyondtheclass/pages/profile/settings/personalInfo/PersonalInfoEditPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
@@ -129,6 +130,7 @@ class RouteGuard {
       AppRoutes.departmentScreen: const DepartmentPage(),
       AppRoutes.subjectsInDepartmentScreen: const SubjectsView(),
       AppRoutes.discussionViewScreen: const DiscussionView(),
+      AppRoutes.personalInfoEditScreen: const PersonalInfoEditPage()
     };
 
     switch (role) {

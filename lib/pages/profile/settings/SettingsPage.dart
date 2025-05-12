@@ -87,6 +87,8 @@ class SettingsPage extends ConsumerWidget {
                 Icons.person_outline,
                 () {
                   // Navigate to personal info edit
+                  Navigator.pushNamed(
+                      context, AppRoutes.personalInfoEditScreen);
                 },
                 isDarkMode,
               ),

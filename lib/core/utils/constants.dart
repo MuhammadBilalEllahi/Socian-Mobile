@@ -33,7 +33,7 @@ class ApiConstants {
     12: "http://192.168.1.12:8080",
   };
 
-  static int _currentUrlIndex = -2;
+  static int _currentUrlIndex = -3;
   static const String _urlIndexCacheKey = 'current_url_index';
 
   static Future<void> initializeBaseUrl() async {
@@ -153,6 +153,7 @@ class AppRoutes {
   static const String teacherReviewPage = '/teacher-review';
   static const String cafeReviewsHome = '/cafe-reviews-page';
   static const String intraCampus = '/intra-campus';
+  static const String personalInfoEditScreen = '/personal-info/edit';
 
   // Teacher routes
   static const String teacherHome = '/teacher/home';

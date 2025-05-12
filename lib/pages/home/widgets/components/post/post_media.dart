@@ -54,7 +54,7 @@ class _PostMediaState extends State<PostMedia>
           httpHeaders: {
             'Connection': 'keep-alive',
           },
-          invalidateCacheIfOlderThan: const Duration(minutes: 10),
+          invalidateCacheIfOlderThan: const Duration(hours: 4),
         );
         _videoController!.addListener(() {
           if (mounted) setState(() {});

@@ -34,6 +34,14 @@ class _PostCardState extends ConsumerState<PostCard> {
   late final authUser;
   late final currentUserId;
 
+  @override
+  void initState() {
+    super.initState();
+
+    authUser = ref.read(authProvider).user;
+    currentUserId = authUser?['_id'];
+  }
+
   Future<void> _votePost(String voteType) async {
     if (isVoting) return;
 
@@ -141,8 +149,6 @@ class _PostCardState extends ConsumerState<PostCard> {
     final createdAt = DateTime.parse(widget.post['createdAt']);
     final formattedDate = DateFormat('MMM d, y').format(createdAt);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    authUser = ref.read(authProvider).user;
-    currentUserId = authUser?['_id'];
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
