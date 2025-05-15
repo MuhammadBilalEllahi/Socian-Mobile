@@ -11,7 +11,6 @@ import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:dio/dio.dart';
 import 'dart:developer' as developer;
 import 'package:http_parser/http_parser.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
 class ProfileImageUploadPage extends ConsumerStatefulWidget {

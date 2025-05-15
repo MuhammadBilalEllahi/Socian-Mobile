@@ -1,6 +1,7 @@
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/domain/auth_state.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
+import 'package:beyondtheclass/shared/widgets/my_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -36,23 +37,28 @@ class _LoginFormState extends ConsumerState<LoginForm> {
 
     try {
       await ref.read(authProvider.notifier).login(
+        context,
             emailController.text,
             passwordController.text,
           );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Login successful!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+        
+
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //     content: Text('Login successful!'),
+      //     backgroundColor: Colors.green,
+      //   ),
+      // );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Colors.red,
-        ),
-      );
+              // showSnackbar(context, e.toString(), isError: true);
+
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Text(e.toString()),
+      //     backgroundColor: Colors.red,
+      //   ),
+      // );
     } finally {
       if (mounted) {
         setState(() {

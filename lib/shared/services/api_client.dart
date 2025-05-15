@@ -239,12 +239,24 @@ class ApiException implements Exception {
 
   ApiException(this.message);
 
+
   static ApiException fromDioError(dynamic error) {
     if (error is DioException) {
+
+      final statusCode = error.response?.statusCode;
+    final data = error.response?.data;
+
+    String readableMessage = "Unexpected error";
+    if (data is Map<String, dynamic> && data.containsKey('error')) {
+      readableMessage = data['error'].toString();
+    } else if (data is String) {
+      readableMessage = data;
+    }
+
       switch (error.type) {
         case DioExceptionType.badResponse:
           return ApiException(
-              "Error: ${error.response?.statusCode} - ${error.response?.data}");
+              " $readableMessage");
         case DioExceptionType.connectionTimeout:
         case DioExceptionType.sendTimeout:
         case DioExceptionType.receiveTimeout:

@@ -1,3 +1,4 @@
+import 'package:beyondtheclass/components/ShiningLinearProgressBar.dart';
 import 'package:beyondtheclass/components/loader.dart';
 import 'package:beyondtheclass/pages/drawer/student/StudentDrawer.dart';
 import 'package:beyondtheclass/pages/home/widgets/universities/AllUniversityPosts.dart';
@@ -44,16 +45,30 @@ class _CampusPostsState extends ConsumerState<CampusPosts>
     final postState = ref.watch(postProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return RefreshIndicator(
-      onRefresh: () async {
-        await ref.read(postProvider.notifier).fetchPosts();
-      },
-      child: _buildPostsList(postState, isDark),
+    return NotificationListener<ScrollNotification>(
+  onNotification: (ScrollNotification notification) {
+    if (notification is OverscrollNotification &&
+        notification.overscroll < 0) {
+      // User is pulling down
+      ref.read(postProvider.notifier).fetchPosts(refreshIt: true);
+    }
+    return false;
+  },
+      child: Column(
+        children: [
+          if (postState.isRefreshing) ShiningLinearProgressBar(
+  progress: postState.loadingProgress, // you must add this field, value 0 to 1
+  isLoadingComplete: postState.loadingProgress >= 1.0,
+),
+
+          Expanded(child: _buildPostsList(postState, isDark))
+        ],
+      ),
     );
   }
 
   Widget _buildPostsList(PostProvider postState, bool isDark) {
-    if (postState.isLoading) {
+    if (postState.isLoading && postState.posts.isEmpty) {
       return ListView.builder(
         padding: EdgeInsets.zero,
         itemCount: 5,
@@ -186,3 +201,6 @@ class _CampusPostsState extends ConsumerState<CampusPosts>
   @override
   bool get wantKeepAlive => true;
 }
+
+
+

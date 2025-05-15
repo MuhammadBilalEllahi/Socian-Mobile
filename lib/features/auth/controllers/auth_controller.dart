@@ -1,6 +1,8 @@
 import 'package:beyondtheclass/features/auth/domain/auth_usecase.dart';
 import 'package:beyondtheclass/features/auth/domain/auth_state.dart';
 import 'package:beyondtheclass/shared/services/secure_storage_service.dart';
+import 'package:beyondtheclass/shared/widgets/my_snackbar.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:beyondtheclass/core/utils/constants.dart';
@@ -61,7 +63,7 @@ class AuthController extends StateNotifier<AuthState> {
     state = const AuthState(isLoading: false);
   }
 
-  Future<void> login(String email, String password) async {
+  Future<void> login(BuildContext context,String email, String password) async {
     if (!mounted) return;
     state = state.copyWith(isLoading: true);
     try {
@@ -79,9 +81,13 @@ class AuthController extends StateNotifier<AuthState> {
         );
         await SecureStorageService.instance.saveToken(token);
       }
+
+      showSnackbar(context, "Logged In", isError: false);
     } catch (e) {
       if (!mounted) return;
-      state = state.copyWith(error: e.toString(), isLoading: false);
+      // state = state.copyWith(error: e.toString(), isLoading: false);
+                    showSnackbar(context, e.toString(), isError: true);
+
     }
   }
 

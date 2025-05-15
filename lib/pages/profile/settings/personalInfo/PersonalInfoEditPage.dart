@@ -2,9 +2,12 @@ import 'dart:developer';
 
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
+import 'package:beyondtheclass/pages/profile/settings/personalInfo/ChangePassword.dart';
 import 'package:beyondtheclass/pages/profile/settings/personalInfo/ProfileImageUploadPage.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:beyondtheclass/shared/services/secure_storage_service.dart';
+import 'package:beyondtheclass/shared/widgets/my_snackbar.dart';
+import 'package:beyondtheclass/utils/authstateChanger.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -25,16 +28,22 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
   bool _enableOtpField = false;
   bool _requireUniversityOtp = false;
 
+  bool editSecondaryEmail = false;
+  bool _enableSecondaryEmailOtpField = false;
+
   final apiClient = ApiClient();
   final nameController = TextEditingController();
   final universityEmailController = TextEditingController();
   final personalEmailController = TextEditingController();
-  final secondaryEmailController = TextEditingController();
+  final secondaryPersonalEmailController = TextEditingController();
   final otpController = TextEditingController();
   final universityOtpController = TextEditingController();
+  final graduationYearController = TextEditingController();
+  String imageURl = '';
+  DateTime? _selectedGraduationDate;
 
-  late String role;
-  String signedInEmail = '';
+  late dynamic role;
+  dynamic signedInEmail = '';
 
   @override
   void initState() {
@@ -44,9 +53,14 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
     nameController.text = user?['name'];
     universityEmailController.text = user?['universityEmail'];
     personalEmailController.text = user?['personalEmail'];
-    secondaryEmailController.text = user?['secondaryPersonalEmail'];
-    signedInEmail = user?['email'];
-    role = user?['role'];
+    secondaryPersonalEmailController.text = user?['secondaryPersonalEmail'];
+    imageURl = user?['profile']?['picture'];
+    signedInEmail = user?['email']?.toString() ?? '';
+    role = user?['role']?.toString() ?? '';
+    if (user?['graduationYear'] != null) {
+      graduationYearController.text = user?['graduationYear']?.toString() ?? '';
+      _selectedGraduationDate = DateTime(user?['graduationYear'], 1, 1);
+    }
   }
 
   Future<void> _pickMedia() async {
@@ -60,15 +74,17 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
 
       if (result == true) {
         // Refresh profile data if image was updated successfully
+        showSnackbar(context, "Upload Successful");
       }
     } catch (e) {
       debugPrint('Error picking media: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error picking media: $e'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      showSnackbar(context, 'Error picking media: $e', isError: true);
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Text('Error picking media: $e'),
+      //     backgroundColor: Theme.of(context).colorScheme.error,
+      //   ),
+      // );
     }
   }
 
@@ -83,95 +99,145 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
       setState(() {
         isEditing = false;
       });
+      AuthStateChanger.updateAuthState( ref, nameController.text , 'name');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Name updated successfully'),
-            backgroundColor: Theme.of(context).colorScheme.primary,
-          ),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(
+        //     content: const Text('Name updated successfully'),
+        //     backgroundColor: Theme.of(context).colorScheme.primary,
+        //   ),
+        // );
+        showSnackbar(context, 'Name updated successfully');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error updating name: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
+        showSnackbar(context, 'Error updating name: $e', isError: true);
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(
+        //     content: Text('Error updating name: $e'),
+        //     backgroundColor: Theme.of(context).colorScheme.error,
+        //   ),
+        // );
       }
     }
   }
 
-  Future<void> updatePersonalEmail() async {
+  Future<void> updateEmail({bool isPersonalEmail = true}) async {
     try {
+      String val = isPersonalEmail ? 'personalEmail' : 'secondaryPersonalEmail';
+
       final response = await apiClient.put(
-        '/api/user/update/personalEmail',
-        {'personalEmail': personalEmailController.text},
+        '/api/user/update/$val',
+        isPersonalEmail
+            ? {'personalEmail': personalEmailController.text}
+            : {'secondaryPersonalEmail': secondaryPersonalEmailController.text},
       );
       if (response.isNotEmpty) {
         setState(() {
-          _enableOtpField = true;
+          if(isPersonalEmail){
+            _enableOtpField = true;
           _requireUniversityOtp = response['requireUniversityOtp'] == true;
+          }else{
+            _enableSecondaryEmailOtpField=true;
+          }
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error updating personal email: $e'),
-        ),
-      );
+      showSnackbar(context, 'Error updating personal email: $e', isError: true);
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Text('Error updating personal email: $e'),
+      //   ),
+      // );
+    } finally {
+      if (isPersonalEmail) {
+        setState(() {
+          editPersonalEmail = false;
+        });
+      } else {
+        setState(() {
+          editSecondaryEmail = false;
+        });
+      }
     }
   }
 
-  Future<void> verifyOtp() async {
+  Future<void> verifyOtp({bool isPersonalEmail = true}) async {
     try {
+      String val = isPersonalEmail ? 'personalEmail' : 'secondaryPersonalEmail';
+      String emailString = isPersonalEmail ? personalEmailController.text : secondaryPersonalEmailController.text;
       Map<String, String> payload = {
         'otp': otpController.text,
-        'email': personalEmailController.text,
+        'email': emailString,
       };
-      if (_requireUniversityOtp) {
+      if (_requireUniversityOtp && isPersonalEmail) {
         payload['universityEmailOtp'] = universityOtpController.text;
       }
       final response = await apiClient.post(
-        '/api/user/verify/personalEmail/otp',
+        '/api/user/verify/$val/otp',
         payload,
       );
       if (response.isNotEmpty) {
         setState(() {
+          if(isPersonalEmail){
+            
           _enableOtpField = false;
           _requireUniversityOtp = false;
           universityOtpController.clear();
+          }else{
+            _enableSecondaryEmailOtpField= false;
+          }
           otpController.clear();
         });
 
-        final userData = response['personalEmail'];
-        final token = await SecureStorageService.instance.getToken();
-
-        if (token != null) {
-          final dataJSON = JwtDecoder.decode(token);
-          // Update the specific field
-          dataJSON['personalEmail'] = userData;
-
-          final jwt = JWT(dataJSON);
-
-          final convertedToJWT = jwt.sign(SecretKey(dotenv.get('JTM')));
-
-          // Save the entire updated token
-          await SecureStorageService.instance.saveToken(convertedToJWT);
-
-          // Update Riverpod state using updateAuthState
-          await ref
-              .read(authProvider.notifier)
-              .updateAuthState(dataJSON, convertedToJWT);
-        }
+        final userData = response['$val'];
+        AuthStateChanger.updateAuthState(ref, emailString,val.toString() );
+      }
+      if (mounted) {
+        showSnackbar(context, "Email Successfully changed");
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error verifying OTP: $e'),
-        ),
-      );
+      showSnackbar(context, "Error Verifying OTP $e", isError: true);
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Text('Error verifying OTP: $e'),
+      //   ),
+      // );
+    }
+  }
+
+  Future<void> _pickGraduationYear(BuildContext context) async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedGraduationDate ?? DateTime(now.year),
+      firstDate: DateTime(now.year - 10),
+      lastDate: DateTime(now.year + 10),
+      helpText: 'Select Graduation Year',
+      fieldLabelText: 'Graduation Year',
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).brightness == Brightness.dark
+                ? ColorScheme.dark(
+                    primary: Theme.of(context).colorScheme.primary,
+                    surface: Theme.of(context).colorScheme.surface,
+                  )
+                : ColorScheme.light(
+                    primary: Theme.of(context).colorScheme.primary,
+                    surface: Theme.of(context).colorScheme.surface,
+                  ),
+          ),
+          child: child!,
+        );
+      },
+      initialEntryMode: DatePickerEntryMode.calendar,
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedGraduationDate = picked;
+        graduationYearController.text = picked.year.toString();
+      });
     }
   }
 
@@ -180,14 +246,35 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final borderColor = isDark ? Colors.grey[800]! : Colors.grey[300]!;
+    final backgroundColor = isDark ? Colors.black : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.black;
+    final mutedTextColor = isDark ? Colors.grey[400]! : Colors.grey[600]!;
+    final surfaceColor = isDark ? Colors.grey[900]! : Colors.grey[100]!;
+// final shadowColor = isDark ? Colors.transparent : Colors.grey[300]!;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Personal Info'),
-        backgroundColor: isDark ? colorScheme.surface : colorScheme.background,
+        backgroundColor: backgroundColor,
         elevation: 0,
       ),
+      backgroundColor: isDark ? Colors.black : Colors.white,
       body: Container(
-        color: isDark ? colorScheme.surface : colorScheme.background,
+        // decoration: BoxDecoration(
+        // color: surfaceColor,
+        // borderRadius: BorderRadius.circular(12),
+        // border: Border.all(color: borderColor),
+        //   boxShadow: [
+        //     if (!isDark)
+        //       BoxShadow(
+        //         color: shadowColor,
+        //         blurRadius: 4,
+        //         offset: Offset(0, 2),
+        //       ),
+        //   ],
+        // ),
+
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -198,22 +285,24 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
                 children: [
                   CircleAvatar(
                     radius: 50,
-                    backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
-                    child: Icon(
-                      Icons.person,
-                      size: 50,
-                      color: colorScheme.primary,
-                    ),
+                    backgroundColor: borderColor,
+                    backgroundImage:
+                        imageURl != '' ? NetworkImage(imageURl) : null,
+                    child: imageURl == ''
+                        ? Icon(
+                            Icons.person,
+                            size: 50,
+                            color: textColor,
+                          )
+                        : null,
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: TextButton.icon(
                       onPressed: _pickMedia,
-                      icon: Icon(Icons.camera_alt, color: colorScheme.primary),
-                      label: Text(
-                        'Change Profile Picture',
-                        style: TextStyle(color: colorScheme.primary),
-                      ),
+                      icon: Icon(Icons.upload, color: textColor),
+                      label: Text('Change Profile Picture',
+                          style: TextStyle(color: textColor)),
                       style: TextButton.styleFrom(
                         backgroundColor:
                             colorScheme.primary.withValues(alpha: 0.1),
@@ -237,17 +326,14 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: colorScheme.onSurface.withValues(alpha: 0.7),
+                  color: textColor,
                 ),
               ),
               const SizedBox(height: 8),
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(
-                    color: isDark
-                        ? colorScheme.outline.withValues(alpha: 0.5)
-                        : colorScheme.outline.withValues(alpha: 0.2),
-                  ),
+                  color: surfaceColor,
+                  border: Border.all(color: borderColor),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -256,39 +342,89 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
                       child: TextField(
                         controller: nameController,
                         readOnly: !isEditing,
-                        style: TextStyle(
-                          color: colorScheme.onSurface,
-                          fontSize: 16,
-                        ),
+                        style: TextStyle(color: textColor, fontSize: 16),
                         decoration: const InputDecoration(
                           hintText: 'Enter your name',
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
+                              horizontal: 16, vertical: 12),
                         ),
                       ),
                     ),
                     IconButton(
                       onPressed: () {
-                        if (isEditing) {
-                          updateName();
-                        } else {
-                          setState(() {
-                            isEditing = true;
-                          });
-                        }
+                        isEditing
+                            ? updateName()
+                            : setState(() => isEditing = true);
                       },
-                      icon: Icon(
-                        isEditing ? Icons.check : Icons.edit,
-                        color: colorScheme.primary,
-                      ),
+                      icon: Icon(isEditing ? Icons.check : Icons.edit,
+                          color: mutedTextColor),
                     ),
                   ],
                 ),
               ),
 
+              if (role == AppRoles.student) ...[
+                Text('Graduation Year',
+                    style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: textColor)),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () => _pickGraduationYear(context),
+                  child: AbsorbPointer(
+                    child: TextField(
+                      controller: graduationYearController,
+                      readOnly: true,
+                      style: TextStyle(color: textColor),
+                      decoration: InputDecoration(
+                        hintText: 'Select graduation year',
+                        filled: true,
+                        fillColor: surfaceColor,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: borderColor),
+                        ),
+                        suffixIcon:
+                            Icon(Icons.calendar_today, color: mutedTextColor),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: TextButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isDark ? Colors.white : Colors.black,
+                      foregroundColor: isDark ? Colors.black : Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChangePassword(),
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      child: Text("Change Password",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: backgroundColor,
+                          )),
+                    )),
+              ),
               // Name Section
               if (role != AppRoles.extOrg || role != AppRoles.noAccess) ...[
                 Text(
@@ -296,17 +432,14 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: colorScheme.onSurface.withValues(alpha: 0.7),
+                    color: textColor,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Container(
                   decoration: BoxDecoration(
-                    border: Border.all(
-                      color: isDark
-                          ? colorScheme.outline.withValues(alpha: 0.5)
-                          : colorScheme.outline.withValues(alpha: 0.2),
-                    ),
+                    color: surfaceColor.withValues(alpha: 0.56),
+                    border: Border.all(color: borderColor),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -316,7 +449,7 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
                           controller: universityEmailController,
                           readOnly: true,
                           style: TextStyle(
-                            color: colorScheme.onSurface,
+                            color: textColor,
                             fontSize: 16,
                           ),
                           decoration: const InputDecoration(
@@ -339,17 +472,14 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: colorScheme.onSurface.withValues(alpha: 0.7),
+                    color: textColor,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Container(
                   decoration: BoxDecoration(
-                    border: Border.all(
-                      color: isDark
-                          ? colorScheme.outline.withValues(alpha: 0.5)
-                          : colorScheme.outline.withValues(alpha: 0.2),
-                    ),
+                    color: surfaceColor,
+                    border: Border.all(color: borderColor),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -359,7 +489,7 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
                           controller: personalEmailController,
                           readOnly: !editPersonalEmail,
                           style: TextStyle(
-                            color: colorScheme.onSurface,
+                            color: textColor,
                             fontSize: 16,
                           ),
                           decoration: const InputDecoration(
@@ -375,14 +505,15 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
                       IconButton(
                         onPressed: () {
                           if (editPersonalEmail) {
-                            updatePersonalEmail();
+                            updateEmail();
                           } else {
                             setState(() {
                               editPersonalEmail = true;
                             });
                           }
                         },
-                        icon: Icon(Icons.edit),
+                        icon:
+                            Icon(editPersonalEmail ? Icons.check : Icons.edit),
                       ),
                     ],
                   ),
@@ -397,11 +528,8 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
                     const SizedBox(height: 8),
                     Container(
                       decoration: BoxDecoration(
-                        border: Border.all(
-                          color: isDark
-                              ? colorScheme.outline.withValues(alpha: 0.5)
-                              : colorScheme.outline.withValues(alpha: 0.2),
-                        ),
+                        color: surfaceColor,
+                        border: Border.all(color: borderColor),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -437,11 +565,8 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
                   const SizedBox(height: 8),
                   Container(
                     decoration: BoxDecoration(
-                      border: Border.all(
-                        color: isDark
-                            ? colorScheme.outline.withValues(alpha: 0.5)
-                            : colorScheme.outline.withValues(alpha: 0.2),
-                      ),
+                      color: surfaceColor,
+                      border: Border.all(color: borderColor),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -468,9 +593,23 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: verifyOtp,
-                    child: const Text('Verify OTP(s)'),
-                  ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isDark ? Colors.white : Colors.black,
+                        foregroundColor: isDark ? Colors.black : Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: verifyOtp,
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: Text(
+                          'Verify OTP(s)',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w600),
+                        ),
+                      )),
                 ],
               ],
 
@@ -480,7 +619,7 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: colorScheme.onSurface.withValues(alpha: 0.7),
+                    color: textColor,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -497,8 +636,8 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
                     children: [
                       Expanded(
                         child: TextField(
-                          controller: secondaryEmailController,
-                          readOnly: true,
+                          controller: secondaryPersonalEmailController,
+                          readOnly: !editSecondaryEmail,
                           style: TextStyle(
                             color: colorScheme.onSurface,
                             fontSize: 16,
@@ -513,9 +652,77 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
                           ),
                         ),
                       ),
+                      IconButton(
+                        onPressed: () {
+                          if (editSecondaryEmail) {
+                            updateEmail(isPersonalEmail: false);
+                          } else {
+                            setState(() {
+                              editSecondaryEmail = true;
+                            });
+                          }
+                        },
+                        icon:
+                            Icon(editSecondaryEmail ? Icons.check : Icons.edit),
+                      ),
                     ],
                   ),
                 ),
+                if (_enableSecondaryEmailOtpField) ...[
+                  Text('Personal Email OTP',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      )),
+                  const SizedBox(height: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: surfaceColor,
+                      border: Border.all(color: borderColor),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: otpController,
+                            style: TextStyle(
+                              color: colorScheme.onSurface,
+                              fontSize: 16,
+                            ),
+                            decoration: const InputDecoration(
+                              hintText: 'Enter OTP sent to your personal email',
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isDark ? Colors.white : Colors.black,
+                        foregroundColor: isDark ? Colors.black : Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () => verifyOtp(isPersonalEmail: false),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: Text(
+                          'Verify OTP(s)',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w600),
+                        ),
+                      )),
+                ],
               ],
             ],
           ),

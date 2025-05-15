@@ -5,6 +5,7 @@ import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/presentation/widgets/otp_form.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:beyondtheclass/shared/widgets/my_dropdown.dart';
+import 'package:beyondtheclass/shared/widgets/my_snackbar.dart';
 import 'package:beyondtheclass/shared/widgets/my_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -183,22 +184,24 @@ class _SignUpFormState extends State<SignUpForm> {
       final userId = redirectUrl.split('/otp/')[1].split('?')[0];
       final email = redirectUrl.split('/otp/')[1].split('?')[1].split('=')[1];
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Sign up successful! Please verify your email.'),
-          backgroundColor: Colors.green,
-        ),
-      );
+showSnackbar(context,"Sign up successful! Please verify your email.");
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //     content: Text('Sign up successful! Please verify your email.'),
+      //     backgroundColor: Colors.green,
+      //   ),
+      // );
 
       Navigator.pushNamed(context, AppRoutes.otpScreen,
           arguments: {'userId': userId, 'email': email});
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Colors.red,
-        ),
-      );
+      showSnackbar(context,e.toString(), isError: true);
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Text(e.toString()),
+      //     backgroundColor: Colors.red,
+      //   ),
+      // );
     } finally {
       if (mounted) {
         setState(() {
