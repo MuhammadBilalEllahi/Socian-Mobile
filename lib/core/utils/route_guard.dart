@@ -179,7 +179,7 @@ class RouteGuard {
       case AppRoles.teacher:
         return const HomePage();
       case AppRoles.alumni:
-        return const AlumniHome();
+        return const HomePage();
       default:
         return const AuthScreen();
     }

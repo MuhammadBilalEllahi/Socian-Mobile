@@ -8,6 +8,8 @@ class MyDropdownField<T> extends StatefulWidget {
   final Function(String?) onChanged;
   final FormFieldValidator<String>? validator;
   final bool isLoading; // New: loading flag
+    final bool disableField; // New: loading flag
+
 
   const MyDropdownField({
     super.key,
@@ -17,6 +19,8 @@ class MyDropdownField<T> extends StatefulWidget {
     required this.onChanged,
     this.validator,
     this.isLoading = false, // default false
+        this.disableField = false, // default false
+
   });
 
   @override
@@ -231,7 +235,7 @@ void didUpdateWidget(covariant MyDropdownField<T> oldWidget) {
     return CompositedTransformTarget(
       link: _layerLink,
       child: GestureDetector(
-        onTap: _toggleDropdown,
+        onTap: widget.disableField ? null: _toggleDropdown,
         child: AbsorbPointer(
           absorbing: !_isOpen,
           child: TextField(

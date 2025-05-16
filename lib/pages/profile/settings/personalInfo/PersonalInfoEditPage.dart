@@ -1,21 +1,16 @@
 import 'dart:developer';
 
 import 'package:beyondtheclass/core/utils/constants.dart';
-import 'package:beyondtheclass/features/auth/controllers/auth_controller.dart';
-import 'package:beyondtheclass/features/auth/data/auth_data_source.dart';
-import 'package:beyondtheclass/features/auth/domain/auth_usecase.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:beyondtheclass/pages/profile/settings/personalInfo/ChangePassword.dart';
 import 'package:beyondtheclass/pages/profile/settings/personalInfo/ProfileImageUploadPage.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
-import 'package:beyondtheclass/shared/services/secure_storage_service.dart';
 import 'package:beyondtheclass/shared/widgets/my_dropdown.dart';
 import 'package:beyondtheclass/shared/widgets/my_snackbar.dart';
 import 'package:beyondtheclass/utils/authstateChanger.dart';
-import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
 class PersonalInfoEditPage extends ConsumerStatefulWidget {
@@ -54,9 +49,11 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
 
   late dynamic role;
   dynamic signedInEmail = '';
-  bool showChangeDeptIcon  = false;
+  bool showChangeDeptIcon = false;
+  bool disableDepartmentField = false;
+  bool disableDateTimeField = false;
 
-
+String _forSubmision ='';
   @override
   void initState() {
     super.initState();
@@ -71,13 +68,22 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
     imageURl = user?['profile']?['picture'];
     signedInEmail = user?['email']?.toString() ?? '';
     role = user?['role']?.toString() ?? '';
-    if (user?['graduationYear'] != null) {
-      graduationYearController.text = user?['graduationYear']?.toString() ?? '';
-      _selectedGraduationDate = DateTime(user?['graduationYear'], 1, 1);
-    }
+    log('Raw graduationYear from user1: ${user?['profile']?['graduationYear']}');
+
+    if (user?['profile']?['graduationYear'] != null) {
+      log('Raw graduationYear from user: ${user?['profile']?['graduationYear']}');
+
+  final parsedDate = DateTime.parse(user?['profile']?['graduationYear'] ?? '');
+  graduationYearController.text = DateFormat('d MMMM y').format(parsedDate);
+  _selectedGraduationDate = parsedDate;
+}
+
+
 
     userDepartmentId = user?['university']?['departmentId']?['_id'];
     userDepartmentName = user?['university']?['departmentId']?['name'];
+    disableDepartmentField = user?['changedDepartmentOnce'] ?? false;
+    disableDateTimeField= user?['changedGraduationYearOnce']?? false;
   }
 
   @override
@@ -230,39 +236,339 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
       showSnackbar(context, "Error Verifying OTP $e", isError: true);
     }
   }
+// Future<void> _pickGraduationYear(BuildContext context) async {
+//   final currentYear = DateTime.now().year;
+//   final years = List.generate(20, (index) => currentYear - 10 + index);
+//   int selectedYear = _selectedGraduationDate?.year ?? currentYear;
 
-  Future<void> _pickGraduationYear(BuildContext context) async {
-    final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedGraduationDate ?? DateTime(now.year),
-      firstDate: DateTime(now.year - 10),
-      lastDate: DateTime(now.year + 10),
-      helpText: 'Select Graduation Year',
-      fieldLabelText: 'Graduation Year',
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).brightness == Brightness.dark
-                ? ColorScheme.dark(
-                    primary: Theme.of(context).colorScheme.primary,
-                    surface: Theme.of(context).colorScheme.surface,
-                  )
-                : ColorScheme.light(
-                    primary: Theme.of(context).colorScheme.primary,
-                    surface: Theme.of(context).colorScheme.surface,
+//   await showModalBottomSheet(
+//     context: context,
+//     shape: RoundedRectangleBorder(
+//       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+//     ),
+//     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+//     builder: (context) {
+//       return SizedBox(
+//         height: 250,
+//         child: Column(
+//           children: [
+//             const SizedBox(height: 12),
+//             const Text(
+//               'Select Graduation Year',
+//               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+//             ),
+//             Expanded(
+//               child: ListWheelScrollView.useDelegate(
+//                 itemExtent: 50,
+//                 diameterRatio: 1.3,
+//                 onSelectedItemChanged: (index) {
+//                   selectedYear = years[index];
+//                 },
+//                 physics: FixedExtentScrollPhysics(),
+//                 childDelegate: ListWheelChildBuilderDelegate(
+//                   builder: (context, index) {
+//                     return Center(
+//                       child: Text(
+//                         years[index].toString(),
+//                         style: TextStyle(
+//                           fontSize: 22,
+//                           fontWeight: FontWeight.w500,
+//                           color: Theme.of(context).textTheme.bodyLarge?.color,
+//                         ),
+//                       ),
+//                     );
+//                   },
+//                   childCount: years.length,
+//                 ),
+//               ),
+//             ),
+//             ElevatedButton(
+//               style: ElevatedButton.styleFrom(
+//                 shape: StadiumBorder(),
+//                 padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+//               ),
+//               onPressed: () {
+//                 final picked = DateTime.utc(selectedYear);
+//                 setState(() {
+//                   _selectedGraduationDate = picked;
+//                   graduationYearController.text = picked.toIso8601String(); // Mongo-compatible
+//                 });
+//                 Navigator.of(context).pop();
+//                 updateGraduationYear();
+//               },
+//               child: const Text("Confirm"),
+//             ),
+//             const SizedBox(height: 12),
+//           ],
+//         ),
+//       );
+//     },
+//   );
+// }
+
+Future<void> _pickGraduationDate(BuildContext context) async {
+
+  final shouldContinue = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return AlertDialog(
+            backgroundColor: Colors.black,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+            ),
+            title: const Text(
+              "Update Graduation Year?",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 18,
+              ),
+            ),
+            content: const Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "You can only change your graduation year once.",
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
                   ),
-          ),
-          child: child!,
-        );
-      },
-      initialEntryMode: DatePickerEntryMode.calendar,
-    );
-    if (picked != null) {
-      setState(() {
-        _selectedGraduationDate = picked;
-        graduationYearController.text = picked.year.toString();
-      });
+                ),
+                Text(
+                  "*Choose wisely because once date is crossed your account will be converted to alumni account.",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  "To change it again, contact:",
+                  style: TextStyle(
+                    color: Colors.white54,
+                    fontSize: 13,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  "ceo@beyondtheclass.me",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text(
+                  "Cancel",
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text(
+                  "Go Ahead",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (shouldContinue != true) {
+        return;
+      }
+
+      
+  final now = DateTime.now();
+  final currentYear = now.year;
+
+  List<int> years = List.generate(10, (index) => currentYear  + index);
+  List<int> months = List.generate(12, (index) => index + 1);
+  List<int> days = List.generate(31, (index) => index + 1);
+
+  int selectedYear = _selectedGraduationDate?.year ?? currentYear;
+  int selectedMonth = _selectedGraduationDate?.month ?? now.month;
+  int selectedDay = _selectedGraduationDate?.day ?? now.day;
+
+  await showModalBottomSheet(
+    context: context,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+    builder: (context) {
+  return StatefulBuilder(
+    builder: (context, setModalState) {
+      return SizedBox(
+        height: 350,
+        child: Column(
+          children: [
+            const SizedBox(height: 12),
+            const Text(
+              'Select Graduation Date',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // Day Picker
+                  Expanded(
+                    child: ListWheelScrollView.useDelegate(
+                      itemExtent: 40,
+                      diameterRatio: 1.2,
+                      physics: FixedExtentScrollPhysics(),
+                      onSelectedItemChanged: (index) {
+                        setModalState(() => selectedDay = days[index]);
+                      },
+                      childDelegate: ListWheelChildBuilderDelegate(
+                        builder: (context, index) {
+                          final isSelected = days[index] == selectedDay;
+                          return Center(
+                            child: Text(
+                              days[index].toString().padLeft(2, '0'),
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                color: isSelected ? Colors.blueAccent : Colors.grey,
+                              ),
+                            ),
+                          );
+                        },
+                        childCount: days.length,
+                      ),
+                    ),
+                  ),
+                  // Month Picker
+                  Expanded(
+                    child: ListWheelScrollView.useDelegate(
+                      itemExtent: 40,
+                      diameterRatio: 1.2,
+                      physics: FixedExtentScrollPhysics(),
+                      onSelectedItemChanged: (index) {
+                        setModalState(() => selectedMonth = months[index]);
+                      },
+                      childDelegate: ListWheelChildBuilderDelegate(
+                        builder: (context, index) {
+                          final isSelected = months[index] == selectedMonth;
+                          return Center(
+                            child: Text(
+                              DateFormat.MMM().format(DateTime(0, months[index])),
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                color: isSelected ? Colors.blueAccent : Colors.grey,
+                              ),
+                            ),
+                          );
+                        },
+                        childCount: months.length,
+                      ),
+                    ),
+                  ),
+                  // Year Picker
+                  Expanded(
+                    child: ListWheelScrollView.useDelegate(
+                      itemExtent: 40,
+                      diameterRatio: 1.2,
+                      physics: FixedExtentScrollPhysics(),
+                      onSelectedItemChanged: (index) {
+                        setModalState(() => selectedYear = years[index]);
+                      },
+                      childDelegate: ListWheelChildBuilderDelegate(
+                        builder: (context, index) {
+                          final isSelected = years[index] == selectedYear;
+                          return Center(
+                            child: Text(
+                              years[index].toString(),
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                color: isSelected ? Colors.blueAccent : Colors.grey,
+                              ),
+                            ),
+                          );
+                        },
+                        childCount: years.length,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                shape: StadiumBorder(),
+                padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              ),
+              onPressed: () {
+                final picked = DateTime.utc(selectedYear, selectedMonth, selectedDay);
+                setState(() {
+                  _selectedGraduationDate = picked;
+                  graduationYearController.text = DateFormat('d MMMM y').format(picked);
+                  _forSubmision = picked.toIso8601String();
+                });
+                Navigator.of(context).pop();
+                updateGraduationYear();
+              },
+              child: const Text("Confirm"),
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      );
+    },
+  );
+});
+}
+
+  Future<void> updateGraduationYear() async {
+    try {
+      
+if(_forSubmision == ''){
+  showSnackbar(context, "Check if date is selected");
+  return ;
+}
+      log("User chose to continue");
+
+      final response = await apiClient.put('/api/user/graduation-year/change',
+          {'graduationYearDateTime':_forSubmision});
+      log("RESPONSE $response ${response['message'] == null}");
+
+      if (response['access_token'] != null) {
+        log("message here2");
+        final token = response['access_token'];
+        final dataJSON = JwtDecoder.decode(token);
+
+        await ref.read(authProvider.notifier).updateAuthState(dataJSON, token);
+
+        if (mounted) {
+          showSnackbar(context, "Department Changed Successfully");
+        }
+      } else if (response['message'] != null) {
+        log("message here3");
+        if (mounted) {
+          showSnackbar(context, response['message'].toString());
+        }
+      }
+      // Navigator.pop(context);
+    } catch (e) {
+      log("error updateGraduationYear $e");
+      showSnackbar(context, e.toString(), isError: true);
     }
   }
 
@@ -374,10 +680,9 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
           showSnackbar(context, response['message'].toString());
         }
       }
-      showChangeDeptIcon  = false;
+      showChangeDeptIcon = false;
       setState(() {
-        
-selectedDepartment = userDepartmentId;
+        selectedDepartment = userDepartmentId;
       });
       // Navigator.pop(context);
     } catch (e) {
@@ -465,24 +770,58 @@ selectedDepartment = userDepartmentId;
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: TextButton.icon(
-                      onPressed: _pickMedia,
-                      icon: Icon(Icons.upload, color: textColor),
-                      label: Text('Change Profile Picture',
-                          style: TextStyle(color: textColor)),
-                      style: TextButton.styleFrom(
-                        backgroundColor:
-                            colorScheme.primary.withValues(alpha: 0.1),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                      child: Column(
+                    children: [
+                      TextButton.icon(
+                        onPressed: _pickMedia,
+                        icon: Icon(Icons.upload, color: textColor),
+                        label: Text('Change Profile Picture',
+                            style: TextStyle(color: textColor)),
+                        style: TextButton.styleFrom(
+                          backgroundColor:
+                              colorScheme.primary.withValues(alpha: 0.1),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: TextButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  isDark ? Colors.white : Colors.black,
+                              foregroundColor:
+                                  isDark ? Colors.black : Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ChangePassword(),
+                                ),
+                              );
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 12),
+                              child: Text("Change Password",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: backgroundColor,
+                                  )),
+                            )),
+                      ),
+                    ],
+                  )),
                 ],
               ),
               const SizedBox(height: 32),
@@ -492,12 +831,13 @@ selectedDepartment = userDepartmentId;
                     ? userDepartmentId
                     : selectedDepartment,
                 items: departmentsInCampus,
+                disableField: disableDepartmentField,
                 label: "Select Department",
                 validator: dropdownValidator(selectedDepartment, 'Department'),
                 onChanged: (value) {
                   log("VAlue $value");
-                  if( selectedDepartment != userDepartmentId){
-                    showChangeDeptIcon= true;
+                  if (selectedDepartment != userDepartmentId) {
+                    showChangeDeptIcon = true;
                   }
                   setState(() {
                     selectedDepartment = value;
@@ -505,7 +845,8 @@ selectedDepartment = userDepartmentId;
                 },
               ),
 
-              if (showChangeDeptIcon && userDepartmentId != '' &&
+              if (showChangeDeptIcon &&
+                  userDepartmentId != '' &&
                   userDepartmentId != selectedDepartment) ...[
                 IconButton(onPressed: updateDepartment, icon: Icon(Icons.check))
               ],
@@ -562,7 +903,7 @@ selectedDepartment = userDepartmentId;
                         color: textColor)),
                 const SizedBox(height: 8),
                 GestureDetector(
-                  onTap: () => _pickGraduationYear(context),
+                  onTap: () => _pickGraduationDate(context),
                   child: AbsorbPointer(
                     child: TextField(
                       controller: graduationYearController,
@@ -586,35 +927,6 @@ selectedDepartment = userDepartmentId;
                 ),
               ],
 
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 12),
-                child: TextButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isDark ? Colors.white : Colors.black,
-                      foregroundColor: isDark ? Colors.black : Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ChangePassword(),
-                        ),
-                      );
-                    },
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      child: Text("Change Password",
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: backgroundColor,
-                          )),
-                    )),
-              ),
               // Name Section
               if (role != AppRoles.extOrg || role != AppRoles.noAccess) ...[
                 Text(
