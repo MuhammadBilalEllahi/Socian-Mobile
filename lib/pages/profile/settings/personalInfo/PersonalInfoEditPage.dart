@@ -895,7 +895,8 @@ if(_forSubmision == ''){
                 ),
               ),
 
-              if (role == AppRoles.student) ...[
+              if (role == AppRoles.student || role == AppRoles.alumni)
+               ...[
                 Text('Graduation Year',
                     style: TextStyle(
                         fontSize: 14,
@@ -903,7 +904,7 @@ if(_forSubmision == ''){
                         color: textColor)),
                 const SizedBox(height: 8),
                 GestureDetector(
-                  onTap: () => _pickGraduationDate(context),
+                  onTap: () => (disableDateTimeField || role == AppRoles.alumni) ? null : _pickGraduationDate(context),
                   child: AbsorbPointer(
                     child: TextField(
                       controller: graduationYearController,
