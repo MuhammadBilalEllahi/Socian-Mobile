@@ -229,6 +229,7 @@ showSnackbar(context,"Sign up successful! Please verify your email.");
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               MyDropdownField<String>(
+                isLoading: isLoading,
                 value: selectedUniversity,
                 items: universities,
                 label: "Select University",

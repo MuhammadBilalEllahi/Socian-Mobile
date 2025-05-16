@@ -6,15 +6,19 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 
 class AuthStateChanger {
   static Future<void> updateAuthState(ref, String receivedData, String field1,
-      {String field2 = ''}) async {
+      {String field2 = '', String field3 = '', String field4 = ''}) async {
     final token = await SecureStorageService.instance.getToken();
 
     if (token != null) {
       final dataJSON = JwtDecoder.decode(token);
       // Update the specific field
 
-      if (field2 != '') {
+      if (field1 != '' && field2 != '') {
         dataJSON[field1][field2] = receivedData;
+      } else if (field1 != '' && field2 != '' && field3 != '') {
+        dataJSON[field1][field2][field3] = receivedData;
+      } else if (field1 != '' && field2 != '' && field3 != '' && field4 != '') {
+        dataJSON[field1][field2][field3][field4] = receivedData;
       } else {
         dataJSON[field1] = receivedData;
       }

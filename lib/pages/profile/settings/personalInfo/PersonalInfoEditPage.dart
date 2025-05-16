@@ -1,11 +1,15 @@
 import 'dart:developer';
 
 import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:beyondtheclass/features/auth/controllers/auth_controller.dart';
+import 'package:beyondtheclass/features/auth/data/auth_data_source.dart';
+import 'package:beyondtheclass/features/auth/domain/auth_usecase.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:beyondtheclass/pages/profile/settings/personalInfo/ChangePassword.dart';
 import 'package:beyondtheclass/pages/profile/settings/personalInfo/ProfileImageUploadPage.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:beyondtheclass/shared/services/secure_storage_service.dart';
+import 'package:beyondtheclass/shared/widgets/my_dropdown.dart';
 import 'package:beyondtheclass/shared/widgets/my_snackbar.dart';
 import 'package:beyondtheclass/utils/authstateChanger.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
@@ -42,13 +46,23 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
   String imageURl = '';
   DateTime? _selectedGraduationDate;
 
+  String userDepartmentId = '';
+  String userDepartmentName = '';
+
+  List<Map<String, dynamic>> departmentsInCampus = [];
+  String? selectedDepartment;
+
   late dynamic role;
   dynamic signedInEmail = '';
+  bool showChangeDeptIcon  = false;
+
 
   @override
   void initState() {
     super.initState();
+    getAllDepartments();
     final user = ref.read(authProvider).user;
+
     log("Auth Provider: $user");
     nameController.text = user?['name'];
     universityEmailController.text = user?['universityEmail'];
@@ -61,6 +75,21 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
       graduationYearController.text = user?['graduationYear']?.toString() ?? '';
       _selectedGraduationDate = DateTime(user?['graduationYear'], 1, 1);
     }
+
+    userDepartmentId = user?['university']?['departmentId']?['_id'];
+    userDepartmentName = user?['university']?['departmentId']?['name'];
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    universityEmailController.dispose();
+    personalEmailController.dispose();
+    secondaryPersonalEmailController.dispose();
+    otpController.dispose();
+    universityOtpController.dispose();
+    graduationYearController.dispose();
+    super.dispose();
   }
 
   Future<void> _pickMedia() async {
@@ -99,7 +128,7 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
       setState(() {
         isEditing = false;
       });
-      AuthStateChanger.updateAuthState( ref, nameController.text , 'name');
+      AuthStateChanger.updateAuthState(ref, nameController.text, 'name');
       if (mounted) {
         // ScaffoldMessenger.of(context).showSnackBar(
         //   SnackBar(
@@ -134,11 +163,11 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
       );
       if (response.isNotEmpty) {
         setState(() {
-          if(isPersonalEmail){
+          if (isPersonalEmail) {
             _enableOtpField = true;
-          _requireUniversityOtp = response['requireUniversityOtp'] == true;
-          }else{
-            _enableSecondaryEmailOtpField=true;
+            _requireUniversityOtp = response['requireUniversityOtp'] == true;
+          } else {
+            _enableSecondaryEmailOtpField = true;
           }
         });
       }
@@ -165,7 +194,9 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
   Future<void> verifyOtp({bool isPersonalEmail = true}) async {
     try {
       String val = isPersonalEmail ? 'personalEmail' : 'secondaryPersonalEmail';
-      String emailString = isPersonalEmail ? personalEmailController.text : secondaryPersonalEmailController.text;
+      String emailString = isPersonalEmail
+          ? personalEmailController.text
+          : secondaryPersonalEmailController.text;
       Map<String, String> payload = {
         'otp': otpController.text,
         'email': emailString,
@@ -179,30 +210,24 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
       );
       if (response.isNotEmpty) {
         setState(() {
-          if(isPersonalEmail){
-            
-          _enableOtpField = false;
-          _requireUniversityOtp = false;
-          universityOtpController.clear();
-          }else{
-            _enableSecondaryEmailOtpField= false;
+          if (isPersonalEmail) {
+            _enableOtpField = false;
+            _requireUniversityOtp = false;
+            universityOtpController.clear();
+          } else {
+            _enableSecondaryEmailOtpField = false;
           }
           otpController.clear();
         });
 
         final userData = response['$val'];
-        AuthStateChanger.updateAuthState(ref, emailString,val.toString() );
+        AuthStateChanger.updateAuthState(ref, emailString, val.toString());
       }
       if (mounted) {
         showSnackbar(context, "Email Successfully changed");
       }
     } catch (e) {
       showSnackbar(context, "Error Verifying OTP $e", isError: true);
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(
-      //     content: Text('Error verifying OTP: $e'),
-      //   ),
-      // );
     }
   }
 
@@ -238,6 +263,148 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
         _selectedGraduationDate = picked;
         graduationYearController.text = picked.year.toString();
       });
+    }
+  }
+
+  Future<void> updateDepartment() async {
+    try {
+      if (selectedDepartment == '' || selectedDepartment == userDepartmentId) {
+        showSnackbar(
+            context, "Department cannot be the same as before or empty");
+        return;
+      }
+
+      final shouldContinue = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return AlertDialog(
+            backgroundColor: Colors.black,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+            ),
+            title: const Text(
+              "Update Department?",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 18,
+              ),
+            ),
+            content: const Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "You can only change your department once.",
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  "To change it again, contact:",
+                  style: TextStyle(
+                    color: Colors.white54,
+                    fontSize: 13,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  "ceo@beyondtheclass.me",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text(
+                  "Cancel",
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text(
+                  "Go Ahead",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (shouldContinue != true) {
+        return;
+      }
+
+      log("User chose to continue");
+
+      final response = await apiClient.put('/api/user/department/change-once',
+          {'departmentId': selectedDepartment});
+      log("RESPONSE $response ${response['message'] == null}");
+
+      if (response['access_token'] != null) {
+        log("message here2");
+        final token = response['access_token'];
+        final dataJSON = JwtDecoder.decode(token);
+
+        await ref.read(authProvider.notifier).updateAuthState(dataJSON, token);
+
+        if (mounted) {
+          showSnackbar(context, "Department Changed Successfully");
+        }
+      } else if (response['message'] != null) {
+        log("message here3");
+        setState(() {
+          selectedDepartment = userDepartmentId;
+        });
+        if (mounted) {
+          showSnackbar(context, response['message'].toString());
+        }
+      }
+      showChangeDeptIcon  = false;
+      setState(() {
+        
+selectedDepartment = userDepartmentId;
+      });
+      // Navigator.pop(context);
+    } catch (e) {
+      log("error updateDepartment $e");
+      showSnackbar(context, e.toString(), isError: true);
+    }
+  }
+
+  void getAllDepartments() async {
+    try {
+      final response = await apiClient.get('/api/department/campus/auth');
+      log("DATA IN DEPARMTENTS $response");
+      log("AGIN  ${response['departmentsInFormat']}");
+      final List<Map<String, dynamic>> data =
+          (response['departmentsInFormat'] as List)
+              .whereType<Map<String, dynamic>>()
+              .toList();
+
+      departmentsInCampus = data;
+      setState(() {
+        // departmentsInCampus= (data)
+        //       .map((uni) => {
+        //             'name': uni['name'],
+        //             '_id': uni['_id'],});
+      });
+    } catch (e) {
+      log("Error in getallDepaartments $e");
     }
   }
 
@@ -319,6 +486,29 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
                 ],
               ),
               const SizedBox(height: 32),
+
+              MyDropdownField<String>(
+                value: userDepartmentId != ''
+                    ? userDepartmentId
+                    : selectedDepartment,
+                items: departmentsInCampus,
+                label: "Select Department",
+                validator: dropdownValidator(selectedDepartment, 'Department'),
+                onChanged: (value) {
+                  log("VAlue $value");
+                  if( selectedDepartment != userDepartmentId){
+                    showChangeDeptIcon= true;
+                  }
+                  setState(() {
+                    selectedDepartment = value;
+                  });
+                },
+              ),
+
+              if (showChangeDeptIcon && userDepartmentId != '' &&
+                  userDepartmentId != selectedDepartment) ...[
+                IconButton(onPressed: updateDepartment, icon: Icon(Icons.check))
+              ],
 
               // Name Section
               Text(
@@ -730,4 +920,13 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
       ),
     );
   }
+}
+
+FormFieldValidator<dynamic> dropdownValidator(String? value, String fieldName) {
+  return (value) {
+    if (value == null || value.isEmpty) {
+      return '$fieldName cannot be empty';
+    }
+    return null;
+  };
 }

@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/pages/explore/SocietyProvider.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -110,6 +111,33 @@ class _CreatePostState extends ConsumerState<CreatePost> {
     _recordingTimer?.cancel();
     super.dispose();
   }
+
+Future<void> _pickMultipleMedia() async {
+  try {
+    final result = await FilePicker.platform.pickFiles(
+      allowMultiple: true,
+      type: FileType.custom,
+      allowedExtensions: ['jpg', 'png', 'mp4', 'mov'], // add more if needed
+      withData: true
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      setState(() {
+        _mediaFiles.addAll(result.files.map((f) => File(f.path!)));
+        for (var file in result.files) {
+          if (file.extension == 'mp4' || file.extension == 'mov') {
+            _initializeVideoController(File(file.path!));
+          }
+        }
+      });
+    }
+  } catch (e) {
+    debugPrint('Error picking multiple files: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error picking multiple files: $e')),
+    );
+  }
+}
 
   Future<void> _pickMedia(ImageSource source, bool isVideo) async {
     try {
@@ -708,7 +736,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
                 onMediaRemove: _removeMedia,
               ),
             MediaControls(
-              onImagePick: () => _pickMedia(ImageSource.gallery, false),
+              onImagePick: () => _pickMultipleMedia(),
               onVideoPick: () => _pickMedia(ImageSource.gallery, true),
               onVoiceNoteStart:
                   _isVoiceSelected ? _startRecording : _selectVoice,
