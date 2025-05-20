@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
 import 'package:flutter/material.dart';
@@ -117,24 +119,55 @@ Future<void> _submitForm() async {
     final role = authState.user?['role'];
     final universityId = authState.user?['references']?['university']?['_id'];
 
+    // ✅ Safely flatten _selectedAllows into List<String>
+    final List<String> flatAllows = [];
+
+    if (_selectedAllows is List) {
+      for (var item in _selectedAllows) {
+        if (item is String) {
+          flatAllows.add(item);
+        // ignore: unnecessary_type_check
+        } 
+        
+        // else if (item is List && item is! String) {
+        //   for (var innerItem in item) {
+        //     flatAllows.add(innerItem.toString());
+        //   }
+        // } 
+        
+        else {
+          flatAllows.add(item.toString());
+        }
+      }
+    } else if (_selectedAllows != null) {
+      flatAllows.add(_selectedAllows.toString());
+    }
+
+    debugPrint('Selected Allows (Raw): $_selectedAllows');
+    debugPrint('Selected Allows (Flat): $flatAllows');
+
+    final payload = {
+      'name': _nameController.text.trim(),
+      'description': _descriptionController.text.trim(),
+      'societyTypeId': _selectedSocietyType,
+      'category': 'default',
+      'icon': _iconController.text.trim(),
+      'banner': _bannerController.text.trim(),
+      'allows': flatAllows,
+      'president': userId,
+    };
+
+    debugPrint('Create Society Payload: ${jsonEncode(payload)}');
+
     final response = await apiClient.post(
       '/api/society/create',
-       {
-        'name': _nameController.text.trim(),
-        'description': _descriptionController.text.trim(),
-        'societyTypeId': _selectedSocietyType,
-        'category': 'default',
-        'icon': _iconController.text.trim(),
-        'banner': _bannerController.text.trim(),
-        'allows': _selectedAllows,
-        'president': userId,
-      },
+       payload,
     );
 
     if (response['message'] == 'Society created successfully') {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Society created successfully')),
+          const SnackBar(content: Text('Society created successfully')),
         );
         Navigator.of(context).pop();
       }
@@ -143,7 +176,7 @@ Future<void> _submitForm() async {
     setState(() {
       _error = e.toString().contains('Society already Exists')
           ? 'Society name already exists'
-          : 'Failed to create society';
+          : 'Failed to create society: $e';
     });
   } finally {
     setState(() {
@@ -151,6 +184,9 @@ Future<void> _submitForm() async {
     });
   }
 }
+
+
+
 
   @override
   Widget build(BuildContext context) {
