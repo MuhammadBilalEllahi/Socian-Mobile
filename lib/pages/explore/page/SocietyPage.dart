@@ -22,12 +22,31 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
   bool hasMore = true;
   String? error;
 
-  // shadcn/minimal palette
-  static const Color bg = Color(0xFF18181B);
-  static const Color fg = Color(0xFFF4F4F5);
-  static const Color muted = Color(0xFF71717A);
-  static const Color border = Color(0xFF27272A);
-  static const Color accent = Color(0xFF6366F1);
+  // shadcn/minimal palette for dark mode
+  static const Color darkBg = Color(0xFF18181B);
+  static const Color darkFg = Color(0xFFF4F4F5);
+  static const Color darkMuted = Color(0xFF71717A);
+  static const Color darkBorder = Color(0xFF27272A);
+  static const Color darkAccent = Color(0xFF6366F1);
+
+  // shadcn-inspired palette for light mode
+  static const Color lightBg = Color(0xFFF4F4F5);
+  static const Color lightFg = Color(0xFF18181B);
+  static const Color lightMuted = Color(0xFF6B7280);
+  static const Color lightBorder = Color(0xFFE5E7EB);
+  static const Color lightAccent = Color(0xFF4F46E5);
+
+  // Helper to get theme colors based on brightness
+  Map<String, Color> _getThemeColors(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return {
+      'bg': isDark ? darkBg : lightBg,
+      'fg': isDark ? darkFg : lightFg,
+      'muted': isDark ? darkMuted : lightMuted,
+      'border': isDark ? darkBorder : lightBorder,
+      'accent': isDark ? darkAccent : lightAccent,
+    };
+  }
 
   late final authUser;
   bool editable = false;
@@ -96,6 +115,7 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
 
   // Edit dialog for name/description
   Future<void> _showEditNameDescriptionDialog() async {
+    final colors = _getThemeColors(context);
     final TextEditingController nameController =
         TextEditingController(text: societyData?['name'] ?? '');
     final TextEditingController descController =
@@ -104,38 +124,38 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: bg,
-          title: const Text('Edit Society', style: TextStyle(color: fg)),
+          backgroundColor: colors['bg'],
+          title: Text('Edit Society', style: TextStyle(color: colors['fg'])),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: nameController,
-                style: const TextStyle(color: fg),
-                decoration: const InputDecoration(
+                style: TextStyle(color: colors['fg']),
+                decoration: InputDecoration(
                   labelText: 'Name',
-                  labelStyle: TextStyle(color: muted),
+                  labelStyle: TextStyle(color: colors['muted']),
                   enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: border),
+                    borderSide: BorderSide(color: colors['border']!),
                   ),
                   focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: accent),
+                    borderSide: BorderSide(color: colors['accent']!),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: descController,
-                style: const TextStyle(color: fg),
+                style: TextStyle(color: colors['fg']),
                 maxLines: 3,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Description',
-                  labelStyle: TextStyle(color: muted),
+                  labelStyle: TextStyle(color: colors['muted']),
                   enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: border),
+                    borderSide: BorderSide(color: colors['border']!),
                   ),
                   focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: accent),
+                    borderSide: BorderSide(color: colors['accent']!),
                   ),
                 ),
               ),
@@ -143,11 +163,11 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
           ),
           actions: [
             TextButton(
-              child: const Text('Cancel', style: TextStyle(color: muted)),
+              child: Text('Cancel', style: TextStyle(color: colors['muted'])),
               onPressed: () => Navigator.of(context).pop(false),
             ),
             TextButton(
-              child: const Text('Save', style: TextStyle(color: accent)),
+              child: Text('Save', style: TextStyle(color: colors['accent'])),
               onPressed: () async {
                 // Save changes
                 final newName = nameController.text.trim();
@@ -183,6 +203,7 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
 
   // Edit icon/banner
   Future<void> _showEditImageDialog({required String type}) async {
+    final colors = _getThemeColors(context);
     // type: 'icon' or 'banner'
     // For simplicity, just ask for a URL (in real app, use image picker)
     final TextEditingController urlController = TextEditingController(
@@ -192,30 +213,30 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: bg,
+          backgroundColor: colors['bg'],
           title: Text('Edit ${type == 'icon' ? 'Icon' : 'Banner'}',
-              style: const TextStyle(color: fg)),
+              style: TextStyle(color: colors['fg'])),
           content: TextField(
             controller: urlController,
-            style: const TextStyle(color: fg),
+            style: TextStyle(color: colors['fg']),
             decoration: InputDecoration(
               labelText: '${type == 'icon' ? 'Icon' : 'Banner'} URL',
-              labelStyle: const TextStyle(color: muted),
-              enabledBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(color: border),
+              labelStyle: TextStyle(color: colors['muted']),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: colors['border']!),
               ),
-              focusedBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(color: accent),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: colors['accent']!),
               ),
             ),
           ),
           actions: [
             TextButton(
-              child: const Text('Cancel', style: TextStyle(color: muted)),
+              child: Text('Cancel', style: TextStyle(color: colors['muted'])),
               onPressed: () => Navigator.of(context).pop(false),
             ),
             TextButton(
-              child: const Text('Save', style: TextStyle(color: accent)),
+              child: Text('Save', style: TextStyle(color: colors['accent'])),
               onPressed: () async {
                 final newUrl = urlController.text.trim();
                 if (newUrl.isNotEmpty) {
@@ -245,6 +266,7 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
   }
 
   Widget _buildPostListItem(Map<String, dynamic> post) {
+    final colors = _getThemeColors(context);
     final author = post['author'];
     final upvotes = post['upvotes'] ?? 0;
     final downvotes = post['downvotes'] ?? 0;
@@ -260,9 +282,9 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
       decoration: BoxDecoration(
-        color: bg,
+        color: colors['bg'],
         border: Border(
-          bottom: BorderSide(color: border, width: 1),
+          bottom: BorderSide(color: colors['border']!, width: 1),
         ),
       ),
       child: Padding(
@@ -284,19 +306,19 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                     width: 30,
                     height: 30,
                     decoration: BoxDecoration(
-                      color: border,
+                      color: colors['border'],
                       borderRadius: BorderRadius.circular(6),
                     ),
-                    child: const Icon(Icons.person, size: 16, color: muted),
+                    child: Icon(Icons.person, size: 16, color: colors['muted']),
                   ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     author?['name'] ?? 'Anonymous',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w500,
                       fontSize: 14,
-                      color: fg,
+                      color: colors['fg'],
                       letterSpacing: 0,
                     ),
                     maxLines: 1,
@@ -306,8 +328,8 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                 const SizedBox(width: 8),
                 Text(
                   timeAgo,
-                  style: const TextStyle(
-                    color: muted,
+                  style: TextStyle(
+                    color: colors['muted'],
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
                     letterSpacing: 0,
@@ -319,10 +341,10 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
             // Title
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w500,
                 fontSize: 16,
-                color: fg,
+                color: colors['fg'],
                 letterSpacing: 0,
               ),
               maxLines: 2,
@@ -332,9 +354,9 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
               const SizedBox(height: 4),
               Text(
                 content,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
-                  color: muted,
+                  color: colors['muted'],
                   height: 1.5,
                   fontWeight: FontWeight.w400,
                   letterSpacing: 0,
@@ -349,14 +371,14 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
               children: [
                 _MinimalIconButton(
                   icon: Icons.arrow_upward_rounded,
-                  color: accent,
+                  color: colors['accent']!,
                   onTap: () {},
                 ),
                 const SizedBox(width: 2),
                 Text(
                   '${upvotes - downvotes}',
-                  style: const TextStyle(
-                    color: fg,
+                  style: TextStyle(
+                    color: colors['fg'],
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
@@ -364,14 +386,14 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                 const SizedBox(width: 14),
                 _MinimalIconButton(
                   icon: Icons.mode_comment_outlined,
-                  color: muted,
+                  color: colors['muted']!,
                   onTap: () {},
                 ),
                 const SizedBox(width: 2),
                 Text(
                   '$commentsCount',
-                  style: const TextStyle(
-                    color: muted,
+                  style: TextStyle(
+                    color: colors['muted'],
                     fontSize: 13,
                     fontWeight: FontWeight.w400,
                   ),
@@ -379,7 +401,7 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                 const SizedBox(width: 14),
                 _MinimalIconButton(
                   icon: Icons.share_outlined,
-                  color: muted,
+                  color: colors['muted']!,
                   onTap: () {},
                 ),
               ],
@@ -401,6 +423,7 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
   }
 
   Widget _buildSocietyInfo() {
+    final colors = _getThemeColors(context);
     final bannerUrl = (societyData?['banner'] ?? '').toString();
     final iconUrl = (societyData?['icon'] ?? '').toString();
     final name = societyData?['name'] ?? '';
@@ -426,7 +449,7 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                 height: 200,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: border,
+                  color: colors['border'],
                   image: bannerUrl.isNotEmpty
                       ? DecorationImage(
                           image: NetworkImage(bannerUrl),
@@ -438,7 +461,7 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                   children: [
                     if (bannerUrl.isEmpty)
                       Center(
-                        child: Icon(Icons.image, color: muted, size: 60),
+                        child: Icon(Icons.image, color: colors['muted'], size: 60),
                       ),
                     if (showEdit)
                       Positioned(
@@ -446,7 +469,7 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                         top: 12,
                         child: _MinimalIconButton(
                           icon: Icons.edit,
-                          color: accent,
+                          color: colors['accent']!,
                           onTap: () => _showEditImageDialog(type: 'banner'),
                         ),
                       ),
@@ -465,13 +488,13 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                     iconUrl.isNotEmpty
                         ? CircleAvatar(
                             radius: 40,
-                            backgroundColor: border,
+                            backgroundColor: colors['border'],
                             backgroundImage: NetworkImage(iconUrl),
                           )
                         : CircleAvatar(
                             radius: 40,
-                            backgroundColor: border,
-                            child: Icon(Icons.groups, color: muted, size: 40),
+                            backgroundColor: colors['border'],
+                            child: Icon(Icons.groups, color: colors['muted'], size: 40),
                           ),
                     if (showEdit)
                       Positioned(
@@ -479,7 +502,7 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                         bottom: -2,
                         child: _MinimalIconButton(
                           icon: Icons.edit,
-                          color: accent,
+                          color: colors['accent']!,
                           onTap: () => _showEditImageDialog(type: 'icon'),
                         ),
                       ),
@@ -500,10 +523,10 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                   Expanded(
                     child: Text(
                       name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: fg,
+                        color: colors['fg'],
                         letterSpacing: 0,
                       ),
                       maxLines: 2,
@@ -513,7 +536,7 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                   if (showEdit)
                     _MinimalIconButton(
                       icon: Icons.edit,
-                      color: accent,
+                      color: colors['accent']!,
                       onTap: _showEditNameDescriptionDialog,
                     ),
                 ],
@@ -528,7 +551,7 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                         description,
                         style: TextStyle(
                           fontSize: 16,
-                          color: muted,
+                          color: colors['muted'],
                           height: 1.5,
                           fontWeight: FontWeight.w400,
                           letterSpacing: 0,
@@ -538,7 +561,7 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                     if (showEdit)
                       _MinimalIconButton(
                         icon: Icons.edit,
-                        color: accent,
+                        color: colors['accent']!,
                         onTap: _showEditNameDescriptionDialog,
                       ),
                   ],
@@ -546,13 +569,13 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
               if (description.isNotEmpty) const SizedBox(height: 16),
               Row(
                 children: [
-                  const Icon(Icons.group, size: 20, color: muted),
+                  Icon(Icons.group, size: 20, color: colors['muted']),
                   const SizedBox(width: 8),
                   Text(
                     '$members members',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
-                      color: muted,
+                      color: colors['muted'],
                       fontWeight: FontWeight.w400,
                       letterSpacing: 0,
                     ),
@@ -560,12 +583,12 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                 ],
               ),
               const SizedBox(height: 24),
-              const Text(
+              Text(
                 'Moderators',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: fg,
+                  color: colors['fg'],
                   letterSpacing: 0,
                 ),
               ),
@@ -589,23 +612,23 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                           image.toString().isNotEmpty
                               ? CircleAvatar(
                                   radius: 24,
-                                  backgroundColor: border,
+                                  backgroundColor: colors['border'],
                                   backgroundImage: NetworkImage(image),
                                 )
                               : CircleAvatar(
                                   radius: 24,
-                                  backgroundColor: border,
+                                  backgroundColor: colors['border'],
                                   child: Icon(Icons.person,
-                                      color: muted, size: 20),
+                                      color: colors['muted'], size: 20),
                                 ),
                           const SizedBox(height: 4),
                           SizedBox(
                             width: 60,
                             child: Text(
                               modName,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
-                                color: muted,
+                                color: colors['muted'],
                                 fontWeight: FontWeight.w400,
                                 letterSpacing: 0,
                               ),
@@ -620,11 +643,11 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                   ),
                 ),
               if (moderators.isEmpty)
-                const Text(
+                Text(
                   "No moderators listed.",
                   style: TextStyle(
                     fontSize: 13,
-                    color: muted,
+                    color: colors['muted'],
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -637,12 +660,13 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = _getThemeColors(context);
     if (isLoading) {
-      return const Scaffold(
-        backgroundColor: bg,
+      return Scaffold(
+        backgroundColor: colors['bg'],
         body: Center(
           child: CircularProgressIndicator(
-            color: accent,
+            color: colors['accent'],
             strokeWidth: 2,
           ),
         ),
@@ -650,12 +674,12 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
     }
     if (error != null) {
       return Scaffold(
-        backgroundColor: bg,
+        backgroundColor: colors['bg'],
         body: Center(
           child: Text(
             error!,
-            style: const TextStyle(
-              color: fg,
+            style: TextStyle(
+              color: colors['fg'],
               fontSize: 15,
               fontWeight: FontWeight.w500,
               letterSpacing: 0,
@@ -666,12 +690,12 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
     }
     if (societyData == null) {
       return Scaffold(
-        backgroundColor: bg,
-        body: const Center(
+        backgroundColor: colors['bg'],
+        body: Center(
           child: Text(
             "No society data found.",
             style: TextStyle(
-              color: fg,
+              color: colors['fg'],
               fontSize: 15,
               fontWeight: FontWeight.w500,
               letterSpacing: 0,
@@ -682,16 +706,16 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
     }
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: colors['bg'],
       appBar: AppBar(
-        backgroundColor: bg,
+        backgroundColor: colors['bg'],
         elevation: 0,
-        iconTheme: const IconThemeData(color: fg),
+        iconTheme: IconThemeData(color: colors['fg']),
         titleSpacing: 0,
         title: Text(
           societyData?['name'] ?? '',
-          style: const TextStyle(
-            color: fg,
+          style: TextStyle(
+            color: colors['fg'],
             fontWeight: FontWeight.w500,
             fontSize: 18,
             overflow: TextOverflow.ellipsis,
@@ -701,8 +725,8 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
         actions: [
           if (isModerator)
             PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert, color: fg),
-              color: bg,
+              icon: Icon(Icons.more_vert, color: colors['fg']),
+              color: colors['bg'],
               onSelected: (value) {
                 if (value == 'edit') {
                   setState(() {
@@ -717,13 +741,13 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                     children: [
                       Icon(
                         editable ? Icons.edit_off : Icons.edit,
-                        color: accent,
+                        color: colors['accent'],
                         size: 18,
                       ),
                       const SizedBox(width: 8),
                       Text(
                         editable ? 'Disable Edit' : 'Enable Edit',
-                        style: const TextStyle(color: fg),
+                        style: TextStyle(color: colors['fg']),
                       ),
                     ],
                   ),
@@ -733,14 +757,14 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
           else
             _MinimalIconButton(
               icon: Icons.more_vert,
-              color: fg,
+              color: colors['fg']!,
               onTap: () {},
             ),
         ],
       ),
       body: RefreshIndicator(
-        color: accent,
-        backgroundColor: bg,
+        color: colors['accent'],
+        backgroundColor: colors['bg'],
         onRefresh: () => fetchSocietyDetails(page: 1, append: false),
         child: CustomScrollView(
           slivers: [
@@ -773,19 +797,19 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
               child: Container(
                 margin: const EdgeInsets.fromLTRB(16, 18, 16, 0),
                 padding: const EdgeInsets.only(bottom: 10),
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   border: Border(
-                    bottom: BorderSide(color: border, width: 1),
+                    bottom: BorderSide(color: colors['border']!, width: 1),
                   ),
                 ),
                 child: Row(
                   children: [
-                    const Text(
+                    Text(
                       'Posts',
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
-                        color: fg,
+                        color: colors['fg'],
                         letterSpacing: 0,
                       ),
                     ),
@@ -793,6 +817,7 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                     _MinimalButton(
                       icon: Icons.add,
                       label: 'Create Post',
+                      colors: colors,
                       onTap: () {
                         // TODO: Implement create post
                       },
@@ -810,8 +835,8 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                       child: Center(
                         child: Text(
                           "No posts yet. Be the first one to post!",
-                          style: const TextStyle(
-                            color: muted,
+                          style: TextStyle(
+                            color: colors['muted'],
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
                             letterSpacing: 0,
@@ -828,11 +853,11 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                           return _buildPostListItem(post);
                         } else {
                           // Loading indicator for pagination
-                          return const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 18.0),
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 18.0),
                             child: Center(
                               child: CircularProgressIndicator(
-                                color: accent,
+                                color: colors['accent'],
                                 strokeWidth: 2,
                               ),
                             ),
@@ -898,10 +923,12 @@ class _MinimalIconButton extends StatelessWidget {
 class _MinimalButton extends StatelessWidget {
   final IconData icon;
   final String label;
+  final Map<String, Color> colors;
   final VoidCallback onTap;
   const _MinimalButton({
     required this.icon,
     required this.label,
+    required this.colors,
     required this.onTap,
   });
 
@@ -917,18 +944,18 @@ class _MinimalButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 14),
           decoration: BoxDecoration(
             border: Border.all(
-                color: _SocietyPageState.accent.withOpacity(0.18), width: 1),
+                color: colors['accent']!.withOpacity(0.18), width: 1),
             borderRadius: BorderRadius.circular(8),
             color: Colors.transparent,
           ),
           child: Row(
             children: [
-              Icon(icon, size: 17, color: _SocietyPageState.accent),
+              Icon(icon, size: 17, color: colors['accent']),
               const SizedBox(width: 7),
               Text(
                 label,
                 style: TextStyle(
-                  color: _SocietyPageState.accent,
+                  color: colors['accent'],
                   fontWeight: FontWeight.w500,
                   fontSize: 14,
                   letterSpacing: 0,

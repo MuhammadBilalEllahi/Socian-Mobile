@@ -1,4 +1,5 @@
 import 'package:beyondtheclass/pages/explore/SocietyProvider.dart';
+import 'package:beyondtheclass/pages/profile/settings/CreateSocietyPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
@@ -95,6 +96,23 @@ class SettingsPage extends ConsumerWidget {
             ],
           ),
 
+ _buildSection(
+            'Create',
+            [
+              _buildListTile(
+                'Society',
+                Icons.people_alt_outlined,
+                () {
+                  // Navigate to personal info edit
+                  Navigator.push(
+                      context, 
+    MaterialPageRoute(builder: (context) => const CreateSocietyPage()),
+                      );
+                },
+                isDarkMode,
+              ),
+            ],
+          ),
           // App Settings
           _buildSection(
             'Preferences',
@@ -168,6 +186,7 @@ class SettingsPage extends ConsumerWidget {
                 isDarkMode,
                 isDestructive: true,
               ),
+              
             ],
           ),
         ],

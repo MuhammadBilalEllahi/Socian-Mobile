@@ -51,51 +51,54 @@ class HorizontalSocietiesList extends StatelessWidget {
         ),
       );
     }
-    return SizedBox(
-      height: 160,
-      child: NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification scrollInfo) {
-          if (hasMore &&
-              !isLoadingMore &&
-              scrollInfo.metrics.pixels >=
-                  scrollInfo.metrics.maxScrollExtent - 100) {
-            onLoadMore?.call();
-          }
-          return false;
-        },
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          itemCount: filtered.length + (hasMore ? 1 : 0),
-          itemBuilder: (BuildContext context, int index) {
-            if (index < filtered.length) {
-              final society = filtered[index];
-              return SocietyCard(
-                society: society,
-                fields: fields,
-                fg: fg,
-                cardBg: cardBg,
-                border: border,
-                muted: muted,
-                chipBg: chipBg,
-                chipFg: chipFg,
-              );
-            } else {
-              // Loading indicator at the end
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: SizedBox(
-                    width: 32,
-                    height: 32,
-                    child: isLoadingMore
-                        ? const CircularProgressIndicator(strokeWidth: 2)
-                        : const SizedBox.shrink(),
-                  ),
-                ),
-              );
+    return Container(
+      child: SizedBox(
+        
+        height: 160,
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification scrollInfo) {
+            if (hasMore &&
+                !isLoadingMore &&
+                scrollInfo.metrics.pixels >=
+                    scrollInfo.metrics.maxScrollExtent - 100) {
+              onLoadMore?.call();
             }
+            return false;
           },
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            itemCount: filtered.length + (hasMore ? 1 : 0),
+            itemBuilder: (BuildContext context, int index) {
+              if (index < filtered.length) {
+                final society = filtered[index];
+                return SocietyCard(
+                  society: society,
+                  fields: fields,
+                  fg: fg,
+                  cardBg: cardBg,
+                  border: border,
+                  muted: muted,
+                  chipBg: chipBg,
+                  chipFg: chipFg,
+                );
+              } else {
+                // Loading indicator at the end
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: isLoadingMore
+                          ? const CircularProgressIndicator(strokeWidth: 2)
+                          : const SizedBox.shrink(),
+                    ),
+                  ),
+                );
+              }
+            },
+          ),
         ),
       ),
     );
