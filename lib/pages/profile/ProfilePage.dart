@@ -2,7 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:beyondtheclass/pages/home/widgets/components/post/post.dart';
-// import 'package:beyondtheclass/pages/home/widgets/campus/widgets/PostCard.dart';
+import 'package:beyondtheclass/pages/profile/widgets/ConnectionsListPage.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,9 +24,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
   late TabController _tabController;
   final _apiClient = ApiClient();
 
-  // Split data into immediate (basic profile) and deferred (detailed) data
-  Map<String, dynamic>? _basicProfile; // Loaded immediately from auth provider
-  Map<String, dynamic>? _detailedProfile; // Loaded asynchronously
+  Map<String, dynamic>? _basicProfile;
+  Map<String, dynamic>? _detailedProfile;
   List<dynamic> _posts = [];
   List<dynamic> _societies = [];
   List<dynamic> _connections = [];
@@ -38,7 +37,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
   @override
   void initState() {
     super.initState();
-    // Load basic profile immediately from auth provider
     _loadBasicProfile();
     final auth = ref.read(authProvider);
     final isOwnProfile =
@@ -60,7 +58,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
       return;
     }
 
-    // For own profile, we can show basic info immediately from auth provider
     if (widget.userId == null || widget.userId == auth.user?['_id']) {
       setState(() {
         _basicProfile = {
@@ -94,13 +91,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
         return;
       }
 
-      // Fetch detailed profile data in parallel
       final results = await Future.wait([
         _apiClient.get('/api/user/profile', queryParameters: {'id': userId}),
         _apiClient.get('/api/user/subscribedSocieties',
             queryParameters: {'id': userId}),
-        _apiClient
-            .get('/api/user/connections', queryParameters: {'id': userId}),
+        _apiClient.get('/api/user/connections', queryParameters: {'id': userId}),
       ]);
 
       final profileResponse = results[0];
@@ -124,7 +119,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
         _societies = societiesResponse['joinedSocieties'] ?? [];
         _connections = connectionsResponse['connections'] ?? [];
 
-        // If we didn't have basic profile (viewing someone else's profile), set it now
         if (_basicProfile == null) {
           _basicProfile = {
             '_id': _detailedProfile?['_id'],
@@ -151,14 +145,55 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
 
   Future<void> _sendConnectRequest(String toUserId) async {
     try {
-      await _apiClient.post('/api/user/add-friend', {'toFriendUser': toUserId});
+      final response =
+          await _apiClient.post('/api/user/add-friend', {'toFriendUser': toUserId});
+      debugPrint('sendConnectRequest: Response=$response');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Connection request sent')),
+        SnackBar(content: Text(response['message'])),
       );
+      await _fetchDetailedProfileData();
     } catch (e) {
-      debugPrint('Error sending connection request: $e');
+      debugPrint('sendConnectRequest: Error=$e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to send connection request')),
+      );
+    }
+  }
+
+  Future<void> _endConnection(String toUserId) async {
+    try {
+      final response = await _apiClient
+          .post('/api/user/unfriend-request', {'toUn_FriendUser': toUserId});
+      debugPrint('endConnection: Response=$response');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(response['message'])),
+      );
+      await _fetchDetailedProfileData();
+    } catch (e) {
+      debugPrint('endConnection: Error=$e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to end connection')),
+      );
+    }
+  }
+
+  Future<void> _handleRequest(String toUserId, String action) async {
+    try {
+      final endpoint = action == 'accept'
+          ? '/api/user/accept-friend-request'
+          : '/api/user/reject-friend-request';
+      await _apiClient.post(endpoint, {
+        action == 'accept' ? 'toAcceptFriendUser' : 'toRejectUser': toUserId,
+      });
+      debugPrint('$action: Response=Success for userId=$toUserId');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Request ${action}ed successfully')),
+      );
+      await _fetchDetailedProfileData();
+    } catch (e) {
+      debugPrint('$action: Error=$e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to $action request')),
       );
     }
   }
@@ -314,14 +349,73 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
   }
 
   Widget _buildConnectButton(String userId, Color primary, Color foreground) {
-    return ElevatedButton(
-      onPressed: () => _sendConnectRequest(userId),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: primary,
-        foregroundColor: foreground,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    final friendStatus = _detailedProfile?['friendStatus'] ?? 'connect';
+    bool isDisabled = false;
+    String buttonText = 'Connect';
+    VoidCallback? onPressed = () => _sendConnectRequest(userId);
+
+    switch (friendStatus) {
+      case 'friends':
+        buttonText = 'End Connection';
+        onPressed = () => _endConnection(userId);
+        break;
+      case 'canCancel':
+        buttonText = 'Already sent';
+        isDisabled = true;
+        onPressed = null;
+        break;
+      case 'accept/reject':
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            ElevatedButton(
+              onPressed: () => _handleRequest(userId, 'accept'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Accept'),
+            ),
+            const SizedBox(width: 8),
+            ElevatedButton(
+              onPressed: () => _handleRequest(userId, 'reject'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Reject'),
+            ),
+          ],
+        );
+      case 'connect':
+      default:
+        buttonText = 'Connect';
+        onPressed = () => _sendConnectRequest(userId);
+        break;
+    }
+
+    return Opacity(
+      opacity: isDisabled ? 0.5 : 1.0,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primary,
+          foregroundColor: foreground,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        child: Text(buttonText),
       ),
-      child: const Text('Connect'),
     );
   }
 
@@ -339,9 +433,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
       }
 
       final response =
-          _apiClient.putFormData(ApiConstants.uploadProfilePic, data);
-      log("Profile pic response $response");
-    } catch (e) {}
+          await _apiClient.putFormData(ApiConstants.uploadProfilePic, data);
+      debugPrint("Profile pic response $response");
+    } catch (e) {
+      debugPrint("uploadProfilePicture: Error=$e");
+    }
   }
 
   @override
@@ -349,7 +445,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
     final auth = ref.watch(authProvider);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    // Custom theme colors
     final background = isDarkMode ? const Color(0xFF09090B) : Colors.white;
     final foreground = isDarkMode ? Colors.white : const Color(0xFF09090B);
     final muted =
@@ -374,7 +469,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
       );
     }
 
-    // If we don't have even basic profile, show loading
     if (_basicProfile == null) {
       return Scaffold(
         backgroundColor: background,
@@ -384,7 +478,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
 
     final isOwnProfile =
         widget.userId == null || widget.userId == auth.user?['_id'];
-    final user = ref.watch(authProvider);
 
     return Scaffold(
       backgroundColor: background,
@@ -432,24 +525,25 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                           ),
                         ),
                         Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: primary,
-                                width: 2,
-                              ),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: primary,
+                              width: 2,
                             ),
-                            child: CircleAvatar(
-                              radius: 30,
-                              backgroundColor: accent,
-                              backgroundImage:
-                                  _basicProfile?['profile']?['picture'] != null
-                                      ? NetworkImage(
-                                          _basicProfile!['profile']['picture'])
-                                      : const AssetImage(
-                                              "assets/images/profilepic2.jpg")
-                                          as ImageProvider,
-                            )),
+                          ),
+                          child: CircleAvatar(
+                            radius: 30,
+                            backgroundColor: accent,
+                            backgroundImage:
+                                _basicProfile?['profile']?['picture'] != null
+                                    ? NetworkImage(
+                                        _basicProfile!['profile']['picture'])
+                                    : const AssetImage(
+                                            "assets/images/profilepic2.jpg")
+                                        as ImageProvider,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -471,8 +565,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                           '${auth.user?['university']['campusId']['name']}',
                           style: TextStyle(color: mutedForeground),
                         ),
-                        // SizedBox(width: 10,),
-
                         Text(
                           ' - ${auth.user?['university']['departmentId']['name']}',
                           style: TextStyle(color: mutedForeground),
@@ -494,21 +586,37 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                     const SizedBox(height: 16),
                     _isLoadingDetails
                         ? const CircularProgressIndicator()
-                        : RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: '${_connections.length} ',
-                                  style: TextStyle(
-                                    color: foreground,
-                                    fontWeight: FontWeight.w600,
+                        : GestureDetector(
+                            onTap: isOwnProfile
+                                ? () => Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => const ConnectionsListPage()),
+  )
+                                : null,
+                            child: RichText(
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: '${_connections.length} ',
+                                    style: TextStyle(
+                                      color: foreground,
+                                      fontWeight: FontWeight.w600,
+                                      // decoration: isOwnProfile
+                                      //     ? TextDecoration.underline
+                                      //     : null,
+                                    ),
                                   ),
-                                ),
-                                TextSpan(
-                                  text: 'Connections',
-                                  style: TextStyle(color: mutedForeground),
-                                ),
-                              ],
+                                  TextSpan(
+                                    text: 'Connections',
+                                    style: TextStyle(
+                                      color: mutedForeground,
+                                      // decoration: isOwnProfile
+                                      //     ? TextDecoration.underline
+                                      //     : null,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                     if (!isOwnProfile && !_isLoadingDetails) ...[

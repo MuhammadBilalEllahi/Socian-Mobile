@@ -5,6 +5,7 @@ import 'package:beyondtheclass/pages/explore/MapsPage.dart';
 
 import 'package:beyondtheclass/pages/gps/GpsInitialPage.dart';
 import 'package:beyondtheclass/pages/home/widgets/campus/CampusPosts.dart';
+import 'package:beyondtheclass/pages/message/ConnectionsPage.dart';
 import 'package:beyondtheclass/pages/message/Messages.dart';
 import 'package:beyondtheclass/pages/profile/ProfilePage.dart';
 import 'package:beyondtheclass/pages/providers/page_provider.dart';
@@ -33,7 +34,8 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     _pages = {
       BottomNavBarRoute.home: const AllView(),
-      BottomNavBarRoute.message: const Messages(),
+      // BottomNavBarRoute.message: const Messages(),
+      BottomNavBarRoute.message: ConnectionsPage(),
       BottomNavBarRoute.explore: const ExploreSocieties(),
       BottomNavBarRoute.gps: const GpsInitialPage(),
       BottomNavBarRoute.profile: const ProfilePage(),

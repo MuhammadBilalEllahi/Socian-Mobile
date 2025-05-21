@@ -1,303 +1,3 @@
-// import 'package:beyondtheclass/features/auth/presentation/OtpVerificationScreen.dart';
-// import 'package:flutter/material.dart';
-// import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:beyondtheclass/core/utils/constants.dart';
-// import 'package:beyondtheclass/features/auth/presentation/widgets/login_form.dart';
-// import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
-// import 'package:beyondtheclass/shared/services/api_client.dart';
-
-// class AuthScreen extends ConsumerWidget {
-//   const AuthScreen({super.key});
-
-// Future<void> _sendForgotPasswordRequest(String email, BuildContext context) async {
-//   try {
-//     final apiClient = ApiClient();
-//     final endpoint = '/api/auth/forgot-password';
-//     final fullUrl = '${ApiConstants.baseUrl}$endpoint';
-    
-//     debugPrint('Making forgot password request to: $fullUrl');
-//     debugPrint('Request payload: {"email": "$email"}');
-
-//     final response = await apiClient.put(
-//       endpoint,
-//       {'email': email},
-//       headers: {'Content-Type': 'application/json'},
-//     );
-
-//     debugPrint('Forgot password response: $response');
-
-//     if (context.mounted) {
-//       // Check if the response contains a redirectUrl (from your backend)
-//       if (response.containsKey('redirectUrl')) {
-//         // Extract userId from redirectUrl or use email as identifier
-//         final uri = Uri.parse(response['redirectUrl']);
-//         final userId = uri.pathSegments.lastWhere(
-//           (segment) => segment.isNotEmpty,
-//           orElse: () => '',
-//         );
-        
-//         Navigator.push(
-//           context,
-//           MaterialPageRoute(
-//             builder: (context) => OtpVerificationScreen(
-//               email: email,
-//               userId: userId.isNotEmpty ? userId : email, // Fallback to email if no userId
-//             ),
-//           ),
-//         );
-//       } else {
-//         // Fallback if no redirectUrl in response
-//         Navigator.push(
-//           context,
-//           MaterialPageRoute(
-//             builder: (context) => OtpVerificationScreen(
-//               email: email,
-//               userId: email, // Use email as identifier
-//             ),
-//           ),
-//         );
-//       }
-//     }
-//   } on ApiException catch (e) {
-//     debugPrint('Forgot password API error: ${e.message}');
-//     if (context.mounted) {
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         SnackBar(content: Text('Error: ${e.message}')),
-//       );
-//     }
-//   } catch (e) {
-//     debugPrint('Unexpected error in forgot password: $e');
-//     if (context.mounted) {
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         SnackBar(content: Text('Unexpected error occurred')),
-//       );
-//     }
-//   }
-// }
-
-
-
-//   void _showForgotPasswordDialog(BuildContext context) {
-//     final emailController = TextEditingController();
-//     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-//     showDialog(
-//       context: context,
-//       builder: (context) => AlertDialog(
-//         title: Text(
-//           "Forgot Password",
-//           style: TextStyle(
-//             color: isDarkMode ? Colors.white : Colors.black,
-//           ),
-//         ),
-//         backgroundColor: isDarkMode ? Colors.grey[900] : Colors.white,
-//         content: Column(
-//           mainAxisSize: MainAxisSize.min,
-//           children: [
-//             Text(
-//               "Enter your email to receive a password reset link",
-//               style: TextStyle(
-//                 color: isDarkMode ? Colors.white70 : Colors.black54,
-//               ),
-//             ),
-//             const SizedBox(height: 20),
-//             TextField(
-//               controller: emailController,
-//               decoration: InputDecoration(
-//                 labelText: "Email",
-//                 labelStyle: TextStyle(
-//                   color: isDarkMode ? Colors.white70 : Colors.black54,
-//                 ),
-//                 border: const OutlineInputBorder(),
-//                 enabledBorder: OutlineInputBorder(
-//                   borderSide: BorderSide(
-//                     color: isDarkMode ? Colors.grey : Colors.black54,
-//                   ),
-//                 ),
-//               ),
-//               style: TextStyle(
-//                 color: isDarkMode ? Colors.white : Colors.black,
-//               ),
-//               keyboardType: TextInputType.emailAddress,
-//             ),
-//           ],
-//         ),
-//         actions: [
-//           TextButton(
-//             onPressed: () => Navigator.pop(context),
-//             child: Text(
-//               "Cancel",
-//               style: TextStyle(
-//                 color: isDarkMode ? Colors.blue[200] : Colors.blue,
-//               ),
-//             ),
-//           ),
-//           ElevatedButton(
-//             style: ElevatedButton.styleFrom(
-//               backgroundColor: isDarkMode ? Colors.blue[800] : Colors.blue,
-//             ),
-//             onPressed: () async {
-//               final email = emailController.text.trim();
-//               if (email.isEmpty || !email.contains('@')) {
-//                 if (context.mounted) {
-//                   ScaffoldMessenger.of(context).showSnackBar(
-//                     const SnackBar(content: Text('Please enter a valid email address')),
-//                   );
-//                 }
-//                 return;
-//               }
-
-//               Navigator.pop(context);
-//               if (context.mounted) {
-//                 ScaffoldMessenger.of(context).showSnackBar(
-//                   const SnackBar(
-//                     content: Text('Sending password reset email...'),
-//                     duration: Duration(seconds: 2),
-//                   ),
-//                 );
-//               }
-
-//               await _sendForgotPasswordRequest(email, context);
-//             },
-//             child: const Text("Send"),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-
-//   @override
-//   Widget build(BuildContext context, WidgetRef ref) {
-//     final authState = ref.watch(authProvider);
-//     final authController = ref.watch(authProvider.notifier);
-//     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-//     if (authState.user != null) {
-//       Future.microtask(() {
-//         Navigator.pushNamedAndRemoveUntil(
-//           context,
-//           AppRoutes.home,
-//           (route) => false,
-//         );
-//       });
-//     }
-
-//     return Scaffold(
-//       body: Container(
-//         width: double.infinity,
-//         height: double.infinity,
-//         decoration: BoxDecoration(
-//           gradient: LinearGradient(
-//             colors: isDarkMode
-//                 ? [
-//                     Color.fromARGB(255, 0, 0, 0),
-//                     Color.fromARGB(255, 48, 48, 48)
-//                   ]
-//                 : [
-//                     Color.fromARGB(255, 240, 240, 240),
-//                     Color.fromARGB(255, 255, 255, 255)
-//                   ],
-//             begin: Alignment.topCenter,
-//             end: Alignment.bottomCenter,
-//           ),
-//         ),
-//         child: LayoutBuilder(
-//           builder: (context, constraints) {
-//             return SingleChildScrollView(
-//               child: ConstrainedBox(
-//                 constraints: BoxConstraints(
-//                   minHeight: constraints.maxHeight,
-//                 ),
-//                 child: IntrinsicHeight(
-//                   child: Padding(
-//                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
-//                     child: Column(
-//                       crossAxisAlignment: CrossAxisAlignment.center,
-//                       children: [
-//                         const SizedBox(height: 100),
-//                         Icon(
-//                           Icons.school,
-//                           size: 80,
-//                           color: isDarkMode ? Colors.white : Colors.black87,
-//                         ),
-//                         const SizedBox(height: 20),
-//                         Text(
-//                           AppConstants.appName, 
-//                           style: TextStyle(
-//                             fontSize: 32,
-//                             fontWeight: FontWeight.bold,
-//                             color: isDarkMode ? Colors.white : Colors.black87,
-//                           ),
-//                         ),
-//                         const SizedBox(height: 10),
-//                         Text(
-//                           "Login to access your account",
-//                           style: TextStyle(
-//                             fontSize: 18,
-//                             color: isDarkMode ? Colors.white : Colors.black87,
-//                           ),
-//                         ),
-//                         const SizedBox(height: 40),
-//                         const LoginForm(),
-//                         const SizedBox(height: 10),
-//                         TextButton(
-//                           onPressed: () => _showForgotPasswordDialog(context),
-//                           child: Text(
-//                             "Forgot Password?",
-//                             style: TextStyle(
-//                               color: isDarkMode ? Colors.blue[200] : Colors.blue,
-//                               fontSize: 14,
-//                             ),
-//                           ),
-//                         ),
-//                         const SizedBox(height: 10),
-//                         Row(
-//                           mainAxisAlignment: MainAxisAlignment.center,
-//                           children: [
-//                             Text(
-//                               "Don't have an account?",
-//                               style: TextStyle(
-//                                 color: isDarkMode ? Colors.white : Colors.black87,
-//                                 fontSize: 14,
-//                               ),
-//                             ),
-//                             TextButton(
-//                               onPressed: () {
-//                                 Navigator.pushReplacementNamed(
-//                                     context, AppRoutes.roleSelection);
-//                               },
-//                               child: Text(
-//                                 "Sign Up",
-//                                 style: TextStyle(
-//                                   color: isDarkMode
-//                                       ? Colors.white
-//                                       : Colors.black87,
-//                                   fontWeight: FontWeight.bold,
-//                                   fontSize: 14,
-//                                 ),
-//                               ),
-//                             ),
-//                           ],
-//                         ),
-//                         const Spacer(),
-//                       ],
-//                     ),
-//                   ),
-//                 ),
-//               ),
-//             );
-//           },
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-
-
-
-
-
 import 'dart:async';
 import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/presentation/widgets/login_form.dart';
@@ -351,6 +51,8 @@ class AuthScreen extends ConsumerWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
+
+          
         ),
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -746,3 +448,26 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
     );
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
