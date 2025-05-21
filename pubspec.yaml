@@ -73,6 +73,7 @@ dependencies:
   timeago: 3.2.2
   cached_video_player_plus: ^3.0.3
   file_picker: ^10.1.7
+  flutter_launcher_icons: ^0.14.3
 
 
 dev_dependencies:
@@ -90,7 +91,11 @@ dev_dependencies:
   flutter_lints: ^4.0.0
 
 
-
+flutter_launcher_icons:
+  android: true
+  ios: true
+  # image_path: "assets/app-icon.jpg"
+  image_path: "assets/original.png"
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

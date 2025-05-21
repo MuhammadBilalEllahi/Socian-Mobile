@@ -55,8 +55,7 @@ class ApiConstants {
 
   static String get baseUrl {
     if (kReleaseMode) {
-      return urlMap[
-          _currentUrlIndex]!; // Always use production URL in release mode
+      return urlMap[0]!; // Always use production URL in release mode
     }
     return urlMap[_currentUrlIndex] ?? urlMap[0]!;
   }

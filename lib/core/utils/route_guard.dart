@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:beyondtheclass/pages/drawer/student/pages/cafeInformation/CafesHome.dart';
 import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/DepartmentPage.dart';
@@ -11,6 +12,7 @@ import 'package:beyondtheclass/pages/drawer/teacher/review/TeacherSelfReview.dar
 import 'package:beyondtheclass/pages/gps/ScheduledGatherings.dart';
 import 'package:beyondtheclass/pages/home/widgets/intracampus/IntraCampus.dart';
 import 'package:beyondtheclass/pages/profile/settings/personalInfo/PersonalInfoEditPage.dart';
+import 'package:beyondtheclass/shared/services/WebSocketService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
@@ -40,6 +42,10 @@ class RouteGuard {
     final auth = ref.watch(authProvider);
     debugPrint("The role is ${auth.user}");
     final userRole = auth.user?['role'] ?? '';
+    if(userRole != null && auth.user != null) {
+      
+      WebSocketService().joinNotification(auth.user!['_id']);
+    }
 
     // List of routes that don't require authentication
     final publicRoutes = [

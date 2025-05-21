@@ -1,7 +1,9 @@
 import 'package:beyondtheclass/components/ShiningLinearProgressBar.dart';
 import 'package:beyondtheclass/components/loader.dart';
+import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:beyondtheclass/pages/drawer/student/StudentDrawer.dart';
 import 'package:beyondtheclass/pages/home/widgets/universities/AllUniversityPosts.dart';
+import 'package:beyondtheclass/shared/services/WebSocketService.dart';
 // import 'package:beyondtheclass/services/user_info_provider.dart';
 import 'package:beyondtheclass/shared/services/infoProvider.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +35,8 @@ class _CampusPostsState extends ConsumerState<CampusPosts>
     });
   }
 
+  
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -45,12 +49,17 @@ class _CampusPostsState extends ConsumerState<CampusPosts>
     final postState = ref.watch(postProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+  final authUser = ref.read(authProvider).user;
+      WebSocketService().joinNotification(authUser!['_id']);
+    
+
     return NotificationListener<ScrollNotification>(
   onNotification: (ScrollNotification notification) {
     if (notification is OverscrollNotification &&
         notification.overscroll < 0) {
       // User is pulling down
       ref.read(postProvider.notifier).fetchPosts(refreshIt: true);
+      
     }
     return false;
   },
