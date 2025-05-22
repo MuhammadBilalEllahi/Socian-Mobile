@@ -74,6 +74,7 @@ dependencies:
   cached_video_player_plus: ^3.0.3
   file_picker: ^10.1.7
   flutter_launcher_icons: ^0.14.3
+  image_cropper: ^9.1.0
 
 
 dev_dependencies:

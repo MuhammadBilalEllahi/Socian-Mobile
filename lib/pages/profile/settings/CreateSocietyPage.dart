@@ -1,10 +1,17 @@
 import 'dart:convert';
+import 'dart:developer';
+import 'dart:io';
 
+import 'package:beyondtheclass/core/utils/constants.dart';
 import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
 import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
+
+import 'package:image_cropper/image_cropper.dart';
 class CreateSocietyPage extends ConsumerStatefulWidget {
   const CreateSocietyPage({super.key});
 
@@ -16,12 +23,15 @@ class _CreateSocietyPageState extends ConsumerState<CreateSocietyPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _iconController = TextEditingController();
+  // final _iconController = TextEditingController();
+  File? _selectedIcon;
+  CroppedFile? _selectedBanner;
   final _bannerController = TextEditingController();
 
+List<String> _rolesList=[];
   String? _selectedSocietyType;
   String? _selectedCampus;
-  List<String> _selectedAllows = [];
+  String _selectedAllows = '';
   bool _isLoading = false;
   String? _error;
 
@@ -59,13 +69,21 @@ class _CreateSocietyPageState extends ConsumerState<CreateSocietyPage> {
     super.initState();
     _fetchSocietyTypes();
     _fetchCampuses();
+    // _rolesList = [
+      // 'alumni', 'student', 'teacher', 'ext_org', 'all'
+      // 'President',
+      // 'Vice President',
+      // 'Secretary',
+      // 'Treasurer',
+      // 'Member',
+    // ];
+    _rolesList.add(ref.read(authProvider).user?['role'] ?? 'unauthorized'); // Add the user's role
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
-    _iconController.dispose();
     _bannerController.dispose();
     super.dispose();
   }
@@ -75,6 +93,7 @@ class _CreateSocietyPageState extends ConsumerState<CreateSocietyPage> {
     try {
       final apiClient = ApiClient();
       final response = await apiClient.get('/api/society/types');
+      log("_________________________________________________________Society Types: $response");
       setState(() {
         _societyTypes = List<Map<String, dynamic>>.from(response);
       });
@@ -122,26 +141,41 @@ Future<void> _submitForm() async {
     // ✅ Safely flatten _selectedAllows into List<String>
     final List<String> flatAllows = [];
 
-    if (_selectedAllows is List) {
-      for (var item in _selectedAllows) {
-        if (item is String) {
-          flatAllows.add(item);
-        // ignore: unnecessary_type_check
-        } 
+// NOTE: ROUTe IN BACKEND IS NOT UPDATED YET, WHEN UPDATED USER "apiClient.postFORMDATA"
+        // Prepare multipart files
+    // final iconFile = await MultipartFile.fromFile(
+    //   _selectedIcon!.path,
+    //   filename: 'icon.jpg',
+    // );
+
+    // MultipartFile? bannerFile;
+    // if (_selectedBanner != null) {
+    //   bannerFile = await MultipartFile.fromFile(
+    //     _selectedBanner!.path,
+    //     filename: 'banner.jpg',
+    //   );
+    // }
+
+    // if (_selectedAllows is List) {
+    //   for (var item in _selectedAllows) {
+    //     if (item is String) {
+    //       flatAllows.add(item);
+    //     // ignore: unnecessary_type_check
+    //     } 
         
-        // else if (item is List && item is! String) {
-        //   for (var innerItem in item) {
-        //     flatAllows.add(innerItem.toString());
-        //   }
-        // } 
+    //     // else if (item is List && item is! String) {
+    //     //   for (var innerItem in item) {
+    //     //     flatAllows.add(innerItem.toString());
+    //     //   }
+    //     // } 
         
-        else {
-          flatAllows.add(item.toString());
-        }
-      }
-    } else if (_selectedAllows != null) {
-      flatAllows.add(_selectedAllows.toString());
-    }
+    //     else {
+    //       flatAllows.add(item.toString());
+    //     }
+    //   }
+    // } else if (_selectedAllows != null) {
+    //   flatAllows.add(_selectedAllows.toString());
+    // }
 
     debugPrint('Selected Allows (Raw): $_selectedAllows');
     debugPrint('Selected Allows (Flat): $flatAllows');
@@ -151,14 +185,16 @@ Future<void> _submitForm() async {
       'description': _descriptionController.text.trim(),
       'societyTypeId': _selectedSocietyType,
       'category': 'default',
-      'icon': _iconController.text.trim(),
-      'banner': _bannerController.text.trim(),
-      'allows': flatAllows,
+      // NOTE: ROUTe IN BACKEND IS NOT UPDATED YET, WHEN UPDATED USER "apiClient.postFORMDATA"
+  //     'icon': iconFile,
+  // 'banner': bannerFile,
+      'allows': _selectedAllows,
       'president': userId,
     };
 
     debugPrint('Create Society Payload: ${jsonEncode(payload)}');
 
+// NOTE: ROUTe IN BACKEND IS NOT UPDATED YET, WHEN UPDATED USER "apiClient.postFORMDATA"
     final response = await apiClient.post(
       '/api/society/create',
        payload,
@@ -186,7 +222,81 @@ Future<void> _submitForm() async {
 }
 
 
+Future<void> _mediaPicker(ImageSource source, {bool isBanner = false}) async {
+  try {
+    final picker = ImagePicker();
+    final XFile? pickedFile = await picker.pickImage(
+      source: source,
+      maxWidth: 2048,
+      maxHeight: 2048,
+      imageQuality: 85,
+    );
 
+    if (pickedFile == null) return;
+
+    if (isBanner) {
+      final croppedFile = await ImageCropper().cropImage(
+        sourcePath: pickedFile.path,
+        aspectRatio: const CropAspectRatio(ratioX: 3, ratioY: 1),
+        compressQuality: 85,
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'Crop Banner',
+            toolbarColor: Colors.deepPurple,
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: CropAspectRatioPreset.original,
+            lockAspectRatio: true,
+          ),
+          IOSUiSettings(
+            title: 'Crop Banner',
+            aspectRatioLockEnabled: true,
+            resetAspectRatioEnabled: false,
+          ),
+        ],
+      );
+
+      if (croppedFile != null && mounted) {
+        setState(() {
+          _selectedBanner = croppedFile;
+        });
+      }
+    } else {
+      // For icon, we can crop as square
+      final croppedFile = await ImageCropper().cropImage(
+        sourcePath: pickedFile.path,
+        aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+        compressQuality: 85,
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'Crop Icon',
+            toolbarColor: Colors.deepPurple,
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: CropAspectRatioPreset.square,
+            lockAspectRatio: true,
+          ),
+          IOSUiSettings(
+            title: 'Crop Icon',
+            aspectRatioLockEnabled: true,
+            resetAspectRatioEnabled: false,
+          ),
+        ],
+      );
+
+      if (croppedFile != null && mounted) {
+        setState(() {
+          _selectedIcon = File(croppedFile.path);
+        });
+      }
+    }
+  } catch (e) {
+    log('Error in image picker/cropper: $e');
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to process image: ${e.toString()}')),
+      );
+    }
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -321,22 +431,22 @@ Future<void> _submitForm() async {
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
-                  children: ['alumni', 'student', 'teacher', 'ext_org', 'all']
+                  children: _rolesList
                       .map((role) => ChoiceChip(
                             label: Text(role),
-                            selected: _selectedAllows.contains(role),
+                            selected: _selectedAllows == role,
                             onSelected: (selected) {
                               setState(() {
                                 if (selected) {
-                                  _selectedAllows.add(role);
+                                  _selectedAllows=role;
                                 } else {
-                                  _selectedAllows.remove(role);
+                                  _selectedAllows='';
                                 }
                               });
                             },
                             selectedColor: colors['accent']!.withOpacity(0.2),
                             labelStyle: TextStyle(
-                              color: _selectedAllows.contains(role)
+                              color: _selectedAllows ==role
                                   ? colors['accent']
                                   : colors['fg'],
                             ),
@@ -345,35 +455,68 @@ Future<void> _submitForm() async {
                 ),
                 const SizedBox(height: 16),
                 // Icon URL
-                TextFormField(
-                  controller: _iconController,
-                  style: TextStyle(color: colors['fg']),
-                  decoration: InputDecoration(
-                    labelText: 'Icon URL (optional)',
-                    labelStyle: TextStyle(color: colors['muted']),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: colors['border']!),
+                GestureDetector(
+                  onTap:()=>_mediaPicker(ImageSource.gallery),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: colors['bg'],
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: colors['border']!),
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: colors['accent']!),
+                    child: Row(
+                      children: [
+                        Icon(Icons.image, color: colors['fg']),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Upload Icon (optional)',
+                          style: TextStyle(color: colors['fg']),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
-                // Banner URL
-                TextFormField(
-                  controller: _bannerController,
-                  style: TextStyle(color: colors['fg']),
-                  decoration: InputDecoration(
-                    labelText: 'Banner URL (optional)',
-                    labelStyle: TextStyle(color: colors['muted']),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: colors['border']!),
+                GestureDetector(
+                  onTap: () => _selectedIcon =null,
+                  child: _selectedIcon != null
+                      ? Image.file(
+                          _selectedIcon!,
+                          width: 100,
+                          height: 100,
+                        )
+                      : const SizedBox.shrink(),
+                ),
+
+                GestureDetector(
+                  onTap: () => _mediaPicker(ImageSource.gallery, isBanner: true),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: colors['bg'],
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: colors['border']!),
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: colors['accent']!),
+                    child: Row(
+                      children: [
+                        Icon(Icons.camera_alt, color: colors['fg']),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Banner Image (optional)',
+                          style: TextStyle(color: colors['fg']),
+                        ),
+                      ],
                     ),
                   ),
+                ),
+                GestureDetector(
+                  onTap: () => _selectedBanner =null,
+                  child: _selectedBanner != null
+                      ? Image.file(
+                          File(_selectedBanner!.path),
+                          width: 100,
+                          height: 100,
+                        )
+                      : const SizedBox.shrink(),
                 ),
                 const SizedBox(height: 24),
                 // Error message
