@@ -31,6 +31,9 @@ class _PostMediaState extends State<PostMedia>
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
+  final List<Widget> _cachedMediaWidgets = [];
+
+
   @override
   void initState() {
     super.initState();
@@ -40,7 +43,104 @@ class _PostMediaState extends State<PostMedia>
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     )..repeat();
+
+    
+    // Initialize media widgets after frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _initializeMediaWidgets();
+        _preloadAdjacentImages(0);
+      }
+    });
+  
   }
+
+
+  void _initializeMediaWidgets() {
+    if (widget.media == null || widget.media!.isEmpty) return;
+    
+    _cachedMediaWidgets.clear();
+    for (final item in widget.media!) {
+      if (item['type']?.startsWith('image/') ?? false) {
+        _cachedMediaWidgets.add(_buildImageItem(item, true));
+      } else if (item['type']?.startsWith('video/') ?? false) {
+        _cachedMediaWidgets.add(_buildVideoItem());
+      } else if (item['type']?.startsWith('audio/') ?? false) {
+        _cachedMediaWidgets.add(_buildAudioItem());
+      }
+    }
+  }
+
+  // Modify _buildImageItem to accept a cache flag
+  Widget _buildImageItem(dynamic item, [bool forCache = false]) {
+  // Preload the image
+  precacheImage(CachedNetworkImageProvider(item['url']), context);
+
+    return KeepAliveWrapper(
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: const [
+            BoxShadow(
+              color: Color.fromARGB(0, 0, 0, 0),
+              blurRadius: 4,
+              offset: Offset(0, 2),
+              )
+          ],
+        ),
+        child: GestureDetector(
+          onTap: forCache ? null : () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => FullScreenMediaView(
+                  mediaFiles: [item['url']],
+                  initialIndex: 0,
+                  videoControllers: {},
+                  isImage: true,
+                ),
+              ),
+            );
+          },
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: CachedNetworkImage(
+              imageUrl: item['url'],
+              width: double.infinity,
+              height: 350,
+              fit: BoxFit.contain,
+              placeholder: (context, url) => const Center(
+                child: CircularProgressIndicator(),
+              ),
+              errorWidget: (context, url, error) => const Icon(Icons.error),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  void _preloadAdjacentImages(int currentIndex) {
+  // Preload next 2 images
+  for (int i = 1; i <= 2; i++) {
+    final nextIndex = currentIndex + i;
+    if (nextIndex < widget.media!.length) {
+      final nextItem = widget.media![nextIndex];
+      if (nextItem['type']?.startsWith('image/') ?? false) {
+        precacheImage(CachedNetworkImageProvider(nextItem['url']), context);
+      }
+    }
+  }
+  
+  // Optionally preload previous 1 image
+  final prevIndex = currentIndex - 1;
+  if (prevIndex >= 0) {
+    final prevItem = widget.media![prevIndex];
+    if (prevItem['type']?.startsWith('image/') ?? false) {
+      precacheImage(CachedNetworkImageProvider(prevItem['url']), context);
+    }
+  }
+}
 
   void _initializeVideo() {
     if (widget.media != null && widget.media!.isNotEmpty) {
@@ -145,6 +245,8 @@ class _PostMediaState extends State<PostMedia>
                   setState(() {
                     _currentPage = index;
                   });
+                      // Preload next 2 images when page changes
+    _preloadAdjacentImages(index);
                 },
                 itemCount: widget.media!.length,
                 itemBuilder: (context, index) {
@@ -189,49 +291,49 @@ class _PostMediaState extends State<PostMedia>
     );
   }
 
-  Widget _buildImageItem(dynamic item) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(
-            color: Color.fromARGB(0, 0, 0, 0),
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => FullScreenMediaView(
-                mediaFiles: [item['url']],
-                initialIndex: 0,
-                videoControllers: {},
-                isImage: true,
-              ),
-            ),
-          );
-        },
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: CachedNetworkImage(
-            imageUrl: item['url'],
-            width: double.infinity,
-            height: 350,
-            fit: BoxFit.contain,
-            placeholder: (context, url) => const Center(
-              child: CircularProgressIndicator(),
-            ),
-            errorWidget: (context, url, error) => const Icon(Icons.error),
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _buildImageItem(dynamic item) {
+  //   return Container(
+  //     margin: const EdgeInsets.only(bottom: 0),
+  //     decoration: BoxDecoration(
+  //       borderRadius: BorderRadius.circular(12),
+  //       boxShadow: const [
+  //         BoxShadow(
+  //           color: Color.fromARGB(0, 0, 0, 0),
+  //           blurRadius: 4,
+  //           offset: Offset(0, 2),
+  //         ),
+  //       ],
+  //     ),
+  //     child: GestureDetector(
+  //       onTap: () {
+  //         Navigator.push(
+  //           context,
+  //           MaterialPageRoute(
+  //             builder: (context) => FullScreenMediaView(
+  //               mediaFiles: [item['url']],
+  //               initialIndex: 0,
+  //               videoControllers: {},
+  //               isImage: true,
+  //             ),
+  //           ),
+  //         );
+  //       },
+  //       child: ClipRRect(
+  //         borderRadius: BorderRadius.circular(12),
+  //         child: CachedNetworkImage(
+  //           imageUrl: item['url'],
+  //           width: double.infinity,
+  //           height: 350,
+  //           fit: BoxFit.contain,
+  //           placeholder: (context, url) => const Center(
+  //             child: CircularProgressIndicator(),
+  //           ),
+  //           errorWidget: (context, url, error) => const Icon(Icons.error),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildVideoItem() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -521,6 +623,18 @@ class _PostMediaState extends State<PostMedia>
   bool get wantKeepAlive => true;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
 class WaveformPainter extends CustomPainter {
   final List<double> waveform;
   final double progress;
@@ -580,6 +694,56 @@ class WaveformPainter extends CustomPainter {
         color != oldDelegate.color;
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Add this wrapper class to keep each page alive
+class KeepAliveWrapper extends StatefulWidget {
+  final Widget child;
+
+  const KeepAliveWrapper({super.key, required this.child});
+
+  @override
+  State<KeepAliveWrapper> createState() => _KeepAliveWrapperState();
+}
+
+class _KeepAliveWrapperState extends State<KeepAliveWrapper>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class FullScreenMediaView extends StatefulWidget {
   final List<String> mediaFiles;

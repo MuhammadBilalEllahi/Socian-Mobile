@@ -20,11 +20,12 @@ class ApiConstants {
     0: "https://api.beyondtheclass.me", // production
 
     1: "http://192.168.1.1:8080",
-    2: "http://192.168.1.10:8080",
+    10: "http://192.168.1.10:8080",
+    4: "http://192.168.1.4:8080",
     
   };
 
-  static int _currentUrlIndex = 2;
+  static int _currentUrlIndex = 4;
   static const String _urlIndexCacheKey = 'current_url_index';
 
   static Future<void> initializeBaseUrl() async {
