@@ -1,11 +1,11 @@
-import 'package:beyondtheclass/shared/services/shared_preferences.dart';
+import 'package:socian/shared/services/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:beyondtheclass/core/utils/constants.dart';
-import 'package:beyondtheclass/core/utils/route_guard.dart';
-import 'package:beyondtheclass/theme/AppThemes.dart';
-import 'package:beyondtheclass/shared/services/WebSocketService.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/core/utils/route_guard.dart';
+import 'package:socian/theme/AppThemes.dart';
+import 'package:socian/shared/services/WebSocketService.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

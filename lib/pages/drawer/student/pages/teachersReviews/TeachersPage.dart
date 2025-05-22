@@ -1,7 +1,7 @@
 import 'dart:ui';
-import 'package:beyondtheclass/components/_buildShimmerEffect.dart';
-import 'package:beyondtheclass/core/utils/constants.dart';
-import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:socian/components/_buildShimmerEffect.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/shared/services/api_client.dart';
 import 'package:flutter/material.dart';
 import 'TeacherDetailsPage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -1,10 +1,10 @@
-import 'package:beyondtheclass/pages/explore/SocietyProvider.dart';
-import 'package:beyondtheclass/pages/profile/settings/CreateSocietyPage.dart';
+import 'package:socian/pages/explore/SocietyProvider.dart';
+import 'package:socian/pages/profile/settings/CreateSocietyPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
-import 'package:beyondtheclass/core/utils/constants.dart';
-import 'package:beyondtheclass/pages/profile/settings/ServerSelectionPage.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/pages/profile/settings/ServerSelectionPage.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});

@@ -1,10 +1,10 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:beyondtheclass/utils/date_formatter.dart';
+import 'package:socian/utils/date_formatter.dart';
 import 'vote_button.dart';
 import 'reply_box.dart';
-import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:socian/shared/services/api_client.dart';
 
 class OriginalComment extends StatefulWidget {
   final Map<String, dynamic> comment;

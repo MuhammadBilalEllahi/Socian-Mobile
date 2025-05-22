@@ -1,9 +1,9 @@
 // otp_verification_screen.dart
-import 'package:beyondtheclass/features/auth/presentation/NewPasswordScreen.dart';
+import 'package:socian/features/auth/presentation/NewPasswordScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:beyondtheclass/core/utils/constants.dart';
-import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/shared/services/api_client.dart';
 
 class OtpVerificationScreen extends ConsumerStatefulWidget {
   final String email;

@@ -1,4 +1,4 @@
-import 'package:beyondtheclass/pages/explore/society.model.dart';
+import 'package:socian/pages/explore/society.model.dart';
 import 'package:flutter/material.dart';
 
 class FilterBar extends StatelessWidget {

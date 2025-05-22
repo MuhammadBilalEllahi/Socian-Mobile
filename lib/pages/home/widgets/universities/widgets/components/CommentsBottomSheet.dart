@@ -1,5 +1,5 @@
 // import 'package:flutter/material.dart';
-// import 'package:beyondtheclass/shared/services/api_client.dart';
+// import 'package:socian/shared/services/api_client.dart';
 // import 'CommentItem.dart';
 // import '../../service/AllUniversityService.dart';
 

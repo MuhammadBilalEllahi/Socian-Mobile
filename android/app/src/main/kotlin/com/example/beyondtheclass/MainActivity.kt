@@ -1,4 +1,4 @@
-package com.beyondtheclass.app
+package app.socian.community
 
 import io.flutter.embedding.android.FlutterActivity
 

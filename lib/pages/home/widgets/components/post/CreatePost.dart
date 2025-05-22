@@ -1,8 +1,8 @@
 import 'dart:developer';
 
-import 'package:beyondtheclass/core/utils/constants.dart';
-import 'package:beyondtheclass/pages/explore/SocietyProvider.dart';
-import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/pages/explore/SocietyProvider.dart';
+import 'package:socian/shared/services/api_client.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,7 +12,7 @@ import 'package:record/record.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';

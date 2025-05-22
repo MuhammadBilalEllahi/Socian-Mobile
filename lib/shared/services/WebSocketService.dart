@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 import 'package:flutter/widgets.dart';
-import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:socian/core/utils/constants.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 /// Singleton WebSocketService for robust, single-connection management using socket_io_client

@@ -1,13 +1,13 @@
 import 'dart:developer';
 
-import 'package:beyondtheclass/core/utils/constants.dart';
-import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
-import 'package:beyondtheclass/pages/profile/settings/personalInfo/ChangePassword.dart';
-import 'package:beyondtheclass/pages/profile/settings/personalInfo/ProfileImageUploadPage.dart';
-import 'package:beyondtheclass/shared/services/api_client.dart';
-import 'package:beyondtheclass/shared/widgets/my_dropdown.dart';
-import 'package:beyondtheclass/shared/widgets/my_snackbar.dart';
-import 'package:beyondtheclass/utils/authstateChanger.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/pages/profile/settings/personalInfo/ChangePassword.dart';
+import 'package:socian/pages/profile/settings/personalInfo/ProfileImageUploadPage.dart';
+import 'package:socian/shared/services/api_client.dart';
+import 'package:socian/shared/widgets/my_dropdown.dart';
+import 'package:socian/shared/widgets/my_snackbar.dart';
+import 'package:socian/utils/authstateChanger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -354,7 +354,7 @@ Future<void> _pickGraduationDate(BuildContext context) async {
                 ),
                 SizedBox(height: 4),
                 Text(
-                  "ceo@beyondtheclass.me",
+                  "ceo@socian.me",
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -619,7 +619,7 @@ if(_forSubmision == ''){
                 ),
                 SizedBox(height: 4),
                 Text(
-                  "ceo@beyondtheclass.me",
+                  "ceo@socian.me",
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,

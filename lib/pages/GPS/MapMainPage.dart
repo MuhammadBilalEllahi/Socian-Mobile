@@ -1,12 +1,12 @@
 import 'dart:convert';
-import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:socian/core/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
 
 class MapMainPage extends ConsumerStatefulWidget {
   const MapMainPage({super.key});

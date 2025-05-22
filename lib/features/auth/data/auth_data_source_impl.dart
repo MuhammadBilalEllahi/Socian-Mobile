@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
-import 'package:beyondtheclass/core/utils/constants.dart';
-import 'package:beyondtheclass/shared/services/api_client.dart';
-import 'package:beyondtheclass/features/auth/data/auth_data_source.dart';
-// import 'package:beyondtheclass/shared/services/secure_storage_service.dart';
-// import 'package:beyondtheclass/shared/services/secure_storage_service.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/shared/services/api_client.dart';
+import 'package:socian/features/auth/data/auth_data_source.dart';
+// import 'package:socian/shared/services/secure_storage_service.dart';
+// import 'package:socian/shared/services/secure_storage_service.dart';
 
 class AuthDataSourceImpl implements AuthDataSource {
   final ApiClient client;
@@ -61,9 +61,9 @@ class AuthDataSourceImpl implements AuthDataSource {
 
 
 
-// import 'package:beyondtheclass/features/auth/data/auth_data_source.dart';
-// import 'package:beyondtheclass/features/auth/data/auth_repo.dart';
-// import 'package:beyondtheclass/shared/services/api_client.dart';
+// import 'package:socian/features/auth/data/auth_data_source.dart';
+// import 'package:socian/features/auth/data/auth_repo.dart';
+// import 'package:socian/shared/services/api_client.dart';
 
 // class AuthDataSourceImpl implements AuthDataSource {
 //   final ApiClient client;

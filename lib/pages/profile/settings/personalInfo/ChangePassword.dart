@@ -1,7 +1,7 @@
 import 'dart:developer';
-import 'package:beyondtheclass/shared/services/api_client.dart';
-import 'package:beyondtheclass/shared/widgets/my_snackbar.dart';
-import 'package:beyondtheclass/shared/widgets/my_textfield.dart';
+import 'package:socian/shared/services/api_client.dart';
+import 'package:socian/shared/widgets/my_snackbar.dart';
+import 'package:socian/shared/widgets/my_textfield.dart';
 import 'package:flutter/material.dart';
 
 class ChangePassword extends StatefulWidget {

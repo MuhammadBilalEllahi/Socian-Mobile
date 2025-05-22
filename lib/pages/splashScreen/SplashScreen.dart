@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'package:beyondtheclass/core/utils/constants.dart';
-import 'package:beyondtheclass/features/auth/domain/auth_state.dart';
-import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
-import 'package:beyondtheclass/pages/splashScreen/components/GoogleButton.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/features/auth/domain/auth_state.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/pages/splashScreen/components/GoogleButton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

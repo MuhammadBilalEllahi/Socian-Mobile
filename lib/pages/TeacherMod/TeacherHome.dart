@@ -1,14 +1,14 @@
-// import 'package:beyondtheclass/core/utils/constants.dart';
-// import 'package:beyondtheclass/pages/bottomBar/MyBottomNavBar.dart';
-// import 'package:beyondtheclass/pages/explore/ExploreSocieities.dart';
-// import 'package:beyondtheclass/pages/gps/GpsInitialPage.dart';
-// import 'package:beyondtheclass/pages/home/widgets/AllView.dart';
-// import 'package:beyondtheclass/pages/message/Messages.dart';
-// import 'package:beyondtheclass/pages/profile/ProfilePage.dart';
-// import 'package:beyondtheclass/pages/providers/page_provider.dart';
+// import 'package:socian/core/utils/constants.dart';
+// import 'package:socian/pages/bottomBar/MyBottomNavBar.dart';
+// import 'package:socian/pages/explore/ExploreSocieities.dart';
+// import 'package:socian/pages/gps/GpsInitialPage.dart';
+// import 'package:socian/pages/home/widgets/AllView.dart';
+// import 'package:socian/pages/message/Messages.dart';
+// import 'package:socian/pages/profile/ProfilePage.dart';
+// import 'package:socian/pages/providers/page_provider.dart';
 // import 'package:flutter/material.dart';
 // import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
+// import 'package:socian/features/auth/providers/auth_provider.dart';
 
 // class TeacherHome extends ConsumerStatefulWidget {
 //   const TeacherHome({super.key});

@@ -1,6 +1,6 @@
-import 'package:beyondtheclass/pages/drawer/student/pages/teachersReviews/pages/commentDetailed/widgets/index.dart';
+import 'package:socian/pages/drawer/student/pages/teachersReviews/pages/commentDetailed/widgets/index.dart';
 import 'package:flutter/material.dart';
-import 'package:beyondtheclass/utils/date_formatter.dart';
+import 'package:socian/utils/date_formatter.dart';
 import 'reaction_button.dart';
 
 class ReplyReplyItem extends StatefulWidget {

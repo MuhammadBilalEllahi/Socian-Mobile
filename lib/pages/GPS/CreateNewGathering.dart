@@ -1,7 +1,7 @@
-// import 'package:beyondtheclass/core/utils/constants.dart';
+// import 'package:socian/core/utils/constants.dart';
 // import 'package:flutter/material.dart';
 // import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:beyondtheclass/shared/services/api_client.dart';
+// import 'package:socian/shared/services/api_client.dart';
 // import 'package:intl/intl.dart';
 // import 'package:google_maps_flutter/google_maps_flutter.dart';
 // import 'package:geolocator/geolocator.dart';
@@ -539,10 +539,10 @@
 
 
 
-import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:socian/core/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:socian/shared/services/api_client.dart';
 import 'package:intl/intl.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';

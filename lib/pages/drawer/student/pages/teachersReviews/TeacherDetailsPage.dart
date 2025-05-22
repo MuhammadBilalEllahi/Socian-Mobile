@@ -8,8 +8,8 @@ import 'widgets/teacher_feedback.dart';
 import 'widgets/teacher_subjects.dart';
 import 'widgets/teacher_comments.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
-import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/shared/services/api_client.dart';
 
 class TeacherDetailsPage extends StatelessWidget {
   final Map<String, dynamic> teacher;

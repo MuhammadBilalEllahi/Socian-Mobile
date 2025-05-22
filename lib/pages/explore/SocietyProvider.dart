@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:beyondtheclass/pages/explore/society.model.dart';
-import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:socian/pages/explore/society.model.dart';
+import 'package:socian/shared/services/api_client.dart';
 
 class PaginatedList<T> {
   final List<T> items;

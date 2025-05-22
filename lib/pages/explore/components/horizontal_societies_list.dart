@@ -1,4 +1,4 @@
-import 'package:beyondtheclass/pages/explore/components/shimmer/shimmer_list.dart';
+import 'package:socian/pages/explore/components/shimmer/shimmer_list.dart';
 import 'package:flutter/material.dart';
 import '../society.model.dart';
 import 'society_card.dart';

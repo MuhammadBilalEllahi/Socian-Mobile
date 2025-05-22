@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:beyondtheclass/core/utils/constants.dart';
-import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/shared/services/api_client.dart';
 
 class DepartmentPage extends StatefulWidget {
   const DepartmentPage({super.key});

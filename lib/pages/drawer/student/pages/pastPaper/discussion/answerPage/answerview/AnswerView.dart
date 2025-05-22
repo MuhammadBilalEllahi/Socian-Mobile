@@ -1,4 +1,4 @@
-import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:socian/shared/services/api_client.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'widgets/EditAnswer.dart';

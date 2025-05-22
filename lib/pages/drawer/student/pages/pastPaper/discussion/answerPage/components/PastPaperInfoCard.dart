@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:socian/core/utils/constants.dart';
 
 class PastPaperInfoCard extends StatelessWidget {
   final Map<String, dynamic> paper;

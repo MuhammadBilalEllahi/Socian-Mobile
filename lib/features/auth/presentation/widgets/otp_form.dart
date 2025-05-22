@@ -1,12 +1,12 @@
-import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
-import 'package:beyondtheclass/core/utils/constants.dart';
-import 'package:beyondtheclass/shared/services/api_client.dart';
-import 'package:beyondtheclass/shared/services/secure_storage_service.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/shared/services/api_client.dart';
+import 'package:socian/shared/services/secure_storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:beyondtheclass/features/auth/controllers/auth_controller.dart';
-import 'package:beyondtheclass/features/auth/domain/auth_state.dart';
+import 'package:socian/features/auth/controllers/auth_controller.dart';
+import 'package:socian/features/auth/domain/auth_state.dart';
 
 class OTPVerificationScreen extends ConsumerStatefulWidget {
   const OTPVerificationScreen({super.key});

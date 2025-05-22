@@ -1,13 +1,13 @@
 import 'dart:io';
-import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
-import 'package:beyondtheclass/shared/services/secure_storage_service.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/shared/services/secure_storage_service.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:beyondtheclass/shared/services/api_client.dart';
-import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:socian/shared/services/api_client.dart';
+import 'package:socian/core/utils/constants.dart';
 import 'package:dio/dio.dart';
 import 'dart:developer' as developer;
 import 'package:http_parser/http_parser.dart';

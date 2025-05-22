@@ -1,6 +1,6 @@
 // import 'package:flutter/material.dart';
 // import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
+// import 'package:socian/features/auth/providers/auth_provider.dart';
 
 // class TeacherProfile extends ConsumerWidget {
 //   const TeacherProfile({super.key});

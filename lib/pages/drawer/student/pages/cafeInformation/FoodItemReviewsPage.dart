@@ -1,5 +1,5 @@
 import 'dart:developer';
-import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:socian/shared/services/api_client.dart';
 import 'package:flutter/material.dart';
 
 class FoodItemReviewsPage extends StatefulWidget {

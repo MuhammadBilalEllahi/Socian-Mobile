@@ -1,4 +1,4 @@
-import 'package:beyondtheclass/pages/explore/page/SocietyPage.dart';
+import 'package:socian/pages/explore/page/SocietyPage.dart';
 import 'package:flutter/material.dart';
 import '../society.model.dart';
 

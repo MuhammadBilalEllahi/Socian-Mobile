@@ -1,4 +1,4 @@
-import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/discussion/answerPage/answerview/AnswerView.dart';
+import 'package:socian/pages/drawer/student/pages/pastPaper/discussion/answerPage/answerview/AnswerView.dart';
 import 'package:flutter/material.dart';
 
 class AnswerTile extends StatelessWidget {

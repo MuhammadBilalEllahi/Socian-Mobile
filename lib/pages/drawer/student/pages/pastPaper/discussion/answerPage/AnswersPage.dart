@@ -1,5 +1,5 @@
-import 'package:beyondtheclass/pages/drawer/student/pages/pastPaper/discussion/answerPage/components/PastPaperInfoCard.dart';
-import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:socian/pages/drawer/student/pages/pastPaper/discussion/answerPage/components/PastPaperInfoCard.dart';
+import 'package:socian/shared/services/api_client.dart';
 import 'package:flutter/material.dart';
 
 // Import for AddAnswer bottom sheet

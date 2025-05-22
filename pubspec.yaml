@@ -1,5 +1,5 @@
-name: beyondtheclass
-description: "FYP mobile app."
+name: socian
+description: "Conversation with university students, professors, and alumni. Share your experiences and get answers to your questions. Join the Socian community today and start connecting with others who share your interests and goals."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

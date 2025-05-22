@@ -1,8 +1,8 @@
 import 'dart:developer';
 
-import 'package:beyondtheclass/pages/drawer/student/pages/cafeInformation/FoodItemReviewsPage.dart';
-import 'package:beyondtheclass/pages/drawer/student/pages/cafeInformation/Modals.dart';
-import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:socian/pages/drawer/student/pages/cafeInformation/FoodItemReviewsPage.dart';
+import 'package:socian/pages/drawer/student/pages/cafeInformation/Modals.dart';
+import 'package:socian/shared/services/api_client.dart';
 import 'package:flutter/material.dart';
 
 class CafesHome extends StatefulWidget {

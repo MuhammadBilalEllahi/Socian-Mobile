@@ -8,12 +8,12 @@ import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:beyondtheclass/shared/services/secure_storage_service.dart';
+import 'package:socian/shared/services/secure_storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
-import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/shared/services/api_client.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
 class TeacherSelfReview extends ConsumerStatefulWidget {

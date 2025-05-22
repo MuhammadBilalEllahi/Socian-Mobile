@@ -1,17 +1,17 @@
-import 'package:beyondtheclass/components/ShiningLinearProgressBar.dart';
-import 'package:beyondtheclass/components/loader.dart';
-import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
-import 'package:beyondtheclass/pages/drawer/student/StudentDrawer.dart';
-import 'package:beyondtheclass/pages/home/widgets/universities/AllUniversityPosts.dart';
-import 'package:beyondtheclass/shared/services/WebSocketService.dart';
-// import 'package:beyondtheclass/services/user_info_provider.dart';
-import 'package:beyondtheclass/shared/services/infoProvider.dart';
+import 'package:socian/components/ShiningLinearProgressBar.dart';
+import 'package:socian/components/loader.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/pages/drawer/student/StudentDrawer.dart';
+import 'package:socian/pages/home/widgets/universities/AllUniversityPosts.dart';
+import 'package:socian/shared/services/WebSocketService.dart';
+// import 'package:socian/services/user_info_provider.dart';
+import 'package:socian/shared/services/infoProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:beyondtheclass/core/utils/constants.dart';
-import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/shared/services/api_client.dart';
 import '../components/post/post.dart';
-import 'package:beyondtheclass/core/usecases/PostProvider.dart';
+import 'package:socian/core/usecases/PostProvider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'dart:developer';
 

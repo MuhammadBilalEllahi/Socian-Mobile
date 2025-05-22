@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:beyondtheclass/core/utils/constants.dart';
-import 'package:beyondtheclass/shared/services/WebSocketService.dart';
-import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/shared/services/WebSocketService.dart';
+import 'package:socian/shared/services/api_client.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;

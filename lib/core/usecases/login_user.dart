@@ -1,6 +1,6 @@
 // lib/core/usecases/login_user.dart
 
-import 'package:beyondtheclass/features/auth/data/auth_repo.dart';
+import 'package:socian/features/auth/data/auth_repo.dart';
 
 class LoginUser {
   final AuthRepo repository;

@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'package:beyondtheclass/core/utils/constants.dart';
-import 'package:beyondtheclass/features/auth/domain/auth_state.dart';
-import 'package:beyondtheclass/shared/services/api_client.dart';
-import 'package:beyondtheclass/shared/services/secure_storage_service.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/features/auth/domain/auth_state.dart';
+import 'package:socian/shared/services/api_client.dart';
+import 'package:socian/shared/services/secure_storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';

@@ -1,4 +1,4 @@
-# beyondtheclass
+# socian
 
 FYP mobile app.
 

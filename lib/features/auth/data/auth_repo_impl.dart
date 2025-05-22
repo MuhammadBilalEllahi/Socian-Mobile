@@ -1,5 +1,5 @@
-import 'package:beyondtheclass/shared/services/api_client.dart';
-import 'package:beyondtheclass/features/auth/data/auth_repo.dart';
+import 'package:socian/shared/services/api_client.dart';
+import 'package:socian/features/auth/data/auth_repo.dart';
 
 class AuthRepoImpl implements AuthRepo {
   final ApiClient apiClient;
@@ -19,8 +19,8 @@ class AuthRepoImpl implements AuthRepo {
 }
 
 
-// import 'package:beyondtheclass/core/utils/constants.dart';
-// import 'package:beyondtheclass/shared/services/api_client.dart';
+// import 'package:socian/core/utils/constants.dart';
+// import 'package:socian/shared/services/api_client.dart';
 
 // import 'auth_repo.dart';
 

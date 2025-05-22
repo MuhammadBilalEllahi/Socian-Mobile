@@ -1,11 +1,11 @@
-import 'package:beyondtheclass/features/auth/controllers/auth_controller.dart';
-import 'package:beyondtheclass/features/auth/data/auth_data_source.dart';
-import 'package:beyondtheclass/features/auth/data/auth_data_source_impl.dart';
-import 'package:beyondtheclass/features/auth/data/auth_repo.dart';
-import 'package:beyondtheclass/features/auth/data/auth_repo_impl.dart';
-import 'package:beyondtheclass/features/auth/domain/auth_state.dart';
-import 'package:beyondtheclass/features/auth/domain/auth_usecase.dart';
-import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:socian/features/auth/controllers/auth_controller.dart';
+import 'package:socian/features/auth/data/auth_data_source.dart';
+import 'package:socian/features/auth/data/auth_data_source_impl.dart';
+import 'package:socian/features/auth/data/auth_repo.dart';
+import 'package:socian/features/auth/data/auth_repo_impl.dart';
+import 'package:socian/features/auth/domain/auth_state.dart';
+import 'package:socian/features/auth/domain/auth_usecase.dart';
+import 'package:socian/shared/services/api_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

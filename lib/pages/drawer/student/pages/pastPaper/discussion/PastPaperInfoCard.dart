@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:beyondtheclass/components/rive/RepeatingThumbAnimation.dart';
-import 'package:beyondtheclass/core/utils/constants.dart';
+import 'package:socian/components/rive/RepeatingThumbAnimation.dart';
+import 'package:socian/core/utils/constants.dart';
 import 'package:flutter/material.dart';
 
 class PastPaperInfoCard extends StatefulWidget {

@@ -1,6 +1,6 @@
-import 'package:beyondtheclass/pages/profile/ProfilePage.dart';
-// import 'package:beyondtheclass/pages/profile/profile_page.dart';
-import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:socian/pages/profile/ProfilePage.dart';
+// import 'package:socian/pages/profile/profile_page.dart';
+import 'package:socian/shared/services/api_client.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

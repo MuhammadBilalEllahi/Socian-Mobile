@@ -1,4 +1,4 @@
-import 'package:beyondtheclass/features/auth/data/auth_data_source.dart';
+import 'package:socian/features/auth/data/auth_data_source.dart';
 
 class AuthUseCases {
   final AuthDataSource authDataSource;
@@ -13,7 +13,7 @@ class AuthUseCases {
 }
 
 // after oldest
-// import 'package:beyondtheclass/features/auth/data/auth_data_source.dart';
+// import 'package:socian/features/auth/data/auth_data_source.dart';
 
 // class AuthUseCases {
 //   final AuthDataSource authDataSource;

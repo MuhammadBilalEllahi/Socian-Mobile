@@ -1,5 +1,5 @@
-import 'package:beyondtheclass/core/utils/constants.dart';
-import 'package:beyondtheclass/features/auth/presentation/student_signupScreen.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/features/auth/presentation/student_signupScreen.dart';
 import 'package:flutter/material.dart';
 
 class RoleSelectionPage extends StatelessWidget {

@@ -1,7 +1,7 @@
-import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:beyondtheclass/shared/services/WebSocketService.dart';
+import 'package:socian/shared/services/WebSocketService.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 typedef ChatMessage = Map<String, dynamic>;

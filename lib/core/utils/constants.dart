@@ -1,4 +1,4 @@
-import 'package:beyondtheclass/shared/services/shared_preferences.dart';
+import 'package:socian/shared/services/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,7 +8,7 @@ class ApiConstants {
   //     "http://10.135.49.240:8080"; //my ip address
   // // static const String baseUrl = "http://192.168.10.6:8080"; //my ip address
   // static const String productionBaseUrl =
-  //     "https://api.beyondtheclass.me"; //my ip address
+  //     "https://api.socian.me"; //my ip address
 
   // This below is ort forwarding url from localhost:8080. create your own every time
 
@@ -17,7 +17,7 @@ class ApiConstants {
     -3: 'https://j9kfnb6c-8080.inc1.devtunnels.ms', //bilal
     -2: 'https://w7x50p90-8080.inc1.devtunnels.ms', //rayyan
     -1: "http://10.135.58.129:8080", // localhost
-    0: "https://api.beyondtheclass.me", // production
+    0: "https://api.socian.me", // production
 
     1: "http://192.168.1.1:8080",
     10: "http://192.168.1.10:8080",
@@ -25,7 +25,7 @@ class ApiConstants {
     
   };
 
-  static int _currentUrlIndex = 4;
+  static int _currentUrlIndex = 10;
   static const String _urlIndexCacheKey = 'current_url_index';
 
   static Future<void> initializeBaseUrl() async {

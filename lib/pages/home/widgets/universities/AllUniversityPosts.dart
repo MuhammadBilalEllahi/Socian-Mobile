@@ -1,8 +1,8 @@
-import 'package:beyondtheclass/core/utils/constants.dart';
-import 'package:beyondtheclass/pages/home/widgets/components/post/post.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/pages/home/widgets/components/post/post.dart';
 import 'package:flutter/material.dart';
-import 'package:beyondtheclass/pages/home/widgets/universities/service/AllUniversityService.dart';
-// import 'package:beyondtheclass/pages/home/widgets/universities/widgets/PostCard.dart';
+import 'package:socian/pages/home/widgets/universities/service/AllUniversityService.dart';
+// import 'package:socian/pages/home/widgets/universities/widgets/PostCard.dart';
 
 class AllUniversityPosts extends StatefulWidget {
   const AllUniversityPosts({super.key});
@@ -56,11 +56,11 @@ class _AllUniversityPostsState extends State<AllUniversityPosts> {
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-// import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
-// import 'package:beyondtheclass/pages/home/widgets/components/post/post_card.dart';
+// import 'package:socian/features/auth/providers/auth_provider.dart';
+// import 'package:socian/pages/home/widgets/components/post/post_card.dart';
 // import 'package:flutter/material.dart';
 // import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:beyondtheclass/pages/home/widgets/universities/service/AllUniversityService.dart';
+// import 'package:socian/pages/home/widgets/universities/service/AllUniversityService.dart';
 
 // class AllUniversityPosts extends ConsumerStatefulWidget {
 //   const AllUniversityPosts({super.key});

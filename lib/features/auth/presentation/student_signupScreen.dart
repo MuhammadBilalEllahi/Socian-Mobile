@@ -1,5 +1,5 @@
-import 'package:beyondtheclass/core/utils/constants.dart';
-import 'package:beyondtheclass/features/auth/presentation/widgets/signup_form.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/features/auth/presentation/widgets/signup_form.dart';
 import 'package:flutter/material.dart';
 
 class SignUpScreen extends StatefulWidget {

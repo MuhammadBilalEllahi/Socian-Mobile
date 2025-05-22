@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:beyondtheclass/core/utils/constants.dart';
-import 'package:beyondtheclass/shared/services/secure_storage_service.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/shared/services/secure_storage_service.dart';
 import 'package:dio/dio.dart';
 
 class ApiClient {

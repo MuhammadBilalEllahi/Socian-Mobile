@@ -1,7 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:beyondtheclass/shared/services/api_client.dart';
+import 'package:socian/shared/services/api_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'commentDetailed/widgets/index.dart';
 

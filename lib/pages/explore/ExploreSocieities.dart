@@ -1,9 +1,9 @@
 
-import 'package:beyondtheclass/features/auth/providers/auth_provider.dart';
-import 'package:beyondtheclass/pages/explore/society.model.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/pages/explore/society.model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:beyondtheclass/pages/explore/SocietyProvider.dart';
+import 'package:socian/pages/explore/SocietyProvider.dart';
 import 'components/search/search_bar.dart' as custom;
 import 'components/search/filter_bar.dart';
 import 'components/horizontal_societies_list.dart';

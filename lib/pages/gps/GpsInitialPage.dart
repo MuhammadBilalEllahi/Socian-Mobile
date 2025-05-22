@@ -1,7 +1,7 @@
-import 'package:beyondtheclass/pages/gps/CreateNewGathering.dart';
-import 'package:beyondtheclass/pages/gps/GatheringsView.dart';
-import 'package:beyondtheclass/pages/gps/MapMainPage.dart';
-import 'package:beyondtheclass/pages/gps/ScheduledGatherings.dart';
+import 'package:socian/pages/gps/CreateNewGathering.dart';
+import 'package:socian/pages/gps/GatheringsView.dart';
+import 'package:socian/pages/gps/MapMainPage.dart';
+import 'package:socian/pages/gps/ScheduledGatherings.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
