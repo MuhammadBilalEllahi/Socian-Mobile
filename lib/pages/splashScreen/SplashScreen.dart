@@ -28,6 +28,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     );
     _animationController.forward();
     Future.delayed(const Duration(seconds: 3), () {
+        if (!mounted) return;
+
       setState(() {
         _moveToTop = true;
       });
