@@ -25,7 +25,7 @@ class ApiConstants {
     
   };
 
-  static int _currentUrlIndex = 10;
+  static int _currentUrlIndex = 0;
   static const String _urlIndexCacheKey = 'current_url_index';
 
   static Future<void> initializeBaseUrl() async {
