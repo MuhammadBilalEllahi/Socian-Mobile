@@ -1,3 +1,4 @@
+import 'package:socian/ads/NativeAdPostWidget.dart';
 import 'package:socian/components/ShiningLinearProgressBar.dart';
 import 'package:socian/components/loader.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
@@ -70,7 +71,9 @@ class _CampusPostsState extends ConsumerState<CampusPosts>
   isLoadingComplete: postState.loadingProgress >= 1.0,
 ),
 
-          Expanded(child: _buildPostsList(postState, isDark))
+
+          Expanded(child: _buildPostsList(postState, isDark)), 
+
         ],
       ),
     );
@@ -196,13 +199,15 @@ class _CampusPostsState extends ConsumerState<CampusPosts>
           debugPrint('Invalid post at index $index: $post');
           return const SizedBox.shrink();
         }
-
+        
         // Fetch user data for author
         log("VALUE OF FLAIR TYPE ${Flairs.campus.value}");
-        return PostCard(
+        return Column (children: [PostCard(
           post: post,
           flairType: Flairs.campus.value,
-        );
+        ), 
+          if( index % 4 ==0 )...[NativeAdPostWidget()]
+        ]);
       },
     );
   }

@@ -15,4 +15,11 @@
     <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
         <item name="android:windowBackground">?android:colorBackground</item>
     </style>
+
+    <color name="ad_background">#121212</color>
+    <color name="ad_text">#EEEEEE</color>
+    <color name="ad_text_secondary">#BBBBBB</color>
+    <color name="ad_button_background">#FFFFFF</color>
+    <color name="ad_button_text">#000000</color>
+    <color name="ad_media_background">#333333</color>
 </resources>

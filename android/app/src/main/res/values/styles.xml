@@ -17,4 +17,12 @@
     </style>
 
     <style name="Ucrop.CropTheme" parent="Theme.AppCompat.Light.NoActionBar"/>
+
+    <color name="ad_background">#FFFFFF</color>
+    <color name="ad_text">#111111</color>
+    <color name="ad_text_secondary">#333333</color>
+    <color name="ad_button_background">#000000</color>
+    <color name="ad_button_text">#FFFFFF</color>
+    <color name="ad_media_background">#EAEAEA</color>
+
 </resources>

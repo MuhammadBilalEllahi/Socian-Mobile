@@ -37,12 +37,6 @@ class _PostMediaState extends State<PostMedia>
   @override
   void initState() {
     super.initState();
-    _initializeVideo();
-    _initializeAudio();
-    _waveformController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1000),
-    )..repeat();
 
     
     // Initialize media widgets after frame
@@ -64,9 +58,19 @@ class _PostMediaState extends State<PostMedia>
       if (item['type']?.startsWith('image/') ?? false) {
         _cachedMediaWidgets.add(_buildImageItem(item, true));
       } else if (item['type']?.startsWith('video/') ?? false) {
+        
+    _initializeVideo();
         _cachedMediaWidgets.add(_buildVideoItem());
+        
+    
       } else if (item['type']?.startsWith('audio/') ?? false) {
+        _initializeAudio();
+    _waveformController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..repeat();
         _cachedMediaWidgets.add(_buildAudioItem());
+        
       }
     }
   }
@@ -530,6 +534,7 @@ class _PostMediaState extends State<PostMedia>
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
+      width: double.minPositive,
       margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -550,8 +555,10 @@ class _PostMediaState extends State<PostMedia>
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
+            // mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 decoration: BoxDecoration(
@@ -573,6 +580,7 @@ class _PostMediaState extends State<PostMedia>
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     AnimatedBuilder(
                       animation: _waveformController,

@@ -67,6 +67,9 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDTnSz8W8hgvXPGu18ugJMRfE9kCh4ecbY"/>
 
+<meta-data
+        android:name="com.google.android.gms.ads.APPLICATION_ID"
+        android:value="ca-app-pub-3181018871090574~2998812787"/>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

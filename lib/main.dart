@@ -6,11 +6,13 @@ import 'package:socian/core/utils/constants.dart';
 import 'package:socian/core/utils/route_guard.dart';
 import 'package:socian/theme/AppThemes.dart';
 import 'package:socian/shared/services/WebSocketService.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   WebSocketService().connect();
+   await MobileAds.instance.initialize();
 
   await AppPrefs.init();
   await IntroStatus.initializeFromCache();
