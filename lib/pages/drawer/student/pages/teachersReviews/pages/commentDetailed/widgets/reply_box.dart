@@ -268,9 +268,9 @@ class _ReplyBoxState extends ConsumerState<ReplyBox> {
                 child: GifPicker(
                   isDark: widget.isDark,
                   onGifSelected: (gifUrl) {
-                    debugPrint("gifUrl--------------------------------: $gifUrl");
+                    // debugPrint("gifUrl--------------------------------: $gifUrl");
                     _selectedGifUrl.value = gifUrl;
-                    debugPrint("gifUrl value--------------------------------: ${_selectedGifUrl.value}");
+                    // debugPrint("gifUrl value--------------------------------: ${_selectedGifUrl.value}");
                     _showGifPicker.value = false;
                   },
                 ),

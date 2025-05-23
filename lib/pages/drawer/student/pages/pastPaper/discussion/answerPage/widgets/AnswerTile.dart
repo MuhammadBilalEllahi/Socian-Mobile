@@ -17,7 +17,7 @@ class AnswerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("VALEUE ${answer['_id']}");
+    // debugPrint("VALEUE ${answer['_id']}");
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(MaterialPageRoute(

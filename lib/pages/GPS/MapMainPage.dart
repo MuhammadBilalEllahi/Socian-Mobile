@@ -49,7 +49,7 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
       _socket?.connect();
 
       _socket?.on('connect', (_) {
-        print('Connected to Socket.IO server');
+        debugPrint('Connected to Socket.IO server');
       });
 
       _socket?.on('attendeeLocationUpdate', (data) {
@@ -101,10 +101,10 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
         }
       });
 
-      _socket?.on('error', (error) => print('Socket error: $error'));
-      _socket?.on('disconnect', (_) => print('Disconnected from Socket.IO server'));
+      _socket?.on('error', (error) => debugPrint('Socket error: $error'));
+      _socket?.on('disconnect', (_) => debugPrint('Disconnected from Socket.IO server'));
     } catch (e) {
-      print('Socket initialization error: $e');
+      debugPrint('Socket initialization error: $e');
     }
   }
 

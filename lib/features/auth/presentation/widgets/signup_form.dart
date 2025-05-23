@@ -73,7 +73,7 @@ class _SignUpFormState extends State<SignUpForm> {
         isLoading = false;
       });
     } catch (e) {
-      print("Error fetching universities: $e");
+      // debugPrint("Error fetching universities: $e");
       setState(() {
         isLoading = false;
       });
@@ -122,7 +122,7 @@ class _SignUpFormState extends State<SignUpForm> {
         _usernameKey.currentState?.validate();
       });
     } catch (e) {
-      print("Error checking username: $e");
+      // debugPrint("Error checking username: $e");
     }
   }
 

@@ -78,7 +78,7 @@ class _PdfViewerState extends State<PdfViewer> {
             });
           },
           onError: (error) {
-            debugPrint("Error loading PDF: $error");
+            // debugPrint("Error loading PDF: $error");
             setState(() {
               this.error = error.toString();
               isLoading = false;

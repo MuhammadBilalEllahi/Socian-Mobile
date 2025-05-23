@@ -122,7 +122,7 @@ class _SubjectsViewState extends State<SubjectsView> {
         _teachers = response['data'] as List<dynamic>;
       });
     } catch (e) {
-      print('Error fetching teachers: $e');
+      // debugPrint('Error fetching teachers: $e');
     }
   }
 
@@ -152,12 +152,12 @@ class _SubjectsViewState extends State<SubjectsView> {
     try {
       final response =
           await apiClient.get('/api/department/subjects?departmentId=$id');
-      debugPrint("SUBJECTS? $response");
+      // debugPrint("SUBJECTS? $response");
       setState(() {
         pastPapers = Future.value(response);
       });
     } catch (e) {
-      print(e);
+      // debugPrint(e);
     }
   }
 
@@ -178,7 +178,7 @@ class _SubjectsViewState extends State<SubjectsView> {
         allowedExtensions: ['pdf'],
         withData: true,
         onFileLoading: (FilePickerStatus status) {
-          print("FilePickerStatus: $status");
+          // debugPrint("FilePickerStatus: $status");
         },
       );
 
@@ -188,7 +188,7 @@ class _SubjectsViewState extends State<SubjectsView> {
         });
       }
     } catch (e) {
-      print('Error picking file: $e');
+      // debugPrint('Error picking file: $e');
     }
   }
 

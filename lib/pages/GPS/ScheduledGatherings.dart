@@ -51,12 +51,12 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
         setState(() {
           _userId = decoded['_id']?.toString();
         });
-        print('User ID loaded: $_userId');
+        // debugPrint('User ID loaded: $_userId');
       } else {
-        print('No token found');
+        debugPrint('No token found');
       }
     } catch (e) {
-      print('Error decoding token: $e');
+      debugPrint('Error decoding token: $e');
     }
   }
 
@@ -73,20 +73,20 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
       _socket?.connect();
 
       _socket?.on('connect', (_) {
-        print('Connected to Socket.IO server');
+        debugPrint('Connected to Socket.IO server');
       });
 
       _socket?.on('reconnect', (_) {
-        print('Reconnected to Socket.IO server');
+        debugPrint('Reconnected to Socket.IO server');
       });
 
       _socket?.on('gatheringUpdate', (data) {
-        print('Gathering update received: $data');
+        debugPrint('Gathering update received: $data');
         _fetchGatherings();
       });
 
       _socket?.on('attendanceUpdate', (data) {
-        print('Attendance update received: $data');
+        debugPrint('Attendance update received: $data');
         final gatheringId = data['gatheringId']?.toString();
         final attendees = data['attendees'] as List<dynamic>?;
 
@@ -109,11 +109,11 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
         });
       });
 
-      _socket?.on('error', (error) => print('Socket error: $error'));
+      _socket?.on('error', (error) => debugPrint('Socket error: $error'));
       _socket?.on(
-          'disconnect', (_) => print('Disconnected from Socket.IO server'));
+          'disconnect', (_) => debugPrint('Disconnected from Socket.IO server'));
     } catch (e) {
-      print('Socket initialization error: $e');
+      // debugPrint('Socket initialization error: $e');
     }
   }
 
@@ -124,10 +124,10 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
     });
 
     try {
-      print('Attempting to fetch from: $baseUrl/api/gatherings/all');
+      // debugPrint('Attempting to fetch from: $baseUrl/api/gatherings/all');
       final response = await _apiClient.getList('/api/gatherings/all');
-      print('Response data: $response');
-      print('Response length: ${(response as List<dynamic>?)?.length ?? 0}');
+      // debugPrint('Response data: $response');
+      // debugPrint('Response length: ${(response as List<dynamic>?)?.length ?? 0}');
 
       final now = DateTime.now();
 
@@ -161,14 +161,14 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
         _isLoading = false;
       });
 
-      print(
-          'Upcoming gatherings: ${_upcomingGatherings.map((g) => g['title']).toList()}');
-      print(
-          'Current gatherings: ${_currentGatherings.map((g) => g['title']).toList()}');
-      print(
-          'Previous gatherings: ${_previousGatherings.map((g) => g['title']).toList()}');
+      // debugPrint(
+      //     'Upcoming gatherings: ${_upcomingGatherings.map((g) => g['title']).toList()}');
+      // debugPrint(
+      //     'Current gatherings: ${_currentGatherings.map((g) => g['title']).toList()}');
+      // debugPrint(
+      //     'Previous gatherings: ${_previousGatherings.map((g) => g['title']).toList()}');
     } catch (e) {
-      print('Error fetching gatherings: $e');
+      debugPrint('Error fetching gatherings: $e');
       setState(() {
         errorMessage = e is ApiException ? e.message : 'Error: ${e.toString()}';
         _isLoading = false;
@@ -178,9 +178,9 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
 
   Future<void> _deleteGathering(String gatheringId) async {
     try {
-      print('Deleting gathering: $gatheringId');
+      debugPrint('Deleting gathering: $gatheringId');
       final response = await _apiClient.delete('/api/gatherings/$gatheringId');
-      print('Delete response: $response');
+      debugPrint('Delete response: $response');
 
       if (response['success'] == true) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -189,7 +189,7 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
         await _fetchGatherings();
       }
     } catch (e) {
-      print('Error deleting gathering: $e');
+      debugPrint('Error deleting gathering: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -747,9 +747,9 @@ class _GatheringDetailScreenState extends State<GatheringDetailScreen>
       setState(() {
         _userId = userId;
       });
-      print('User ID loaded: $_userId');
+      debugPrint('User ID loaded: $_userId');
     } catch (e) {
-      print('Error loading user ID: $e');
+      debugPrint('Error loading user ID: $e');
     }
   }
 
@@ -763,7 +763,7 @@ class _GatheringDetailScreenState extends State<GatheringDetailScreen>
         });
       }
     } catch (e) {
-      print('Error loading user name: $e');
+      debugPrint('Error loading user name: $e');
     }
   }
 
@@ -815,7 +815,7 @@ class _GatheringDetailScreenState extends State<GatheringDetailScreen>
 
   void _initSocket() {
     widget.socket?.on('attendanceUpdate', (data) {
-      print('Attendance update in detail screen: $data');
+      debugPrint('Attendance update in detail screen: $data');
       final gatheringId = data['gatheringId']?.toString();
       final attendees = data['attendees'] as List<dynamic>?;
 
@@ -850,7 +850,7 @@ class _GatheringDetailScreenState extends State<GatheringDetailScreen>
       });
       _checkIfWithinRadius();
     } catch (e) {
-      print('Error getting user location: $e');
+      debugPrint('Error getting user location: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to get location: $e')),
       );
@@ -909,7 +909,7 @@ class _GatheringDetailScreenState extends State<GatheringDetailScreen>
         });
         await _updateLocation(newLocation.latitude, newLocation.longitude);
       } catch (e) {
-        print('Error updating location: $e');
+        debugPrint('Error updating location: $e');
       }
     });
   }
@@ -925,14 +925,14 @@ class _GatheringDetailScreenState extends State<GatheringDetailScreen>
         data,
         headers: {'Content-Type': 'application/json'},
       );
-      print('Update location response: $response');
+      debugPrint('Update location response: $response');
       if (response['removed'] == true) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('You have left the gathering radius')),
         );
       }
     } catch (e) {
-      print('Error updating location: $e');
+      debugPrint('Error updating location: $e');
     }
   }
 
@@ -977,7 +977,7 @@ class _GatheringDetailScreenState extends State<GatheringDetailScreen>
         const SnackBar(content: Text('Attendance marked successfully')),
       );
     } catch (e) {
-      print('Error marking attendance: $e');
+      debugPrint('Error marking attendance: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.toString())),
       );

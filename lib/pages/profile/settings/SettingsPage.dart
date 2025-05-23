@@ -118,15 +118,15 @@ class SettingsPage extends ConsumerWidget {
             'Preferences',
             [
               _buildListTile(
-                'Server Selection',
+                'Server Selection Disabled',
                 Icons.cloud_outlined,
                 () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ServerSelectionPage(),
-                    ),
-                  );
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (context) => const ServerSelectionPage(),
+                  //   ),
+                  // );
                 },
                 isDarkMode,
               ),

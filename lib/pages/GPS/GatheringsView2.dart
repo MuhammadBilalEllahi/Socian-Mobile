@@ -86,7 +86,7 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
       });
       _updateMapCamera();
     } catch (e) {
-      print('Error getting user location: $e');
+      // debugPrint('Error getting user location: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to get location: $e')),
       );
@@ -118,20 +118,20 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
       _socket?.connect();
 
       _socket?.on('connect', (_) {
-        print('Connected to Socket.IO server');
+        debugPrint('Connected to Socket.IO server');
       });
 
       _socket?.on('reconnect', (_) {
-        print('Reconnected to Socket.IO server');
+        debugPrint('Reconnected to Socket.IO server');
       });
 
       _socket?.on('gatheringUpdate', (data) {
-        print('Gathering update received: $data');
+        // debugPrint('Gathering update received: $data');
         _fetchGatherings();
       });
 
       _socket?.on('attendanceUpdate', (data) {
-        print('Attendance update received: $data');
+        // debugPrint('Attendance update received: $data');
         final gatheringId = data['gatheringId']?.toString();
         final attendees = data['attendees'] as List<dynamic>?;
 
@@ -146,10 +146,10 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
         });
       });
 
-      _socket?.on('error', (error) => print('Socket error: $error'));
-      _socket?.on('disconnect', (_) => print('Disconnected from Socket.IO server'));
+      _socket?.on('error', (error) => debugPrint('Socket error: $error'));
+      _socket?.on('disconnect', (_) => debugPrint('Disconnected from Socket.IO server'));
     } catch (e) {
-      print('Socket initialization error: $e');
+      debugPrint('Socket initialization error: $e');
     }
   }
 
@@ -182,9 +182,9 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
       });
 
       await _updateMapElements();
-      print('Current gatherings: ${_currentGatherings.map((g) => {'title': g['title'], 'attendees': (g['attendees'] as List<dynamic>?)?.length ?? 0}).toList()}');
+      debugPrint('Current gatherings: ${_currentGatherings.map((g) => {'title': g['title'], 'attendees': (g['attendees'] as List<dynamic>?)?.length ?? 0}).toList()}');
     } catch (e) {
-      print('Error fetching gatherings: $e');
+      debugPrint('Error fetching gatherings: $e');
       setState(() {
         errorMessage = e is ApiException ? e.message : 'Error: ${e.toString()}';
         _isLoading = false;

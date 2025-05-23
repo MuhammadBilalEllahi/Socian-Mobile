@@ -206,7 +206,7 @@ class _OTPVerificationScreenState extends ConsumerState<OTPVerificationScreen> {
         return null;
       }
     } catch (error) {
-      print("Error during OTP verification: $error");
+      // debugPrint("Error during OTP verification: $error");
       return null;
     }
   }

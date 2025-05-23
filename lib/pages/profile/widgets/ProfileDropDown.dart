@@ -33,13 +33,13 @@ class ProfileDropDown extends ConsumerWidget {
           onSelected: (value) {
             switch (value) {
               case 1:
-                print("View Profile");
+                debugPrint("View Profile");
                 break;
               case 2:
-                print("Edit Profile");
+                debugPrint("Edit Profile");
                 break;
               case 3:
-                print("Settings");
+                debugPrint("Settings");
                 break;
               case 4:
                 ref.read(authProvider.notifier).logout();

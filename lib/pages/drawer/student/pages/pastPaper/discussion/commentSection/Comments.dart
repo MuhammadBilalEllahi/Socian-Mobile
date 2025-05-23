@@ -52,7 +52,7 @@ class _CommentsState extends State<Comments> {
       final response = await _apiClient.post(
           '/api/discussion/create-get?toBeDisccusedId=${widget.toBeDiscussedId}',
           {});
-      debugPrint("COMMENTS: $response");
+      // debugPrint("COMMENTS: $response");
       setState(() {
         comments = response['discussion']['discussioncomments'] ?? [];
         isLoading = false;

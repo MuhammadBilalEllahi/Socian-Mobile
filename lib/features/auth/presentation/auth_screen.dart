@@ -193,8 +193,8 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
       final endpoint = '/api/auth/forgot-password';
       final fullUrl = '${ApiConstants.baseUrl}$endpoint';
 
-      debugPrint('Making forgot password request to: $fullUrl');
-      debugPrint('Request payload: {"email": "$email"}');
+      //debugPrint('Making forgot password request to: $fullUrl');
+      //debugPrint('Request payload: {"email": "$email"}');
 
       final response = await apiClient.put(
         endpoint,
@@ -205,7 +205,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
         },
       );
 
-      debugPrint('Forgot password response: $response');
+      //debugPrint('Forgot password response: $response');
 
       if (mounted) {
         setState(() {
@@ -220,14 +220,14 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
         );
       }
     } on ApiException catch (e) {
-      debugPrint('Forgot password API error: ${e.message}');
+      //debugPrint('Forgot password API error: ${e.message}');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: ${e.message}')),
         );
       }
     } catch (e) {
-      debugPrint('Unexpected error in forgot password: $e');
+      //debugPrint('Unexpected error in forgot password: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Unexpected error occurred')),
@@ -247,8 +247,8 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
       final endpoint = '/api/auth/verify/otp/password';
       final fullUrl = '${ApiConstants.baseUrl}$endpoint';
 
-      debugPrint('Making OTP verification request to: $fullUrl');
-      debugPrint('Request payload: {"email": "$email", "otp": "$otp"}');
+      //debugPrint('Making OTP verification request to: $fullUrl');
+      //debugPrint('Request payload: {"email": "$email", "otp": "$otp"}');
 
       final response = await apiClient.post(
         endpoint,
@@ -262,7 +262,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
         },
       );
 
-      debugPrint('OTP verification response: $response');
+      //debugPrint('OTP verification response: $response');
 
       final token = response['token'];
       if (mounted) {
@@ -281,14 +281,14 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
         });
       }
     } on ApiException catch (e) {
-      debugPrint('OTP verification error: ${e.message}');
+      //debugPrint('OTP verification error: ${e.message}');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: ${e.message}')),
         );
       }
     } catch (e) {
-      debugPrint('Unexpected error in OTP verification: $e');
+      //debugPrint('Unexpected error in OTP verification: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Invalid OTP. Please try again')),

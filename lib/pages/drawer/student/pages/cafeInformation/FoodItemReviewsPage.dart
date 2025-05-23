@@ -46,7 +46,7 @@ class _FoodItemReviewsPageState extends State<FoodItemReviewsPage> {
         filteredReviews = reviews;
       });
     } catch (e) {
-      print('Error fetching reviews: $e');
+      // debugPrint('Error fetching reviews: $e');
     }
   }
 
@@ -70,7 +70,7 @@ class _FoodItemReviewsPageState extends State<FoodItemReviewsPage> {
         Navigator.pop(context);
       }
     } catch (e) {
-      print('Error submitting rating: $e');
+      // debugPrint('Error submitting rating: $e');
     }
   }
 

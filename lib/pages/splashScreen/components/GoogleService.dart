@@ -26,8 +26,13 @@ class GoogleSignInService extends StateNotifier<AuthState> {
     try {
       state = state.copyWith(isLoading: true, error: null);
 
-      print('Google ID: $googleClientId');
+// ?? will be used for ios or android switching
+//       final isAndroid = defaultTargetPlatform == TargetPlatform.android;
+// final googleClientId = isAndroid
+
+      debugPrint('Google ID: $googleClientId');
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      debugPrint('Google User: $googleUser');
       if (googleUser == null) {
         state = state.copyWith(isLoading: false);
         return; // User canceled login
@@ -35,6 +40,7 @@ class GoogleSignInService extends StateNotifier<AuthState> {
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final String? idToken = googleAuth.idToken;
+      debugPrint("idToken: $idToken");
 
       if (idToken == null) {
         state = state.copyWith(isLoading: false, error: "Failed to get ID token.");
@@ -62,6 +68,14 @@ class GoogleSignInService extends StateNotifier<AuthState> {
         state = state.copyWith(isLoading: false, error: "Invalid response from server.");
       }
     } catch (e) {
+      debugPrint('Error during Google Sign-In: $e');
+      if (e is GoogleSignInAccount) {
+        state = state.copyWith(isLoading: false, error: "Google Sign-In canceled.");
+      } else if (e is ApiException) {
+        state = state.copyWith(isLoading: false, error: e.message);
+      } else {
+        state = state.copyWith(isLoading: false, error: "An unknown error occurred.");
+      }
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }

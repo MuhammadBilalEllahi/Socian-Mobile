@@ -30,7 +30,7 @@ class _DepartmentPageState extends State<DepartmentPage> {
   void fetchDepartments() async {
     try {
       final response = await apiClient.get(ApiConstants.campus);
-      debugPrint("DEPARTMENTS? $response");
+      // debugPrint("DEPARTMENTS? $response");
       setState(() {
         departments = Future.value(response['departments'] ?? []);
       });
@@ -204,7 +204,7 @@ class _DepartmentPageState extends State<DepartmentPage> {
                           color: Colors.transparent,
                           child: InkWell(
                             onTap: () {
-                              debugPrint("DEPARTMENT DATA $department");
+                              // debugPrint("DEPARTMENT DATA $department");
                               final departmentId =
                                   department['_id']?.toString();
                               if (departmentId == null ||

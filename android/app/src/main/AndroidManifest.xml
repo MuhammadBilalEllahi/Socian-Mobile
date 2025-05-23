@@ -60,7 +60,7 @@
             android:value="false" />
         <meta-data
     android:name="com.google.android.gms.auth.api.signin"
-    android:value="1076027750526-li5gkit9klq06mmocutusfb6ta8e1etc.apps.googleusercontent.com" />
+    android:value="1076027750526-hvf2a71v6lkoc0do26hnvth9gjtovia1.apps.googleusercontent.com" />
 
         <!-- Add Google Maps API Key -->
         <meta-data

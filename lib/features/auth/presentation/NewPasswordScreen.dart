@@ -43,9 +43,9 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen> {
       final endpoint = '/api/auth/newPassword';
       final fullUrl = '${ApiConstants.baseUrl}$endpoint';
 
-      debugPrint('Making new password request to: $fullUrl');
-      debugPrint(
-          'Request payload: {"token": "${widget.token}", "newPassword": "<hidden>"}');
+      // debugPrint('Making new password request to: $fullUrl');
+      // debugPrint(
+      //     'Request payload: {"token": "${widget.token}", "newPassword": "<hidden>"}');
 
       await apiClient.post(
         endpoint,

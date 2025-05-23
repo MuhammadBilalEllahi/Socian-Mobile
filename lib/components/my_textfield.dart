@@ -116,20 +116,20 @@ class myTextField extends StatelessWidget {
 //           onInputValidated: (bool value) {
 //             if (value) {
 //               var number = PhoneNumber().phoneNumber;
-//               print("$number");
+//               debugPrint("$number");
 //               // The input is considered valid, update the textEditingController
 //               widget._textEditingController.text =
 //                   "$phoneCode${widget._textEditingController.text}";
-//               print(widget._textEditingController.text);
-//               print(value);
+//               debugPrint(widget._textEditingController.text);
+//               debugPrint(value);
 //             }
 //           },
 //           onInputChanged: (PhoneNumber number) {
 //             phoneCode = number.dialCode!;
-//             print(phoneCode);
+//             debugPrint(phoneCode);
 //             // Access the entered phone number
 //             String phoneNumber = number.phoneNumber ?? "";
-//             print("$phoneNumber and ${widget._textEditingController.text}");
+//             debugPrint("$phoneNumber and ${widget._textEditingController.text}");
 
 //             // Handle phone number changes if needed
 //           },

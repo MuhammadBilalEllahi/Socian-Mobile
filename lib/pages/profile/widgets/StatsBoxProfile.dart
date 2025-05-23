@@ -15,13 +15,13 @@ class _StatsBoxProfileState extends ConsumerState<StatsBoxProfile> {
 
         final auth = ref.watch(authProvider);
 
-print("auth ${auth.user}");
+debugPrint("auth ${auth.user}");
 
 var postCredibility = auth.user?['profile']['credibility']['postCredibility'] ?? 0;
 var commentCredibility = auth.user?['profile']['credibility']['commentCredibility'] ?? 0;
 final credibilities =  postCredibility + commentCredibility ?? 0;
-print("auth credibilty }");
-print("auth credibilty ${auth.user?['profile']['credibility']['commentCredibility']}");
+debugPrint("auth credibilty }");
+debugPrint("auth credibilty ${auth.user?['profile']['credibility']['commentCredibility']}");
 
 
 

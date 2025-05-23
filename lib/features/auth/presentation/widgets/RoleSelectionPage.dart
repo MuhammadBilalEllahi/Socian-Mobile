@@ -50,7 +50,7 @@ class RoleSelectionPage extends StatelessWidget {
                     "role": AppRoles.student,
                   },
                 );
-                debugPrint("Student selected");
+                // debugPrint("Student selected");
               },
             ),
             const SizedBox(height: 20),
@@ -67,7 +67,7 @@ class RoleSelectionPage extends StatelessWidget {
                     "role": AppRoles.teacher,
                   },
                 );
-                debugPrint("Faculty Member selected");
+                // debugPrint("Faculty Member selected");
               },
             ),
             const SizedBox(height: 20),
@@ -84,7 +84,7 @@ class RoleSelectionPage extends StatelessWidget {
                     "role": AppRoles.alumni,
                   },
                 );
-                debugPrint("Alumni selected");
+                // debugPrint("Alumni selected");
               },
             ),
           ],

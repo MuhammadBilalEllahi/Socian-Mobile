@@ -50,7 +50,7 @@ class _GpsInitialPageState extends State<GpsInitialPage> {
     }
 
     // Permission granted (LocationPermission.always or LocationPermission.whileInUse)
-    print('Location services enabled and permission granted');
+    // debugPrint('Location services enabled and permission granted');
   }
 
   Future<void> _showEnableLocationDialog() async {

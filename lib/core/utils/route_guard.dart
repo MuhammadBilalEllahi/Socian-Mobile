@@ -40,7 +40,7 @@ class RouteGuard {
   static Route<dynamic>? onGenerateRoute(
       RouteSettings settings, WidgetRef ref) {
     final auth = ref.watch(authProvider);
-    debugPrint("The role is ${auth.user}");
+    // debugPrint("The role is ${auth.user}");
     final userRole = auth.user?['role'] ?? '';
     if(userRole != null && auth.user != null) {
       

@@ -106,7 +106,7 @@ class _AddQuestionState extends State<AddQuestion> {
 
   String _calculateFullPath(String questionNumberOrAlphaBet,
       {String? parentPath}) {
-    debugPrint("THIS IS CALCULT $questionNumberOrAlphaBet and $parentPath");
+    // debugPrint("THIS IS CALCULT $questionNumberOrAlphaBet and $parentPath");
     if (parentPath == null || parentPath.isEmpty) {
       return questionNumberOrAlphaBet;
     }

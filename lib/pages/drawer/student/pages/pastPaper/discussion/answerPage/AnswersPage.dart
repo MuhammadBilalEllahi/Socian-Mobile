@@ -59,7 +59,7 @@ class _AnswersPageState extends State<AnswersPage> {
             '/api/discussion/questions/populated/all',
             {'toBeDiscussedId': paper['_id']});
 
-        debugPrint("RESPONSE __ ${response['answers']}");
+        // debugPrint("RESPONSE __ ${response['answers']}");
         setState(() {
           answers = List<Map<String, dynamic>>.from(response['answers'] ?? []);
           isLoading = false;

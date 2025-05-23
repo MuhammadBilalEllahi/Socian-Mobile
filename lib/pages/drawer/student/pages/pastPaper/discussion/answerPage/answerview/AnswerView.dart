@@ -61,7 +61,7 @@ class _AnswerViewState extends State<AnswerView> {
     try {
       final response = await _apiClient
           .get('/api/discussion/answer/comments?answerId=${widget.answerId}');
-      debugPrint("COMMENTS $response");
+      // debugPrint("COMMENTS $response");
       final commentList = (response is Map && response['comment'] is List)
           ? response['comment'] as List<dynamic>
           : <dynamic>[];

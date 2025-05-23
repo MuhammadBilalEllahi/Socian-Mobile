@@ -12,13 +12,13 @@ class AuthDataSourceImpl implements AuthDataSource {
 
   @override
   Future<Map<String, dynamic>> login(String email, String password) async {
-    print(
-        "4 - File: auth_data_source_impl.dart - This is credentials: $email and $password");
+    // debugPrint(
+    //     "4 - File: auth_data_source_impl.dart - This is credentials: $email and $password");
 
     try {
       // Adding a print to check the API call
-      debugPrint(
-          "4.1 - Making API call to login endpoint ${ApiConstants.baseUrl}");
+      // debugPrint(
+      //     "4.1 - Making API call to login endpoint ${ApiConstants.baseUrl}");
 
       final response = await client.post(
         ApiConstants.loginEndpoint,
@@ -27,14 +27,14 @@ class AuthDataSourceImpl implements AuthDataSource {
       );
 
       // Check the response status
-      print("4.2 - API call response: ${response.toString()}");
+      // debugPrint("4.2 - API call response: ${response.toString()}");
 
       if (response.containsKey('access_token')) {
         String token = response['access_token'];
 
         // await SecureStorageService.instance.saveToken(token);
         // await  SharedPreferencesService.instance.saveToken(token);
-        print("Token received: $token");
+        // debugPrint("Token received: $token");
 
         return {'access_token': token};
       } else {
@@ -43,7 +43,7 @@ class AuthDataSourceImpl implements AuthDataSource {
       // return response;
     } catch (e) {
       // Catching any errors and logging them
-      print("4.3 - Error in API call: $e");
+      // debugPrint("4.3 - Error in API call: $e");
       rethrow;
     }
 // Assuming response is already a Map
@@ -57,7 +57,7 @@ class AuthDataSourceImpl implements AuthDataSource {
 // authController.updateLoginState(token);
 
 // final jwt = JWT.decode(token);
-// print(jwt['userId']);
+// debugPrint(jwt['userId']);
 
 
 

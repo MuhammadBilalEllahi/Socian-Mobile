@@ -6,7 +6,7 @@ class AuthUseCases {
   AuthUseCases(this.authDataSource);
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-        print("3 - File: auth_usecase.dart - This is credentials: $email and $password");
+        // debugPrint("3 - File: auth_usecase.dart - This is credentials: $email and $password");
 
     return await authDataSource.login(email, password);
   }

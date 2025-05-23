@@ -71,18 +71,18 @@ class _DiscussionViewState extends State<DiscussionView> {
 
   Future<File> createFileOfPdfUrl(String url) async {
     Completer<File> completer = Completer();
-    debugPrint("Start downloading PDF from: $url");
+    // debugPrint("Start downloading PDF from: $url");
     try {
       final filename = url.substring(url.lastIndexOf("/") + 1);
       final response = await http.get(Uri.parse(url));
       final bytes = response.bodyBytes;
       final dir = await getApplicationDocumentsDirectory();
-      debugPrint("Saving PDF to: ${dir.path}/$filename");
+      // debugPrint("Saving PDF to: ${dir.path}/$filename");
       File file = File("${dir.path}/$filename");
       await file.writeAsBytes(bytes, flush: true);
       completer.complete(file);
     } catch (e) {
-      debugPrint("Error downloading PDF: $e");
+      // debugPrint("Error downloading PDF: $e");
       throw Exception('Error downloading PDF file: $e');
     }
     return completer.future;
@@ -91,7 +91,7 @@ class _DiscussionViewState extends State<DiscussionView> {
   void loadPaper(int index) async {
     if (index >= 0 && index < papers.length) {
       final paper = papers[index];
-      debugPrint("DATAof $paper");
+      // debugPrint("DATAof $paper");
       id = paper['_id'];
       if (paper['files'] != null && paper['files'].isNotEmpty) {
         final file = paper['files'].firstWhere(
@@ -176,7 +176,7 @@ class _DiscussionViewState extends State<DiscussionView> {
           }
         }
         isLoading = false;
-        debugPrint("----------papers: ${papers[currentIndex]}");
+        // debugPrint("----------papers: ${papers[currentIndex]}");
       });
     } catch (e) {
       setState(() {

@@ -254,8 +254,7 @@ class _ReplyReplyItemState extends State<ReplyReplyItem> {
                         setState(() {
                           _showReplyBox = !_showReplyBox;
                           _replyTo = widget.reply['user']['_id'];
-                          debugPrint(
-                              'replyTo: $_replyTo ${widget.reply['user']['name']}');
+                          // debugPrint(  'replyTo: $_replyTo ${widget.reply['user']['name']}');
                         });
                       },
                       style: IconButton.styleFrom(

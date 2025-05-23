@@ -17,7 +17,7 @@ class ApiConstants {
     -3: 'https://j9kfnb6c-8080.inc1.devtunnels.ms', //bilal
     -2: 'https://w7x50p90-8080.inc1.devtunnels.ms', //rayyan
     -1: "http://10.135.58.129:8080", // localhost
-    0: "https://api.socian.me", // production
+    0: "https://api.socian.app", // production
 
     1: "http://192.168.1.1:8080",
     10: "http://192.168.1.10:8080",
@@ -25,7 +25,7 @@ class ApiConstants {
     
   };
 
-  static int _currentUrlIndex = 10;
+  static int _currentUrlIndex = 0;
   static const String _urlIndexCacheKey = 'current_url_index';
 
   static Future<void> initializeBaseUrl() async {

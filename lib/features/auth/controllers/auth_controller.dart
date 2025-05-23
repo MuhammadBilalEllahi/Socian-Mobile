@@ -125,7 +125,7 @@ class AuthController extends StateNotifier<AuthState> {
 //   AuthController({required this.authUseCases}) : super(const AuthState());
 
 //   Future<void> login(String email, String password) async {
-//     print(
+//     debugPrint(
 //         "2 - File: auth_controller.dart - This is credentials: $email and $password");
 
 //     state = state.copyWith(isLoading: true);
@@ -133,16 +133,16 @@ class AuthController extends StateNotifier<AuthState> {
 //     try {
 //       final response = await authUseCases.login(email, password);
 
-//       print("cameback here $response");
+//       debugPrint("cameback here $response");
 
 //       final token = response['token'];
-//       print("token here $token");
+//       debugPrint("token here $token");
 
 //       // String yourToken = "";
 //       Map<String, dynamic> user = JwtDecoder.decode(token);
 
 //       // final user = jsonDecode(token);
-// //       print("\n\n\n user here $user");
+// //       debugPrint("\n\n\n user here $user");
 
 //       if(user.isNotEmpty){
 //           state = state.copyWith(user: user, token: token,isLoading: false, error: null);

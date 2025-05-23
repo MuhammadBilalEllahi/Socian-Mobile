@@ -50,7 +50,7 @@ class _CommentDetailsPageState extends State<CommentDetailsPage> {
       setState(() {
         _replies = List<Map<String, dynamic>>.from(
             response['replies']['replies'] ?? []);
-        debugPrint("\n response _replies: ${_replies.toString()}");
+        // debugPrint("\n response _replies: ${_replies.toString()}");
         _isLoading = false;
       });
     } catch (e) {
@@ -211,7 +211,7 @@ class _CommentDetailsPageState extends State<CommentDetailsPage> {
   }
 
   List<Widget> _buildMainReplies(List<Map<String, dynamic>> replies) {
-    debugPrint("_buildMainReplies: ${replies.toString()}");
+    // debugPrint("_buildMainReplies: ${replies.toString()}");
     return replies
         .where((reply) => reply['_id'] != null)
         .map((reply) => ReplyItem(

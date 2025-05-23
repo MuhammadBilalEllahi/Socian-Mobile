@@ -47,17 +47,17 @@ class _ReplyItemState extends ConsumerState<ReplyItem> {
     try {
       final response = await apiClient.get(
           '/api/teacher/reply/reply/feedback?feedbackCommentId=${widget.reply['_id']}');
-      debugPrint('response reply replies: $response');
+      // debugPrint('response reply replies: $response');
       final data = response['replies']['replies'] as List;
-      debugPrint('data reply replies: $data');
+      // debugPrint('data reply replies: $data');
       final mappedReplies =
           data.map((reply) => Map<String, dynamic>.from(reply as Map)).toList();
-      debugPrint('mappedReplies: $mappedReplies');
+      // debugPrint('mappedReplies: $mappedReplies');
       setState(() {
         _replyReplies = mappedReplies;
       });
     } catch (e) {
-      debugPrint('Error loading reply replies: $e');
+      // debugPrint('Error loading reply replies: $e');
     } finally {
       setState(() {
         _isLoadingReplies = false;

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:socian/core/utils/constants.dart';
 import 'package:socian/shared/services/secure_storage_service.dart';
 import 'package:dio/dio.dart';
@@ -128,7 +129,7 @@ class ApiClient {
 
       return response.data as T;
     } catch (e) {
-      print("Error in DIO GET $e");
+      debugPrint("Error in DIO GET $e");
       throw ApiException.fromDioError(e);
     }
   }
