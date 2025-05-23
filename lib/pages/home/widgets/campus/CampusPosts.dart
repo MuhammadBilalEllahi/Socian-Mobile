@@ -50,8 +50,8 @@ class _CampusPostsState extends ConsumerState<CampusPosts>
     final postState = ref.watch(postProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-  final authUser = ref.read(authProvider).user;
-      WebSocketService().joinNotification(authUser!['_id']);
+  // final authUser = ref.read(authProvider).user;
+      // WebSocketService().joinNotification(authUser!['_id']);
     
 
     return NotificationListener<ScrollNotification>(
@@ -81,55 +81,54 @@ class _CampusPostsState extends ConsumerState<CampusPosts>
 
   Widget _buildPostsList(PostProvider postState, bool isDark) {
     if (postState.isLoading && postState.posts.isEmpty) {
-      return ListView.builder(
-        padding: EdgeInsets.zero,
-        itemCount: 5,
-        itemBuilder: (context, index) {
-          return Shimmer.fromColors(
-            baseColor: isDark ? Colors.grey[800]! : Colors.grey[300]!,
-            highlightColor: isDark ? Colors.grey[700]! : Colors.grey[100]!,
-            child: Container(
-              margin:
-                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-              height: 200,
-              decoration: BoxDecoration(
-                color: isDark ? Colors.grey[900] : Colors.white,
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    height: 50,
-                    margin: const EdgeInsets.all(12.0),
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.grey[800] : Colors.grey[200],
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                  ),
-                  Container(
-                    height: 100,
-                    margin: const EdgeInsets.symmetric(horizontal: 12.0),
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.grey[800] : Colors.grey[200],
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                  ),
-                  Container(
-                    height: 20,
-                    margin: const EdgeInsets.all(12.0),
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.grey[800] : Colors.grey[200],
-                      borderRadius: BorderRadius.circular(4.0),
-                    ),
-                  ),
-                ],
-              ),
+     return ListView.builder(
+      padding: EdgeInsets.zero,
+      itemCount: 5,
+      itemBuilder: (context, index) {
+        return Shimmer.fromColors(
+          baseColor: isDark ? Colors.grey[800]! : Colors.grey[300]!,
+          highlightColor: isDark ? Colors.grey[700]! : Colors.grey[100]!,
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+            height: 200,
+            decoration: BoxDecoration(
+              color: isDark ? Colors.grey[900] : Colors.white,
+              borderRadius: BorderRadius.circular(12.0),
             ),
-          );
-        },
-      );
-    }
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  height: 40, // reduced from 50
+                  margin: const EdgeInsets.all(8.0), // reduced from 12
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.grey[800] : Colors.grey[200],
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+                Container(
+                  height: 100, // keep as is, no vertical margin
+                  margin: const EdgeInsets.symmetric(horizontal: 8.0), // reduced horizontal margin from 12
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.grey[800] : Colors.grey[200],
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+                Container(
+                  height: 16, // reduced from 20
+                  margin: const EdgeInsets.all(8.0), // reduced from 12
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.grey[800] : Colors.grey[200],
+                    borderRadius: BorderRadius.circular(4.0),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
     if (postState.hasError) {
       return Center(
@@ -150,6 +149,34 @@ class _CampusPostsState extends ConsumerState<CampusPosts>
                 fontWeight: FontWeight.w600,
               ),
             ),
+            
+
+
+              Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: TextButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  isDark ? Colors.white : Colors.black,
+                              foregroundColor:
+                                  isDark ? Colors.black : Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onPressed: ()=> ref.read(postProvider.notifier).fetchPosts(refreshIt: true),
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 12),
+                              child: Text("Refresh",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
+                                  )),
+                            )),
+                      ),
+                    
             const SizedBox(height: 8),
             Text(
               postState.errorMessage ?? 'Unknown error',
@@ -192,21 +219,21 @@ class _CampusPostsState extends ConsumerState<CampusPosts>
       itemCount: postState.posts.length,
       itemBuilder: (context, index) {
         final post = postState.posts[index];
-        debugPrint('Post at index $index: $post (type: ${post.runtimeType})');
+        // debugPrint('Post at index $index: $post (type: ${post.runtimeType})');
 
         // Validate post structure
         if (post is! Map<String, dynamic> || post['author']?['_id'] == null) {
-          debugPrint('Invalid post at index $index: $post');
+          // debugPrint('Invalid post at index $index: $post');
           return const SizedBox.shrink();
         }
         
         // Fetch user data for author
-        log("VALUE OF FLAIR TYPE ${Flairs.campus.value}");
+        // log("VALUE OF FLAIR TYPE ${Flairs.campus.value}");
         return Column (children: [PostCard(
           post: post,
           flairType: Flairs.campus.value,
         ), 
-          if( index % 4 ==0 )...[NativeAdPostWidget()]
+          // if( index % 10 ==0 )...[const NativeAdPostWidget()]
         ]);
       },
     );

@@ -13,6 +13,7 @@ void main() async {
   await dotenv.load(fileName: ".env");
  await WebSocketService().connect();
    await MobileAds.instance.initialize();
+MobileAds.instance.setAppMuted(true);
 
   await AppPrefs.init();
   await IntroStatus.initializeFromCache();

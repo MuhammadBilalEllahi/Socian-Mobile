@@ -5,6 +5,28 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:math' as math;
 import 'dart:io';
 import 'package:cached_video_player_plus/cached_video_player_plus.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+
+class CustomCacheManager extends CacheManager {
+  static const key = "customCache";
+
+  static final CustomCacheManager _instance = CustomCacheManager._();
+
+  factory CustomCacheManager() {
+    return _instance;
+  }
+
+  CustomCacheManager._()
+      : super(
+          Config(
+            key,
+            stalePeriod: const Duration(days: 3),
+            maxNrOfCacheObjects: 100, // Limit to 100 files
+            repo: JsonCacheInfoRepository(databaseName: key),
+            fileService: HttpFileService(),
+          ),
+        );
+}
 
 class PostMedia extends StatefulWidget {
   final List<dynamic>? media;
@@ -51,6 +73,7 @@ class _PostMediaState extends State<PostMedia>
 
 
   void _initializeMediaWidgets() {
+    
     if (widget.media == null || widget.media!.isEmpty) return;
     
     _cachedMediaWidgets.clear();
@@ -111,6 +134,8 @@ class _PostMediaState extends State<PostMedia>
             borderRadius: BorderRadius.circular(12),
             child: CachedNetworkImage(
               imageUrl: item['url'],
+              
+  cacheManager: CustomCacheManager(),
               width: double.infinity,
               height: 350,
               fit: BoxFit.contain,
@@ -946,6 +971,8 @@ class _FullScreenMediaViewState extends State<FullScreenMediaView> {
                 child: Center(
                   child: CachedNetworkImage(
                     imageUrl: file,
+                    
+  cacheManager: CustomCacheManager(),
                     fit: BoxFit.contain,
                     placeholder: (context, url) => const Center(
                       child: CircularProgressIndicator(),

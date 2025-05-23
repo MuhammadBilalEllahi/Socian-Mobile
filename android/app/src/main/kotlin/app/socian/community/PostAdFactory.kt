@@ -87,6 +87,9 @@ class PostAdFactory(private val context: Context) : NativeAdFactory {
 
 
         adView.mediaView?.setMediaContent(nativeAd.mediaContent)
+// nativeAd.mediaContent?.videoController?.setMute(true)
+// nativeAd.mediaContent?.videoController?.isMuted = true
+
 
         adView.setNativeAd(nativeAd)
 
