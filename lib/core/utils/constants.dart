@@ -22,10 +22,11 @@ class ApiConstants {
     1: "http://192.168.1.1:8080",
     10: "http://192.168.1.10:8080",
     4: "http://192.168.1.4:8080",
+    9: "http://192.168.1.9:8080",
     
   };
 
-  static int _currentUrlIndex = 10;
+  static int _currentUrlIndex = 9;
   static const String _urlIndexCacheKey = 'current_url_index';
 
   static Future<void> initializeBaseUrl() async {
@@ -87,6 +88,8 @@ class ApiConstants {
 
   static const String teachers = '/teacher';
   static const String campusTeachers = '$api$teachers/campus/teachers';
+
+  
 }
 
 class AppConstants {
@@ -127,6 +130,8 @@ class AppRoutes {
   static const String signupScreen = '/signup';
   static const String roleSelection = '/role-selection';
   static const String otpScreen = '/otp';
+
+static const String privacyPolicy = '/privacy-policy';
 
   // Student routes
   static const String home = '/home';

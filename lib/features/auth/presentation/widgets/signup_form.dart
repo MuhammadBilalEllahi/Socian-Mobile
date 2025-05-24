@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:socian/components/customSnackBar.dart';
 import 'package:socian/core/utils/constants.dart';
+import 'package:socian/features/auth/presentation/PrivacyPolicyScreen.dart';
 import 'package:socian/features/auth/presentation/widgets/otp_form.dart';
 import 'package:socian/shared/services/api_client.dart';
 import 'package:socian/shared/widgets/my_dropdown.dart';
@@ -27,6 +28,9 @@ class _SignUpFormState extends State<SignUpForm> {
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
   final _usernameController = TextEditingController();
+
+  bool _agreedToPolicy = false;
+  
 
   String? selectedUniversity;
   String? selectedDepartment;
@@ -154,6 +158,12 @@ class _SignUpFormState extends State<SignUpForm> {
   }
 
   Future<void> signupStudent() async {
+    if (!_agreedToPolicy) {
+      showSnackbar(context, 'You must agree to the privacy policy to continue.',
+          isError: true);
+      return;
+    }
+
     if (isSigningUp) return;
 
     setState(() {
@@ -174,6 +184,7 @@ class _SignUpFormState extends State<SignUpForm> {
         'campusId': campusId,
         'role': widget.role,
         'departmentId': selectedDepartment,
+        'agreedToPolicy': _agreedToPolicy,
       };
 
       final response =
@@ -184,7 +195,7 @@ class _SignUpFormState extends State<SignUpForm> {
       final userId = redirectUrl.split('/otp/')[1].split('?')[0];
       final email = redirectUrl.split('/otp/')[1].split('?')[1].split('=')[1];
 
-showSnackbar(context,"Sign up successful! Please verify your email.");
+      showSnackbar(context, "Sign up successful! Please verify your email.");
       // ScaffoldMessenger.of(context).showSnackBar(
       //   const SnackBar(
       //     content: Text('Sign up successful! Please verify your email.'),
@@ -195,7 +206,7 @@ showSnackbar(context,"Sign up successful! Please verify your email.");
       Navigator.pushNamed(context, AppRoutes.otpScreen,
           arguments: {'userId': userId, 'email': email});
     } catch (e) {
-      showSnackbar(context,e.toString(), isError: true);
+      showSnackbar(context, e.toString(), isError: true);
       // ScaffoldMessenger.of(context).showSnackBar(
       //   SnackBar(
       //     content: Text(e.toString()),
@@ -301,6 +312,55 @@ showSnackbar(context,"Sign up successful! Please verify your email.");
                     },
                   ),
                   validator: passwordValidator()),
+              Row(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Checkbox(
+                    activeColor: isDarkMode
+                        ? const Color.fromARGB(255, 138, 138, 138)
+                        : const Color.fromARGB(255, 20, 20, 20),
+                        checkColor: isDarkMode
+                        
+                        ? const Color.fromARGB(255, 20, 20, 20)
+                        : const Color.fromARGB(255, 138, 138, 138),
+                        visualDensity: VisualDensity.comfortable,
+                    value: _agreedToPolicy,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        _agreedToPolicy = value ?? false;
+                      });
+                    },
+                  ),
+                  const Text('I agree to the '),
+                  GestureDetector(
+                    onTap: () async {
+                      
+                    // showPrivacyPolicyBottomSheet(context),
+                        // Navigator.pushNamed(context, AppRoutes.privacyPolicy),
+                      final result = await Navigator.push<bool>(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const PrivacyPolicyScreen()),
+                      );
+
+                      if (result == true) {
+                        setState(() {
+                          _agreedToPolicy = true;
+                        });
+                      }
+                    },
+                    child: Text(
+                      'privacy policy',
+                      style: TextStyle(
+                        decoration: TextDecoration.underline,
+                        color: isDarkMode
+                            ? const Color.fromARGB(255, 138, 138, 138)
+                            : const Color.fromARGB(255, 20, 20, 20),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 10),
               Center(
                 child: GestureDetector(

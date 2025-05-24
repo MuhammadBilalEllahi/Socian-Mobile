@@ -10,6 +10,9 @@ class AuthRepoImpl implements AuthRepo {
   Future<Map<String, dynamic>> login(String email, String password) async {
     // debugPrint("5 - File: auth_repo_impl.dart - This is credentials: $email and $password");
 
+
+   
+
     final response = await apiClient.post(
       '/api/auth/login',
       {"email": email, "password": password},

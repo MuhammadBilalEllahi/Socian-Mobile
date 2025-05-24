@@ -7,6 +7,7 @@ import 'package:socian/core/utils/route_guard.dart';
 import 'package:socian/theme/AppThemes.dart';
 import 'package:socian/shared/services/WebSocketService.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:posthog_flutter/posthog_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +16,11 @@ void main() async {
    await MobileAds.instance.initialize();
 MobileAds.instance.setAppMuted(true);
 
+  final config = PostHogConfig(dotenv.env['POSTHOG_API'] ?? '');
+  config.debug = true;
+  config.captureApplicationLifecycleEvents = true;
+  config.host = dotenv.env['POSTHOG_HOST'] ?? '';
+  await Posthog().setup(config);
   await AppPrefs.init();
   await IntroStatus.initializeFromCache();
 
@@ -31,6 +37,10 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
+      navigatorObservers: [
+        // The PosthogObserver records screen views automatically
+        PosthogObserver(),
+      ],
       onGenerateRoute: (settings) => RouteGuard.onGenerateRoute(settings, ref),
       debugShowCheckedModeBanner: false,
       title: AppConstants.appName,

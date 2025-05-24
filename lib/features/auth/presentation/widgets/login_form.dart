@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:socian/core/utils/constants.dart';
 import 'package:socian/features/auth/domain/auth_state.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/shared/services/api_client.dart';
 import 'package:socian/shared/widgets/my_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,6 +22,19 @@ class _LoginFormState extends ConsumerState<LoginForm> {
 
   // State for toggling password visibility
   bool isPasswordVisible = false;
+  
+
+ 
+
+
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    
+  }
+
+
 
   void _login() async {
     if (emailController.text.isEmpty || passwordController.text.isEmpty) {

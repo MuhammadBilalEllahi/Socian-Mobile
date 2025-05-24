@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:socian/features/auth/presentation/PrivacyPolicyScreen.dart';
 import 'package:socian/pages/drawer/student/pages/cafeInformation/CafesHome.dart';
 import 'package:socian/pages/drawer/student/pages/pastPaper/DepartmentPage.dart';
 import 'package:socian/pages/drawer/student/pages/pastPaper/PastPapers.dart';
@@ -35,6 +36,16 @@ import 'package:socian/pages/AlumniPages/AlumniHome.dart';
 import 'package:socian/pages/AlumniPages/AlumniProfile.dart';
 import 'package:socian/pages/AlumniPages/AlumniJobs.dart';
 import 'package:socian/pages/profile/settings/SettingsPage.dart';
+import 'package:posthog_flutter/posthog_flutter.dart';
+
+
+void callPostHog(String userId,String name,String email,String role) async{
+      await Posthog().identify(
+  userId: userId,
+  userProperties: {"name": name, "email": email, "role": role},
+  userPropertiesSetOnce: {"date_of_first_log_in": DateTime.now().toIso8601String()},
+);
+}
 
 class RouteGuard {
   static Route<dynamic>? onGenerateRoute(
@@ -45,7 +56,14 @@ class RouteGuard {
     if(userRole != null && auth.user != null) {
       
       WebSocketService().joinNotification(auth.user!['_id']);
+callPostHog(
+        auth.user!['_id'],
+        auth.user!['name'] ?? '',
+        auth.user!['email'] ?? '',
+        userRole,
+      );
     }
+    
 
     // List of routes that don't require authentication
     final publicRoutes = [
@@ -55,6 +73,7 @@ class RouteGuard {
       AppRoutes.signupScreen,
       AppRoutes.roleSelection,
       AppRoutes.otpScreen,
+      AppRoutes.privacyPolicy
     ];
 
     // If trying to access splash screen, always allow it
@@ -121,6 +140,8 @@ class RouteGuard {
         return const RoleSelectionPage();
       case AppRoutes.otpScreen:
         return const OTPVerificationScreen();
+      case AppRoutes.privacyPolicy:
+        return const PrivacyPolicyScreen();
       default:
         return const AuthScreen();
     }
