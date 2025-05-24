@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:socian/core/utils/constants.dart';
 
 class LogoLoader extends StatefulWidget {
   const LogoLoader({super.key});
@@ -62,7 +63,7 @@ class _LogoLoaderState extends State<LogoLoader> with SingleTickerProviderStateM
               return Opacity(
                 opacity: _fadeAnimation.value,
                 child: const Text(
-                  'Beyond The Class',
+                  AppConstants.appName,
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,

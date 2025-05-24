@@ -270,7 +270,7 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Beyond The Class',
+                    AppConstants.appName,
                     style: TextStyle(
                       fontSize: 14,
                       color: (isDarkMode ? Colors.white : Colors.black)

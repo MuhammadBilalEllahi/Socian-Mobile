@@ -98,7 +98,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 Text(
                   AppConstants.appName,
                   style: TextStyle(
-                    fontSize: 36,
+                    fontSize: 66,
                     fontWeight: FontWeight.bold,
                     color: isDarkMode ? Colors.white : Colors.black87,
                     letterSpacing: 1.2,
