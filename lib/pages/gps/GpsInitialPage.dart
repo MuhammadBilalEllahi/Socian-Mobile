@@ -1,4 +1,5 @@
 import 'package:socian/pages/gps/CreateNewGathering.dart';
+import 'package:socian/pages/gps/CreateNewGathering2.dart';
 import 'package:socian/pages/gps/GatheringsView.dart';
 import 'package:socian/pages/gps/MapMainPage.dart';
 import 'package:socian/pages/gps/ScheduledGatherings.dart';
@@ -311,7 +312,7 @@ class _GpsInitialPageState extends State<GpsInitialPage> {
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const CreateNewGathering(),
+                      builder: (context) => const CreateNewGathering2(),
                     ),
                   ),
                   background: background,
