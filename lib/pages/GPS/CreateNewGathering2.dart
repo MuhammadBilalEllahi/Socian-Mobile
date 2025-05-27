@@ -1,5 +1,4 @@
 
-
 import 'package:socian/core/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,14 +7,14 @@ import 'package:intl/intl.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 
-class CreateNewGathering extends ConsumerStatefulWidget {
-  const CreateNewGathering({super.key});
+class CreateNewGathering2 extends ConsumerStatefulWidget {
+  const CreateNewGathering2({super.key});
 
   @override
-  ConsumerState<CreateNewGathering> createState() => _CreateNewGatheringState();
+  ConsumerState<CreateNewGathering2> createState() => _CreateNewGathering2State();
 }
 
-class _CreateNewGatheringState extends ConsumerState<CreateNewGathering> {
+class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
   final _formKey = GlobalKey<FormState>();
   final ApiClient _apiClient = ApiClient();
 
@@ -26,36 +25,61 @@ class _CreateNewGatheringState extends ConsumerState<CreateNewGathering> {
   DateTime _startTime = DateTime.now();
   DateTime _endTime = DateTime.now().add(const Duration(hours: 1));
   LatLng? _selectedLocation;
+  String? _selectedSocietyId;
+  List<Map<String, String>> _moderatedSocieties = [];
 
   // UI state
   bool _isLoading = false;
+  bool _isFetchingSocieties = true;
   String? _errorMessage;
   GoogleMapController? _mapController;
 
   @override
+  void initState() {
+    super.initState();
+    _fetchModeratedSocieties();
+  }
+
+  Future<void> _fetchModeratedSocieties() async {
+    setState(() {
+      _isFetchingSocieties = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final response = await _apiClient.get('/api/user/moderated-societies');
+      final societies = List<Map<String, dynamic>>.from(response);
+      setState(() {
+        _moderatedSocieties = societies.map((s) => {
+          '_id': s['_id'].toString(),
+          'name': s['name'].toString(),
+        }).toList();
+        if (_moderatedSocieties.isNotEmpty) {
+          _selectedSocietyId = _moderatedSocieties.first['_id'];
+        }
+        _isFetchingSocieties = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Failed to load societies';
+        _isFetchingSocieties = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final background =
-        isDarkMode ? const Color(0xFF000000) : const Color(0xFFFFFFFF);
-    final foreground =
-        isDarkMode ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
-    final muted =
-        isDarkMode ? const Color(0xFF1A1A1A) : const Color(0xFFF5F5F5);
-    final mutedForeground =
-        isDarkMode ? const Color(0xFFA3A3A3) : const Color(0xFF737373);
-    final border =
-        isDarkMode ? const Color(0xFF262626) : const Color(0xFFE5E5E5);
-    final accent =
-        isDarkMode ? const Color(0xFF1A1A1A) : const Color(0xFFFAFAFA);
-    final primaryColor =
-        isDarkMode ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
-    final cardBackground =
-        isDarkMode ? const Color(0xFF1A1A1A) : const Color(0xFFFFFFFF);
-    final cardBorder =
-        isDarkMode ? const Color(0xFF262626) : const Color(0xFFE5E5E5);
-    final cardShadow = isDarkMode
-        ? Colors.black.withOpacity(0.1)
-        : Colors.black.withOpacity(0.05);
+    final background = isDarkMode ? const Color(0xFF000000) : const Color(0xFFFFFFFF);
+    final foreground = isDarkMode ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
+    final muted = isDarkMode ? const Color(0xFF1A1A1A) : const Color(0xFFF5F5F5);
+    final mutedForeground = isDarkMode ? const Color(0xFFA3A3A3) : const Color(0xFF737373);
+    final border = isDarkMode ? const Color(0xFF262626) : const Color(0xFFE5E5E5);
+    final accent = isDarkMode ? const Color(0xFF1A1A1A) : const Color(0xFFFAFAFA);
+    final primaryColor = isDarkMode ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
+    final cardBackground = isDarkMode ? const Color(0xFF1A1A1A) : const Color(0xFFFFFFFF);
+    final cardBorder = isDarkMode ? const Color(0xFF262626) : const Color(0xFFE5E5E5);
+    final cardShadow = isDarkMode ? Colors.black.withOpacity(0.1) : Colors.black.withOpacity(0.05);
 
     return Scaffold(
       backgroundColor: background,
@@ -159,7 +183,70 @@ class _CreateNewGatheringState extends ConsumerState<CreateNewGathering> {
                                 ),
                               ),
                               const SizedBox(height: 24),
-                              // Simplified title field
+                              // Society selection
+                              _isFetchingSocieties
+                                  ? const Center(child: CircularProgressIndicator())
+                                  : _moderatedSocieties.isEmpty
+                                      ? Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 16),
+                                          child: Text(
+                                            'No societies found',
+                                            style: TextStyle(
+                                              color: mutedForeground,
+                                              fontSize: 14,
+                                              letterSpacing: -0.3,
+                                            ),
+                                          ),
+                                        )
+                                      : DropdownButtonFormField<String>(
+                                          decoration: InputDecoration(
+                                            labelText: 'Society',
+                                            labelStyle: TextStyle(
+                                              color: mutedForeground,
+                                              fontSize: 14,
+                                              letterSpacing: -0.3,
+                                            ),
+                                            border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(6),
+                                              borderSide: BorderSide(color: border),
+                                            ),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(6),
+                                              borderSide: BorderSide(color: border),
+                                            ),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(6),
+                                              borderSide: BorderSide(color: primaryColor),
+                                            ),
+                                          ),
+                                          value: _selectedSocietyId,
+                                          items: _moderatedSocieties.map((society) {
+                                            return DropdownMenuItem<String>(
+                                              value: society['_id'],
+                                              child: Text(
+                                                society['name']!,
+                                                style: TextStyle(
+                                                  color: foreground,
+                                                  fontSize: 14,
+                                                  letterSpacing: -0.3,
+                                                ),
+                                              ),
+                                            );
+                                          }).toList(),
+                                          onChanged: (value) {
+                                            setState(() {
+                                              _selectedSocietyId = value;
+                                            });
+                                          },
+                                          validator: (value) {
+                                            if (value == null || value.isEmpty) {
+                                              return 'Please select a society';
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                              const SizedBox(height: 16),
+                              // Title field
                               TextFormField(
                                 decoration: InputDecoration(
                                   labelText: 'Title',
@@ -187,15 +274,15 @@ class _CreateNewGatheringState extends ConsumerState<CreateNewGathering> {
                                   letterSpacing: -0.3,
                                 ),
                                 validator: (value) {
-                                  if (value == null || value.isEmpty) {
+                                  if (value == null || value.trim().isEmpty) {
                                     return 'Please enter a title';
                                   }
                                   return null;
                                 },
-                                onSaved: (value) => _title = value!,
+                                onSaved: (value) => _title = value!.trim(),
                               ),
                               const SizedBox(height: 16),
-                              // Simplified description field
+                              // Description field
                               TextFormField(
                                 decoration: InputDecoration(
                                   labelText: 'Description (optional)',
@@ -223,7 +310,7 @@ class _CreateNewGatheringState extends ConsumerState<CreateNewGathering> {
                                   letterSpacing: -0.3,
                                 ),
                                 maxLines: 3,
-                                onSaved: (value) => _description = value ?? '',
+                                onSaved: (value) => _description = value?.trim() ?? '',
                               ),
                               const SizedBox(height: 16),
                               // Radius slider
@@ -272,8 +359,7 @@ class _CreateNewGatheringState extends ConsumerState<CreateNewGathering> {
                                   border: Border.all(color: border),
                                 ),
                                 child: ListTile(
-                                  leading:
-                                      Icon(Icons.event, color: primaryColor),
+                                  leading: Icon(Icons.event, color: primaryColor),
                                   title: Text(
                                     'Start Time',
                                     style: TextStyle(
@@ -283,16 +369,14 @@ class _CreateNewGatheringState extends ConsumerState<CreateNewGathering> {
                                     ),
                                   ),
                                   subtitle: Text(
-                                    DateFormat('MMM dd, yyyy - hh:mm a')
-                                        .format(_startTime),
+                                    DateFormat('MMM dd, yyyy - hh:mm a').format(_startTime),
                                     style: TextStyle(
                                       color: mutedForeground,
                                       fontSize: 14,
                                       letterSpacing: -0.3,
                                     ),
                                   ),
-                                  trailing:
-                                      Icon(Icons.edit, color: primaryColor),
+                                  trailing: Icon(Icons.edit, color: primaryColor),
                                   onTap: () => _selectDateTime(context, true),
                                 ),
                               ),
@@ -305,8 +389,7 @@ class _CreateNewGatheringState extends ConsumerState<CreateNewGathering> {
                                   border: Border.all(color: border),
                                 ),
                                 child: ListTile(
-                                  leading: Icon(Icons.event_available,
-                                      color: primaryColor),
+                                  leading: Icon(Icons.event_available, color: primaryColor),
                                   title: Text(
                                     'End Time',
                                     style: TextStyle(
@@ -316,24 +399,21 @@ class _CreateNewGatheringState extends ConsumerState<CreateNewGathering> {
                                     ),
                                   ),
                                   subtitle: Text(
-                                    DateFormat('MMM dd, yyyy - hh:mm a')
-                                        .format(_endTime),
+                                    DateFormat('MMM dd, yyyy - hh:mm a').format(_endTime),
                                     style: TextStyle(
                                       color: mutedForeground,
                                       fontSize: 14,
                                       letterSpacing: -0.3,
                                     ),
                                   ),
-                                  trailing:
-                                      Icon(Icons.edit, color: primaryColor),
+                                  trailing: Icon(Icons.edit, color: primaryColor),
                                   onTap: () => _selectDateTime(context, false),
                                 ),
                               ),
                               // Error message
                               if (_errorMessage != null)
                                 Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 16),
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
                                   child: Text(
                                     _errorMessage!,
                                     style: TextStyle(
@@ -351,8 +431,7 @@ class _CreateNewGatheringState extends ConsumerState<CreateNewGathering> {
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: primaryColor,
                                     foregroundColor: background,
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 12),
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(6),
                                     ),
@@ -513,6 +592,14 @@ class _CreateNewGatheringState extends ConsumerState<CreateNewGathering> {
         return;
       }
 
+      // Validate society selection
+      if (_moderatedSocieties.isNotEmpty && _selectedSocietyId == null) {
+        setState(() {
+          _errorMessage = 'Please select a society';
+        });
+        return;
+      }
+
       setState(() {
         _isLoading = true;
         _errorMessage = null;
@@ -529,16 +616,22 @@ class _CreateNewGatheringState extends ConsumerState<CreateNewGathering> {
           'radius': _radius.round(),
           'startTime': _startTime.toIso8601String(),
           'endTime': _endTime.toIso8601String(),
+          'societyId': _selectedSocietyId,
         };
+
+        debugPrint('Create Gathering Payload: $data');
 
         final response = await _apiClient.post('/api/gatherings', data);
 
         if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Gathering created successfully')),
+          );
           Navigator.pop(context);
         }
       } catch (e) {
         setState(() {
-          _errorMessage = 'Failed to create gathering';
+          _errorMessage = 'Failed to create gathering: $e';
           _isLoading = false;
         });
       }
@@ -551,3 +644,5 @@ class _CreateNewGatheringState extends ConsumerState<CreateNewGathering> {
     super.dispose();
   }
 }
+
+
