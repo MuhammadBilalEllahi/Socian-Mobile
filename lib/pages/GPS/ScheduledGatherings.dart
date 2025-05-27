@@ -110,8 +110,8 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
       });
 
       _socket?.on('error', (error) => debugPrint('Socket error: $error'));
-      _socket?.on(
-          'disconnect', (_) => debugPrint('Disconnected from Socket.IO server'));
+      _socket?.on('disconnect',
+          (_) => debugPrint('Disconnected from Socket.IO server'));
     } catch (e) {
       // debugPrint('Socket initialization error: $e');
     }
@@ -140,20 +140,35 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
             (response as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [];
 
         for (var gathering in gatherings) {
+          final newNow = DateTime.now().toUtc().add(Duration(hours: 5));
+
           final startTime =
-              DateTime.tryParse(gathering['startTime']?.toString() ?? '')
-                  ?.toLocal();
+              DateTime.parse(gathering['startTime']?.toString() ?? '');
+
           final endTime =
-              DateTime.tryParse(gathering['endTime']?.toString() ?? '')
-                  ?.toLocal();
+              DateTime.parse(gathering['endTime']?.toString() ?? '');
+
+          debugPrint("Gathering ID: ${gathering['title']}");
+          debugPrint("TIME NOW $newNow");
+          debugPrint("Start  Time: ${gathering['startTime']}");
+          debugPrint("End Time: ${gathering['endTime']}");
+          debugPrint("Format Start Time: $startTime");
+          debugPrint("Format End Time: $endTime");
 
           if (startTime == null || endTime == null) continue;
 
-          if (startTime.isAfter(now)) {
+          debugPrint(
+              "startTime: endTime: newNow: ${startTime} $endTime $newNow}");
+          debugPrint(
+              "startTime.isBefore(newNow) ${startTime.isBefore(newNow)}");
+          debugPrint("endTime.isAfter(newNow) ${endTime.isAfter(newNow)}");
+
+          debugPrint("NewNOW is $newNow -------- startTime { $startTime }.isBefore(newNow) is ${startTime.isBefore(newNow)}------- &&----- endTime { $endTime }.isAfter(newNow) is ${endTime.isAfter(newNow)} evaluates: ${startTime.isBefore(newNow) && endTime.isAfter(newNow)}");
+          if (startTime.isAfter(newNow)) {
             _upcomingGatherings.add(gathering);
-          } else if (startTime.isBefore(now) && endTime.isAfter(now)) {
+          } else if (startTime.isBefore(newNow) && endTime.isAfter(newNow)) {
             _currentGatherings.add(gathering);
-          } else if (endTime.isBefore(now)) {
+          } else if (endTime.isBefore(newNow)) {
             _previousGatherings.add(gathering);
           }
         }
@@ -419,12 +434,10 @@ class _ScheduledGatheringsState extends ConsumerState<ScheduledGatherings>
         itemBuilder: (context, index) {
           final gathering = gatherings[index];
           final startTime =
-              DateTime.tryParse(gathering['startTime']?.toString() ?? '')
-                      ?.toLocal() ??
+              DateTime.tryParse(gathering['startTime']?.toString() ?? '') ??
                   DateTime.now();
           final endTime =
-              DateTime.tryParse(gathering['endTime']?.toString() ?? '')
-                      ?.toLocal() ??
+              DateTime.tryParse(gathering['endTime']?.toString() ?? '') ??
                   DateTime.now();
           final now = DateTime.now();
           final isActive = now.isAfter(startTime) && now.isBefore(endTime);
@@ -831,7 +844,7 @@ class _GatheringDetailScreenState extends State<GatheringDetailScreen>
   }
 
   void _checkGatheringStatus() {
-    final now = DateTime.now();
+    final now = DateTime.now().toUtc().add(Duration(hours: 5));
     setState(() {
       _isGatheringActive = now.isAfter(widget.gathering.startTime) &&
           now.isBefore(widget.gathering.endTime);
@@ -1111,7 +1124,7 @@ class _GatheringDetailScreenState extends State<GatheringDetailScreen>
                           size: 16, color: mutedForeground),
                       const SizedBox(width: 4),
                       Text(
-                        'Starts: ${DateFormat('MMM dd, yyyy - hh:mm a').format(widget.gathering.startTime)}',
+                        'Starts: ${DateFormat('MMM dd, yyyy - hh:mm a').format(widget.gathering.startTime.subtract(const Duration(hours: 5)))}',
                         style: TextStyle(color: mutedForeground),
                       ),
                     ],
@@ -1122,7 +1135,7 @@ class _GatheringDetailScreenState extends State<GatheringDetailScreen>
                       Icon(Icons.access_time, size: 16, color: mutedForeground),
                       const SizedBox(width: 4),
                       Text(
-                        'Ends: ${DateFormat('MMM dd, yyyy - hh:mm a').format(widget.gathering.endTime)}',
+                        'Ends: ${DateFormat('MMM dd, yyyy - hh:mm a').format(widget.gathering.endTime.subtract( const Duration(hours: 5)))}',
                         style: TextStyle(color: mutedForeground),
                       ),
                     ],
