@@ -1,7 +1,6 @@
-import 'package:socian/shared/services/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:socian/shared/services/shared_preferences.dart';
 
 class ApiConstants {
   // static const String localhostBaseUrl =
@@ -24,10 +23,9 @@ class ApiConstants {
     4: "http://192.168.1.4:8080",
     9: "http://192.168.1.9:8080",
     12: "http://192.168.100.111:8080",
-    
   };
 
-  static int _currentUrlIndex = 12;
+  static int _currentUrlIndex = -2;
   static const String _urlIndexCacheKey = 'current_url_index';
 
   static Future<void> initializeBaseUrl() async {
@@ -90,8 +88,6 @@ class ApiConstants {
 
   static const String teachers = '/teacher';
   static const String campusTeachers = '$api$teachers/campus/teachers';
-
-  
 }
 
 class AppConstants {
@@ -133,7 +129,7 @@ class AppRoutes {
   static const String roleSelection = '/role-selection';
   static const String otpScreen = '/otp';
 
-static const String privacyPolicy = '/privacy-policy';
+  static const String privacyPolicy = '/privacy-policy';
 
   // Student routes
   static const String home = '/home';
