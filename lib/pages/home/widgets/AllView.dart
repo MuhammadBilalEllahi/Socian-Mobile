@@ -1,10 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:socian/core/utils/constants.dart';
 import 'package:socian/pages/drawer/student/StudentDrawer.dart';
-import 'package:socian/pages/home/widgets/components/post/CreatePost.dart';
-import 'package:flutter/material.dart';
 import 'package:socian/pages/home/widgets/campus/CampusPosts.dart';
-import 'package:socian/pages/home/widgets/universities/AllUniversityPosts.dart';
+import 'package:socian/pages/home/widgets/components/post/CreatePost.dart';
 import 'package:socian/pages/home/widgets/intracampus/IntraCampus.dart';
+import 'package:socian/pages/home/widgets/universities/AllUniversityPosts.dart';
 
 class AllView extends StatefulWidget {
   const AllView({super.key});
@@ -82,31 +82,31 @@ class _AllViewState extends State<AllView> with TickerProviderStateMixin {
                     indicatorWeight: 3,
                     tabs: [
                       Tab(
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _isCampusView = !_isCampusView;
-                            });
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                _isCampusView ? 'Campus' : 'IntraCampus',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              _isCampusView ? 'Campus' : 'IntraCampus',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
                               ),
-                              const SizedBox(width: 4),
-                              Icon(
+                            ),
+                            const SizedBox(width: 4),
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _isCampusView = !_isCampusView;
+                                });
+                              },
+                              child: Icon(
                                 _isCampusView
                                     ? Icons.arrow_drop_down
                                     : Icons.arrow_drop_up,
                                 size: 20,
                               ),
-                            ],
-                          ),
+                            )
+                          ],
                         ),
                       ),
                       const Tab(

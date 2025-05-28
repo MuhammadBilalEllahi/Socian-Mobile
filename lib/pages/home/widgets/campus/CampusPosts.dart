@@ -1,20 +1,12 @@
-import 'package:socian/ads/NativeAdPostWidget.dart';
-import 'package:socian/components/ShiningLinearProgressBar.dart';
-import 'package:socian/components/loader.dart';
-import 'package:socian/features/auth/providers/auth_provider.dart';
-import 'package:socian/pages/drawer/student/StudentDrawer.dart';
-import 'package:socian/pages/home/widgets/universities/AllUniversityPosts.dart';
-import 'package:socian/shared/services/WebSocketService.dart';
 // import 'package:socian/services/user_info_provider.dart';
-import 'package:socian/shared/services/infoProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:socian/core/utils/constants.dart';
-import 'package:socian/shared/services/api_client.dart';
-import '../components/post/post.dart';
-import 'package:socian/core/usecases/PostProvider.dart';
 import 'package:shimmer/shimmer.dart';
-import 'dart:developer';
+import 'package:socian/components/ShiningLinearProgressBar.dart';
+import 'package:socian/core/usecases/PostProvider.dart';
+import 'package:socian/core/utils/constants.dart';
+
+import '../components/post/post.dart';
 
 class CampusPosts extends ConsumerStatefulWidget {
   const CampusPosts({super.key});
@@ -36,8 +28,6 @@ class _CampusPostsState extends ConsumerState<CampusPosts>
     });
   }
 
-  
-
   @override
   void dispose() {
     _tabController.dispose();
@@ -50,30 +40,27 @@ class _CampusPostsState extends ConsumerState<CampusPosts>
     final postState = ref.watch(postProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-  // final authUser = ref.read(authProvider).user;
-      // WebSocketService().joinNotification(authUser!['_id']);
-    
+    // final authUser = ref.read(authProvider).user;
+    // WebSocketService().joinNotification(authUser!['_id']);
 
     return NotificationListener<ScrollNotification>(
-  onNotification: (ScrollNotification notification) {
-    if (notification is OverscrollNotification &&
-        notification.overscroll < 0) {
-      // User is pulling down
-      ref.read(postProvider.notifier).fetchPosts(refreshIt: true);
-      
-    }
-    return false;
-  },
+      onNotification: (ScrollNotification notification) {
+        if (notification is OverscrollNotification &&
+            notification.overscroll < 0) {
+          // User is pulling down
+          ref.read(postProvider.notifier).fetchPosts(refreshIt: true);
+        }
+        return false;
+      },
       child: Column(
         children: [
-          if (postState.isRefreshing) ShiningLinearProgressBar(
-  progress: postState.loadingProgress, // you must add this field, value 0 to 1
-  isLoadingComplete: postState.loadingProgress >= 1.0,
-),
-
-
-          Expanded(child: _buildPostsList(postState, isDark)), 
-
+          if (postState.isRefreshing)
+            ShiningLinearProgressBar(
+              progress: postState
+                  .loadingProgress, // you must add this field, value 0 to 1
+              isLoadingComplete: postState.loadingProgress >= 1.0,
+            ),
+          Expanded(child: _buildPostsList(postState, isDark)),
         ],
       ),
     );
@@ -81,54 +68,56 @@ class _CampusPostsState extends ConsumerState<CampusPosts>
 
   Widget _buildPostsList(PostProvider postState, bool isDark) {
     if (postState.isLoading && postState.posts.isEmpty) {
-     return ListView.builder(
-      padding: EdgeInsets.zero,
-      itemCount: 5,
-      itemBuilder: (context, index) {
-        return Shimmer.fromColors(
-          baseColor: isDark ? Colors.grey[800]! : Colors.grey[300]!,
-          highlightColor: isDark ? Colors.grey[700]! : Colors.grey[100]!,
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-            height: 200,
-            decoration: BoxDecoration(
-              color: isDark ? Colors.grey[900] : Colors.white,
-              borderRadius: BorderRadius.circular(12.0),
+      return ListView.builder(
+        padding: EdgeInsets.zero,
+        itemCount: 5,
+        itemBuilder: (context, index) {
+          return Shimmer.fromColors(
+            baseColor: isDark ? Colors.grey[800]! : Colors.grey[300]!,
+            highlightColor: isDark ? Colors.grey[700]! : Colors.grey[100]!,
+            child: Container(
+              margin:
+                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              height: 200,
+              decoration: BoxDecoration(
+                color: isDark ? Colors.grey[900] : Colors.white,
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    height: 40, // reduced from 50
+                    margin: const EdgeInsets.all(8.0), // reduced from 12
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[800] : Colors.grey[200],
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  Container(
+                    height: 100, // keep as is, no vertical margin
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 8.0), // reduced horizontal margin from 12
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[800] : Colors.grey[200],
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  Container(
+                    height: 16, // reduced from 20
+                    margin: const EdgeInsets.all(8.0), // reduced from 12
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[800] : Colors.grey[200],
+                      borderRadius: BorderRadius.circular(4.0),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  height: 40, // reduced from 50
-                  margin: const EdgeInsets.all(8.0), // reduced from 12
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.grey[800] : Colors.grey[200],
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                ),
-                Container(
-                  height: 100, // keep as is, no vertical margin
-                  margin: const EdgeInsets.symmetric(horizontal: 8.0), // reduced horizontal margin from 12
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.grey[800] : Colors.grey[200],
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                ),
-                Container(
-                  height: 16, // reduced from 20
-                  margin: const EdgeInsets.all(8.0), // reduced from 12
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.grey[800] : Colors.grey[200],
-                    borderRadius: BorderRadius.circular(4.0),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
+          );
+        },
+      );
+    }
 
     if (postState.hasError) {
       return Center(
@@ -149,34 +138,32 @@ class _CampusPostsState extends ConsumerState<CampusPosts>
                 fontWeight: FontWeight.w600,
               ),
             ),
-            
-
-
-              Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8),
-                        child: TextButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  isDark ? Colors.white : Colors.black,
-                              foregroundColor:
-                                  isDark ? Colors.black : Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            onPressed: ()=> ref.read(postProvider.notifier).fetchPosts(refreshIt: true),
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 12),
-                              child: Text("Refresh",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
-                                  )),
-                            )),
-                      ),
-                    
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: TextButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isDark ? Colors.white : Colors.black,
+                    foregroundColor: isDark ? Colors.black : Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () => ref
+                      .read(postProvider.notifier)
+                      .fetchPosts(refreshIt: true),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Text("Refresh",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.black
+                              : Colors.white,
+                        )),
+                  )),
+            ),
             const SizedBox(height: 8),
             Text(
               postState.errorMessage ?? 'Unknown error',
@@ -226,13 +213,14 @@ class _CampusPostsState extends ConsumerState<CampusPosts>
           // debugPrint('Invalid post at index $index: $post');
           return const SizedBox.shrink();
         }
-        
+
         // Fetch user data for author
         // log("VALUE OF FLAIR TYPE ${Flairs.campus.value}");
-        return Column (children: [PostCard(
-          post: post,
-          flairType: Flairs.campus.value,
-        ), 
+        return Column(children: [
+          PostCard(
+            post: post,
+            flairType: Flairs.department.value,
+          ),
           // if( index % 10 ==0 )...[const NativeAdPostWidget()]
         ]);
       },
@@ -242,6 +230,3 @@ class _CampusPostsState extends ConsumerState<CampusPosts>
   @override
   bool get wantKeepAlive => true;
 }
-
-
-

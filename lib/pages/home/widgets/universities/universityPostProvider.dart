@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:socian/core/utils/constants.dart';
 import 'package:socian/shared/services/api_client.dart';
 
-class PostProvider extends ChangeNotifier {
+class UniversityPostProvider extends ChangeNotifier {
   List<dynamic> _posts = [];
   bool _isLoading = false;
   bool _isRefreshing = false;
@@ -65,7 +65,7 @@ class PostProvider extends ChangeNotifier {
       // if (route.isEmpty) {
       //   throw 'Invalid route configuration';
       // }
-      final response = await apiClient.get(ApiConstants.postsCampus);
+      final response = await apiClient.get(ApiConstants.universiyPosts);
 
       if (response is List) {
         _posts = response;
@@ -116,7 +116,8 @@ class PostProvider extends ChangeNotifier {
   }
 }
 
-// Create a Riverpod provider for PostProvider
-final postProvider = ChangeNotifierProvider<PostProvider>((ref) {
-  return PostProvider();
+// Create a Riverpod provider for UniversityPostProvider
+final universitypostProvider =
+    ChangeNotifierProvider<UniversityPostProvider>((ref) {
+  return UniversityPostProvider();
 });

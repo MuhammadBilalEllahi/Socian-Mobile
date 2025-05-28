@@ -1,114 +1,233 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:socian/components/ShiningLinearProgressBar.dart';
 import 'package:socian/core/utils/constants.dart';
 import 'package:socian/pages/home/widgets/components/post/post.dart';
-import 'package:flutter/material.dart';
-import 'package:socian/pages/home/widgets/universities/service/AllUniversityService.dart';
-// import 'package:socian/pages/home/widgets/universities/widgets/PostCard.dart';
+import 'package:socian/pages/home/widgets/universities/universitypostProvider.dart';
 
-class AllUniversityPosts extends StatefulWidget {
+class AllUniversityPosts extends ConsumerStatefulWidget {
   const AllUniversityPosts({super.key});
 
   @override
-  State<AllUniversityPosts> createState() => _AllUniversityPostsState();
+  ConsumerState<AllUniversityPosts> createState() => _AllUniversityPostsState();
 }
 
-class _AllUniversityPostsState extends State<AllUniversityPosts> {
-  List<Map<String, dynamic>> _posts = [];
+class _AllUniversityPostsState extends ConsumerState<AllUniversityPosts>
+    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _fetchPosts();
-  }
-
-  void _fetchPosts() async {
-    final posts = await AllUniversityService.getAllUniversityPosts();
-
-    debugPrint('posts--------------: $posts');
-    setState(() {
-      _posts = posts;
+    _tabController = TabController(length: 2, vsync: this);
+    Future.microtask(() {
+      ref.read(universitypostProvider.notifier).fetchPosts();
     });
   }
 
   @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
+    final postState = ref.watch(universitypostProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // final authUser = ref.read(authProvider).user;
+    // WebSocketService().joinNotification(authUser!['_id']);
+
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification notification) {
+        if (notification is OverscrollNotification &&
+            notification.overscroll < 0) {
+          // User is pulling down
+          ref.read(universitypostProvider.notifier).fetchPosts(
+                refreshIt: true,
+              );
+        }
+        return false;
+      },
+      child: Column(
+        children: [
+          if (postState.isRefreshing)
+            ShiningLinearProgressBar(
+              progress: postState
+                  .loadingProgress, // you must add this field, value 0 to 1
+              isLoadingComplete: postState.loadingProgress >= 1.0,
+            ),
+          Expanded(child: _buildPostsList(postState, isDark)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPostsList(UniversityPostProvider postState, bool isDark) {
+    if (postState.isLoading && postState.posts.isEmpty) {
+      return ListView.builder(
+        padding: EdgeInsets.zero,
+        itemCount: 5,
+        itemBuilder: (context, index) {
+          return Shimmer.fromColors(
+            baseColor: isDark ? Colors.grey[800]! : Colors.grey[300]!,
+            highlightColor: isDark ? Colors.grey[700]! : Colors.grey[100]!,
+            child: Container(
+              margin:
+                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              height: 200,
+              decoration: BoxDecoration(
+                color: isDark ? Colors.grey[900] : Colors.white,
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    height: 40, // reduced from 50
+                    margin: const EdgeInsets.all(8.0), // reduced from 12
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[800] : Colors.grey[200],
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  Container(
+                    height: 100, // keep as is, no vertical margin
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 8.0), // reduced horizontal margin from 12
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[800] : Colors.grey[200],
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  Container(
+                    height: 16, // reduced from 20
+                    margin: const EdgeInsets.all(8.0), // reduced from 12
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[800] : Colors.grey[200],
+                      borderRadius: BorderRadius.circular(4.0),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    if (postState.hasError) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              color: Colors.red,
+              size: 60,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Error Loading Posts',
+              style: TextStyle(
+                color: isDark ? Colors.white : Colors.black,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: TextButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isDark ? Colors.white : Colors.black,
+                    foregroundColor: isDark ? Colors.black : Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () =>
+                      ref.read(universitypostProvider.notifier).fetchPosts(
+                            refreshIt: true,
+                          ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Text("Refresh",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.black
+                              : Colors.white,
+                        )),
+                  )),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              postState.errorMessage ?? 'Unknown error',
+              style: TextStyle(
+                color: isDark ? Colors.grey[400] : Colors.grey[600],
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (postState.posts.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.list,
+              color: isDark ? Colors.grey[600] : Colors.grey[400],
+              size: 60,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No Posts Available',
+              style: TextStyle(
+                color: isDark ? Colors.white : Colors.black,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return ListView.builder(
-      padding: const EdgeInsets.all(0),
-      itemCount: _posts.length,
+      padding: EdgeInsets.zero,
+      itemCount: postState.posts.length,
       itemBuilder: (context, index) {
-        return PostCard(
-            post: _posts[index], flairType: Flairs.university.value);
-        // PostCard(post: _posts[index],);
+        final post = postState.posts[index];
+        // debugPrint('Post at index $index: $post (type: ${post.runtimeType})');
+
+        // Validate post structure
+        if (post is! Map<String, dynamic> || post['author']?['_id'] == null) {
+          // debugPrint('Invalid post at index $index: $post');
+          return const SizedBox.shrink();
+        }
+
+        // Fetch user data for author
+        // log("VALUE OF FLAIR TYPE ${Flairs.campus.value}");
+        return Column(children: [
+          PostCard(
+            post: post,
+            flairType: Flairs.university.value,
+          ),
+          // if( index % 10 ==0 )...[const NativeAdPostWidget()]
+        ]);
       },
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-// import 'package:socian/features/auth/providers/auth_provider.dart';
-// import 'package:socian/pages/home/widgets/components/post/post_card.dart';
-// import 'package:flutter/material.dart';
-// import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:socian/pages/home/widgets/universities/service/AllUniversityService.dart';
-
-// class AllUniversityPosts extends ConsumerStatefulWidget {
-//   const AllUniversityPosts({super.key});
-
-//   @override
-//   ConsumerState<AllUniversityPosts> createState() => _AllUniversityPostsState();
-// }
-
-// class _AllUniversityPostsState extends ConsumerState<AllUniversityPosts> {
-//   List<Map<String, dynamic>> _posts = [];
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _fetchPosts();
-//   }
-
-//   void _fetchPosts() async {
-//     final posts = await AllUniversityService.getAllUniversityPosts();
-//     debugPrint('posts--------------: $posts');
-//     setState(() {
-//       _posts = posts;
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     // Read authProvider to get current user's data
-//     final auth = ref.read(authProvider);
-//     final currentUserUniversity =
-//         auth.user?['university']?['universityId']?['name']?.toString() ?? 'Unknown';
-//     debugPrint('Current user university: $currentUserUniversity');
-
-//     return ListView.builder(
-//       padding: const EdgeInsets.all(0),
-//       itemCount: _posts.length,
-//       itemBuilder: (context, index) {
-//         // Extract university name for flair
-//         final universityName =
-//             _posts[index]['author']?['university']?['universityId']?['name']
-//                     ?.toString() ??
-//                 '';
-//         return PostCard(
-//           post: _posts[index],
-//           flairType: 1, // Pass university name as flair
-//         );
-//       },
-//     );
-//   }
-// }
-

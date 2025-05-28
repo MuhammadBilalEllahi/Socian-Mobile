@@ -23,10 +23,11 @@ class ApiConstants {
     10: "http://192.168.1.10:8080",
     4: "http://192.168.1.4:8080",
     9: "http://192.168.1.9:8080",
+    12: "http://192.168.100.111:8080",
     
   };
 
-  static int _currentUrlIndex = 0;
+  static int _currentUrlIndex = 12;
   static const String _urlIndexCacheKey = 'current_url_index';
 
   static Future<void> initializeBaseUrl() async {
@@ -82,6 +83,7 @@ class ApiConstants {
   static const String posts = '/posts';
   static const String postsCampus = '$api$posts/campus/all';
   static const String intraCampusPosts = '$api$posts/campuses/all';
+  static const String universiyPosts = '$api$posts/universities/all';
 
   static const String users = '/users';
   static const String searchUsers = '$api$users/search';

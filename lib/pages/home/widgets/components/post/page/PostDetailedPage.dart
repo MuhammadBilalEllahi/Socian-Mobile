@@ -1,6 +1,6 @@
-import 'package:socian/pages/home/widgets/campus/widgets/PostCard.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:socian/pages/home/widgets/campus/widgets/PostCard.dart';
 
 class PostDetailedPage extends StatefulWidget {
   final dynamic post;

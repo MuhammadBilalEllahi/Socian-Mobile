@@ -1,15 +1,12 @@
-import 'package:socian/components/loader.dart';
-import 'package:socian/pages/drawer/student/StudentDrawer.dart';
-import 'package:socian/pages/home/widgets/intracampus/IntraCampusPostProvider.dart';
-import 'package:socian/pages/home/widgets/universities/AllUniversityPosts.dart';
-import 'package:socian/shared/services/infoProvider.dart';
+// import 'package:socian/services/user_info_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:socian/core/utils/constants.dart';
-import 'package:socian/shared/services/api_client.dart';
-import '../components/post/post.dart';
 import 'package:shimmer/shimmer.dart';
-import 'dart:developer';
+import 'package:socian/components/ShiningLinearProgressBar.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/pages/home/widgets/intracampus/intraCampusProvider.dart';
+
+import '../components/post/post.dart';
 
 class IntraCampus extends ConsumerStatefulWidget {
   const IntraCampus({super.key});
@@ -43,16 +40,36 @@ class _IntraCampusState extends ConsumerState<IntraCampus>
     final postState = ref.watch(intraCampusPostProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return RefreshIndicator(
-      onRefresh: () async {
-        await ref.read(intraCampusPostProvider.notifier).fetchPosts();
+    // final authUser = ref.read(authProvider).user;
+    // WebSocketService().joinNotification(authUser!['_id']);
+
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification notification) {
+        if (notification is OverscrollNotification &&
+            notification.overscroll < 0) {
+          // User is pulling down
+          ref.read(intraCampusPostProvider.notifier).fetchPosts(
+                refreshIt: true,
+              );
+        }
+        return false;
       },
-      child: _buildPostsList(postState, isDark),
+      child: Column(
+        children: [
+          if (postState.isRefreshing)
+            ShiningLinearProgressBar(
+              progress: postState
+                  .loadingProgress, // you must add this field, value 0 to 1
+              isLoadingComplete: postState.loadingProgress >= 1.0,
+            ),
+          Expanded(child: _buildPostsList(postState, isDark)),
+        ],
+      ),
     );
   }
 
   Widget _buildPostsList(IntraCampusPostProvider postState, bool isDark) {
-    if (postState.isLoading) {
+    if (postState.isLoading && postState.posts.isEmpty) {
       return ListView.builder(
         padding: EdgeInsets.zero,
         itemCount: 5,
@@ -72,24 +89,25 @@ class _IntraCampusState extends ConsumerState<IntraCampus>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    height: 50,
-                    margin: const EdgeInsets.all(12.0),
+                    height: 40, // reduced from 50
+                    margin: const EdgeInsets.all(8.0), // reduced from 12
                     decoration: BoxDecoration(
                       color: isDark ? Colors.grey[800] : Colors.grey[200],
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                   ),
                   Container(
-                    height: 100,
-                    margin: const EdgeInsets.symmetric(horizontal: 12.0),
+                    height: 100, // keep as is, no vertical margin
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 8.0), // reduced horizontal margin from 12
                     decoration: BoxDecoration(
                       color: isDark ? Colors.grey[800] : Colors.grey[200],
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                   ),
                   Container(
-                    height: 20,
-                    margin: const EdgeInsets.all(12.0),
+                    height: 16, // reduced from 20
+                    margin: const EdgeInsets.all(8.0), // reduced from 12
                     decoration: BoxDecoration(
                       color: isDark ? Colors.grey[800] : Colors.grey[200],
                       borderRadius: BorderRadius.circular(4.0),
@@ -121,6 +139,33 @@ class _IntraCampusState extends ConsumerState<IntraCampus>
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: TextButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isDark ? Colors.white : Colors.black,
+                    foregroundColor: isDark ? Colors.black : Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () =>
+                      ref.read(intraCampusPostProvider.notifier).fetchPosts(
+                            refreshIt: true,
+                          ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Text("Refresh",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.black
+                              : Colors.white,
+                        )),
+                  )),
             ),
             const SizedBox(height: 8),
             Text(
@@ -164,20 +209,23 @@ class _IntraCampusState extends ConsumerState<IntraCampus>
       itemCount: postState.posts.length,
       itemBuilder: (context, index) {
         final post = postState.posts[index];
-        debugPrint('Post at index $index: $post (type: ${post.runtimeType})');
+        // debugPrint('Post at index $index: $post (type: ${post.runtimeType})');
 
         // Validate post structure
         if (post is! Map<String, dynamic> || post['author']?['_id'] == null) {
-          debugPrint('Invalid post at index $index: $post');
+          // debugPrint('Invalid post at index $index: $post');
           return const SizedBox.shrink();
         }
 
         // Fetch user data for author
-        log("VALUE OF FLAIR TYPE ${Flairs.campus.value}");
-        return PostCard(
-          post: post,
-          flairType: Flairs.campus.value,
-        );
+        // log("VALUE OF FLAIR TYPE ${Flairs.campus.value}");
+        return Column(children: [
+          PostCard(
+            post: post,
+            flairType: Flairs.campus.value,
+          ),
+          // if( index % 10 ==0 )...[const NativeAdPostWidget()]
+        ]);
       },
     );
   }
