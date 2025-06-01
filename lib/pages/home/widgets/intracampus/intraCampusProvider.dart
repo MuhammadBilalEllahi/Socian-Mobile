@@ -27,6 +27,13 @@ class IntraCampusPostProvider extends ChangeNotifier {
   DateTime? _lastFetchedTime;
   final Duration cacheDuration = const Duration(minutes: 5);
 
+  int _page = 1;
+  final int _limit = 10;
+  bool _hasNextPage = true;
+
+  bool get hasNextPage => _hasNextPage;
+  int get page => _page;
+
   Future<void> fetchPosts({
     bool refreshIt = false,
     // bool campus = false,
@@ -55,22 +62,24 @@ class IntraCampusPostProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // String route = campus
-      //     ? ApiConstants.postsCampus
-      //     : intraCampus
-      //         ? ApiConstants.intraCampusPosts
-      //         : universities
-      //             ? ApiConstants.universiyPosts
-      //             : '';
-      // if (route.isEmpty) {
-      //   throw 'Invalid route configuration';
-      // }
-      final response = await apiClient.get(ApiConstants.intraCampusPosts);
+      final response = await apiClient
+          .get('${ApiConstants.intraCampusPosts}?page=$_page&limit=$_limit');
+      if (response is Map<String, dynamic> &&
+          response.containsKey('data') &&
+          response.containsKey('pagination')) {
+        final newPosts = response['data'] as List<dynamic>;
+        final pagination = response['pagination'];
 
-      if (response is List) {
-        _posts = response;
+        if (_page == 1) {
+          _posts = newPosts;
+        } else {
+          _posts.addAll(newPosts);
+        }
+
+        _hasNextPage = pagination['hasNextPage'];
+        _page++;
       } else {
-        throw 'Invalid API response format: $response';
+        _errorMessage = 'Invalid API response format';
       }
     } catch (e) {
       _hasError = true;

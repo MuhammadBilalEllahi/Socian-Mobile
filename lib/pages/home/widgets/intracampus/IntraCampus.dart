@@ -45,6 +45,13 @@ class _IntraCampusState extends ConsumerState<IntraCampus>
 
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
+        if (notification.metrics.pixels ==
+            notification.metrics.maxScrollExtent) {
+          if (!postState.isLoading && postState.hasNextPage) {
+            ref.read(intraCampusPostProvider.notifier).fetchPosts();
+          }
+        }
+
         if (notification is OverscrollNotification &&
             notification.overscroll < 0) {
           // User is pulling down
@@ -63,6 +70,7 @@ class _IntraCampusState extends ConsumerState<IntraCampus>
               isLoadingComplete: postState.loadingProgress >= 1.0,
             ),
           Expanded(child: _buildPostsList(postState, isDark)),
+          const SizedBox(height: 60),
         ],
       ),
     );

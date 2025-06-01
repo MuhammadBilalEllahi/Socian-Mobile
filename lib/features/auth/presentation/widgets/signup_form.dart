@@ -1,15 +1,11 @@
-import 'dart:convert';
-
-import 'package:socian/components/customSnackBar.dart';
+import 'package:flutter/material.dart';
 import 'package:socian/core/utils/constants.dart';
 import 'package:socian/features/auth/presentation/PrivacyPolicyScreen.dart';
-import 'package:socian/features/auth/presentation/widgets/otp_form.dart';
 import 'package:socian/shared/services/api_client.dart';
+import 'package:socian/shared/services/secure_storage_service.dart';
 import 'package:socian/shared/widgets/my_dropdown.dart';
 import 'package:socian/shared/widgets/my_snackbar.dart';
 import 'package:socian/shared/widgets/my_textfield.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class SignUpForm extends StatefulWidget {
   final String role;
@@ -25,12 +21,14 @@ class _SignUpFormState extends State<SignUpForm> {
       GlobalKey<FormFieldState<String>>();
 
   final _emailController = TextEditingController();
+
+  final _personalEmailController = TextEditingController();
+
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
   final _usernameController = TextEditingController();
 
   bool _agreedToPolicy = false;
-  
 
   String? selectedUniversity;
   String? selectedDepartment;
@@ -43,6 +41,50 @@ class _SignUpFormState extends State<SignUpForm> {
   bool isSigningUp = false;
   final ApiClient apiClient = ApiClient();
   bool isUsernameTaken = false;
+
+  void _cacheListeners() {
+    _nameController.addListener(_cacheSignupData);
+    _usernameController.addListener(_cacheSignupData);
+    _emailController.addListener(_cacheSignupData);
+    _personalEmailController.addListener(_cacheSignupData);
+  }
+
+  Future<void> _cacheSignupData() async {
+    final storage = SecureStorageService.instance;
+    final now = DateTime.now().millisecondsSinceEpoch.toString();
+
+    await storage.saveField('signup_name', _nameController.text);
+    await storage.saveField('signup_username', _usernameController.text);
+    await storage.saveField('signup_email', _emailController.text);
+    await storage.saveField(
+        'signup_personalEmail', _personalEmailController.text);
+    if (selectedUniversity != null) {
+      await storage.saveField('signup_university', selectedUniversity!);
+    }
+    if (selectedDepartment != null) {
+      await storage.saveField('signup_department', selectedDepartment!);
+    }
+    await storage.saveField('signup_cachedTime', now);
+  }
+
+  Future<void> _restoreSignupData() async {
+    final storage = SecureStorageService.instance;
+
+    final time = await storage.getField('signup_cachedTime');
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    if (time != null && now - int.parse(time) < 2 * 24 * 60 * 60 * 1000) {
+      _nameController.text = (await storage.getField('signup_name')) ?? '';
+      _usernameController.text =
+          (await storage.getField('signup_username')) ?? '';
+      _emailController.text = (await storage.getField('signup_email')) ?? '';
+      _personalEmailController.text =
+          (await storage.getField('signup_personalEmail')) ?? '';
+      selectedUniversity = await storage.getField('signup_university');
+      selectedDepartment = await storage.getField('signup_department');
+      setState(() {});
+    }
+  }
 
   @override
   void initState() {
@@ -58,6 +100,8 @@ class _SignUpFormState extends State<SignUpForm> {
         });
       }
     });
+    _restoreSignupData();
+    _cacheListeners();
   }
 
   void fetchUniversities() async {
@@ -82,6 +126,19 @@ class _SignUpFormState extends State<SignUpForm> {
         isLoading = false;
       });
     }
+  }
+
+  FormFieldValidator<dynamic> personalEmailValidator() {
+    return (dynamic value) {
+      if (AppRoles.alumni != widget.role) {
+        return null; // Skip validation for non-alumni roles
+      }
+      if (value == null || value.isEmpty) {
+        return 'Please enter an email';
+      }
+
+      return null;
+    };
   }
 
   FormFieldValidator<dynamic> emailValidator() {
@@ -187,6 +244,9 @@ class _SignUpFormState extends State<SignUpForm> {
         'agreedToPolicy': _agreedToPolicy,
       };
 
+      if (AppRoles.alumni == widget.role) {
+        requestBody['personalEmail'] = _personalEmailController.text;
+      }
       final response =
           await apiClient.post(ApiConstants.registerEndpoint, requestBody);
 
@@ -194,25 +254,20 @@ class _SignUpFormState extends State<SignUpForm> {
       final redirectUrl = data['redirectUrl'];
       final userId = redirectUrl.split('/otp/')[1].split('?')[0];
       final email = redirectUrl.split('/otp/')[1].split('?')[1].split('=')[1];
+      if (mounted) {
+        showSnackbar(context, "Sign up successful! Please verify your email.");
 
-      showSnackbar(context, "Sign up successful! Please verify your email.");
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   const SnackBar(
-      //     content: Text('Sign up successful! Please verify your email.'),
-      //     backgroundColor: Colors.green,
-      //   ),
-      // );
+        Navigator.pushNamed(context, AppRoutes.otpScreen,
+            arguments: {'userId': userId, 'email': email});
+      }
 
-      Navigator.pushNamed(context, AppRoutes.otpScreen,
-          arguments: {'userId': userId, 'email': email});
+      await SecureStorageService.instance.clearSignupFields();
     } catch (e) {
-      showSnackbar(context, e.toString(), isError: true);
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(
-      //     content: Text(e.toString()),
-      //     backgroundColor: Colors.red,
-      //   ),
-      // );
+      if (mounted) {
+        showSnackbar(context, e.toString(), isError: true);
+
+        // debugPrint("Error during signup: $e");
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -260,6 +315,7 @@ class _SignUpFormState extends State<SignUpForm> {
                     selectedDomain = selectedUni['domain'];
                     selectedRegex = selectedUni['regex'];
                   });
+                  _cacheSignupData();
                 },
               ),
               const SizedBox(height: 16),
@@ -287,6 +343,14 @@ class _SignUpFormState extends State<SignUpForm> {
                   obscureTextBool: false,
                   focus: false,
                   validator: usernameValidator()),
+              if (widget.role == AppRoles.alumni) ...[
+                MyTextField(
+                    textEditingController: _personalEmailController,
+                    label: 'Your Personal Email',
+                    obscureTextBool: false,
+                    focus: false,
+                    validator: personalEmailValidator()),
+              ],
               MyTextField(
                   textEditingController: _emailController,
                   label: 'Your Instituitonal Email',
@@ -319,11 +383,10 @@ class _SignUpFormState extends State<SignUpForm> {
                     activeColor: isDarkMode
                         ? const Color.fromARGB(255, 138, 138, 138)
                         : const Color.fromARGB(255, 20, 20, 20),
-                        checkColor: isDarkMode
-                        
+                    checkColor: isDarkMode
                         ? const Color.fromARGB(255, 20, 20, 20)
                         : const Color.fromARGB(255, 138, 138, 138),
-                        visualDensity: VisualDensity.comfortable,
+                    visualDensity: VisualDensity.comfortable,
                     value: _agreedToPolicy,
                     onChanged: (bool? value) {
                       setState(() {
@@ -334,9 +397,8 @@ class _SignUpFormState extends State<SignUpForm> {
                   const Text('I agree to the '),
                   GestureDetector(
                     onTap: () async {
-                      
-                    // showPrivacyPolicyBottomSheet(context),
-                        // Navigator.pushNamed(context, AppRoutes.privacyPolicy),
+                      // showPrivacyPolicyBottomSheet(context),
+                      // Navigator.pushNamed(context, AppRoutes.privacyPolicy),
                       final result = await Navigator.push<bool>(
                         context,
                         MaterialPageRoute(

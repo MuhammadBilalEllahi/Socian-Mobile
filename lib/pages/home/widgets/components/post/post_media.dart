@@ -1,10 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
+import 'dart:math' as math;
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'dart:math' as math;
-import 'dart:io';
 import 'package:cached_video_player_plus/cached_video_player_plus.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class CustomCacheManager extends CacheManager {
@@ -118,7 +117,7 @@ class _PostMediaState extends State<PostMedia>
                       builder: (context) => FullScreenMediaView(
                         mediaFiles: [item['url']],
                         initialIndex: 0,
-                        videoControllers: {},
+                        videoControllers: const {},
                         isImage: true,
                       ),
                     ),
@@ -551,7 +550,6 @@ class _PostMediaState extends State<PostMedia>
 
   Widget _buildAudioItem() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
 
     return Container(
       width: double.minPositive,
@@ -760,22 +758,22 @@ class _FullScreenMediaViewState extends State<FullScreenMediaView> {
     super.initState();
     _pageController = PageController(initialPage: widget.initialIndex);
     // Add listeners to all video controllers
-    widget.videoControllers.values.forEach((controller) {
+    for (var controller in widget.videoControllers.values) {
       controller.addListener(() {
         if (mounted) setState(() {});
       });
-    });
+    }
   }
 
   @override
   void dispose() {
     _pageController.dispose();
     // Remove listeners from all video controllers
-    widget.videoControllers.values.forEach((controller) {
+    for (var controller in widget.videoControllers.values) {
       controller.removeListener(() {
         if (mounted) setState(() {});
       });
-    });
+    }
     super.dispose();
   }
 

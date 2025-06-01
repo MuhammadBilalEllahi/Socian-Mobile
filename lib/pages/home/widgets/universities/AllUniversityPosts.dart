@@ -16,11 +16,31 @@ class AllUniversityPosts extends ConsumerStatefulWidget {
 class _AllUniversityPostsState extends ConsumerState<AllUniversityPosts>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   late TabController _tabController;
+  late ScrollController _scrollController;
+
+  bool _isFetching = false;
+
+  void _onScroll() {
+    final provider = ref.read(universitypostProvider.notifier);
+    print("onScroll: checking scroll position...");
+    if (_scrollController.position.extentAfter < 500 &&
+        provider.hasNextPage &&
+        !_isFetching &&
+        !provider.isLoading) {
+      _isFetching = true;
+      provider.fetchPosts().whenComplete(() => _isFetching = false);
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+
+    _scrollController = ScrollController();
+
+    _scrollController.addListener(_onScroll);
+
     Future.microtask(() {
       ref.read(universitypostProvider.notifier).fetchPosts();
     });
@@ -28,6 +48,7 @@ class _AllUniversityPostsState extends ConsumerState<AllUniversityPosts>
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _tabController.dispose();
     super.dispose();
   }
@@ -61,6 +82,7 @@ class _AllUniversityPostsState extends ConsumerState<AllUniversityPosts>
               isLoadingComplete: postState.loadingProgress >= 1.0,
             ),
           Expanded(child: _buildPostsList(postState, isDark)),
+          const SizedBox(height: 60),
         ],
       ),
     );
@@ -203,27 +225,26 @@ class _AllUniversityPostsState extends ConsumerState<AllUniversityPosts>
     }
 
     return ListView.builder(
+      controller: _scrollController,
       padding: EdgeInsets.zero,
       itemCount: postState.posts.length,
+      // itemExtent: 500,
+      // prototypeItem: PostCard(post: postState.posts.first, flairType: Flairs.university.value),
+
       itemBuilder: (context, index) {
         final post = postState.posts[index];
-        // debugPrint('Post at index $index: $post (type: ${post.runtimeType})');
-
-        // Validate post structure
         if (post is! Map<String, dynamic> || post['author']?['_id'] == null) {
-          // debugPrint('Invalid post at index $index: $post');
           return const SizedBox.shrink();
         }
-
-        // Fetch user data for author
-        // log("VALUE OF FLAIR TYPE ${Flairs.campus.value}");
-        return Column(children: [
-          PostCard(
-            post: post,
-            flairType: Flairs.university.value,
-          ),
-          // if( index % 10 ==0 )...[const NativeAdPostWidget()]
-        ]);
+        return Column(
+          key: ValueKey(post['_id']),
+          children: [
+            PostCard(
+              post: post,
+              flairType: Flairs.university.value,
+            ),
+          ],
+        );
       },
     );
   }
