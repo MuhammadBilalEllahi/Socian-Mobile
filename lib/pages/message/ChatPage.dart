@@ -509,7 +509,7 @@
 //                 child: IconButton(
 //                   icon: Icon(Icons.send, color: Colors.white),
 //                   onPressed: _send,
-//                 ),      
+//                 ),
 //               ),
 //             ],
 //           ),
@@ -519,44 +519,16 @@
 //   }
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:socian/shared/services/api_client.dart';
-import 'package:intl/intl.dart';
-import 'package:dio/dio.dart' as dio;
-import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'dart:ui' as ui;
+
+import 'package:dio/dio.dart' as dio;
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/shared/services/api_client.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
 class ChatPage extends ConsumerStatefulWidget {
   final String userId; // Recipient ID
@@ -580,7 +552,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   List<Map<String, dynamic>> _messages = [];
   bool _isLoading = true;
   String? _errorMessage;
-  bool _isTyping = false;
+  final bool _isTyping = false;
   String? _userId;
 
   @override
@@ -671,7 +643,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     });
     try {
       final response = await _apiClient.get('/api/messages/${widget.userId}');
-      final httpMessages = (response['messages'] as List).cast<Map<String, dynamic>>();
+      final httpMessages =
+          (response['messages'] as List).cast<Map<String, dynamic>>();
       print('Fetched messages: $httpMessages');
       setState(() {
         _messages = httpMessages;
@@ -681,7 +654,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     } catch (e) {
       String errorMsg = 'Failed to load messages';
       if (e is dio.DioException) {
-        errorMsg += ': ${e.response?.statusCode} ${e.response?.data['message'] ?? e.message}';
+        errorMsg +=
+            ': ${e.response?.statusCode} ${e.response?.data['message'] ?? e.message}';
       }
       setState(() {
         _errorMessage = errorMsg;
@@ -759,7 +733,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
       }
@@ -778,18 +752,19 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final background = isDarkMode
-        ? LinearGradient(
+        ? const LinearGradient(
             colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           )
-        : LinearGradient(
+        : const LinearGradient(
             colors: [Color(0xFFE2E8F0), Color(0xFFF8FAFC)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           );
-    final foreground = isDarkMode ? Colors.white : Color(0xFF0F172A);
-    final mutedForeground = isDarkMode ? Color(0xFFA5B4FC) : Color(0xFF64748B);
+    final foreground = isDarkMode ? Colors.white : const Color(0xFF0F172A);
+    final mutedForeground =
+        isDarkMode ? const Color(0xFFA5B4FC) : const Color(0xFF64748B);
     const primary = Color(0xFF8B5CF6);
 
     if (_errorMessage != null) {
@@ -813,7 +788,9 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           child: Column(
             children: [
               _buildAppBar(context, foreground),
-              Expanded(child: _buildMessageList(context, foreground, mutedForeground, primary)),
+              Expanded(
+                  child: _buildMessageList(
+                      context, foreground, mutedForeground, primary)),
               _buildInputArea(context, foreground, mutedForeground, primary),
             ],
           ),
@@ -827,10 +804,11 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       child: BackdropFilter(
         filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.1),
-            border: Border(bottom: BorderSide(color: foreground.withOpacity(0.1))),
+            border:
+                Border(bottom: BorderSide(color: foreground.withOpacity(0.1))),
           ),
           child: Row(
             children: [
@@ -843,10 +821,11 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 backgroundColor: foreground.withOpacity(0.2),
                 child: Text(
                   widget.userName[0].toUpperCase(),
-                  style: TextStyle(color: foreground, fontWeight: FontWeight.bold),
+                  style:
+                      TextStyle(color: foreground, fontWeight: FontWeight.bold),
                 ),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   widget.userName,
@@ -868,7 +847,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     );
   }
 
-  Widget _buildMessageList(BuildContext context, Color foreground, Color mutedForeground, Color primary) {
+  Widget _buildMessageList(BuildContext context, Color foreground,
+      Color mutedForeground, Color primary) {
     if (_isLoading) {
       return Center(child: CircularProgressIndicator(color: primary));
     }
@@ -881,15 +861,16 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               _errorMessage!,
               style: TextStyle(color: mutedForeground, fontSize: 16),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _fetch,
               style: ElevatedButton.styleFrom(
                 backgroundColor: primary,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
               ),
-              child: Text('Retry'),
+              child: const Text('Retry'),
             ),
           ],
         ),
@@ -912,19 +893,24 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     final groupedMessages = <String, List<Map<String, dynamic>>>{};
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(Duration(days: 1));
+    final yesterday = today.subtract(const Duration(days: 1));
     final dateFormat = DateFormat('MMM d, yyyy');
     final timeFormat = DateFormat('HH:mm');
 
     for (var message in _messages) {
       DateTime createdAt;
       try {
-        createdAt = DateTime.parse(message['timestamp'] ?? message['createdAt'] ?? DateTime.now().toIso8601String()).toLocal();
+        createdAt = DateTime.parse(message['timestamp'] ??
+                message['createdAt'] ??
+                DateTime.now().toIso8601String())
+            .toLocal();
       } catch (e) {
-        print('Error parsing timestamp: ${message['timestamp'] ?? message['createdAt']}');
+        print(
+            'Error parsing timestamp: ${message['timestamp'] ?? message['createdAt']}');
         createdAt = DateTime.now();
       }
-      final messageDate = DateTime(createdAt.year, createdAt.month, createdAt.day);
+      final messageDate =
+          DateTime(createdAt.year, createdAt.month, createdAt.day);
       String dateKey;
 
       if (messageDate == today) {
@@ -946,7 +932,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       items.add(
         Center(
           child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.symmetric(vertical: 8),
             child: Text(
               dateKey,
               style: TextStyle(
@@ -961,9 +947,13 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       for (var message in messages) {
         DateTime createdAt;
         try {
-          createdAt = DateTime.parse(message['timestamp'] ?? message['createdAt'] ?? DateTime.now().toIso8601String()).toLocal();
+          createdAt = DateTime.parse(message['timestamp'] ??
+                  message['createdAt'] ??
+                  DateTime.now().toIso8601String())
+              .toLocal();
         } catch (e) {
-          print('Error parsing timestamp: ${message['timestamp'] ?? message['createdAt']}');
+          print(
+              'Error parsing timestamp: ${message['timestamp'] ?? message['createdAt']}');
           createdAt = DateTime.now();
         }
         final isSentByUser = message['senderId'] != widget.userId;
@@ -971,23 +961,28 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
         items.add(
           Align(
-            alignment: isSentByUser ? Alignment.centerRight : Alignment.centerLeft,
+            alignment:
+                isSentByUser ? Alignment.centerRight : Alignment.centerLeft,
             child: Container(
-              margin: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: isSentByUser ? primary.withOpacity(0.9) : foreground.withOpacity(0.1),
+                color: isSentByUser
+                    ? primary.withOpacity(0.9)
+                    : foreground.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
                     blurRadius: 8,
-                    offset: Offset(0, 2),
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
               child: Column(
-                crossAxisAlignment: isSentByUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                crossAxisAlignment: isSentByUser
+                    ? CrossAxisAlignment.end
+                    : CrossAxisAlignment.start,
                 children: [
                   Text(
                     message['content'] ?? '',
@@ -996,21 +991,24 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                       fontSize: 16,
                     ),
                   ),
-                  SizedBox(height: 6),
+                  const SizedBox(height: 6),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         formattedTime,
                         style: TextStyle(
-                          color: isSentByUser ? Colors.white70 : mutedForeground,
+                          color:
+                              isSentByUser ? Colors.white70 : mutedForeground,
                           fontSize: 12,
                         ),
                       ),
                       if (isSentByUser && message['status'] != 'sent') ...[
-                        SizedBox(width: 4),
+                        const SizedBox(width: 4),
                         Icon(
-                          message['status'] == 'read' ? Icons.done_all : Icons.done,
+                          message['status'] == 'read'
+                              ? Icons.done_all
+                              : Icons.done,
                           size: 16,
                           color: Colors.white70,
                         ),
@@ -1027,17 +1025,18 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
     return ListView(
       controller: _scrollController,
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       children: items,
     );
   }
 
-  Widget _buildInputArea(BuildContext context, Color foreground, Color mutedForeground, Color primary) {
+  Widget _buildInputArea(BuildContext context, Color foreground,
+      Color mutedForeground, Color primary) {
     return ClipRRect(
       child: BackdropFilter(
         filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
             color: foreground.withOpacity(0.1),
             border: Border(top: BorderSide(color: foreground.withOpacity(0.1))),
@@ -1054,19 +1053,21 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                   style: TextStyle(color: foreground, fontSize: 16),
                   decoration: InputDecoration(
                     hintText: 'Type a message...',
-                    hintStyle: TextStyle(color: mutedForeground.withOpacity(0.7)),
+                    hintStyle:
+                        TextStyle(color: mutedForeground.withOpacity(0.7)),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
                       borderSide: BorderSide.none,
                     ),
                     filled: true,
                     fillColor: foreground.withOpacity(0.05),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                   ),
                   onSubmitted: (_) => _send(),
                 ),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
@@ -1077,7 +1078,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                   ),
                 ),
                 child: IconButton(
-                  icon: Icon(Icons.send, color: Colors.white),
+                  icon: const Icon(Icons.send, color: Colors.white),
                   onPressed: _send,
                 ),
               ),

@@ -1,12 +1,10 @@
-
-import 'package:socian/pages/message/ChatPage.dart';
-import 'package:socian/pages/profile/ProfilePage.dart';
+import 'package:dio/dio.dart' as dio;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:socian/shared/services/api_client.dart';
 import 'package:intl/intl.dart';
-import 'package:dio/dio.dart' as dio;
-
+import 'package:socian/pages/message/ChatPage.dart';
+import 'package:socian/pages/profile/ProfilePage.dart';
+import 'package:socian/shared/services/api_client.dart';
 
 class ConnectionsPage extends ConsumerStatefulWidget {
   const ConnectionsPage({super.key});
@@ -50,7 +48,8 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage>
     } catch (e) {
       String errorMsg = 'Failed to load connection requests';
       if (e is dio.DioException) {
-        errorMsg += ': ${e.response?.statusCode} ${e.response?.data['message'] ?? e.message}';
+        errorMsg +=
+            ': ${e.response?.statusCode} ${e.response?.data['message'] ?? e.message}';
         debugPrint('Dio error fetching friend requests: $errorMsg');
       } else {
         debugPrint('Unexpected error fetching friend requests: $e');
@@ -77,7 +76,8 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage>
     } catch (e) {
       String errorMsg = 'Failed to load connections';
       if (e is dio.DioException) {
-        errorMsg += ': ${e.response?.statusCode} ${e.response?.data['message'] ?? e.message}';
+        errorMsg +=
+            ': ${e.response?.statusCode} ${e.response?.data['message'] ?? e.message}';
         debugPrint('Dio error fetching connections: $errorMsg');
       } else {
         debugPrint('Unexpected error fetching connections: $e');
@@ -125,10 +125,14 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage>
 
     final background = isDarkMode ? const Color(0xFF09090B) : Colors.white;
     final foreground = isDarkMode ? Colors.white : const Color(0xFF09090B);
-    final muted = isDarkMode ? const Color(0xFF27272A) : const Color(0xFFF4F4F5);
-    final mutedForeground = isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
-    final border = isDarkMode ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
-    final accent = isDarkMode ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
+    final muted =
+        isDarkMode ? const Color(0xFF27272A) : const Color(0xFFF4F4F5);
+    final mutedForeground =
+        isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+    final border =
+        isDarkMode ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+    final accent =
+        isDarkMode ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
     const primary = Color(0xFF8B5CF6);
 
     return Scaffold(
@@ -209,14 +213,17 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage>
                                       MaterialPageRoute(
                                         builder: (context) => ChatPage(
                                           userId: connection['_id'],
-                                          userName: connection['name'] ?? 'Unknown', 
+                                          userName:
+                                              connection['name'] ?? 'Unknown',
                                         ),
                                       ),
                                     );
                                   },
                                   child: Container(
-                                    margin: const EdgeInsets.symmetric(vertical: 4),
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    margin:
+                                        const EdgeInsets.symmetric(vertical: 4),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 8),
                                     decoration: BoxDecoration(
                                       color: accent,
                                       borderRadius: BorderRadius.circular(12),
@@ -225,15 +232,20 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage>
                                       children: [
                                         CircleAvatar(
                                           radius: 24,
-                                          backgroundImage: connection['picture'] != null
-                                              ? NetworkImage(connection['picture'])
-                                              : const AssetImage('assets/images/profilepic2.jpg')
+                                          backgroundImage: connection[
+                                                      'picture'] !=
+                                                  null
+                                              ? NetworkImage(
+                                                  connection['picture'])
+                                              : const AssetImage(
+                                                      'assets/images/profilepic2.jpg')
                                                   as ImageProvider,
                                         ),
                                         const SizedBox(width: 12),
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               Text(
                                                 connection['name'] ?? 'Unknown',
@@ -306,10 +318,13 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage>
                               itemCount: _requests.length,
                               itemBuilder: (context, index) {
                                 final request = _requests[index];
-                                final createdAt = DateTime.parse(request['createdAt']);
-                                final formattedDate = DateFormat('MMM d, y').format(createdAt);
+                                final createdAt =
+                                    DateTime.parse(request['createdAt']);
+                                final formattedDate =
+                                    DateFormat('MMM d, y').format(createdAt);
                                 final fromUser = request['fromUser'];
-                                final screenWidth = MediaQuery.of(context).size.width;
+                                final screenWidth =
+                                    MediaQuery.of(context).size.width;
 
                                 return Card(
                                   elevation: 3,
@@ -319,16 +334,19 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage>
                                   ),
                                   color: accent,
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 12),
                                     child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         GestureDetector(
                                           onTap: () {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => ProfilePage(
+                                                builder: (context) =>
+                                                    ProfilePage(
                                                   userId: fromUser['_id'],
                                                 ),
                                               ),
@@ -336,23 +354,29 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage>
                                           },
                                           child: CircleAvatar(
                                             radius: 30,
-                                            backgroundImage: fromUser['profilePicture'] != null
-                                                ? NetworkImage(fromUser['profilePicture'])
-                                                : const AssetImage('assets/images/profilepic2.jpg')
+                                            backgroundImage: fromUser[
+                                                        'profilePicture'] !=
+                                                    null
+                                                ? NetworkImage(
+                                                    fromUser['profilePicture'])
+                                                : const AssetImage(
+                                                        'assets/images/profilepic2.jpg')
                                                     as ImageProvider,
                                           ),
                                         ),
                                         const SizedBox(width: 12),
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               GestureDetector(
                                                 onTap: () {
                                                   Navigator.push(
                                                     context,
                                                     MaterialPageRoute(
-                                                      builder: (context) => ProfilePage(
+                                                      builder: (context) =>
+                                                          ProfilePage(
                                                         userId: fromUser['_id'],
                                                       ),
                                                     ),
@@ -389,31 +413,55 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage>
                                                 runSpacing: 8,
                                                 children: [
                                                   SizedBox(
-                                                    width: screenWidth > 350 ? 100 : double.infinity,
+                                                    width: screenWidth > 350
+                                                        ? 100
+                                                        : double.infinity,
                                                     child: ElevatedButton(
-                                                      onPressed: () => _handleRequest(fromUser['_id'], 'accept'),
-                                                      style: ElevatedButton.styleFrom(
-                                                        backgroundColor: primary,
-                                                        foregroundColor: Colors.white,
-                                                        shape: RoundedRectangleBorder(
-                                                          borderRadius: BorderRadius.circular(8),
+                                                      onPressed: () =>
+                                                          _handleRequest(
+                                                              fromUser['_id'],
+                                                              'accept'),
+                                                      style: ElevatedButton
+                                                          .styleFrom(
+                                                        backgroundColor:
+                                                            primary,
+                                                        foregroundColor:
+                                                            Colors.white,
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(8),
                                                         ),
                                                       ),
-                                                      child: const Text('Accept'),
+                                                      child:
+                                                          const Text('Accept'),
                                                     ),
                                                   ),
                                                   SizedBox(
-                                                    width: screenWidth > 350 ? 100 : double.infinity,
+                                                    width: screenWidth > 350
+                                                        ? 100
+                                                        : double.infinity,
                                                     child: ElevatedButton(
-                                                      onPressed: () => _handleRequest(fromUser['_id'], 'reject'),
-                                                      style: ElevatedButton.styleFrom(
-                                                        backgroundColor: Colors.red,
-                                                        foregroundColor: Colors.white,
-                                                        shape: RoundedRectangleBorder(
-                                                          borderRadius: BorderRadius.circular(8),
+                                                      onPressed: () =>
+                                                          _handleRequest(
+                                                              fromUser['_id'],
+                                                              'reject'),
+                                                      style: ElevatedButton
+                                                          .styleFrom(
+                                                        backgroundColor:
+                                                            Colors.red,
+                                                        foregroundColor:
+                                                            Colors.white,
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(8),
                                                         ),
                                                       ),
-                                                      child: const Text('Reject'),
+                                                      child:
+                                                          const Text('Reject'),
                                                     ),
                                                   ),
                                                 ],
