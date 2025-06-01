@@ -1,13 +1,14 @@
 import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:socian/core/utils/constants.dart';
 import 'package:socian/features/auth/domain/auth_state.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/pages/splashScreen/components/GoogleButton.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   _SplashScreenState createState() => _SplashScreenState();
@@ -17,7 +18,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   bool _moveToTop = false;
-  bool _isDarkMode = true; // Add theme state
+  final bool _isDarkMode = true; // Add theme state
 
   @override
   void initState() {
@@ -28,7 +29,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     );
     _animationController.forward();
     Future.delayed(const Duration(seconds: 3), () {
-        if (!mounted) return;
+      if (!mounted) return;
 
       setState(() {
         _moveToTop = true;
@@ -168,6 +169,53 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 const SizedBox(height: 20),
                 Column(
                   children: [
+                    // TextButton(
+                    //   onPressed: () {
+                    //     Navigator.push(
+                    //         context,
+                    //         MaterialPageRoute(
+                    //             builder: (_) => const UploadCardPage()));
+                    //   },
+                    //   child: Text(
+                    //     "Upload ID Card",
+                    //     style: TextStyle(
+                    //       fontSize: 16,
+                    //       color: isDarkMode ? Colors.white : Colors.black87,
+                    //     ),
+                    //   ),
+                    // ),
+                    // TextButton(
+                    //   onPressed: () {
+                    //     Navigator.push(
+                    //         context,
+                    //         MaterialPageRoute(
+                    //             builder: (_) => const FaceVerificationPage()));
+                    //   },
+                    //   child: Text(
+                    //     'Face Verification',
+                    //     style: TextStyle(
+                    //       fontSize: 16,
+                    //       color: isDarkMode ? Colors.white : Colors.black87,
+                    //     ),
+                    //   ),
+                    // ),
+                    // TextButton(
+                    //   onPressed: () {
+                    //     Navigator.of(context).push(
+                    //       MaterialPageRoute(
+                    //         builder: (_) => const FaceCaptureScreen(),
+                    //       ),
+                    //     );
+                    //   },
+                    //   child: Text(
+                    //     'FaceCaptureScreen',
+                    //     style: TextStyle(
+                    //       fontSize: 16,
+                    //       color: isDarkMode ? Colors.white : Colors.black87,
+                    //     ),
+                    //   ),
+                    // ),
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,

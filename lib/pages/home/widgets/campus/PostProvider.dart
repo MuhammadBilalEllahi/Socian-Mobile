@@ -27,6 +27,13 @@ class PostProvider extends ChangeNotifier {
   DateTime? _lastFetchedTime;
   final Duration cacheDuration = const Duration(minutes: 5);
 
+  int _page = 1;
+  final int _limit = 10;
+  bool _hasNextPage = true;
+
+  bool get hasNextPage => _hasNextPage;
+  int get page => _page;
+
   Future<void> fetchPosts({
     bool refreshIt = false,
     // bool campus = false,
@@ -44,6 +51,9 @@ class PostProvider extends ChangeNotifier {
 
     if (refreshIt) {
       _isRefreshing = true;
+
+      _page = 1;
+      _hasNextPage = true;
     } else {
       _isLoading = true;
     }
@@ -54,23 +64,27 @@ class PostProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
 
+    debugPrint("[PostProvider] Fetching posts: page=$_page, limit=$_limit");
     try {
-      // String route = campus
-      //     ? ApiConstants.postsCampus
-      //     : intraCampus
-      //         ? ApiConstants.intraCampusPosts
-      //         : universities
-      //             ? ApiConstants.universiyPosts
-      //             : '';
-      // if (route.isEmpty) {
-      //   throw 'Invalid route configuration';
-      // }
-      final response = await apiClient.get(ApiConstants.postsCampus);
+      final response = await apiClient
+          .get('${ApiConstants.postsCampus}?page=$_page&limit=$_limit');
 
-      if (response is List) {
-        _posts = response;
+      if (response is Map<String, dynamic> &&
+          response.containsKey('data') &&
+          response.containsKey('pagination')) {
+        final newPosts = response['data'] as List<dynamic>;
+        final pagination = response['pagination'];
+
+        if (_page == 1) {
+          _posts = newPosts;
+        } else {
+          _posts.addAll(newPosts);
+        }
+
+        _hasNextPage = pagination['hasNextPage'];
+        _page++;
       } else {
-        throw 'Invalid API response format: $response';
+        _errorMessage = 'Invalid API response format';
       }
     } catch (e) {
       _hasError = true;

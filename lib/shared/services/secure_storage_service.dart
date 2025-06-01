@@ -5,7 +5,8 @@ class SecureStorageService {
   SecureStorageService._privateConstructor();
 
   // The single instance of the class
-  static final SecureStorageService instance = SecureStorageService._privateConstructor();
+  static final SecureStorageService instance =
+      SecureStorageService._privateConstructor();
 
   // Instance of FlutterSecureStorage
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
@@ -24,8 +25,34 @@ class SecureStorageService {
   Future<void> deleteToken() async {
     await _secureStorage.delete(key: 'token');
   }
-}
 
+  // Generic field save/load/delete
+  Future<void> saveField(String key, String value) async {
+    await _secureStorage.write(key: key, value: value);
+  }
+
+  Future<String?> getField(String key) async {
+    return await _secureStorage.read(key: key);
+  }
+
+  Future<void> deleteField(String key) async {
+    await _secureStorage.delete(key: key);
+  }
+
+  Future<void> clearSignupFields() async {
+    for (final key in [
+      'signup_name',
+      'signup_username',
+      'signup_email',
+      'signup_personalEmail',
+      'signup_university',
+      'signup_department',
+      'signup_cachedTime',
+    ]) {
+      await _secureStorage.delete(key: key);
+    }
+  }
+}
 
 // import 'package:shared_preferences/shared_preferences.dart';
 

@@ -78,6 +78,11 @@ dependencies:
   google_mobile_ads: ^6.0.0
   visibility_detector: ^0.4.0+2
   posthog_flutter: ^5.0.0
+  permission_handler: ^12.0.0+1
+  camera: ^0.10.6
+  google_mlkit_face_detection: ^0.13.1
+  image: ^4.5.4
+  # google_mlkit_commons: ^0.11.0
 
 
 dev_dependencies:

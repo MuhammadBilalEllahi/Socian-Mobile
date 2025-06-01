@@ -23,16 +23,18 @@ class UniversityPostProvider extends ChangeNotifier {
   double loadingProgress = 0.0;
   Timer? _progressTimer;
 
-  bool _hasFetched = false;
+  final bool _hasFetched = false;
   DateTime? _lastFetchedTime;
   final Duration cacheDuration = const Duration(minutes: 5);
 
-  Future<void> fetchPosts({
-    bool refreshIt = false,
-    // bool campus = false,
-    // bool intraCampus = false,
-    // bool universities = false,
-  }) async {
+  int _page = 1;
+  final int _limit = 10;
+  bool _hasNextPage = true;
+
+  bool get hasNextPage => _hasNextPage;
+  int get page => _page;
+
+  Future<void> fetchPosts({bool refreshIt = false}) async {
     _startProgressAnimation();
 
     if (!refreshIt &&
@@ -43,43 +45,48 @@ class UniversityPostProvider extends ChangeNotifier {
     }
 
     if (refreshIt) {
+      _page = 1;
+      _hasNextPage = true;
       _isRefreshing = true;
     } else {
       _isLoading = true;
     }
 
-    _hasFetched = true;
-    _lastFetchedTime = DateTime.now();
     _hasError = false;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      // String route = campus
-      //     ? ApiConstants.postsCampus
-      //     : intraCampus
-      //         ? ApiConstants.intraCampusPosts
-      //         : universities
-      //             ? ApiConstants.universiyPosts
-      //             : '';
-      // if (route.isEmpty) {
-      //   throw 'Invalid route configuration';
-      // }
-      final response = await apiClient.get(ApiConstants.universiyPosts);
+      final response = await apiClient
+          .get('${ApiConstants.universiyPosts}?page=$_page&limit=$_limit');
 
-      if (response is List) {
-        _posts = response;
+      if (response is Map<String, dynamic> &&
+          response.containsKey('data') &&
+          response.containsKey('pagination')) {
+        final newPosts = response['data'] as List<dynamic>;
+        final pagination = response['pagination'];
+
+        if (_page == 1) {
+          _posts = newPosts;
+        } else {
+          _posts.addAll(newPosts);
+        }
+
+        _hasNextPage = pagination['hasNextPage'] ?? false;
+        if (_hasNextPage) _page++;
       } else {
-        throw 'Invalid API response format: $response';
+        _errorMessage = 'Invalid API response format';
+        _hasError = true;
       }
     } catch (e) {
       _hasError = true;
-      _errorMessage = 'Failed to load posts: $e';
+      _errorMessage = e.toString();
     } finally {
-      _completeProgress();
       _isLoading = false;
       _isRefreshing = false;
+      _lastFetchedTime = DateTime.now();
       notifyListeners();
+      _completeProgress();
     }
   }
 

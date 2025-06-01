@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:socian/components/ShiningLinearProgressBar.dart';
-import 'package:socian/core/usecases/PostProvider.dart';
 import 'package:socian/core/utils/constants.dart';
+import 'package:socian/pages/home/widgets/campus/PostProvider.dart';
 
 import '../components/post/post.dart';
 
@@ -45,11 +45,19 @@ class _CampusPostsState extends ConsumerState<CampusPosts>
 
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
+        if (notification.metrics.pixels ==
+            notification.metrics.maxScrollExtent - 100) {
+          if (!postState.isLoading) {
+            ref.read(postProvider.notifier).fetchPosts();
+          }
+        }
+
         if (notification is OverscrollNotification &&
             notification.overscroll < 0) {
           // User is pulling down
           ref.read(postProvider.notifier).fetchPosts(refreshIt: true);
         }
+
         return false;
       },
       child: Column(
@@ -61,6 +69,9 @@ class _CampusPostsState extends ConsumerState<CampusPosts>
               isLoadingComplete: postState.loadingProgress >= 1.0,
             ),
           Expanded(child: _buildPostsList(postState, isDark)),
+          const SizedBox(
+            height: 60,
+          )
         ],
       ),
     );
