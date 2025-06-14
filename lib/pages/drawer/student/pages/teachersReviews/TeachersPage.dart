@@ -1,10 +1,11 @@
-import 'dart:ui';
-import 'package:socian/components/_buildShimmerEffect.dart';
-import 'package:socian/core/utils/constants.dart';
-import 'package:socian/shared/services/api_client.dart';
 import 'package:flutter/material.dart';
-import 'TeacherDetailsPage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:socian/components/_buildShimmerEffect.dart';
+import 'package:socian/core/utils/rbac.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/shared/services/api_client.dart';
+
+import 'TeacherDetailsPage.dart';
 import 'TeachersProvider.dart'; // import the provider
 
 class TeachersPage extends ConsumerStatefulWidget {
@@ -16,11 +17,31 @@ class TeachersPage extends ConsumerStatefulWidget {
 
 class _TeachersPageState extends ConsumerState<TeachersPage> {
   TextEditingController searchController = TextEditingController();
+  final ApiClient _apiClient = ApiClient();
 
   @override
   void dispose() {
     searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleHideTeacher(String teacherId) async {
+    try {
+      await _apiClient.post('/api/mod/teacher/hide', {'teacherId': teacherId});
+      // Refresh the teachers list after hiding
+      await ref.read(teachersProvider.notifier).fetchTeachers();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Teacher hidden successfully')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to hide teacher: ${e.toString()}')),
+        );
+      }
+    }
   }
 
   @override
@@ -29,6 +50,7 @@ class _TeachersPageState extends ConsumerState<TeachersPage> {
     final isDark = theme.brightness == Brightness.dark;
     final teachersState = ref.watch(teachersProvider);
     final notifier = ref.read(teachersProvider.notifier);
+    final user = ref.watch(authProvider).user;
 
     return Scaffold(
       backgroundColor: isDark ? Colors.black : Colors.white,
@@ -137,6 +159,12 @@ class _TeachersPageState extends ConsumerState<TeachersPage> {
                           topFeedback: teacher['topFeedback'],
                           subjects: List<String>.from(
                               teacher['subjectsTaught'] ?? []),
+                          onHide: RBAC.hasPermission(
+                                  user,
+                                  Permissions.moderator[
+                                      ModeratorPermissionsEnum.hidePost.name]!)
+                              ? () => _handleHideTeacher(teacher['_id'])
+                              : null,
                         ),
                       );
                     },
@@ -159,6 +187,7 @@ class _TeacherCard extends StatelessWidget {
   final double rating;
   final String? topFeedback;
   final List<String> subjects;
+  final VoidCallback? onHide;
 
   const _TeacherCard({
     required this.teacher,
@@ -168,6 +197,7 @@ class _TeacherCard extends StatelessWidget {
     required this.rating,
     this.topFeedback,
     required this.subjects,
+    this.onHide,
   });
 
   @override
@@ -216,12 +246,28 @@ class _TeacherCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        name,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.2,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              name,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                          ),
+                          if (onHide != null)
+                            IconButton(
+                              icon: Icon(
+                                Icons.visibility_off,
+                                color: isDark ? Colors.white70 : Colors.black54,
+                              ),
+                              onPressed: onHide,
+                              tooltip: 'Hide teacher',
+                            ),
+                        ],
                       ),
                       const SizedBox(height: 4),
                       Text(

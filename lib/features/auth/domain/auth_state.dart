@@ -4,6 +4,7 @@ class AuthState {
   final bool isLoading;
   final Map<String, dynamic>? user;
   final String? role;
+  final String? superRole;
 
   const AuthState({
     this.token,
@@ -11,6 +12,7 @@ class AuthState {
     this.isLoading = false,
     this.user,
     this.role,
+    this.superRole,
   });
 
   factory AuthState.initial() {
@@ -20,6 +22,7 @@ class AuthState {
       isLoading: false,
       user: null,
       role: null,
+      superRole: null,
     );
   }
 
@@ -29,6 +32,7 @@ class AuthState {
     bool? isLoading,
     Map<String, dynamic>? user,
     String? role,
+    String? superRole,
   }) {
     return AuthState(
       token: token ?? this.token,
@@ -36,6 +40,7 @@ class AuthState {
       isLoading: isLoading ?? this.isLoading,
       user: user ?? this.user,
       role: role ?? this.role,
+      superRole: superRole ?? this.superRole,
     );
   }
 
@@ -47,12 +52,13 @@ class AuthState {
         other.error == error &&
         other.isLoading == isLoading &&
         other.role == role &&
+        other.superRole == superRole &&
         mapEquals(other.user, user);
   }
 
   @override
   int get hashCode {
-    return Object.hash(token, error, isLoading, role, user);
+    return Object.hash(token, error, isLoading, role, superRole, user);
   }
 }
 

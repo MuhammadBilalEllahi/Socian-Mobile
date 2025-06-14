@@ -1,11 +1,11 @@
-import 'package:socian/features/auth/domain/auth_usecase.dart';
-import 'package:socian/features/auth/domain/auth_state.dart';
-import 'package:socian/shared/services/secure_storage_service.dart';
-import 'package:socian/shared/widgets/my_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:socian/core/utils/constants.dart';
+import 'package:socian/features/auth/domain/auth_state.dart';
+import 'package:socian/features/auth/domain/auth_usecase.dart';
+import 'package:socian/shared/services/secure_storage_service.dart';
+import 'package:socian/shared/widgets/my_snackbar.dart';
 
 class AuthController extends StateNotifier<AuthState> {
   final AuthUseCases authUseCases;
@@ -39,6 +39,7 @@ class AuthController extends StateNotifier<AuthState> {
           user: user,
           token: token,
           role: user['role'] ?? AppRoles.student,
+          superRole: user['super_role'],
           isLoading: false,
         );
       } else {
@@ -63,7 +64,8 @@ class AuthController extends StateNotifier<AuthState> {
     state = const AuthState(isLoading: false);
   }
 
-  Future<void> login(BuildContext context,String email, String password) async {
+  Future<void> login(
+      BuildContext context, String email, String password) async {
     if (!mounted) return;
     state = state.copyWith(isLoading: true);
     try {
@@ -77,6 +79,7 @@ class AuthController extends StateNotifier<AuthState> {
           user: user,
           token: token,
           role: user['role'] ?? AppRoles.student,
+          superRole: user['super_role'],
           isLoading: false,
         );
         await SecureStorageService.instance.saveToken(token);
@@ -85,9 +88,7 @@ class AuthController extends StateNotifier<AuthState> {
       showSnackbar(context, "Logged In", isError: false);
     } catch (e) {
       if (!mounted) return;
-      // state = state.copyWith(error: e.toString(), isLoading: false);
-                    showSnackbar(context, e.toString(), isError: true);
-
+      showSnackbar(context, e.toString(), isError: true);
     }
   }
 
@@ -98,11 +99,13 @@ class AuthController extends StateNotifier<AuthState> {
       await SecureStorageService.instance.saveToken(token);
       if (!mounted) return;
       state = state.copyWith(
-          user: user,
-          token: token,
-          isLoading: false,
-          error: null,
-          role: user['role'] ?? AppRoles.student);
+        user: user,
+        token: token,
+        isLoading: false,
+        error: null,
+        role: user['role'] ?? AppRoles.student,
+        superRole: user['super_role'],
+      );
     } catch (e) {
       if (!mounted) return;
       state = state.copyWith(error: e.toString(), isLoading: false);
