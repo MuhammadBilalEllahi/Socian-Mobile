@@ -1,27 +1,65 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http_parser/http_parser.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:path/path.dart' as path;
-import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:socian/features/auth/presentation/alumni/FaceVerificationPage.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/features/auth/presentation/alumni/FaceCaptureScreen.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/shared/services/api_client.dart';
 import 'package:socian/shared/widgets/my_snackbar.dart';
 
-class UploadCardPage extends StatefulWidget {
+class UploadCardPage extends ConsumerStatefulWidget {
   const UploadCardPage({super.key});
 
   @override
-  State<UploadCardPage> createState() => _UploadCardPageState();
+  ConsumerState<UploadCardPage> createState() => _UploadCardPageState();
 }
 
-class _UploadCardPageState extends State<UploadCardPage> {
+class _UploadCardPageState extends ConsumerState<UploadCardPage> {
   File? frontImage;
   File? backImage;
+
+  String? selectedCard;
+
+  final List<Map<String, dynamic>> cardTypes = [
+    {'label': 'Student Card', 'value': 'studentCard'},
+    {'label': 'Student Bus Card', 'value': 'studentBusCard'},
+    {'label': 'Transcript', 'value': 'transcript'},
+    {'label': 'Degree', 'value': 'degree'},
+    {'label': 'Other', 'value': 'other'},
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    final authUser = ref.read(authProvider).user;
+    if (authUser?['role'] == AppRoles.alumni) {
+      print("The user is $authUser");
+      print("verification ${authUser?['verification']}");
+      if (authUser!['verification']['studentCardUploaded'] == true &&
+          authUser['verification']['livePictureUploaded'] == true) {
+        Navigator.pushNamedAndRemoveUntil(
+            context, AppRoutes.alumniHome, (route) => false);
+      }
+      if (authUser['verification']['studentCardUploaded'] == true &&
+          !authUser['verification']['livePictureUploaded']) {
+        Navigator.pushReplacementNamed(context, AppRoutes.alumniUploadCard);
+      }
+      // if (authUser!['verification']['livePictureUploaded'] == true) {
+      //   return MaterialPageRoute(
+      //     builder: (_) => const FaceCaptureScreen(),
+      //     settings: const RouteSettings(name: AppRoutes.alumniLivePicture),
+      //   );
+      // }
+    }
+  }
 
   Future<void> _openCamera(bool isFrontSide, BuildContext context) async {
     final cameras = await availableCameras();
@@ -32,6 +70,10 @@ class _UploadCardPageState extends State<UploadCardPage> {
     final controller = CameraController(camera, ResolutionPreset.high);
     await controller.initialize();
 
+    // final captured = await Navigator.pushNamed(
+    //   context,
+    //   AppRoutes.alumniLivePicture,
+    // );
     final captured = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -87,7 +129,14 @@ class _UploadCardPageState extends State<UploadCardPage> {
     final response = await apiClient.postFormData(
         '/api/auth/alumni/verification/card', formData);
 
-    if (response['uploaded'] == true) {
+    print("RESPONSE upload Inage $response");
+    if (response['access_token'] != null) {
+      final token = response['access_token'];
+      final user = JwtDecoder.decode(token);
+
+      log("The user is in UploadCard $user");
+
+      await ref.read(authProvider.notifier).updateAuthState(user, token);
       return true;
     } else {
       return false;
@@ -144,6 +193,24 @@ class _UploadCardPageState extends State<UploadCardPage> {
                       fontSize: 24,
                       fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
+              // MyDropdownField<String>(
+              //   isLoading: false,
+              //   value: selectedCard,
+              //   items: cardTypes,
+              //   label: "Select University",
+              //   validator: (value) {
+              //     if (value == null || value.isEmpty) {
+              //       return 'Please select a document type';
+              //     }
+              //     return null;
+              //   },
+              //   onChanged: (value) {
+              //     setState(() {
+              //       selectedCard = value;
+              //     });
+              //   },
+              // ),
+              // const SizedBox(height: 16),
               Text(
                 "Front",
                 style: TextStyle(color: textColor),
@@ -180,12 +247,18 @@ class _UploadCardPageState extends State<UploadCardPage> {
                   onPressed: () async {
                     try {
                       final data = await _uploadImages();
+
+                      print("The data $data");
                       if (data == true) {
                         Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const FaceVerificationPage()),
-                        );
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const FaceCaptureScreen()));
+                        // await Navigator.pushNamed(
+                        //   context,
+                        //   AppRoutes.alumniLivePicture,
+                        // );
                       } else {
                         showSnackbar(
                             context, "Upload failed. Please try again.",

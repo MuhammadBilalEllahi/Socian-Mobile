@@ -1169,6 +1169,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
     return Scaffold(
       backgroundColor: background,
       appBar: AppBar(
+        automaticallyImplyLeading: isOwnProfile ? false : true,
         backgroundColor: background,
         elevation: 0,
         actions: [

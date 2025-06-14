@@ -1,7 +1,20 @@
 import 'dart:developer';
-import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:socian/core/utils/constants.dart';
 import 'package:socian/features/auth/presentation/PrivacyPolicyScreen.dart';
+import 'package:socian/features/auth/presentation/alumni/FaceCaptureScreen.dart';
+import 'package:socian/features/auth/presentation/alumni/UploadCardPage.dart';
+import 'package:socian/features/auth/presentation/auth_screen.dart';
+import 'package:socian/features/auth/presentation/student_signupScreen.dart';
+import 'package:socian/features/auth/presentation/widgets/RoleSelectionPage.dart';
+import 'package:socian/features/auth/presentation/widgets/login_form.dart';
+import 'package:socian/features/auth/presentation/widgets/otp_form.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/pages/AlumniPages/AlumniHome.dart';
+import 'package:socian/pages/AlumniPages/AlumniJobs.dart';
+import 'package:socian/pages/AlumniPages/AlumniProfile.dart';
 import 'package:socian/pages/drawer/student/pages/cafeInformation/CafesHome.dart';
 import 'package:socian/pages/drawer/student/pages/pastPaper/DepartmentPage.dart';
 import 'package:socian/pages/drawer/student/pages/pastPaper/PastPapers.dart';
@@ -10,42 +23,26 @@ import 'package:socian/pages/drawer/student/pages/pastPaper/discussion/Discussio
 import 'package:socian/pages/drawer/student/pages/pastPaper/discussion/answerPage/AnswersPage.dart';
 import 'package:socian/pages/drawer/student/pages/teachersReviews/TeachersPage.dart';
 import 'package:socian/pages/drawer/teacher/review/TeacherSelfReview.dart';
-import 'package:socian/pages/gps/ScheduledGatherings.dart';
-import 'package:socian/pages/home/widgets/intracampus/IntraCampus.dart';
-import 'package:socian/pages/profile/settings/personalInfo/PersonalInfoEditPage.dart';
-import 'package:socian/shared/services/WebSocketService.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:socian/features/auth/providers/auth_provider.dart';
-import 'package:socian/core/utils/constants.dart';
-import 'package:socian/features/auth/presentation/auth_screen.dart';
-import 'package:socian/features/auth/presentation/student_signupScreen.dart';
-import 'package:socian/features/auth/presentation/widgets/RoleSelectionPage.dart';
-import 'package:socian/features/auth/presentation/widgets/login_form.dart';
-import 'package:socian/features/auth/presentation/widgets/otp_form.dart';
-import 'package:socian/pages/splashScreen/SplashScreen.dart';
-import 'package:socian/pages/home/HomePage.dart';
-import 'package:socian/pages/message/Messages.dart';
 import 'package:socian/pages/explore/MapsPage.dart';
+import 'package:socian/pages/gps/ScheduledGatherings.dart';
+import 'package:socian/pages/home/HomePage.dart';
+import 'package:socian/pages/home/widgets/intracampus/IntraCampus.dart';
+import 'package:socian/pages/message/Messages.dart';
 import 'package:socian/pages/profile/ProfilePage.dart';
-
-import 'package:socian/pages/TeacherMod/TeacherHome.dart';
-import 'package:socian/pages/TeacherMod/TeacherProfile.dart';
-import 'package:socian/pages/TeacherMod/TeacherFeedbacks.dart';
-import 'package:socian/pages/AlumniPages/AlumniHome.dart';
-import 'package:socian/pages/AlumniPages/AlumniProfile.dart';
-import 'package:socian/pages/AlumniPages/AlumniJobs.dart';
 import 'package:socian/pages/profile/settings/SettingsPage.dart';
-import 'package:posthog_flutter/posthog_flutter.dart';
+import 'package:socian/pages/profile/settings/personalInfo/PersonalInfoEditPage.dart';
+import 'package:socian/pages/splashScreen/SplashScreen.dart';
+import 'package:socian/shared/services/WebSocketService.dart';
 
-
-void callPostHog(String userId,String name,String email,String role) async{
-      await Posthog().identify(
-  userId: userId,
-  userProperties: {"name": name, "email": email, "role": role},
-  userPropertiesSetOnce: {"date_of_first_log_in": DateTime.now().toIso8601String()},
-);
-}
+// void callPostHog(String userId, String name, String email, String role) async {
+//   await Posthog().identify(
+//     userId: userId,
+//     userProperties: {"name": name, "email": email, "role": role},
+//     userPropertiesSetOnce: {
+//       "date_of_first_log_in": DateTime.now().toIso8601String()
+//     },
+//   );
+// }
 
 class RouteGuard {
   static Route<dynamic>? onGenerateRoute(
@@ -53,17 +50,34 @@ class RouteGuard {
     final auth = ref.watch(authProvider);
     // debugPrint("The role is ${auth.user}");
     final userRole = auth.user?['role'] ?? '';
-    if(userRole != null && auth.user != null) {
-      
+    if (userRole != null && auth.user != null) {
       WebSocketService().joinNotification(auth.user!['_id']);
-callPostHog(
-        auth.user!['_id'],
-        auth.user!['name'] ?? '',
-        auth.user!['email'] ?? '',
-        userRole,
-      );
+      // callPostHog(
+      //   auth.user!['_id'],
+      //   auth.user!['name'] ?? '',
+      //   auth.user!['email'] ?? '',
+      //   userRole,
+      // );
+
+      if (auth.user?['role'] == AppRoles.alumni) {
+        log("The user is ${auth.user}");
+        if (auth.user!['verification']['studentCardUploaded'] == false) {
+          if (settings.name != AppRoutes.alumniUploadCard) {
+            // Redirect to upload card page if not already there
+            return MaterialPageRoute(
+              builder: (_) => const UploadCardPage(),
+              settings: const RouteSettings(name: AppRoutes.alumniUploadCard),
+            );
+          }
+        }
+        if (auth.user!['verification']['livePictureUploaded'] == false) {
+          return MaterialPageRoute(
+            builder: (_) => const FaceCaptureScreen(),
+            settings: const RouteSettings(name: AppRoutes.alumniLivePicture),
+          );
+        }
+      }
     }
-    
 
     // List of routes that don't require authentication
     final publicRoutes = [
@@ -73,7 +87,9 @@ callPostHog(
       AppRoutes.signupScreen,
       AppRoutes.roleSelection,
       AppRoutes.otpScreen,
-      AppRoutes.privacyPolicy
+      AppRoutes.privacyPolicy,
+      AppRoutes.alumniUploadCard,
+      AppRoutes.alumniLivePicture
     ];
 
     // If trying to access splash screen, always allow it
@@ -142,6 +158,11 @@ callPostHog(
         return const OTPVerificationScreen();
       case AppRoutes.privacyPolicy:
         return const PrivacyPolicyScreen();
+
+      case AppRoutes.alumniUploadCard:
+        return const UploadCardPage();
+      case AppRoutes.alumniLivePicture:
+        return const FaceCaptureScreen();
       default:
         return const AuthScreen();
     }

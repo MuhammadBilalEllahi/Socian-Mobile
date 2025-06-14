@@ -1,12 +1,10 @@
-import 'package:socian/features/auth/providers/auth_provider.dart';
-import 'package:socian/core/utils/constants.dart';
-import 'package:socian/shared/services/api_client.dart';
-import 'package:socian/shared/services/secure_storage_service.dart';
 import 'package:flutter/material.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:socian/features/auth/controllers/auth_controller.dart';
-import 'package:socian/features/auth/domain/auth_state.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/features/auth/presentation/alumni/UploadCardPage.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/shared/services/api_client.dart';
 
 class OTPVerificationScreen extends ConsumerStatefulWidget {
   const OTPVerificationScreen({super.key});
@@ -35,12 +33,12 @@ class _OTPVerificationScreenState extends ConsumerState<OTPVerificationScreen> {
           gradient: LinearGradient(
             colors: isDarkMode
                 ? [
-                    Color.fromARGB(255, 0, 0, 0),
-                    Color.fromARGB(255, 48, 48, 48)
+                    const Color.fromARGB(255, 0, 0, 0),
+                    const Color.fromARGB(255, 48, 48, 48)
                   ]
                 : [
-                    Color.fromARGB(255, 240, 240, 240),
-                    Color.fromARGB(255, 255, 255, 255)
+                    const Color.fromARGB(255, 240, 240, 240),
+                    const Color.fromARGB(255, 255, 255, 255)
                   ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -136,8 +134,18 @@ class _OTPVerificationScreenState extends ConsumerState<OTPVerificationScreen> {
                                       content:
                                           Text("OTP Verified Successfully")));
 
-                              Navigator.pushReplacementNamed(
-                                  context, AppRoutes.home);
+                              if (user['role'] == AppRoles.alumni) {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const UploadCardPage()));
+                                // Navigator.pushReplacementNamed(
+                                //     context, AppRoutes.alumniUploadCard);
+                              } else {
+                                Navigator.pushReplacementNamed(
+                                    context, AppRoutes.home);
+                              }
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(content: Text("Invalid OTP")));

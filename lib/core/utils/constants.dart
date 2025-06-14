@@ -21,11 +21,14 @@ class ApiConstants {
     1: "http://192.168.1.1:8080",
     10: "http://192.168.1.10:8080",
     4: "http://192.168.1.4:8080",
+    5: "http://192.168.1.5:8080",
+    6: "http://192.168.1.6:8080",
     7: "http://192.168.1.7:8080",
     9: "http://192.168.1.9:8080",
+    90: "http://10.135.48.250:8080"
   };
 
-  static int _currentUrlIndex = 7;
+  static int _currentUrlIndex = 6;
   static const String _urlIndexCacheKey = 'current_url_index';
 
   static Future<void> initializeBaseUrl() async {
@@ -159,6 +162,9 @@ class AppRoutes {
   static const String alumniHome = '/alumni/home';
   static const String alumniProfile = '/alumni/profile';
   static const String alumniJobs = '/alumni/jobs';
+
+  static const String alumniUploadCard = '/alumni/verif/card';
+  static const String alumniLivePicture = '/alumni/verif/live-picture';
 }
 
 class AppAssets {

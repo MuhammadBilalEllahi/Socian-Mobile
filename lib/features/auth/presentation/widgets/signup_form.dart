@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:socian/core/utils/constants.dart';
 import 'package:socian/features/auth/presentation/PrivacyPolicyScreen.dart';
@@ -42,11 +44,20 @@ class _SignUpFormState extends State<SignUpForm> {
   final ApiClient apiClient = ApiClient();
   bool isUsernameTaken = false;
 
+  Timer? _debounce;
+
+  void _onChangedDebounced() {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      _cacheSignupData();
+    });
+  }
+
   void _cacheListeners() {
-    _nameController.addListener(_cacheSignupData);
-    _usernameController.addListener(_cacheSignupData);
-    _emailController.addListener(_cacheSignupData);
-    _personalEmailController.addListener(_cacheSignupData);
+    _nameController.addListener(_onChangedDebounced);
+    _usernameController.addListener(_onChangedDebounced);
+    _emailController.addListener(_onChangedDebounced);
+    _personalEmailController.addListener(_onChangedDebounced);
   }
 
   Future<void> _cacheSignupData() async {
@@ -65,6 +76,16 @@ class _SignUpFormState extends State<SignUpForm> {
       await storage.saveField('signup_department', selectedDepartment!);
     }
     await storage.saveField('signup_cachedTime', now);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _usernameController.dispose();
+    _emailController.dispose();
+    _personalEmailController.dispose();
+    _debounce?.cancel();
+    super.dispose();
   }
 
   Future<void> _restoreSignupData() async {
@@ -315,7 +336,7 @@ class _SignUpFormState extends State<SignUpForm> {
                     selectedDomain = selectedUni['domain'];
                     selectedRegex = selectedUni['regex'];
                   });
-                  _cacheSignupData();
+                  _onChangedDebounced();
                 },
               ),
               const SizedBox(height: 16),
@@ -328,6 +349,7 @@ class _SignUpFormState extends State<SignUpForm> {
                   setState(() {
                     selectedDepartment = value;
                   });
+                  _onChangedDebounced();
                 },
               ),
               MyTextField(

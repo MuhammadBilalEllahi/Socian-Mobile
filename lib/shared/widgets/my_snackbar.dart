@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-void showSnackbar(BuildContext context, String message, {bool isError = false}) {
+
+void showSnackbar(BuildContext context, String message,
+    {bool isError = false}) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
   ScaffoldMessenger.of(context).showSnackBar(
@@ -22,4 +24,4 @@ void showSnackbar(BuildContext context, String message, {bool isError = false}) 
       duration: const Duration(seconds: 3),
     ),
   );
-  }
+}

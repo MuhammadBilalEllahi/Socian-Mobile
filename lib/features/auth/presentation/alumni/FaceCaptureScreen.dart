@@ -3,25 +3,28 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http_parser/http_parser.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/shared/services/api_client.dart';
 
-class FaceCaptureScreen extends StatefulWidget {
+class FaceCaptureScreen extends ConsumerStatefulWidget {
   const FaceCaptureScreen({super.key});
 
   @override
-  _FaceCaptureScreenState createState() => _FaceCaptureScreenState();
+  ConsumerState<FaceCaptureScreen> createState() => _FaceCaptureScreenState();
 }
 
-class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
+class _FaceCaptureScreenState extends ConsumerState<FaceCaptureScreen> {
   late CameraController _controller;
   late List<CameraDescription> _cameras;
   String? _imagePath;
   bool _isTakingPicture = false;
+  bool _isCameraOpening = false;
 
   @override
   void initState() {
@@ -29,16 +32,40 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     _initCamera();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!_controller.value.isInitialized) return;
+
+    if (state == AppLifecycleState.inactive) {
+      _controller.dispose();
+    } else if (state == AppLifecycleState.resumed) {
+      _controller = CameraController(
+        _cameras.firstWhere(
+            (cam) => cam.lensDirection == CameraLensDirection.front),
+        ResolutionPreset.high,
+      );
+      _controller.initialize();
+    }
+  }
+
   Future<void> _initCamera() async {
+    if (_isCameraOpening) return;
+    _isCameraOpening = true;
     await Permission.camera.request();
 
-    _cameras = await availableCameras();
-    _controller = CameraController(
-      _cameras
-          .firstWhere((cam) => cam.lensDirection == CameraLensDirection.front),
-      ResolutionPreset.high,
-    );
-    await _controller.initialize();
+    try {
+      _cameras = await availableCameras();
+      _controller = CameraController(
+        _cameras.firstWhere(
+            (cam) => cam.lensDirection == CameraLensDirection.front),
+        ResolutionPreset.high,
+      );
+      if (!_controller.value.isInitialized) {
+        await _controller.initialize();
+      }
+    } finally {
+      _isCameraOpening = false;
+    }
     await _controller.setFlashMode(FlashMode.always);
     setState(() {});
   }
@@ -63,7 +90,13 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     _simulateFrontFlash();
     try {
       final XFile picture = await _controller.takePicture();
+      File pictured = File(picture.path);
+
       _imagePath = picture.path;
+
+      print("Picture $picture");
+      print("_ImagePath $_imagePath");
+      print("PICTURED $pictured");
 
       setState(() {
         _isTakingPicture = false;
@@ -82,16 +115,39 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     final apiClient = ApiClient();
     final data = <String, dynamic>{};
 
-    data['file'] = await MultipartFile.fromFile(
-      imageFile.path,
-      filename:
-          '${DateTime.now().millisecondsSinceEpoch}_${path.basename(imageFile.path)}',
-      contentType:
-          MediaType('image', path.extension(imageFile.path).substring(1)),
-    );
+    print("IS FILE HERE $imageFile AND ${imageFile.path}");
 
-    await apiClient.postFormData(
-        '/api/auth/alumni/verification/live-picture', data);
+    final formData = {
+      'files': [
+        await MultipartFile.fromFile(
+          imageFile.path,
+          filename:
+              '${DateTime.now().millisecondsSinceEpoch}_${path.basename(imageFile.path)}',
+          contentType:
+              MediaType('image', path.extension(imageFile.path).substring(1)),
+        )
+      ]
+    };
+    // data['file'] = await MultipartFile.fromFile(
+    //   imageFile.path,
+    //   filename:
+    //       '${DateTime.now().millisecondsSinceEpoch}_${path.basename(imageFile.path)}',
+    //   contentType:
+    //       MediaType('image', path.extension(imageFile.path).substring(1)),
+    // );
+
+    print("FILE DATA $formData");
+    final response = await apiClient.postFormData(
+        '/api/auth/alumni/verification/live-picture', formData);
+
+    if (response['access_token'] != null) {
+      final token = response['access_token'];
+      final user = JwtDecoder.decode(token);
+
+      await ref.read(authProvider.notifier).updateAuthState(user, token);
+
+      Navigator.pushNamed(context, AppRoutes.home);
+    }
   }
 
   @override
