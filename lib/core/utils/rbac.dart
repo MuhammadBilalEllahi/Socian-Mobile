@@ -11,6 +11,7 @@ class Permissions {
 
   static const moderator = {
     'hidePost': 'mod:hide_post',
+    'hideTeacherReview': 'mod:hide_teacher_review',
     'hideTeacherModal': 'mod:hide_teacher_modal',
     'manageContent': 'mod:manage_content',
     'manageComments': 'mod:manage_comments',
@@ -45,6 +46,7 @@ enum SuperAdminPermissionsEnum {
 
 enum ModeratorPermissionsEnum {
   hidePost,
+  hideTeacherReview,
   hideTeacherModal,
   manageContent,
   manageComments,

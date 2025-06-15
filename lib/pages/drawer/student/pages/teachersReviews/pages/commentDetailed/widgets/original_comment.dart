@@ -1,12 +1,19 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:socian/utils/date_formatter.dart';
-import 'vote_button.dart';
-import 'reply_box.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:socian/core/utils/rbac.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/pages/drawer/student/pages/teachersReviews/widgets/EditFeedBackSheet.dart';
+import 'package:socian/pages/drawer/student/pages/teachersReviews/widgets/TeacherMainPageComments.dart';
 import 'package:socian/shared/services/api_client.dart';
+import 'package:socian/shared/widgets/my_snackbar.dart';
+import 'package:socian/utils/date_formatter.dart';
 
-class OriginalComment extends StatefulWidget {
+import 'reply_box.dart';
+import 'vote_button.dart';
+
+class OriginalComment extends ConsumerStatefulWidget {
   final Map<String, dynamic> comment;
   final String teacherId;
   final bool isDark;
@@ -23,10 +30,10 @@ class OriginalComment extends StatefulWidget {
   });
 
   @override
-  State<OriginalComment> createState() => _OriginalCommentState();
+  ConsumerState<OriginalComment> createState() => _OriginalCommentState();
 }
 
-class _OriginalCommentState extends State<OriginalComment> {
+class _OriginalCommentState extends ConsumerState<OriginalComment> {
   bool _isVoting = false;
   int? _upVotesCount;
   int? _downVotesCount;
@@ -76,7 +83,7 @@ class _OriginalCommentState extends State<OriginalComment> {
         },
       );
       log('[VOTE] RESPONSE FROM VOTE $response');
-      if (mounted && response is Map) {
+      if (mounted) {
         setState(() {
           _upVotesCount = response['upVotesCount'] ?? _upVotesCount;
           _downVotesCount = response['downVotesCount'] ?? _downVotesCount;
@@ -116,10 +123,129 @@ class _OriginalCommentState extends State<OriginalComment> {
     }
   }
 
+  final _reasonController = TextEditingController();
+
+  Widget _hideReasonDialog() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    return AlertDialog(
+      title: const Text('Hide Reason', style: TextStyle(fontSize: 16)),
+      content: TextFormField(
+        controller: _reasonController,
+        maxLines: 3,
+        decoration: InputDecoration(
+          hintText: 'Enter reason for hiding',
+          hintStyle: const TextStyle(fontSize: 14),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter a reason';
+          }
+          return null;
+        },
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('Cancel',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: isDarkMode ? Colors.white : Colors.black)),
+        ),
+        TextButton(
+          onPressed: () =>
+              Navigator.pop(context, _reasonController.text.trim()),
+          child: Text('Submit',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: isDarkMode ? Colors.white : Colors.black)),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handleHide() async {
+    // Handle hide
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (context) => _hideReasonDialog(),
+    );
+    if (reason == null) return;
+    final apiClient = ApiClient();
+    try {
+      final response = await apiClient.post(
+        '/api/mod/teacher/reviews/feedback/hide',
+        {
+          'reviewId': widget.comment['_id'],
+          'reason': reason,
+        },
+      );
+      if (response.isNotEmpty) {
+        showSnackbar(context, response['message'], isError: false);
+      }
+    } catch (e) {
+      showSnackbar(context, e.toString(), isError: true);
+    }
+  }
+
+  Future<void> _handleDelete() async {
+    // Handle delete
+    final apiClient = ApiClient();
+    try {
+      final response = await apiClient.delete(
+        '/api/teacher/reviews/feedbacks/delete?teacherId=${widget.teacherId}&reviewId=${widget.comment['_id']}',
+      );
+      if (response.isNotEmpty) {
+        if (mounted) {
+          showSnackbar(context, response['message'], isError: false);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        showSnackbar(context, e.toString(), isError: true);
+      }
+    }
+  }
+
+  void _handleEdit(Map<String, dynamic> comment) {
+    // Get the parent widget's state
+    final parentState =
+        context.findAncestorStateOfType<TeacherMainPageCommentsState>();
+
+    print("comment $comment");
+    // Handle edit
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: EditFeedBackSheet(
+          teacherId: widget.teacherId,
+          editComment: comment,
+          onOptimisticComment: (optimisticComment,
+              {required Future<bool> Function() confirm}) {
+            parentState?.addOptimisticComment(
+              optimisticComment,
+              confirm: confirm,
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final comment = widget.comment;
+    final userRef = ref.read(authProvider).user;
     final user = comment['user'];
     final name = user['name'] ?? 'Anonymous';
     final isDeleted = user['_id'] == null;
@@ -177,6 +303,10 @@ class _OriginalCommentState extends State<OriginalComment> {
                                 size: 16,
                                 color: Colors.blue,
                               ),
+                            ],
+                            if (user['_id'] == userRef?['_id']) ...[
+                              const SizedBox(width: 4),
+                              const Text('(You)'),
                             ],
                           ],
                         ),
@@ -244,6 +374,85 @@ class _OriginalCommentState extends State<OriginalComment> {
                       ? null
                       : (() => _handleVote(comment['_id'],
                           comment['user']['_id'], 'downvote')) as VoidCallback?,
+                ),
+                PopupMenuButton<String>(
+                  icon: Icon(
+                    Icons.more_horiz_rounded,
+                    color: widget.isDark
+                        ? Colors.white.withOpacity(0.7)
+                        : Colors.black.withOpacity(0.7),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  color: widget.isDark ? Colors.grey[900] : Colors.white,
+                  elevation: 4,
+                  itemBuilder: (context) => [
+                    if (widget.comment['user']?['_id'] == userRef?['_id']) ...[
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.edit_rounded,
+                              size: 18,
+                              color:
+                                  widget.isDark ? Colors.white : Colors.black,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Edit',
+                              style: TextStyle(
+                                color:
+                                    widget.isDark ? Colors.white : Colors.black,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.delete_rounded,
+                              size: 18,
+                              color: Colors.red[400],
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Delete',
+                              style: TextStyle(
+                                color: Colors.red[400],
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    if (RBAC.hasPermission(
+                        userRef,
+                        Permissions.moderator[ModeratorPermissionsEnum
+                            .hideTeacherReview.name]!)) ...[
+                      const PopupMenuItem(
+                        value: 'hide',
+                        child: Row(
+                          children: [
+                            Icon(Icons.visibility_off_rounded, size: 20),
+                            SizedBox(width: 8),
+                            Text('Hide'),
+                          ],
+                        ),
+                      ),
+                    ]
+                  ],
+                  onSelected: (value) {
+                    if (value == 'delete') _handleDelete();
+                    if (value == 'edit') _handleEdit(comment);
+                    if (value == 'hide') _handleHide();
+                  },
                 ),
               ],
             ),

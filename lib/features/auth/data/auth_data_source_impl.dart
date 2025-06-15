@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
-import 'package:posthog_flutter/posthog_flutter.dart';
+// import 'package:flutter/foundation.dart';
+//  import 'package:posthog_flutter/posthog_flutter.dart';
 import 'package:socian/core/utils/constants.dart';
-import 'package:socian/shared/services/api_client.dart';
 import 'package:socian/features/auth/data/auth_data_source.dart';
+import 'package:socian/shared/services/api_client.dart';
 // import 'package:socian/shared/services/secure_storage_service.dart';
 // import 'package:socian/shared/services/secure_storage_service.dart';
 
@@ -13,22 +13,22 @@ class AuthDataSourceImpl implements AuthDataSource {
 
   AuthDataSourceImpl({required this.client});
 
-    Future<String?> getPublicIp() async {
-  try {
-    final apiClientPublic = ExternalApiClient();
-    final response = await apiClientPublic.get('https://api.ipify.org?format=json');
-    print('Response from IP API: $response');
-    if (response['ip'] != null) {
-      print('Public IP: ${response['ip']}');
-      return response['ip'];
-      
+  Future<String?> getPublicIp() async {
+    try {
+      final apiClientPublic = ExternalApiClient();
+      final response =
+          await apiClientPublic.get('https://api.ipify.org?format=json');
+      print('Response from IP API: $response');
+      if (response['ip'] != null) {
+        print('Public IP: ${response['ip']}');
+        return response['ip'];
+      }
+    } catch (e) {
+      print('Failed to get IP: $e');
+      return '';
     }
-  } catch (e) {
-    print('Failed to get IP: $e');
     return '';
   }
-  return '';
-}
 
   @override
   Future<Map<String, dynamic>> login(String email, String password) async {
@@ -40,10 +40,18 @@ class AuthDataSourceImpl implements AuthDataSource {
       // debugPrint(
       //     "4.1 - Making API call to login endpoint ${ApiConstants.baseUrl}");
 
-
       final response = await client.post(
         ApiConstants.loginEndpoint,
-        {'email': email, 'password': password, 'ip': await getPublicIp(), 'val_platform': Platform.isIOS ? 'ios' : Platform.isAndroid? 'android': ''},
+        {
+          'email': email,
+          'password': password,
+          'ip': await getPublicIp(),
+          'val_platform': Platform.isIOS
+              ? 'ios'
+              : Platform.isAndroid
+                  ? 'android'
+                  : ''
+        },
         // headers: {"x-platform": "app"},
       );
 

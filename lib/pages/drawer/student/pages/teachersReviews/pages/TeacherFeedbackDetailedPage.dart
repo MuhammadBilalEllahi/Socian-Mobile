@@ -2,15 +2,15 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:socian/shared/services/api_client.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'commentDetailed/widgets/index.dart';
 
-class CommentDetailsPage extends StatefulWidget {
+class TeacherFeedbackDetailedPage extends StatefulWidget {
   final Map<String, dynamic> comment;
   final String teacherId;
   final bool isDark;
 
-  const CommentDetailsPage({
+  const TeacherFeedbackDetailedPage({
     super.key,
     required this.comment,
     required this.teacherId,
@@ -18,10 +18,12 @@ class CommentDetailsPage extends StatefulWidget {
   });
 
   @override
-  State<CommentDetailsPage> createState() => _CommentDetailsPageState();
+  State<TeacherFeedbackDetailedPage> createState() =>
+      _TeacherFeedbackDetailedPageState();
 }
 
-class _CommentDetailsPageState extends State<CommentDetailsPage> {
+class _TeacherFeedbackDetailedPageState
+    extends State<TeacherFeedbackDetailedPage> {
   bool _isLoading = true;
   List<Map<String, dynamic>> _replies = [];
   // bool _isNestedView = true;

@@ -1,32 +1,34 @@
 import 'dart:async';
 import 'dart:developer';
-import 'package:socian/core/utils/constants.dart';
-import 'package:socian/pages/drawer/student/pages/teachersReviews/pages/comment_details_page.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/core/utils/rbac.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/pages/drawer/student/pages/teachersReviews/pages/TeacherFeedbackDetailedPage.dart';
+import 'package:socian/pages/drawer/student/pages/teachersReviews/widgets/EditFeedBackSheet.dart';
+import 'package:socian/pages/drawer/student/pages/teachersReviews/widgets/gif_picker.dart';
 import 'package:socian/shared/services/api_client.dart';
+import 'package:socian/shared/widgets/my_snackbar.dart';
 
-import 'gif_picker.dart';
-
-class TeacherComments extends StatefulWidget {
+class TeacherMainPageComments extends ConsumerStatefulWidget {
   final String teacherId;
 
-  const TeacherComments({
+  const TeacherMainPageComments({
     super.key,
     required this.teacherId,
   });
 
   @override
-  State<TeacherComments> createState() => TeacherCommentsState();
+  ConsumerState<TeacherMainPageComments> createState() =>
+      TeacherMainPageCommentsState();
 }
 
-class TeacherCommentsState extends State<TeacherComments> {
+class TeacherMainPageCommentsState
+    extends ConsumerState<TeacherMainPageComments> {
   final _commentController = TextEditingController();
   List<Map<String, dynamic>> _comments = [];
-  int _rating = 0;
-  bool _isAnonymous = false;
-  bool _isSubmitting = false;
   bool _isLoading = true;
 
   @override
@@ -76,6 +78,12 @@ class TeacherCommentsState extends State<TeacherComments> {
     }
   }
 
+  void removeComment(Map<String, dynamic> comment) {
+    setState(() {
+      _comments = _comments.where((c) => c['_id'] != comment['_id']).toList();
+    });
+  }
+
   Future<void> _fetchComments() async {
     setState(() {
       _isLoading = true;
@@ -108,83 +116,6 @@ class TeacherCommentsState extends State<TeacherComments> {
     }
   }
 
-  // Future<void> _submitComment(WidgetRef ref) async {
-  //   if (_commentController.text.trim().isEmpty || _rating == 0) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(
-  //         content: Text('Please provide both a rating and a comment'),
-  //         backgroundColor: Colors.red,
-  //       ),
-  //     );
-  //     return;
-  //   }
-
-  //   setState(() {
-  //     _isSubmitting = true;
-  //   });
-
-  //   try {
-  //     final user = ref.read(authProvider).user;
-  //     if (user == null) {
-  //       throw Exception('User not authenticated');
-  //     }
-
-  //     final ApiClient apiClient = ApiClient();
-
-  //     debugPrint("rating: $_rating");
-  //     debugPrint("comment: ${_commentController.text.trim()}");
-  //     debugPrint("isAnonymous: $_isAnonymous");
-  //     debugPrint("user: $user");
-  //     debugPrint("teacherId: ${widget.teacherId}");
-  //     debugPrint("userId: ${user['_id']}");
-
-  //     await apiClient.post(
-  //       '/api/teacher/rate',
-  //       {
-  //         'teacherId': widget.teacherId,
-  //         'userId': user['_id'],
-  //         'rating': _rating,
-  //         'feedback': _commentController.text.trim(),
-  //         'hideUser': _isAnonymous,
-  //       },
-  //     );
-
-  //     // Clear form and show success message
-  //     _commentController.clear();
-  //     setState(() {
-  //       _rating = 0;
-  //       _isAnonymous = false;
-  //     });
-
-  //     // Fetch updated comments
-  //     // await _fetchComments();
-
-  //     if (mounted) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         const SnackBar(
-  //           content: Text('Comment posted successfully'),
-  //           backgroundColor: Colors.green,
-  //         ),
-  //       );
-  //     }
-  //   } catch (e) {
-  //     if (mounted) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(
-  //           content: Text('Failed to post comment: ${e.toString()}'),
-  //           backgroundColor: Colors.red,
-  //         ),
-  //       );
-  //     }
-  //   } finally {
-  //     if (mounted) {
-  //       setState(() {
-  //         _isSubmitting = false;
-  //       });
-  //     }
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -204,215 +135,6 @@ class TeacherCommentsState extends State<TeacherComments> {
           ),
         ),
         const SizedBox(height: 16),
-
-        // Comment Box
-        // Padding(
-        //   padding: const EdgeInsets.symmetric(horizontal: 24),
-        //   child: Container(
-        //     decoration: BoxDecoration(
-        //       // color: Colors.yellow,
-        //       color: Colors.transparent,
-        //       // color: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
-        //       borderRadius: BorderRadius.circular(16),
-        //       border: Border.all(
-        //         color: isDark
-        //             ? Colors.white.withOpacity(0.1)
-        //             : Colors.black.withOpacity(0.1),
-        //       ),
-        //     ),
-        //     child: Column(
-        //       children: [
-        //         // Rating Selector
-        //         Container(
-        //           padding: const EdgeInsets.all(16),
-        //           decoration: BoxDecoration(
-        //             border: Border(
-        //               bottom: BorderSide(
-        //                 color: isDark
-        //                     ? Colors.white.withOpacity(0.1)
-        //                     : Colors.black.withOpacity(0.1),
-        //               ),
-        //             ),
-        //           ),
-        //           child: Column(
-        //             crossAxisAlignment: CrossAxisAlignment.start,
-        //             children: [
-        //               Text(
-        //                 'Rate your experience',
-        //                 style: theme.textTheme.bodyMedium?.copyWith(
-        //                   fontWeight: FontWeight.w500,
-        //                 ),
-        //               ),
-        //               const SizedBox(height: 8),
-        //               Row(
-        //                 children: List.generate(5, (index) {
-        //                   final starValue = index + 1;
-        //                   return GestureDetector(
-        //                     onTap: () {
-        //                       setState(() {
-        //                         _rating = starValue;
-        //                       });
-        //                     },
-        //                     child: Padding(
-        //                       padding: const EdgeInsets.only(right: 4),
-        //                       child: Icon(
-        //                         _rating >= starValue
-        //                             ? Icons.star_rounded
-        //                             : Icons.star_outline_rounded,
-        //                         size: 32,
-        //                         color: _rating >= starValue
-        //                             ? const Color(0xFFFFD700)
-        //                             : isDark
-        //                                 ? Colors.white.withOpacity(0.3)
-        //                                 : Colors.black.withOpacity(0.3),
-        //                       ),
-        //                     ),
-        //                   );
-        //                 }),
-        //               ),
-        //             ],
-        //           ),
-        //         ),
-        //         // Comment TextField
-        //         TextField(
-        //           controller: _commentController,
-        //           style: theme.textTheme.bodyLarge,
-        //           maxLines: 3,
-        //           decoration: InputDecoration(
-        //             hintText: 'Write a comment...',
-        //             hintStyle: theme.textTheme.bodyLarge?.copyWith(
-        //               color: theme.colorScheme.onSurface.withOpacity(0.5),
-        //             ),
-        //             border: InputBorder.none,
-        //             contentPadding: const EdgeInsets.all(16),
-        //           ),
-        //         ),
-        //         // Anonymous Checkbox
-        //         Container(
-        //           decoration: BoxDecoration(
-        //             border: Border(
-        //               top: BorderSide(
-        //                 color: isDark
-        //                     ? Colors.white.withOpacity(0.1)
-        //                     : Colors.black.withOpacity(0.1),
-        //               ),
-        //             ),
-        //           ),
-        //           padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-        //           child: Row(
-        //             children: [
-        //               InkWell(
-        //                 onTap: () {
-        //                   setState(() {
-        //                     _isAnonymous = !_isAnonymous;
-        //                   });
-        //                 },
-        //                 borderRadius: BorderRadius.circular(4),
-        //                 child: Container(
-        //                   width: 18,
-        //                   height: 18,
-        //                   decoration: BoxDecoration(
-        //                     borderRadius: BorderRadius.circular(4),
-        //                     border: Border.all(
-        //                       color: _isAnonymous
-        //                           ? (isDark ? Colors.white : Colors.black)
-        //                           : (isDark
-        //                               ? Colors.white.withOpacity(0.3)
-        //                               : Colors.black.withOpacity(0.3)),
-        //                       width: 1.5,
-        //                     ),
-        //                     color: _isAnonymous
-        //                         ? (isDark ? Colors.white : Colors.black)
-        //                         : Colors.transparent,
-        //                   ),
-        //                   child: _isAnonymous
-        //                       ? Icon(
-        //                           Icons.check,
-        //                           size: 14,
-        //                           color: isDark ? Colors.black : Colors.white,
-        //                         )
-        //                       : null,
-        //                 ),
-        //               ),
-        //               const SizedBox(width: 8),
-        //               Text(
-        //                 'Comment anonymously',
-        //                 style: theme.textTheme.bodyMedium?.copyWith(
-        //                   color: isDark
-        //                       ? Colors.white.withOpacity(0.7)
-        //                       : Colors.black.withOpacity(0.7),
-        //                 ),
-        //               ),
-        //             ],
-        //           ),
-        //         ),
-        //         // Submit Button Container
-        //         Container(
-        //           decoration: BoxDecoration(
-        //             border: Border(
-        //               top: BorderSide(
-        //                 color: isDark
-        //                     ? Colors.white.withOpacity(0.1)
-        //                     : Colors.black.withOpacity(0.1),
-        //               ),
-        //             ),
-        //           ),
-        //           padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-        //           child: Row(
-        //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        //             children: [
-        //               Text(
-        //                 'Be respectful in comments',
-        //                 style: theme.textTheme.bodySmall?.copyWith(
-        //                   color: theme.colorScheme.onSurface.withOpacity(0.5),
-        //                 ),
-        //               ),
-        //               Consumer(
-        //                 builder: (context, ref, child) {
-        //                   return TextButton(
-        //                     onPressed: _isSubmitting
-        //                         ? null
-        //                         : () => _submitComment(ref),
-        //                     style: TextButton.styleFrom(
-        //                       backgroundColor: isDark
-        //                           ? Colors.white.withOpacity(0.1)
-        //                           : Colors.black,
-        //                       padding: const EdgeInsets.symmetric(
-        //                           horizontal: 16, vertical: 8),
-        //                       shape: RoundedRectangleBorder(
-        //                         borderRadius: BorderRadius.circular(8),
-        //                       ),
-        //                     ),
-        //                     child: _isSubmitting
-        //                         ? SizedBox(
-        //                             height: 20,
-        //                             width: 20,
-        //                             child: CircularProgressIndicator(
-        //                               strokeWidth: 2,
-        //                               valueColor: AlwaysStoppedAnimation<Color>(
-        //                                 isDark ? Colors.white : Colors.white,
-        //                               ),
-        //                             ),
-        //                           )
-        //                         : Text(
-        //                             'Comment',
-        //                             style: theme.textTheme.bodyMedium?.copyWith(
-        //                               color:
-        //                                   isDark ? Colors.white : Colors.white,
-        //                               fontWeight: FontWeight.w500,
-        //                             ),
-        //                           ),
-        //                   );
-        //                 },
-        //               ),
-        //             ],
-        //           ),
-        //         ),
-        //       ],
-        //     ),
-        //   ),
-        // ),
-        // const SizedBox(height: 24),
 
         // Comments List
         if (_isLoading)
@@ -468,7 +190,7 @@ class TeacherCommentsState extends State<TeacherComments> {
   }
 }
 
-class _CommentItem extends StatefulWidget {
+class _CommentItem extends ConsumerStatefulWidget {
   final Map<String, dynamic> comment;
   final bool isDark;
   final String teacherId;
@@ -484,10 +206,10 @@ class _CommentItem extends StatefulWidget {
   });
 
   @override
-  State<_CommentItem> createState() => _CommentItemState();
+  ConsumerState<_CommentItem> createState() => _CommentItemState();
 }
 
-class _CommentItemState extends State<_CommentItem> {
+class _CommentItemState extends ConsumerState<_CommentItem> {
   final bool _showReplyBox = false;
   bool _isVoting = false;
   String? _userVote; // 'upVote', 'downVote', or null
@@ -522,7 +244,7 @@ class _CommentItemState extends State<_CommentItem> {
     setState(() {
       _isVoting = true;
       // Optimistic update
-      String? prevVote = _userVote;
+      // String? prevVote = _userVote;
       if (_userVote == voteType) {
         // Undo vote
         if (voteType == 'upVote') _upVotesCount = (_upVotesCount ?? 1) - 1;
@@ -608,16 +330,138 @@ class _CommentItemState extends State<_CommentItem> {
     }
   }
 
+  Future<void> _handleDelete() async {
+    // Handle delete
+    final apiClient = ApiClient();
+    try {
+      final response = await apiClient.delete(
+        '/api/teacher/reviews/feedbacks/delete?teacherId=${widget.teacherId}&reviewId=${widget.comment['_id']}',
+      );
+      if (response.isNotEmpty) {
+        if (mounted) {
+          showSnackbar(context, response['message'], isError: false);
+        }
+
+        final parentState =
+            context.findAncestorStateOfType<TeacherMainPageCommentsState>();
+        parentState?.removeComment(widget.comment);
+      }
+    } catch (e) {
+      if (mounted) {
+        showSnackbar(context, e.toString(), isError: true);
+      }
+    }
+  }
+
+  void _handleEdit(Map<String, dynamic> comment) {
+    // Get the parent widget's state
+    final parentState =
+        context.findAncestorStateOfType<TeacherMainPageCommentsState>();
+
+    print("comment $comment");
+    // Handle edit
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: EditFeedBackSheet(
+          teacherId: widget.teacherId,
+          editComment: comment,
+          onOptimisticComment: (optimisticComment,
+              {required Future<bool> Function() confirm}) {
+            parentState?.addOptimisticComment(
+              optimisticComment,
+              confirm: confirm,
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  final _reasonController = TextEditingController();
+
+  Widget _hideReasonDialog() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    return AlertDialog(
+      title: const Text('Hide Reason', style: TextStyle(fontSize: 16)),
+      content: TextFormField(
+        controller: _reasonController,
+        maxLines: 3,
+        decoration: InputDecoration(
+          hintText: 'Enter reason for hiding',
+          hintStyle: const TextStyle(fontSize: 14),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter a reason';
+          }
+          return null;
+        },
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('Cancel',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: isDarkMode ? Colors.white : Colors.black)),
+        ),
+        TextButton(
+          onPressed: () =>
+              Navigator.pop(context, _reasonController.text.trim()),
+          child: Text('Submit',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: isDarkMode ? Colors.white : Colors.black)),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handleHide() async {
+    // Handle hide
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (context) => _hideReasonDialog(),
+    );
+    if (reason == null) return;
+    final apiClient = ApiClient();
+    try {
+      final response = await apiClient.post(
+        '/api/mod/teacher/reviews/feedback/hide',
+        {
+          'reviewId': widget.comment['_id'],
+          'reason': reason,
+        },
+      );
+      if (response.isNotEmpty) {
+        showSnackbar(context, response['message'], isError: false);
+      }
+    } catch (e) {
+      showSnackbar(context, e.toString(), isError: true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final userRef = ref.read(authProvider).user;
     final user = widget.comment['user'];
     final name = user['name'] ?? 'Anonymous';
     final isDeleted = user['_id'] == null;
     final isAnonymous = widget.comment['isAnonymous'] ?? false;
 
-    log("_________________\n _____________ \n Comment " +
-        widget.comment.toString());
+    log("_________________\n _____________ \n Comment ${widget.comment}");
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -670,8 +514,11 @@ class _CommentItemState extends State<_CommentItem> {
                                 size: 16,
                                 color: Colors.blue,
                               ),
+                              if (user['_id'] == userRef?['_id']) ...[
+                                const Text('(You)'),
+                              ],
                               if (widget.comment['isEdited'] == true)
-                                Text('(Edited)'),
+                                const Text('(Edited)'),
                             ],
                           ],
                         ),
@@ -818,7 +665,7 @@ class _CommentItemState extends State<_CommentItem> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => CommentDetailsPage(
+                        builder: (context) => TeacherFeedbackDetailedPage(
                           comment: updatedComment,
                           teacherId: widget.teacherId,
                           isDark: widget.isDark,
@@ -846,6 +693,85 @@ class _CommentItemState extends State<_CommentItem> {
                           : Colors.black.withOpacity(0.7),
                     ),
                   ),
+                ),
+                PopupMenuButton<String>(
+                  icon: Icon(
+                    Icons.more_horiz_rounded,
+                    color: widget.isDark
+                        ? Colors.white.withOpacity(0.7)
+                        : Colors.black.withOpacity(0.7),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  color: widget.isDark ? Colors.grey[900] : Colors.white,
+                  elevation: 4,
+                  itemBuilder: (context) => [
+                    if (widget.comment['user']?['_id'] == userRef?['_id']) ...[
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.edit_rounded,
+                              size: 18,
+                              color:
+                                  widget.isDark ? Colors.white : Colors.black,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Edit',
+                              style: TextStyle(
+                                color:
+                                    widget.isDark ? Colors.white : Colors.black,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.delete_rounded,
+                              size: 18,
+                              color: Colors.red[400],
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Delete',
+                              style: TextStyle(
+                                color: Colors.red[400],
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    if (RBAC.hasPermission(
+                        userRef,
+                        Permissions.moderator[ModeratorPermissionsEnum
+                            .hideTeacherReview.name]!)) ...[
+                      const PopupMenuItem(
+                        value: 'hide',
+                        child: Row(
+                          children: [
+                            Icon(Icons.visibility_off_rounded, size: 20),
+                            SizedBox(width: 8),
+                            Text('Hide'),
+                          ],
+                        ),
+                      ),
+                    ]
+                  ],
+                  onSelected: (value) {
+                    if (value == 'delete') _handleDelete();
+                    if (value == 'edit') _handleEdit(widget.comment);
+                    if (value == 'hide') _handleHide();
+                  },
                 ),
               ],
             ),
@@ -876,7 +802,7 @@ class _CommentItemState extends State<_CommentItem> {
   }
 }
 
-class _ReplyItem extends StatefulWidget {
+class _ReplyItem extends ConsumerStatefulWidget {
   final Map<String, dynamic> reply;
   final bool isDark;
   final String teacherId;
@@ -888,10 +814,10 @@ class _ReplyItem extends StatefulWidget {
   });
 
   @override
-  State<_ReplyItem> createState() => _ReplyItemState();
+  ConsumerState<_ReplyItem> createState() => _ReplyItemState();
 }
 
-class _ReplyItemState extends State<_ReplyItem> {
+class _ReplyItemState extends ConsumerState<_ReplyItem> {
   bool _showReplyBox = false;
   bool _showReactionPicker = false;
   Map<String, dynamic>? _selectedReaction;
@@ -921,6 +847,7 @@ class _ReplyItemState extends State<_ReplyItem> {
 
   @override
   Widget build(BuildContext context) {
+    final userRef = ref.read(authProvider).user;
     final theme = Theme.of(context);
     final user = widget.reply['user'] ?? {};
     final name = user['name'] ?? '[deleted]';
@@ -985,7 +912,9 @@ class _ReplyItemState extends State<_ReplyItem> {
                           color: Colors.blue,
                         ),
                       ],
-                      const Spacer(),
+                      if (widget.reply['user']?['_id'] == userRef?['_id']) ...[
+                        const Text('(You)'),
+                      ],
                       Text(
                         _formatDate(date),
                         style: theme.textTheme.bodySmall?.copyWith(
