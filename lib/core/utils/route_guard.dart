@@ -15,6 +15,8 @@ import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/pages/AlumniPages/AlumniHome.dart';
 import 'package:socian/pages/AlumniPages/AlumniJobs.dart';
 import 'package:socian/pages/AlumniPages/AlumniProfile.dart';
+import 'package:socian/pages/drawer/student/pages/alumni/AlumniScrolls.dart';
+import 'package:socian/pages/drawer/student/pages/alumni/JobProfile.dart';
 import 'package:socian/pages/drawer/student/pages/cafeInformation/CafesHome.dart';
 import 'package:socian/pages/drawer/student/pages/pastPaper/DepartmentPage.dart';
 import 'package:socian/pages/drawer/student/pages/pastPaper/PastPapers.dart';
@@ -89,7 +91,7 @@ class RouteGuard {
       AppRoutes.otpScreen,
       AppRoutes.privacyPolicy,
       AppRoutes.alumniUploadCard,
-      AppRoutes.alumniLivePicture
+      AppRoutes.alumniLivePicture,
     ];
 
     // If trying to access splash screen, always allow it
@@ -178,7 +180,9 @@ class RouteGuard {
       AppRoutes.departmentScreen: const DepartmentPage(),
       AppRoutes.subjectsInDepartmentScreen: const SubjectsView(),
       AppRoutes.discussionViewScreen: const DiscussionView(),
-      AppRoutes.personalInfoEditScreen: const PersonalInfoEditPage()
+      AppRoutes.personalInfoEditScreen: const PersonalInfoEditPage(),
+      AppRoutes.jobProfile: const JobProfile(),
+      AppRoutes.alumniScrolls: const AlumniScrolls(),
     };
 
     switch (role) {
@@ -213,6 +217,8 @@ class RouteGuard {
           AppRoutes.alumniHome: const AlumniHome(),
           AppRoutes.alumniProfile: const AlumniProfile(),
           AppRoutes.alumniJobs: const AlumniJobs(),
+          AppRoutes.jobProfile: const JobProfile(),
+          AppRoutes.alumniScrolls: const AlumniScrolls(),
           ...commonRoutes,
         };
       default:

@@ -1,9 +1,12 @@
-import 'package:socian/pages/drawer/student/pages/teachersReviews/pages/commentDetailed/widgets/index.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:socian/core/utils/rbac.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/pages/drawer/student/pages/teachersReviews/pages/commentDetailed/widgets/EditReplyBox.dart';
+import 'package:socian/pages/drawer/student/pages/teachersReviews/pages/commentDetailed/widgets/index.dart';
 import 'package:socian/utils/date_formatter.dart';
-import 'reaction_button.dart';
 
-class ReplyReplyItem extends StatefulWidget {
+class ReplyReplyItem extends ConsumerStatefulWidget {
   final Map<String, dynamic> reply;
   final bool isDark;
   final String teacherId;
@@ -28,10 +31,10 @@ class ReplyReplyItem extends StatefulWidget {
   });
 
   @override
-  State<ReplyReplyItem> createState() => _ReplyReplyItemState();
+  ConsumerState<ReplyReplyItem> createState() => _ReplyReplyItemState();
 }
 
-class _ReplyReplyItemState extends State<ReplyReplyItem> {
+class _ReplyReplyItemState extends ConsumerState<ReplyReplyItem> {
   bool _showReplyBox = false;
   String _replyTo = '';
   final List<Map<String, dynamic>> _nestedReplies = [];
@@ -70,8 +73,35 @@ class _ReplyReplyItemState extends State<ReplyReplyItem> {
     widget.onReplyAdded(reply, parentId, isReplyToReply);
   }
 
+  void _handleEdit(Map<String, dynamic> reply) {
+    // TODO: Implement edit logic
+  }
+
+  void _handleHide() {
+    // TODO: Implement hide logic
+
+    showModalBottomSheet(
+        enableDrag: true,
+        context: context,
+        builder: (context) => EditReplyBox(
+              reply: widget.reply,
+              parentId: widget.reply['_id'],
+              teacherId: widget.teacherId,
+              isDark: widget.isDark,
+              isReplyToReply: true,
+              isReplyToReplyToReply: true,
+              onReplyRemoved: widget.onReplyRemoved,
+              onReplyAdded: widget.onReplyAdded,
+            ));
+  }
+
+  void _handleDelete() {
+    // TODO: Implement delete logic
+  }
+
   @override
   Widget build(BuildContext context) {
+    final userRef = ref.read(authProvider).user;
     final theme = Theme.of(context);
     final user = widget.reply['user'] ?? {};
     final name = user['name'] ?? '[deleted]';
@@ -167,6 +197,96 @@ class _ReplyReplyItemState extends State<ReplyReplyItem> {
                                           .withOpacity(0.5),
                                     ),
                                   ),
+                                ...[
+                                  PopupMenuButton<String>(
+                                    icon: Icon(
+                                      Icons.more_horiz_rounded,
+                                      color: widget.isDark
+                                          ? Colors.white.withOpacity(0.7)
+                                          : Colors.black.withOpacity(0.7),
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    color: widget.isDark
+                                        ? Colors.grey[900]
+                                        : Colors.white,
+                                    elevation: 4,
+                                    itemBuilder: (context) => [
+                                      if (widget.reply['user']?['_id'] ==
+                                          userRef?['_id']) ...[
+                                        PopupMenuItem(
+                                          value: 'edit',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.edit_rounded,
+                                                size: 18,
+                                                color: widget.isDark
+                                                    ? Colors.white
+                                                    : Colors.black,
+                                              ),
+                                              const SizedBox(width: 12),
+                                              Text(
+                                                'Edit',
+                                                style: TextStyle(
+                                                  color: widget.isDark
+                                                      ? Colors.white
+                                                      : Colors.black,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        PopupMenuItem(
+                                          value: 'delete',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.delete_rounded,
+                                                size: 18,
+                                                color: Colors.red[400],
+                                              ),
+                                              const SizedBox(width: 12),
+                                              Text(
+                                                'Delete',
+                                                style: TextStyle(
+                                                  color: Colors.red[400],
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                      if (RBAC.hasPermission(
+                                          userRef,
+                                          Permissions.moderator[
+                                              ModeratorPermissionsEnum
+                                                  .hideFeedBackRootReply
+                                                  .name]!)) ...[
+                                        const PopupMenuItem(
+                                          value: 'hide',
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.visibility_off_rounded,
+                                                  size: 20),
+                                              SizedBox(width: 8),
+                                              Text('Hide'),
+                                            ],
+                                          ),
+                                        ),
+                                      ]
+                                    ],
+                                    onSelected: (value) {
+                                      if (value == 'delete') _handleDelete();
+                                      if (value == 'edit')
+                                        _handleEdit(widget.reply);
+                                      if (value == 'hide') _handleHide();
+                                    },
+                                  ),
+                                ]
                               ],
                             ),
                           ),

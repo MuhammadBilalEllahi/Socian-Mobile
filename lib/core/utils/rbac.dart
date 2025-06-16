@@ -13,6 +13,8 @@ class Permissions {
     'hidePost': 'mod:hide_post',
     'hideTeacherReview': 'mod:hide_teacher_review',
     'hideTeacherModal': 'mod:hide_teacher_modal',
+    'hideFeedBackRootReply': 'mod:hide_feed_back_root_reply',
+    'hideFeedBackReplyKaReply': 'mod:hide_feed_back_reply_ka_reply',
     'manageContent': 'mod:manage_content',
     'manageComments': 'mod:manage_comments',
     'viewAll': 'view:all',
@@ -48,6 +50,8 @@ enum ModeratorPermissionsEnum {
   hidePost,
   hideTeacherReview,
   hideTeacherModal,
+  hideFeedBackRootReply,
+  hideFeedBackReplyKaReply,
   manageContent,
   manageComments,
   viewAll;
@@ -105,6 +109,10 @@ class RBAC {
     AppSuperRoles.moderator: [
       Permissions.moderator[ModeratorPermissionsEnum.hidePost.name]!,
       Permissions.moderator[ModeratorPermissionsEnum.hideTeacherModal.name]!,
+      Permissions
+          .moderator[ModeratorPermissionsEnum.hideFeedBackRootReply.name]!,
+      Permissions
+          .moderator[ModeratorPermissionsEnum.hideFeedBackReplyKaReply.name]!,
       Permissions.moderator[ModeratorPermissionsEnum.manageContent.name]!,
       Permissions.moderator[ModeratorPermissionsEnum.manageComments.name]!,
       Permissions.moderator[ModeratorPermissionsEnum.viewAll.name]!,

@@ -1,14 +1,15 @@
-import 'package:socian/core/utils/constants.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:socian/core/utils/rbac.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/pages/drawer/student/pages/teachersReviews/pages/commentDetailed/widgets/EditReplyBox.dart';
+import 'package:socian/pages/drawer/student/pages/teachersReviews/pages/commentDetailed/widgets/ReplyReplyItem.dart';
 import 'package:socian/pages/drawer/student/pages/teachersReviews/pages/commentDetailed/widgets/index.dart';
 import 'package:socian/shared/services/api_client.dart';
-import 'package:flutter/material.dart';
+import 'package:socian/shared/widgets/my_snackbar.dart';
 import 'package:socian/utils/date_formatter.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:socian/features/auth/providers/auth_provider.dart';
-import 'reaction_button.dart';
-import 'reply_reply_item.dart';
 
-class ReplyItem extends ConsumerStatefulWidget {
+class RootReplyItem extends ConsumerStatefulWidget {
   final Map<String, dynamic> reply;
   final bool isDark;
   final String teacherId;
@@ -16,7 +17,7 @@ class ReplyItem extends ConsumerStatefulWidget {
   final Function(Map<String, dynamic>, String, bool) onReplyAdded;
   final Function(String, String, bool) onReplyRemoved;
 
-  const ReplyItem({
+  const RootReplyItem({
     super.key,
     required this.reply,
     required this.isDark,
@@ -27,10 +28,10 @@ class ReplyItem extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<ReplyItem> createState() => _ReplyItemState();
+  ConsumerState<RootReplyItem> createState() => _RootReplyItemState();
 }
 
-class _ReplyItemState extends ConsumerState<ReplyItem> {
+class _RootReplyItemState extends ConsumerState<RootReplyItem> {
   bool _showReplyBox = false;
   bool _showReplyReplies = false;
   final apiClient = ApiClient();
@@ -113,11 +114,100 @@ class _ReplyItemState extends ConsumerState<ReplyItem> {
     widget.onReplyAdded(optimisticReply, parentId, isReplyToReply);
   }
 
+  void _handleDelete() {
+    // TODO: Implement delete logic
+  }
+
+  void _handleEdit(Map<String, dynamic> reply) {
+    // TODO: Implement edit logic
+
+    showModalBottomSheet(
+        enableDrag: true,
+        context: context,
+        builder: (context) => EditReplyBox(
+              reply: reply,
+              parentId: widget.reply['_id'],
+              teacherId: widget.teacherId,
+              isDark: widget.isDark,
+              isReplyToReply: true,
+              onReplyRemoved: widget.onReplyRemoved,
+              onReplyAdded: widget.onReplyAdded,
+            ));
+  }
+
+  final _reasonController = TextEditingController();
+
+  Widget _hideReasonDialog() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    return AlertDialog(
+      title: const Text('Hide Reason', style: TextStyle(fontSize: 16)),
+      content: TextFormField(
+        controller: _reasonController,
+        maxLines: 3,
+        decoration: InputDecoration(
+          hintText: 'Enter reason for hiding',
+          hintStyle: const TextStyle(fontSize: 14),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter a reason';
+          }
+          return null;
+        },
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('Cancel',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: isDarkMode ? Colors.white : Colors.black)),
+        ),
+        TextButton(
+          onPressed: () =>
+              Navigator.pop(context, _reasonController.text.trim()),
+          child: Text('Submit',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: isDarkMode ? Colors.white : Colors.black)),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handleHide() async {
+    // Handle hide
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (context) => _hideReasonDialog(),
+    );
+    if (reason == null) return;
+    final apiClient = ApiClient();
+    try {
+      final response = await apiClient.put(
+        '/api/mod/teacher/reviews/feedbacks/hide',
+        {
+          'replyId': widget.reply['_id'],
+          'reason': reason,
+        },
+      );
+      if (response.isNotEmpty) {
+        showSnackbar(context, response['message'], isError: false);
+      }
+    } catch (e) {
+      showSnackbar(context, e.toString(), isError: true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final user = widget.reply['user'] ?? {};
     final name = user['name'] ?? '[deleted]';
+    final userRef = ref.read(authProvider).user;
     final isDeleted = user['_id'] == null;
     final isAnonymous = widget.reply['isAnonymous'] ?? false;
     final date = widget.reply['updatedAt'] ?? widget.reply['createdAt'] ?? '';
@@ -128,6 +218,7 @@ class _ReplyItemState extends ConsumerState<ReplyItem> {
     final isTemporary = widget.reply['_id'] != null &&
         widget.reply['_id'].toString().contains('T');
 
+    print("WidgetReply ${widget.reply}");
     return Opacity(
       opacity: isTemporary ? 0.6 : 1.0,
       child: Container(
@@ -212,6 +303,95 @@ class _ReplyItemState extends ConsumerState<ReplyItem> {
                                           .withOpacity(0.5),
                                     ),
                                   ),
+
+                                PopupMenuButton<String>(
+                                  icon: Icon(
+                                    Icons.more_horiz_rounded,
+                                    color: widget.isDark
+                                        ? Colors.white.withOpacity(0.7)
+                                        : Colors.black.withOpacity(0.7),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  color: widget.isDark
+                                      ? Colors.grey[900]
+                                      : Colors.white,
+                                  elevation: 4,
+                                  itemBuilder: (context) => [
+                                    if (widget.reply['user']?['_id'] ==
+                                        userRef?['_id']) ...[
+                                      PopupMenuItem(
+                                        value: 'edit',
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.edit_rounded,
+                                              size: 18,
+                                              color: widget.isDark
+                                                  ? Colors.white
+                                                  : Colors.black,
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Text(
+                                              'Edit',
+                                              style: TextStyle(
+                                                color: widget.isDark
+                                                    ? Colors.white
+                                                    : Colors.black,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      PopupMenuItem(
+                                        value: 'delete',
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.delete_rounded,
+                                              size: 18,
+                                              color: Colors.red[400],
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Text(
+                                              'Delete',
+                                              style: TextStyle(
+                                                color: Colors.red[400],
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                    if (RBAC.hasPermission(
+                                        userRef,
+                                        Permissions.moderator[
+                                            ModeratorPermissionsEnum
+                                                .hideFeedBackRootReply
+                                                .name]!)) ...[
+                                      const PopupMenuItem(
+                                        value: 'hide',
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.visibility_off_rounded,
+                                                size: 20),
+                                            SizedBox(width: 8),
+                                            Text('Hide'),
+                                          ],
+                                        ),
+                                      ),
+                                    ]
+                                  ],
+                                  onSelected: (value) {
+                                    if (value == 'delete') _handleDelete();
+                                    if (value == 'edit')
+                                      _handleEdit(widget.reply);
+                                    if (value == 'hide') _handleHide();
+                                  },
+                                ),
                               ],
                             ),
                           ),

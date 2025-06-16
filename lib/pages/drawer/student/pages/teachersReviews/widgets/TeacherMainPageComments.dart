@@ -437,9 +437,10 @@ class _CommentItemState extends ConsumerState<_CommentItem> {
     if (reason == null) return;
     final apiClient = ApiClient();
     try {
-      final response = await apiClient.post(
-        '/api/mod/teacher/reviews/feedback/hide',
+      final response = await apiClient.put(
+        '/api/mod/teacher/reviews/feedbacks/hide',
         {
+          'teacherId': widget.teacherId,
           'reviewId': widget.comment['_id'],
           'reason': reason,
         },

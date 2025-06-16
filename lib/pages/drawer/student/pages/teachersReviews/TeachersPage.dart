@@ -4,6 +4,7 @@ import 'package:socian/components/_buildShimmerEffect.dart';
 import 'package:socian/core/utils/rbac.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/shared/services/api_client.dart';
+import 'package:socian/shared/widgets/my_snackbar.dart';
 
 import 'TeacherDetailsPage.dart';
 import 'TeachersProvider.dart'; // import the provider
@@ -25,22 +26,137 @@ class _TeachersPageState extends ConsumerState<TeachersPage> {
     super.dispose();
   }
 
+  final _reasonController = TextEditingController();
+
+  Widget _hideReasonDialog() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    return AlertDialog(
+      title: const Text('Hide Reason - Do not Make Mistakes',
+          style: TextStyle(fontSize: 16, color: Colors.red)),
+      content: TextFormField(
+        controller: _reasonController,
+        maxLines: 3,
+        decoration: InputDecoration(
+          hintText: 'Enter reason for hiding',
+          hintStyle: const TextStyle(fontSize: 14),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter a reason';
+          }
+          return null;
+        },
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('Cancel',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: isDarkMode ? Colors.white : Colors.black)),
+        ),
+        TextButton(
+          onPressed: () =>
+              Navigator.pop(context, _reasonController.text.trim()),
+          child: Text('Submit',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: isDarkMode ? Colors.white : Colors.black)),
+        ),
+      ],
+    );
+  }
+
   Future<void> _handleHideTeacher(String teacherId) async {
+    print("______________________\n _______________\n $teacherId");
+    // Handle hide
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (context) => _hideReasonDialog(),
+    );
+    if (reason == null) return;
+    final apiClient = ApiClient();
     try {
-      await _apiClient.post('/api/mod/teacher/hide', {'teacherId': teacherId});
-      // Refresh the teachers list after hiding
-      await ref.read(teachersProvider.notifier).fetchTeachers();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Teacher hidden successfully')),
-        );
+      final response = await apiClient.put(
+        '/api/mod/teacher/hide?teacherId=$teacherId',
+        {
+          'reason': reason,
+        },
+      );
+      if (response.isNotEmpty) {
+        showSnackbar(context, response['message'], isError: false);
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to hide teacher: ${e.toString()}')),
-        );
+      showSnackbar(context, e.toString(), isError: true);
+    }
+  }
+
+  Widget _unHideReasonDialog() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    return AlertDialog(
+      title: const Text('Unhide Reason - Do not Make Mistakes',
+          style: TextStyle(fontSize: 16, color: Colors.green)),
+      content: TextFormField(
+        controller: _reasonController,
+        maxLines: 3,
+        decoration: InputDecoration(
+          hintText: 'Enter reason for unhiding',
+          hintStyle: const TextStyle(fontSize: 14),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter a reason';
+          }
+          return null;
+        },
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('Cancel',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: isDarkMode ? Colors.white : Colors.black)),
+        ),
+        TextButton(
+          onPressed: () =>
+              Navigator.pop(context, _reasonController.text.trim()),
+          child: Text('Submit',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: isDarkMode ? Colors.white : Colors.black)),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handleUnHideTeacher(String teacherId) async {
+    print("______________________\n _______________\n $teacherId");
+    // Handle hide
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (context) => _unHideReasonDialog(),
+    );
+    if (reason == null) return;
+    final apiClient = ApiClient();
+    try {
+      final response = await apiClient.put(
+        '/api/mod/teacher/un-hide?teacherId=$teacherId',
+        {
+          'reason': reason,
+        },
+      );
+      if (response.isNotEmpty) {
+        showSnackbar(context, response['message'], isError: false);
       }
+    } catch (e) {
+      showSnackbar(context, e.toString(), isError: true);
     }
   }
 
@@ -165,6 +281,12 @@ class _TeachersPageState extends ConsumerState<TeachersPage> {
                                       ModeratorPermissionsEnum.hidePost.name]!)
                               ? () => _handleHideTeacher(teacher['_id'])
                               : null,
+                          onUnHide: RBAC.hasPermission(
+                                  user,
+                                  Permissions.moderator[
+                                      ModeratorPermissionsEnum.hidePost.name]!)
+                              ? () => _handleUnHideTeacher(teacher['_id'])
+                              : null,
                         ),
                       );
                     },
@@ -188,7 +310,7 @@ class _TeacherCard extends StatelessWidget {
   final String? topFeedback;
   final List<String> subjects;
   final VoidCallback? onHide;
-
+  final VoidCallback? onUnHide;
   const _TeacherCard({
     required this.teacher,
     required this.name,
@@ -198,6 +320,7 @@ class _TeacherCard extends StatelessWidget {
     this.topFeedback,
     required this.subjects,
     this.onHide,
+    this.onUnHide,
   });
 
   @override
@@ -266,6 +389,15 @@ class _TeacherCard extends StatelessWidget {
                               ),
                               onPressed: onHide,
                               tooltip: 'Hide teacher',
+                            ),
+                          if (onUnHide != null)
+                            IconButton(
+                              icon: Icon(
+                                Icons.visibility,
+                                color: isDark ? Colors.white70 : Colors.black54,
+                              ),
+                              onPressed: onUnHide,
+                              tooltip: 'Unhide teacher',
                             ),
                         ],
                       ),

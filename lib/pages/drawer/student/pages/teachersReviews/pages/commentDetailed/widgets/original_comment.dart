@@ -10,7 +10,7 @@ import 'package:socian/shared/services/api_client.dart';
 import 'package:socian/shared/widgets/my_snackbar.dart';
 import 'package:socian/utils/date_formatter.dart';
 
-import 'reply_box.dart';
+import 'ReplyBox.dart';
 import 'vote_button.dart';
 
 class OriginalComment extends ConsumerStatefulWidget {

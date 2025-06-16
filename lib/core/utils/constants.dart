@@ -163,6 +163,8 @@ class AppRoutes {
   static const String alumniHome = '/alumni/home';
   static const String alumniProfile = '/alumni/profile';
   static const String alumniJobs = '/alumni/jobs';
+  static const String alumniScrolls = '/alumni/scrolls';
+  static const String jobProfile = '/alumni/job/profile';
 
   static const String alumniUploadCard = '/alumni/verif/card';
   static const String alumniLivePicture = '/alumni/verif/live-picture';

@@ -1,9 +1,9 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:socian/pages/drawer/student/pages/teachersReviews/pages/commentDetailed/widgets/RootReplyItem.dart';
+import 'package:socian/pages/drawer/student/pages/teachersReviews/pages/commentDetailed/widgets/original_comment.dart';
 import 'package:socian/shared/services/api_client.dart';
-
-import 'commentDetailed/widgets/index.dart';
 
 class TeacherFeedbackDetailedPage extends StatefulWidget {
   final Map<String, dynamic> comment;
@@ -216,7 +216,7 @@ class _TeacherFeedbackDetailedPageState
     // debugPrint("_buildMainReplies: ${replies.toString()}");
     return replies
         .where((reply) => reply['_id'] != null)
-        .map((reply) => ReplyItem(
+        .map((reply) => RootReplyItem(
               reply: Map<String, dynamic>.from(reply),
               isDark: widget.isDark,
               teacherId: widget.teacherId,

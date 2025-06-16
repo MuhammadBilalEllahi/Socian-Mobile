@@ -12,6 +12,7 @@ import 'package:socian/core/utils/constants.dart';
 import 'package:socian/features/auth/presentation/alumni/FaceCaptureScreen.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/shared/services/api_client.dart';
+import 'package:socian/shared/widgets/my_dropdown.dart';
 import 'package:socian/shared/widgets/my_snackbar.dart';
 
 class UploadCardPage extends ConsumerStatefulWidget {
@@ -28,11 +29,11 @@ class _UploadCardPageState extends ConsumerState<UploadCardPage> {
   String? selectedCard;
 
   final List<Map<String, dynamic>> cardTypes = [
-    {'label': 'Student Card', 'value': 'studentCard'},
-    {'label': 'Student Bus Card', 'value': 'studentBusCard'},
-    {'label': 'Transcript', 'value': 'transcript'},
-    {'label': 'Degree', 'value': 'degree'},
-    {'label': 'Other', 'value': 'other'},
+    {'name': 'Student Card', '_id': 'studentCard'},
+    {'name': 'Student Bus Card', '_id': 'studentBusCard'},
+    {'name': 'Transcript', '_id': 'transcript'},
+    {'name': 'Degree', '_id': 'degree'},
+    {'name': 'Other', '_id': 'other'},
   ];
 
   @override
@@ -97,6 +98,11 @@ class _UploadCardPageState extends ConsumerState<UploadCardPage> {
 
   Future<bool> _uploadImages() async {
     final apiClient = ApiClient();
+
+    if (selectedCard == null) {
+      showSnackbar(context, "Please select a document type", isError: true);
+      return false;
+    }
     final data = <String, dynamic>{};
     if (frontImage == null ||
         backImage == null ||
@@ -123,7 +129,8 @@ class _UploadCardPageState extends ConsumerState<UploadCardPage> {
           contentType:
               MediaType('image', path.extension(backImage!.path).substring(1)),
         ),
-      ]
+      ],
+      'docType': selectedCard,
     };
 
     final response = await apiClient.postFormData(
@@ -143,30 +150,46 @@ class _UploadCardPageState extends ConsumerState<UploadCardPage> {
     }
   }
 
+  double _getCardAspectRatio() {
+    switch (selectedCard) {
+      case 'studentCard':
+      case 'studentBusCard':
+        return 1.6; // Standard ID card
+      case 'degree':
+      case 'transcript':
+        return 1.4; // More rectangular
+      default:
+        return 1.5; // Default
+    }
+  }
+
   Widget _imageTile(
       {required String title,
       required File? image,
       required VoidCallback onTap}) {
+    final aspectRatio = _getCardAspectRatio();
     return InkWell(
       onTap: onTap,
-      child: Container(
-        height: 220,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade300),
+      child: AspectRatio(
+        aspectRatio: aspectRatio,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: image != null
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.file(image,
+                      fit: BoxFit.cover, width: double.infinity),
+                )
+              : Center(
+                  child: Text(title,
+                      style: const TextStyle(
+                          color: Colors.black, fontWeight: FontWeight.w500)),
+                ),
         ),
-        child: image != null
-            ? ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Image.file(image,
-                    fit: BoxFit.cover, width: double.infinity),
-              )
-            : Center(
-                child: Text(title,
-                    style: const TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.w500)),
-              ),
       ),
     );
   }
@@ -181,36 +204,41 @@ class _UploadCardPageState extends ConsumerState<UploadCardPage> {
         isDarkMode ? Colors.black : const Color.fromARGB(204, 255, 255, 255);
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: SafeArea(
+      appBar: AppBar(
+        title: Text('Verify Your Identity',
+            style: TextStyle(
+                color: textColor, fontSize: 24, fontWeight: FontWeight.bold)),
+      ),
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Verify Your Identity',
-                  style: TextStyle(
-                      color: textColor,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
-              // MyDropdownField<String>(
-              //   isLoading: false,
-              //   value: selectedCard,
-              //   items: cardTypes,
-              //   label: "Select University",
-              //   validator: (value) {
-              //     if (value == null || value.isEmpty) {
-              //       return 'Please select a document type';
-              //     }
-              //     return null;
-              //   },
-              //   onChanged: (value) {
-              //     setState(() {
-              //       selectedCard = value;
-              //     });
-              //   },
-              // ),
-              // const SizedBox(height: 16),
+              MyDropdownField<String>(
+                isLoading: false,
+                value: selectedCard,
+                items: cardTypes,
+                label: "Select Document Type",
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please select a document type';
+                  }
+                  return null;
+                },
+                onChanged: (value) {
+                  setState(() {
+                    selectedCard = value;
+                  });
+                },
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'images are not cropped, so dont worry about image preview',
+                style: TextStyle(color: textColor.withValues(alpha: 0.7)),
+              ),
+              const SizedBox(height: 16),
               Text(
                 "Front",
                 style: TextStyle(color: textColor),
@@ -228,11 +256,17 @@ class _UploadCardPageState extends ConsumerState<UploadCardPage> {
                   title: 'Upload Back Side of Card',
                   image: backImage,
                   onTap: () => _openCamera(false, context)),
-              const Spacer(),
-              Text(
-                'images are not cropped, so dont worry about image preview',
-                style: TextStyle(color: textColor.withValues(alpha: 0.7)),
-              ),
+              // const Spacer(),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
               TextButton(
                 onPressed: () {
                   // Handle "Try another way"

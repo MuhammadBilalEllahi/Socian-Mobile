@@ -1,10 +1,8 @@
-import 'package:socian/core/utils/constants.dart';
-import 'package:socian/features/auth/providers/auth_provider.dart';
-import 'package:socian/pages/drawer/student/pages/pastPaper/DepartmentPage.dart';
-import 'package:socian/pages/drawer/student/pages/teachersReviews/TeachersPage.dart';
-import 'package:socian/pages/providers/page_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/pages/providers/page_provider.dart';
 
 class StudentDrawer extends ConsumerStatefulWidget {
   const StudentDrawer({super.key});
@@ -207,7 +205,10 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                   _buildDrawerItem(
                     icon: Icons.people,
                     title: "Alumni",
-                    onTap: () => Navigator.of(context).pop(),
+                    onTap: () => Navigator.pushNamed(
+                      context,
+                      AppRoutes.alumniScrolls,
+                    ),
                     isDarkMode: isDarkMode,
                   ),
                   if (role == AppRoles.teacher)
