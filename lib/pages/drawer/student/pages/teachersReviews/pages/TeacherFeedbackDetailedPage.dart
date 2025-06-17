@@ -1,8 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:socian/pages/drawer/student/pages/teachersReviews/pages/commentDetailed/widgets/RootReplyItem.dart';
-import 'package:socian/pages/drawer/student/pages/teachersReviews/pages/commentDetailed/widgets/original_comment.dart';
+import 'package:socian/pages/drawer/student/pages/teachersReviews/pages/commentDetailed/widgets/index.dart';
 import 'package:socian/shared/services/api_client.dart';
 
 class TeacherFeedbackDetailedPage extends StatefulWidget {
@@ -150,6 +149,32 @@ class _TeacherFeedbackDetailedPageState
     });
   }
 
+  void _replaceReplyOptimistically(
+      Map<String, dynamic> reply, String parentId, bool isReplyToReply) {
+    print('reply: $reply The R is - ');
+
+    print("The _replies is - ${_replies.toString()}");
+    setState(() {
+      final index = _replies.indexWhere((r) => r['_id'] == reply['_id']);
+      if (index != -1) {
+        _replies[index] = {
+          ..._replies[index],
+          'comment': reply['comment'],
+          'gifUrl': reply['gifUrl'],
+        };
+
+        print("The _replies[index] is - ${_replies[index].toString()}");
+        print("//////////////////////");
+        print("The reply is - ${reply.toString()}");
+        print("The index is - $index");
+
+        print("//////////////////////------------");
+        print("The _replies is - ${_replies.toString()}");
+        print("//////////////////////------------");
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -223,6 +248,7 @@ class _TeacherFeedbackDetailedPageState
               onReaction: _handleReaction,
               onReplyAdded: _addReplyOptimistically,
               onReplyRemoved: _removeOptimisticReply,
+              onReplyEdited: _replaceReplyOptimistically,
             ))
         .toList();
   }

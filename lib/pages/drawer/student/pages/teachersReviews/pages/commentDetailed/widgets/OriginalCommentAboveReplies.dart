@@ -175,9 +175,10 @@ class _OriginalCommentState extends ConsumerState<OriginalComment> {
     if (reason == null) return;
     final apiClient = ApiClient();
     try {
-      final response = await apiClient.post(
-        '/api/mod/teacher/reviews/feedback/hide',
+      final response = await apiClient.put(
+        '/api/mod/teacher/reviews/feedbacks/hide',
         {
+          'teacherId': widget.teacherId,
           'reviewId': widget.comment['_id'],
           'reason': reason,
         },
@@ -247,10 +248,12 @@ class _OriginalCommentState extends ConsumerState<OriginalComment> {
     final comment = widget.comment;
     final userRef = ref.read(authProvider).user;
     final user = comment['user'];
+    final picture = user?['profilePic'] ?? '';
+    final username = user['username'] ?? '';
     final name = user['name'] ?? 'Anonymous';
     final isDeleted = user['_id'] == null;
     final isAnonymous = comment['isAnonymous'] ?? false;
-    log("WELLxLL $comment");
+    print("WELLxLL $comment");
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -265,13 +268,30 @@ class _OriginalCommentState extends ConsumerState<OriginalComment> {
                 backgroundColor: widget.isDark
                     ? Colors.white.withOpacity(0.1)
                     : Colors.black.withOpacity(0.05),
-                child: Text(
-                  name[0].toUpperCase(),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: widget.isDark ? Colors.white : Colors.black,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                child: (picture.isNotEmpty)
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.network(
+                          picture,
+                          width: 24,
+                          height: 24,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Text(
+                            name[0].toUpperCase(),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color:
+                                  widget.isDark ? Colors.white : Colors.black,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ))
+                    : Text(
+                        name[0].toUpperCase(),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: widget.isDark ? Colors.white : Colors.black,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -283,16 +303,36 @@ class _OriginalCommentState extends ConsumerState<OriginalComment> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              isAnonymous ? 'Anonymous' : name,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: isDeleted
-                                    ? theme.colorScheme.onSurface
-                                        .withOpacity(0.5)
-                                    : null,
-                              ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  isAnonymous ? 'Anonymous' : name,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: isDeleted
+                                        ? theme.colorScheme.onSurface
+                                            .withOpacity(0.5)
+                                        : null,
+                                  ),
+                                ),
+                                Text(
+                                  isAnonymous ? '@anonymous' : '@$username',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 10,
+                                    letterSpacing: 0.5,
+                                    color: isDeleted
+                                        ? theme.colorScheme.onSurface
+                                            .withOpacity(0.5)
+                                        : null,
+                                  ),
+                                ),
+                              ],
                             ),
                             if (!isDeleted &&
                                 !isAnonymous &&

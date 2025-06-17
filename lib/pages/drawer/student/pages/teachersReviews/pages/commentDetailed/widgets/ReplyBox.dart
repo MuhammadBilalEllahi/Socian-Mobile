@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/shared/services/api_client.dart';
+
 import '../../../widgets/gif_picker.dart';
 
 class ReplyBox extends ConsumerStatefulWidget {
@@ -20,8 +21,9 @@ class ReplyBox extends ConsumerStatefulWidget {
     required this.isDark,
     required this.isReplyToReply,
     required this.onReplyAdded,
-    required this.onReplyRemoved, 
-    this.replyTo,   this.isReplyToReplyToReply =false,
+    required this.onReplyRemoved,
+    this.replyTo,
+    this.isReplyToReplyToReply = false,
   });
 
   @override
@@ -64,33 +66,44 @@ class _ReplyBoxState extends ConsumerState<ReplyBox> {
         'gifUrl': _selectedGifUrl.value,
         'user': {
           '_id': userMap['_id'],
+          'username': userMap['username'],
           'name': userMap['name'],
           'isVerified': userMap['isVerified'],
+        },
+        'profile': {
+          'picture': userMap['profile']?['picture'] ?? '',
         },
         'isAnonymous': false,
         'createdAt': DateTime.now().toIso8601String(),
         'reactions': {},
         'replies': [],
-        if (widget.isReplyToReply && widget.isReplyToReplyToReply && widget.replyTo != null) 
+        if (widget.isReplyToReply &&
+            widget.isReplyToReplyToReply &&
+            widget.replyTo != null)
           'replyTo': {'_id': widget.replyTo},
       };
 
       // Add reply optimistically
-      widget.onReplyAdded(optimisticReply, widget.parentId, widget.isReplyToReply);
+      widget.onReplyAdded(
+          optimisticReply, widget.parentId, widget.isReplyToReply);
 
       final ApiClient apiClient = ApiClient();
       final endpoint = widget.isReplyToReply
-        ? '/api/teacher/reply/reply/feedback'
-        : '/api/teacher/reply/feedback';
+          ? '/api/teacher/reply/reply/feedback'
+          : '/api/teacher/reply/feedback';
 
       final response = await apiClient.post(
         endpoint,
         {
           'teacherId': widget.teacherId,
-          widget.isReplyToReply ? 'feedbackCommentId' : 'feedbackReviewId': widget.parentId,
+          widget.isReplyToReply ? 'feedbackCommentId' : 'feedbackReviewId':
+              widget.parentId,
           'feedbackComment': text,
           'gifUrl': _selectedGifUrl.value ?? '',
-          if (widget.isReplyToReply && widget.isReplyToReplyToReply && widget.replyTo != null) 'replyTo': widget.replyTo,
+          if (widget.isReplyToReply &&
+              widget.isReplyToReplyToReply &&
+              widget.replyTo != null)
+            'replyTo': widget.replyTo,
         },
       );
 
@@ -103,14 +116,20 @@ class _ReplyBoxState extends ConsumerState<ReplyBox> {
           'gifUrl': _selectedGifUrl.value,
           'user': {
             '_id': userMap['_id'],
+            'username': userMap['username'],
             'name': userMap['name'],
             'isVerified': userMap['isVerified'],
+          },
+          'profile': {
+            'picture': userMap['profile']?['picture'] ?? '',
           },
           'isAnonymous': false,
           'createdAt': DateTime.now().toIso8601String(),
           'reactions': {},
           'replies': [],
-          if (widget.isReplyToReply && widget.isReplyToReplyToReply && widget.replyTo != null) 
+          if (widget.isReplyToReply &&
+              widget.isReplyToReplyToReply &&
+              widget.replyTo != null)
             'replyTo': {'_id': widget.replyTo},
         }, widget.parentId, widget.isReplyToReply);
       }
@@ -156,81 +175,91 @@ class _ReplyBoxState extends ConsumerState<ReplyBox> {
     final bool isUserLoggedIn = userMap != null;
 
     return Column(
-        children: [
-          ValueListenableBuilder<String?>(
-            valueListenable: _selectedGifUrl,
-            builder: (context, gifUrl, _) {
-              if (gifUrl == null) return const SizedBox.shrink();
-              return Stack(
-                children: [
-                  Image.network(
-                    gifUrl,
+      children: [
+        ValueListenableBuilder<String?>(
+          valueListenable: _selectedGifUrl,
+          builder: (context, gifUrl, _) {
+            if (gifUrl == null) return const SizedBox.shrink();
+            return Stack(
+              children: [
+                Image.network(
+                  gifUrl,
+                  height: 150,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
                     height: 150,
                     width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      height: 150,
-                      width: double.infinity,
-                      color: Colors.grey.withOpacity(0.1),
-                      child: Center(
-                        child: Icon(
-                          Icons.broken_image_outlined,
-                          color: theme.colorScheme.onSurface.withOpacity(0.5),
-                        ),
+                    color: Colors.grey.withOpacity(0.1),
+                    child: Center(
+                      child: Icon(
+                        Icons.broken_image_outlined,
+                        color: theme.colorScheme.onSurface.withOpacity(0.5),
                       ),
                     ),
                   ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: IconButton(
-                      onPressed: isUserLoggedIn ? () => _selectedGifUrl.value = null : null,
-                      icon: const Icon(Icons.close),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.black54,
-                        foregroundColor: Colors.white,
-                      ),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: IconButton(
+                    onPressed: isUserLoggedIn
+                        ? () => _selectedGifUrl.value = null
+                        : null,
+                    icon: const Icon(Icons.close),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.black54,
+                      foregroundColor: Colors.white,
                     ),
-                  ),
-                ],
-              );
-            },
-          ),
-          Row(
-            children: [
-              IconButton(
-                onPressed: isUserLoggedIn ? () => _showGifPicker.value = !_showGifPicker.value : null,
-                icon: const Icon(Icons.gif_box_outlined),
-                color: (widget.isDark ? Colors.white : Colors.black).withOpacity(isUserLoggedIn ? 0.7 : 0.3),
-              ),
-              Expanded(
-                child: TextField(
-                  controller: _replyController,
-                  style: theme.textTheme.bodyMedium,
-                  enabled: isUserLoggedIn,
-                  decoration: InputDecoration(
-                    hintText: isUserLoggedIn ? 'Write a reply...' : 'Login to reply',
-                    hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(isUserLoggedIn ? 0.5 : 0.3),
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.all(12),
                   ),
                 ),
-              ),
-              TextButton(
-                onPressed: (!isUserLoggedIn || _isLoading) ? null : _handleReply,
-                style: TextButton.styleFrom(
-                  backgroundColor: widget.isDark ? Colors.white.withOpacity(isUserLoggedIn ? 0.1 : 0.05) : Colors.black.withOpacity(isUserLoggedIn ? 1 : 0.3),
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(11),
-                      bottomRight: Radius.circular(11),
-                    ),
+              ],
+            );
+          },
+        ),
+        Row(
+          children: [
+            IconButton(
+              onPressed: isUserLoggedIn
+                  ? () => _showGifPicker.value = !_showGifPicker.value
+                  : null,
+              icon: const Icon(Icons.gif_box_outlined),
+              color: (widget.isDark ? Colors.white : Colors.black)
+                  .withOpacity(isUserLoggedIn ? 0.7 : 0.3),
+            ),
+            Expanded(
+              child: TextField(
+                controller: _replyController,
+                style: theme.textTheme.bodyMedium,
+                enabled: isUserLoggedIn,
+                decoration: InputDecoration(
+                  hintText:
+                      isUserLoggedIn ? 'Write a reply...' : 'Login to reply',
+                  hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface
+                        .withOpacity(isUserLoggedIn ? 0.5 : 0.3),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.all(12),
                 ),
-                child: _isLoading 
+              ),
+            ),
+            TextButton(
+              onPressed: (!isUserLoggedIn || _isLoading) ? null : _handleReply,
+              style: TextButton.styleFrom(
+                backgroundColor: widget.isDark
+                    ? Colors.white.withOpacity(isUserLoggedIn ? 0.1 : 0.05)
+                    : Colors.black.withOpacity(isUserLoggedIn ? 1 : 0.3),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(11),
+                    bottomRight: Radius.circular(11),
+                  ),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+              child: _isLoading
                   ? SizedBox(
                       width: 20,
                       height: 20,
@@ -248,36 +277,38 @@ class _ReplyBoxState extends ConsumerState<ReplyBox> {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-              ),
-            ],
-          ),
-          ValueListenableBuilder<bool>(
-            valueListenable: _showGifPicker,
-            builder: (context, show, _) {
-              if (!show || !isUserLoggedIn) return const SizedBox.shrink();
-              return Container(
-                height: 300,
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  border: Border(
-                    top: BorderSide(
-                      color: widget.isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
-                    ),
+            ),
+          ],
+        ),
+        ValueListenableBuilder<bool>(
+          valueListenable: _showGifPicker,
+          builder: (context, show, _) {
+            if (!show || !isUserLoggedIn) return const SizedBox.shrink();
+            return Container(
+              height: 300,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: widget.isDark
+                        ? Colors.white.withOpacity(0.1)
+                        : Colors.black.withOpacity(0.1),
                   ),
                 ),
-                child: GifPicker(
-                  isDark: widget.isDark,
-                  onGifSelected: (gifUrl) {
-                    // debugPrint("gifUrl--------------------------------: $gifUrl");
-                    _selectedGifUrl.value = gifUrl;
-                    // debugPrint("gifUrl value--------------------------------: ${_selectedGifUrl.value}");
-                    _showGifPicker.value = false;
-                  },
-                ),
-              );
-            },
-          ),
-        ],
+              ),
+              child: GifPicker(
+                isDark: widget.isDark,
+                onGifSelected: (gifUrl) {
+                  // debugPrint("gifUrl--------------------------------: $gifUrl");
+                  _selectedGifUrl.value = gifUrl;
+                  // debugPrint("gifUrl value--------------------------------: ${_selectedGifUrl.value}");
+                  _showGifPicker.value = false;
+                },
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
-} 
+}

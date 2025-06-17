@@ -15,6 +15,7 @@ class EditReplyBox extends ConsumerStatefulWidget {
   final Function(String, String, bool) onReplyRemoved;
   final String? replyTo;
   final bool isReplyToReplyToReply;
+  final Function(Map<String, dynamic>, String, bool) onReplyEdited;
   const EditReplyBox({
     super.key,
     required this.parentId,
@@ -26,6 +27,7 @@ class EditReplyBox extends ConsumerStatefulWidget {
     required this.onReplyRemoved,
     this.replyTo,
     this.isReplyToReplyToReply = false,
+    required this.onReplyEdited,
   });
 
   @override
@@ -61,7 +63,6 @@ class _EditReplyBoxState extends ConsumerState<EditReplyBox> {
       _isLoading = true;
     });
 
-    final tempId = DateTime.now().toIso8601String();
     try {
       final userMap = ref.read(authProvider).user;
       if (userMap == null) {
@@ -70,7 +71,7 @@ class _EditReplyBoxState extends ConsumerState<EditReplyBox> {
 
       // Create optimistic reply
       final optimisticReply = {
-        '_id': tempId,
+        '_id': widget.reply['_id'],
         'comment': text,
         'gifUrl': _selectedGifUrl.value,
         'user': {
@@ -91,18 +92,20 @@ class _EditReplyBoxState extends ConsumerState<EditReplyBox> {
       // Add reply optimistically
       widget.onReplyAdded(
           optimisticReply, widget.parentId, widget.isReplyToReply);
+      widget.onReplyEdited(
+          optimisticReply, widget.parentId, widget.isReplyToReply);
 
       final ApiClient apiClient = ApiClient();
       final endpoint = widget.isReplyToReply
-          ? '/api/teacher/reply/reply/feedback'
-          : '/api/teacher/reply/feedback';
+          ? '/api/teacher/reply/reply/feedback/edit'
+          : '/api/teacher/reply/feedback/edit';
 
-      final response = await apiClient.post(
+      final response = await apiClient.put(
         endpoint,
         {
-          'teacherId': widget.teacherId,
-          widget.isReplyToReply ? 'feedbackCommentId' : 'feedbackReviewId':
-              widget.parentId,
+          // 'teacherId': widget.teacherId,
+          widget.isReplyToReply ? 'feedbackReviewId' : 'feedbackCommentId':
+              widget.reply['_id'],
           'feedbackComment': text,
           'gifUrl': _selectedGifUrl.value ?? '',
           if (widget.isReplyToReply &&
@@ -133,6 +136,9 @@ class _EditReplyBoxState extends ConsumerState<EditReplyBox> {
               widget.replyTo != null)
             'replyTo': {'_id': widget.replyTo},
         }, widget.parentId, widget.isReplyToReply);
+
+        // widget.onReplyEdited
+        //     .call(optimisticReply, widget.parentId, widget.isReplyToReply);
       }
 
       if (mounted) {
@@ -146,7 +152,8 @@ class _EditReplyBoxState extends ConsumerState<EditReplyBox> {
       }
     } catch (e) {
       // Remove optimistic reply on error
-      widget.onReplyRemoved(tempId, widget.parentId, widget.isReplyToReply);
+      widget.onReplyRemoved(
+          widget.reply['_id'], widget.parentId, widget.isReplyToReply);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

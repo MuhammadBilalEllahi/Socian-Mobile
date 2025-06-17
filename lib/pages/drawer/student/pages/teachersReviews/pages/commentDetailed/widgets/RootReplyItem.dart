@@ -16,7 +16,7 @@ class RootReplyItem extends ConsumerStatefulWidget {
   final Function(String, String) onReaction;
   final Function(Map<String, dynamic>, String, bool) onReplyAdded;
   final Function(String, String, bool) onReplyRemoved;
-
+  final Function(Map<String, dynamic>, String, bool) onReplyEdited;
   const RootReplyItem({
     super.key,
     required this.reply,
@@ -25,6 +25,7 @@ class RootReplyItem extends ConsumerStatefulWidget {
     required this.onReaction,
     required this.onReplyAdded,
     required this.onReplyRemoved,
+    required this.onReplyEdited,
   });
 
   @override
@@ -99,9 +100,13 @@ class _RootReplyItemState extends ConsumerState<RootReplyItem> {
       'gifUrl': reply['gifUrl'],
       'user': Map<String, dynamic>.from({
         '_id': userMap['_id'],
+        'username': userMap['username'],
         'name': userMap['name'],
         'isVerified': userMap['isVerified'],
       }),
+      'profile': {
+        'picture': userMap['profile']?['picture'] ?? '',
+      },
       'isAnonymous': false,
       'createdAt': DateTime.now().toIso8601String(),
       'reactions': <String, dynamic>{},
@@ -114,8 +119,19 @@ class _RootReplyItemState extends ConsumerState<RootReplyItem> {
     widget.onReplyAdded(optimisticReply, parentId, isReplyToReply);
   }
 
-  void _handleDelete() {
+  Future<void> _handleDelete() async {
     // TODO: Implement delete logic
+
+    try {
+      final response = await apiClient.delete(
+          '/api/teacher/reply/feedback/delete?feedbackReviewId=${widget.reply['_id']}');
+      if (response.isNotEmpty) {
+        showSnackbar(context, response['message'], isError: false);
+        widget.onReplyRemoved(widget.reply['_id'], widget.reply['_id'], false);
+      }
+    } catch (e) {
+      showSnackbar(context, e.toString(), isError: true);
+    }
   }
 
   void _handleEdit(Map<String, dynamic> reply) {
@@ -129,9 +145,10 @@ class _RootReplyItemState extends ConsumerState<RootReplyItem> {
               parentId: widget.reply['_id'],
               teacherId: widget.teacherId,
               isDark: widget.isDark,
-              isReplyToReply: true,
+              isReplyToReply: false,
               onReplyRemoved: widget.onReplyRemoved,
               onReplyAdded: widget.onReplyAdded,
+              onReplyEdited: widget.onReplyEdited,
             ));
   }
 
@@ -188,9 +205,8 @@ class _RootReplyItemState extends ConsumerState<RootReplyItem> {
     final apiClient = ApiClient();
     try {
       final response = await apiClient.put(
-        '/api/mod/teacher/reviews/feedbacks/hide',
+        '/api/mod/teacher/reply/feedback/hide?feedbackReviewId=${widget.reply['_id']}',
         {
-          'replyId': widget.reply['_id'],
           'reason': reason,
         },
       );
@@ -207,6 +223,8 @@ class _RootReplyItemState extends ConsumerState<RootReplyItem> {
     final theme = Theme.of(context);
     final user = widget.reply['user'] ?? {};
     final name = user['name'] ?? '[deleted]';
+    final username = user['username'] ?? '[deleted]';
+    final picture = user?['profile']?['picture'] ?? '';
     final userRef = ref.read(authProvider).user;
     final isDeleted = user['_id'] == null;
     final isAnonymous = widget.reply['isAnonymous'] ?? false;
@@ -250,31 +268,81 @@ class _RootReplyItemState extends ConsumerState<RootReplyItem> {
                             backgroundColor: widget.isDark
                                 ? Colors.white.withOpacity(0.1)
                                 : Colors.black.withOpacity(0.05),
-                            child: Text(
-                              (isAnonymous
-                                      ? 'A'
-                                      : user['name'] != null
-                                          ? user['name'][0]
-                                          : '#')
-                                  .toUpperCase(),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color:
-                                    widget.isDark ? Colors.white : Colors.black,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
+                            child: (!isAnonymous && picture.isNotEmpty)
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.network(
+                                      picture,
+                                      width: 24,
+                                      height: 24,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) => Text(
+                                        (isAnonymous
+                                                ? 'A'
+                                                : user['name'] != null
+                                                    ? user['name'][0]
+                                                    : '#')
+                                            .toUpperCase(),
+                                        style:
+                                            theme.textTheme.bodySmall?.copyWith(
+                                          color: widget.isDark
+                                              ? Colors.white
+                                              : Colors.black,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                : Text(
+                                    (isAnonymous
+                                            ? 'A'
+                                            : user['name'] != null
+                                                ? user['name'][0]
+                                                : '#')
+                                        .toUpperCase(),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: widget.isDark
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Row(
                               children: [
-                                // Text(
-                                //   isAnonymous ? 'Anonymous' : name,
-                                //   style: theme.textTheme.bodySmall?.copyWith(
-                                //     fontWeight: FontWeight.w600,
-                                //     color: isDeleted ? theme.colorScheme.onSurface.withOpacity(0.5) : null,
-                                //   ),
-                                // ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      isAnonymous ? 'Anonymous' : name,
+                                      style:
+                                          theme.textTheme.bodySmall?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: isDeleted
+                                            ? theme.colorScheme.onSurface
+                                                .withOpacity(0.5)
+                                            : null,
+                                      ),
+                                    ),
+                                    Text(
+                                      isAnonymous ? '@anonymous' : '@$username',
+                                      style:
+                                          theme.textTheme.bodySmall?.copyWith(
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 10,
+                                        letterSpacing: 0.5,
+                                        color: isDeleted
+                                            ? theme.colorScheme.onSurface
+                                                .withOpacity(0.5)
+                                            : null,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                                 if (!isDeleted &&
                                     !isAnonymous &&
                                     user['isVerified'] == true) ...[
@@ -303,7 +371,6 @@ class _RootReplyItemState extends ConsumerState<RootReplyItem> {
                                           .withOpacity(0.5),
                                     ),
                                   ),
-
                                 PopupMenuButton<String>(
                                   icon: Icon(
                                     Icons.more_horiz_rounded,
@@ -522,6 +589,15 @@ class _RootReplyItemState extends ConsumerState<RootReplyItem> {
                       onReplyAdded: widget.onReplyAdded,
                       onReplyRemoved: widget.onReplyRemoved,
                       parentUsername: widget.reply['user']?['name'] ?? '',
+                      onReplyEdited: (reply, parentId, isReplyToReply) {
+                        // widget.onReplyEdited
+                        //     .call(reply, parentId, isReplyToReply);
+                        setState(() {
+                          _replyReplies
+                              .removeWhere((r) => r['_id'] == reply['_id']);
+                          _replyReplies.add(reply);
+                        });
+                      },
                     )),
             ],
           ),

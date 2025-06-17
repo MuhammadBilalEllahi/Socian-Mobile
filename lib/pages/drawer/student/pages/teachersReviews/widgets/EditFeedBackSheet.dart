@@ -8,11 +8,13 @@ class EditFeedBackSheet extends ConsumerStatefulWidget {
   final Map<String, dynamic> editComment;
   final void Function(Map<String, dynamic> optimisticComment,
       {required Future<bool> Function() confirm})? onOptimisticComment;
+  final void Function(Map<String, dynamic> comment)? onEditComment;
   const EditFeedBackSheet(
       {super.key,
       required this.teacherId,
       required this.editComment,
-      this.onOptimisticComment});
+      this.onOptimisticComment,
+      this.onEditComment});
 
   @override
   ConsumerState<EditFeedBackSheet> createState() => EditFeedBackSheetState();
@@ -98,6 +100,7 @@ class EditFeedBackSheetState extends ConsumerState<EditFeedBackSheet> {
     }
 
     widget.onOptimisticComment?.call(optimisticComment, confirm: confirm);
+    widget.onEditComment?.call(widget.editComment);
 
     _commentController.clear();
     setState(() {

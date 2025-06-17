@@ -4,6 +4,8 @@ import 'package:socian/core/utils/rbac.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/pages/drawer/student/pages/teachersReviews/pages/commentDetailed/widgets/EditReplyBox.dart';
 import 'package:socian/pages/drawer/student/pages/teachersReviews/pages/commentDetailed/widgets/index.dart';
+import 'package:socian/shared/services/api_client.dart';
+import 'package:socian/shared/widgets/my_snackbar.dart';
 import 'package:socian/utils/date_formatter.dart';
 
 class ReplyReplyItem extends ConsumerStatefulWidget {
@@ -13,7 +15,7 @@ class ReplyReplyItem extends ConsumerStatefulWidget {
   final Function(String, String) onReaction;
   final Function(Map<String, dynamic>, String, bool) onReplyAdded;
   final Function(String, String, bool) onReplyRemoved;
-
+  final Function(Map<String, dynamic>, String, bool) onReplyEdited;
   final String? parentUsername;
 
   final String feedbackCommentId;
@@ -28,6 +30,7 @@ class ReplyReplyItem extends ConsumerStatefulWidget {
     required this.onReplyRemoved,
     required this.feedbackCommentId,
     this.parentUsername,
+    required this.onReplyEdited,
   });
 
   @override
@@ -71,32 +74,108 @@ class _ReplyReplyItemState extends ConsumerState<ReplyReplyItem> {
 
     // Pass the reply up to parent
     widget.onReplyAdded(reply, parentId, isReplyToReply);
+    widget.reply['isTemporary'] = false;
   }
 
   void _handleEdit(Map<String, dynamic> reply) {
     // TODO: Implement edit logic
-  }
-
-  void _handleHide() {
-    // TODO: Implement hide logic
 
     showModalBottomSheet(
         enableDrag: true,
         context: context,
         builder: (context) => EditReplyBox(
-              reply: widget.reply,
+              reply: reply,
               parentId: widget.reply['_id'],
               teacherId: widget.teacherId,
               isDark: widget.isDark,
-              isReplyToReply: true,
-              isReplyToReplyToReply: true,
+              isReplyToReply: false,
               onReplyRemoved: widget.onReplyRemoved,
               onReplyAdded: widget.onReplyAdded,
+              onReplyEdited: widget.onReplyEdited,
+              isReplyToReplyToReply: true,
             ));
   }
 
-  void _handleDelete() {
+  final _reasonController = TextEditingController();
+
+  Widget _hideReasonDialog() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    return AlertDialog(
+      title: const Text('Hide Reason Reply\'s reply',
+          style: TextStyle(fontSize: 16)),
+      content: TextFormField(
+        controller: _reasonController,
+        maxLines: 3,
+        decoration: InputDecoration(
+          hintText: 'Enter reason for hiding',
+          hintStyle: const TextStyle(fontSize: 14),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter a reason';
+          }
+          return null;
+        },
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('Cancel',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: isDarkMode ? Colors.white : Colors.black)),
+        ),
+        TextButton(
+          onPressed: () =>
+              Navigator.pop(context, _reasonController.text.trim()),
+          child: Text('Submit',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: isDarkMode ? Colors.white : Colors.black)),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handleHide() async {
+    // Handle hide
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (context) => _hideReasonDialog(),
+    );
+    if (reason == null) return;
+    final apiClient = ApiClient();
+    try {
+      final response = await apiClient.put(
+        '/api/mod/teacher/reply/reply/feedback/hide?feedbackCommentId=${widget.reply['_id']}',
+        {
+          'reason': reason,
+        },
+      );
+      if (response.isNotEmpty) {
+        showSnackbar(context, response['message'], isError: false);
+      }
+    } catch (e) {
+      showSnackbar(context, e.toString(), isError: true);
+    }
+  }
+
+  Future<void> _handleDelete() async {
     // TODO: Implement delete logic
+    final apiClient = ApiClient();
+    try {
+      final response = await apiClient.delete(
+          '/api/teacher/reply/reply/feedback/delete?feedbackCommentId=${widget.reply['_id']}');
+      if (response.isNotEmpty) {
+        showSnackbar(context, response['message'], isError: false);
+        widget.onReplyRemoved(widget.reply['_id'], widget.reply['_id'], false);
+      }
+    } catch (e) {
+      showSnackbar(context, e.toString(), isError: true);
+    }
   }
 
   @override
@@ -105,8 +184,9 @@ class _ReplyReplyItemState extends ConsumerState<ReplyReplyItem> {
     final theme = Theme.of(context);
     final user = widget.reply['user'] ?? {};
     final name = user['name'] ?? '[deleted]';
+    final username = user['username'] ?? '[deleted]';
     final isDeleted = user['_id'] == null;
-
+    final picture = user?['profile']?['picture'] ?? '';
     final date = widget.reply['updatedAt'] ?? widget.reply['createdAt'] ?? '';
     final replyText = widget.reply['comment'] ?? widget.reply['text'] ?? '';
     final gifUrl = widget.reply['gifUrl'] ?? '';
@@ -145,30 +225,61 @@ class _ReplyReplyItemState extends ConsumerState<ReplyReplyItem> {
                             backgroundColor: widget.isDark
                                 ? Colors.white.withOpacity(0.1)
                                 : Colors.black.withOpacity(0.05),
-                            child: Text(
-                              user['name'] != null
-                                  ? user['name'][0].toUpperCase()
-                                  : '#',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color:
-                                    widget.isDark ? Colors.white : Colors.black,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
+                            child: (picture.isNotEmpty && picture != null)
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.network(
+                                      picture,
+                                      width: 24,
+                                      height: 24,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  )
+                                : Text(
+                                    user['name'] != null
+                                        ? user['name'][0].toUpperCase()
+                                        : '#',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: widget.isDark
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Row(
                               children: [
-                                Text(
-                                  name,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: isDeleted
-                                        ? theme.colorScheme.onSurface
-                                            .withOpacity(0.5)
-                                        : null,
-                                  ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      name,
+                                      style:
+                                          theme.textTheme.bodySmall?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: isDeleted
+                                            ? theme.colorScheme.onSurface
+                                                .withOpacity(0.5)
+                                            : null,
+                                      ),
+                                    ),
+                                    Text(
+                                      '@$username',
+                                      style:
+                                          theme.textTheme.bodySmall?.copyWith(
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 10,
+                                        letterSpacing: 0.5,
+                                        color: isDeleted
+                                            ? theme.colorScheme.onSurface
+                                                .withOpacity(0.5)
+                                            : null,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 if (!isDeleted &&
                                     user['isVerified'] == true) ...[

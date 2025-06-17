@@ -458,11 +458,13 @@ class _CommentItemState extends ConsumerState<_CommentItem> {
     final theme = Theme.of(context);
     final userRef = ref.read(authProvider).user;
     final user = widget.comment['user'];
+    final username = user['username'] ?? '';
     final name = user['name'] ?? 'Anonymous';
+    final picture = user['profilePic'] ?? '';
     final isDeleted = user['_id'] == null;
     final isAnonymous = widget.comment['isAnonymous'] ?? false;
 
-    log("_________________\n _____________ \n Comment ${widget.comment}");
+    print("_________________\n _____________ \n Comment ${widget.comment}");
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -472,19 +474,42 @@ class _CommentItemState extends ConsumerState<_CommentItem> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(
-                radius: 16,
-                backgroundColor: widget.isDark
-                    ? Colors.white.withOpacity(0.1)
-                    : Colors.black.withOpacity(0.05),
-                child: Text(
-                  name[0].toUpperCase(),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: widget.isDark ? Colors.white : Colors.black,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
+              (picture.isNotEmpty)
+                  ? CircleAvatar(
+                      radius: 16,
+                      backgroundColor: widget.isDark
+                          ? Colors.white.withOpacity(0.1)
+                          : Colors.black.withOpacity(0.05),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.network(
+                          picture,
+                          width: 32,
+                          height: 32,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Text(
+                            name[0].toUpperCase(),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color:
+                                  widget.isDark ? Colors.white : Colors.black,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ))
+                  : CircleAvatar(
+                      radius: 16,
+                      backgroundColor: widget.isDark
+                          ? Colors.white.withOpacity(0.1)
+                          : Colors.black.withOpacity(0.05),
+                      child: Text(
+                        name[0].toUpperCase(),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: widget.isDark ? Colors.white : Colors.black,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -496,15 +521,30 @@ class _CommentItemState extends ConsumerState<_CommentItem> {
                       children: [
                         Row(
                           children: [
-                            Text(
-                              isAnonymous ? 'Anonymous' : name,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: isDeleted
-                                    ? theme.colorScheme.onSurface
-                                        .withOpacity(0.5)
-                                    : null,
-                              ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  isAnonymous ? 'Anonymous' : name,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: isDeleted
+                                        ? theme.colorScheme.onSurface
+                                            .withOpacity(0.5)
+                                        : null,
+                                  ),
+                                ),
+                                if (!isAnonymous)
+                                  Text(
+                                    '@$username',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      fontSize: 10,
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.5),
+                                    ),
+                                  ),
+                              ],
                             ),
                             if (!isDeleted &&
                                 !isAnonymous &&
