@@ -4,17 +4,16 @@
 // 3. comment to a feedback
 // 4. teacher message to all students
 // content upload by teacher like pdf, links, books url or pdf for students
-import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
-import 'dart:convert';
 import 'dart:developer';
 
-import 'package:socian/shared/services/secure_storage_service.dart';
+import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/shared/services/api_client.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:socian/shared/services/secure_storage_service.dart';
 
 class TeacherSelfReview extends ConsumerStatefulWidget {
   const TeacherSelfReview({super.key});
@@ -75,12 +74,36 @@ class _TeacherSelfReviewState extends ConsumerState<TeacherSelfReview> {
         });
       } else {
         final response = await apiClient.get('/api/user/teacher/attachUser');
+
+        log("response $response");
+        log("user in riverpod ${ref.read(authProvider).user}");
+        if (response['access_token'] != null) {
+          _message = "User Connected";
+          final token = response['access_token'];
+          final user = JwtDecoder.decode(token);
+          log("DECODEDuser $user");
+
+          await ref.read(authProvider.notifier).updateAuthState(user, token);
+          //reload the page
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const TeacherSelfReview()),
+          );
+          //     .then((value) {
+          //   _fetchTeacherData();
+          // });
+        }
         setState(() {
           _message = response['message'];
           _teachersInList =
               List<Map<String, dynamic>>.from(response['teachers'] ?? []);
           _isLoading = false;
         });
+
+        // final teacherId = user['teacherConnectivities']['teacherModal'];
+        // if (teacherId != null) {
+        //   await _fetchTeacherData();
+        // }
       }
     } catch (e) {
       setState(() {
@@ -623,7 +646,7 @@ class _TeacherSelfReviewState extends ConsumerState<TeacherSelfReview> {
 
   Widget _buildCreateTeacherButton() {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 5),
+      margin: const EdgeInsets.symmetric(vertical: 5),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
         color: Colors.grey[900],
@@ -713,7 +736,7 @@ class _TeacherSelfReviewState extends ConsumerState<TeacherSelfReview> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.error_outline,
                         color: Colors.red,
                         size: 48,
@@ -950,7 +973,7 @@ class _TeacherSelfReviewState extends ConsumerState<TeacherSelfReview> {
     final textColor = isDark ? Colors.white : Colors.black;
     final mutedTextColor = isDark ? Colors.grey[400]! : Colors.grey[600]!;
 
-    log("message ${feedback}");
+    log("message $feedback");
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),

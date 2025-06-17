@@ -1029,14 +1029,16 @@ class _DiscussionViewState extends State<DiscussionView> {
                                                                               children: [
                                                                                 GestureDetector(
                                                                                   onTap: () {
-                                                                                    Navigator.push(
-                                                                                      context,
-                                                                                      MaterialPageRoute(
-                                                                                        builder: (context) => ProfilePage(
-                                                                                          userId: teacher['_id'],
+                                                                                    if (teacher['userAttachedBool'] == true) {
+                                                                                      Navigator.push(
+                                                                                        context,
+                                                                                        MaterialPageRoute(
+                                                                                          builder: (context) => ProfilePage(
+                                                                                            userId: teacher['userAttached']['_id'],
+                                                                                          ),
                                                                                         ),
-                                                                                      ),
-                                                                                    );
+                                                                                      );
+                                                                                    }
                                                                                   },
                                                                                   child: Text(
                                                                                     teacher['name'],
