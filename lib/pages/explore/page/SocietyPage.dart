@@ -1009,6 +1009,8 @@
 //   }
 // }
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 // import 'package:socian/features/auth/presentation/providers/auth_provider.dart';
@@ -1084,6 +1086,12 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
       final response = await _apiClient.get(
         '/api/society/${widget.societyId}?page=$page&limit=$pageSize',
       );
+      log("response $response");
+      if (response['isJoined'] == true) {
+        setState(() {
+          isMember = true;
+        });
+      }
       final society = response['society'] as Map<String, dynamic>?;
       final fetchedPosts = (response['posts'] ?? []) as List<dynamic>;
       setState(() {

@@ -40,109 +40,24 @@ class PostMedia extends StatefulWidget {
 }
 
 class _PostMediaState extends State<PostMedia>
-    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
-  CachedVideoPlayerPlusController? _videoController;
-  AudioPlayer? _audioPlayer;
-  bool _isPlaying = false;
-  Duration _duration = Duration.zero;
-  Duration _position = Duration.zero;
-  late AnimationController _waveformController;
-  final List<double> _waveform =
-      List.generate(50, (index) => math.Random().nextDouble() * 0.5 + 0.5);
+    with AutomaticKeepAliveClientMixin {
   final PageController _pageController = PageController();
   int _currentPage = 0;
-
-  final List<Widget> _cachedMediaWidgets = [];
 
   @override
   void initState() {
     super.initState();
-
-    _initializeVideo();
-    _initializeAudio();
-    _waveformController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1000),
-    )..repeat();
-
-    // Initialize media widgets after frame
+    // Preload adjacent images after frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        _initializeMediaWidgets();
         _preloadAdjacentImages(0);
       }
     });
   }
 
-  void _initializeMediaWidgets() {
-    if (widget.media == null || widget.media!.isEmpty) return;
-
-    _cachedMediaWidgets.clear();
-    for (final item in widget.media!) {
-      if (item['type']?.startsWith('image/') ?? false) {
-        _cachedMediaWidgets.add(_buildImageItem(item, true));
-      } else if (item['type']?.startsWith('video/') ?? false) {
-        _cachedMediaWidgets.add(_buildVideoItem());
-      } else if (item['type']?.startsWith('audio/') ?? false) {
-        _cachedMediaWidgets.add(_buildAudioItem());
-      }
-    }
-  }
-
-  // Modify _buildImageItem to accept a cache flag
-  Widget _buildImageItem(dynamic item, [bool forCache = false]) {
-    // Preload the image
-    precacheImage(CachedNetworkImageProvider(item['url']), context);
-
-    return KeepAliveWrapper(
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 0),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: const [
-            BoxShadow(
-              color: Color.fromARGB(0, 0, 0, 0),
-              blurRadius: 4,
-              offset: Offset(0, 2),
-            )
-          ],
-        ),
-        child: GestureDetector(
-          onTap: forCache
-              ? null
-              : () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => FullScreenMediaView(
-                        mediaFiles: [item['url']],
-                        initialIndex: 0,
-                        videoControllers: const {},
-                        isImage: true,
-                      ),
-                    ),
-                  );
-                },
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: CachedNetworkImage(
-              imageUrl: item['url'],
-              cacheManager: CustomCacheManager(),
-              width: double.infinity,
-              height: 350,
-              fit: BoxFit.contain,
-              placeholder: (context, url) => const Center(
-                child: CircularProgressIndicator(),
-              ),
-              errorWidget: (context, url, error) => const Icon(Icons.error),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   void _preloadAdjacentImages(int currentIndex) {
+    if (widget.media == null) return;
+
     // Preload next 2 images
     for (int i = 1; i <= 2; i++) {
       final nextIndex = currentIndex + i;
@@ -164,85 +79,8 @@ class _PostMediaState extends State<PostMedia>
     }
   }
 
-  void _initializeVideo() {
-    if (widget.media != null && widget.media!.isNotEmpty) {
-      final video = widget.media!.firstWhere(
-        (element) => element['type']?.startsWith('video/') ?? false,
-        orElse: () => null,
-      );
-      if (video != null) {
-        _videoController = CachedVideoPlayerPlusController.networkUrl(
-          Uri.parse(video['url']),
-          httpHeaders: {
-            'Connection': 'keep-alive',
-          },
-          invalidateCacheIfOlderThan: const Duration(hours: 4),
-        );
-        _videoController!.addListener(() {
-          if (mounted) setState(() {});
-        });
-        _videoController!.initialize().then((_) {
-          if (mounted) {
-            setState(() {});
-            _videoController!.setLooping(true);
-          }
-        });
-      }
-    }
-  }
-
-  void _initializeAudio() {
-    if (widget.media != null && widget.media!.isNotEmpty) {
-      final audio = widget.media!.firstWhere(
-        (element) => element['type']?.startsWith('audio/') ?? false,
-        orElse: () => null,
-      );
-      if (audio != null) {
-        _audioPlayer = AudioPlayer();
-        _audioPlayer!.onPlayerStateChanged.listen((state) {
-          setState(() {
-            _isPlaying = state == PlayerState.playing;
-          });
-        });
-        _audioPlayer!.onDurationChanged.listen((duration) {
-          setState(() {
-            _duration = duration;
-          });
-        });
-        _audioPlayer!.onPositionChanged.listen((position) {
-          setState(() {
-            _position = position;
-          });
-        });
-        _audioPlayer!.setSourceUrl(audio['url']);
-      }
-    }
-  }
-
-  Future<void> _playPauseAudio() async {
-    if (_audioPlayer == null) return;
-    if (_isPlaying) {
-      await _audioPlayer!.pause();
-    } else {
-      await _audioPlayer!.resume();
-    }
-  }
-
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
-    final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return "$minutes:$seconds";
-  }
-
   @override
   void dispose() {
-    _videoController?.removeListener(() {
-      if (mounted) setState(() {});
-    });
-    _videoController?.dispose();
-    _audioPlayer?.dispose();
-    _waveformController.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -273,12 +111,33 @@ class _PostMediaState extends State<PostMedia>
                 itemCount: widget.media!.length,
                 itemBuilder: (context, index) {
                   final item = widget.media![index];
-                  if (item['type']?.startsWith('image/') ?? false) {
-                    return _buildImageItem(item);
-                  } else if (item['type']?.startsWith('video/') ?? false) {
-                    return _buildVideoItem();
-                  } else if (item['type']?.startsWith('audio/') ?? false) {
-                    return _buildAudioItem();
+                  final mediaType = item['type'] ?? '';
+
+                  if (mediaType.startsWith('image/')) {
+                    return PostImageMedia(
+                      imageUrl: item['url'],
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FullScreenMediaView(
+                              mediaFiles: [item['url']],
+                              initialIndex: 0,
+                              videoControllers: const {},
+                              isImage: true,
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  } else if (mediaType.startsWith('video/')) {
+                    return PostVideoMedia(
+                      videoUrl: item['url'],
+                    );
+                  } else if (mediaType.startsWith('audio/')) {
+                    return PostAudioMedia(
+                      audioUrl: item['url'],
+                    );
                   }
                   return const SizedBox.shrink();
                 },
@@ -313,53 +172,115 @@ class _PostMediaState extends State<PostMedia>
     );
   }
 
-  // Widget _buildImageItem(dynamic item) {
-  //   return Container(
-  //     margin: const EdgeInsets.only(bottom: 0),
-  //     decoration: BoxDecoration(
-  //       borderRadius: BorderRadius.circular(12),
-  //       boxShadow: const [
-  //         BoxShadow(
-  //           color: Color.fromARGB(0, 0, 0, 0),
-  //           blurRadius: 4,
-  //           offset: Offset(0, 2),
-  //         ),
-  //       ],
-  //     ),
-  //     child: GestureDetector(
-  //       onTap: () {
-  //         Navigator.push(
-  //           context,
-  //           MaterialPageRoute(
-  //             builder: (context) => FullScreenMediaView(
-  //               mediaFiles: [item['url']],
-  //               initialIndex: 0,
-  //               videoControllers: {},
-  //               isImage: true,
-  //             ),
-  //           ),
-  //         );
-  //       },
-  //       child: ClipRRect(
-  //         borderRadius: BorderRadius.circular(12),
-  //         child: CachedNetworkImage(
-  //           imageUrl: item['url'],
-  //           width: double.infinity,
-  //           height: 350,
-  //           fit: BoxFit.contain,
-  //           placeholder: (context, url) => const Center(
-  //             child: CircularProgressIndicator(),
-  //           ),
-  //           errorWidget: (context, url, error) => const Icon(Icons.error),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
+  @override
+  bool get wantKeepAlive => true;
+}
 
-  Widget _buildVideoItem() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+class PostImageMedia extends StatelessWidget {
+  final String imageUrl;
+  final VoidCallback? onTap;
 
+  const PostImageMedia({
+    super.key,
+    required this.imageUrl,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return KeepAliveWrapper(
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: const [
+            BoxShadow(
+              color: Color.fromARGB(0, 0, 0, 0),
+              blurRadius: 4,
+              offset: Offset(0, 2),
+            )
+          ],
+        ),
+        child: GestureDetector(
+          onTap: onTap,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: CachedNetworkImage(
+              imageUrl: imageUrl,
+              cacheManager: CustomCacheManager(),
+              width: double.infinity,
+              height: 350,
+              fit: BoxFit.contain,
+              placeholder: (context, url) => const Center(
+                child: CircularProgressIndicator(),
+              ),
+              errorWidget: (context, url, error) => const Icon(Icons.error),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class PostVideoMedia extends StatefulWidget {
+  final String videoUrl;
+
+  const PostVideoMedia({
+    super.key,
+    required this.videoUrl,
+  });
+
+  @override
+  State<PostVideoMedia> createState() => _PostVideoMediaState();
+}
+
+class _PostVideoMediaState extends State<PostVideoMedia> {
+  CachedVideoPlayerPlusController? _videoController;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeVideo();
+  }
+
+  void _initializeVideo() {
+    _videoController = CachedVideoPlayerPlusController.networkUrl(
+      Uri.parse(widget.videoUrl),
+      httpHeaders: {
+        'Connection': 'keep-alive',
+      },
+      invalidateCacheIfOlderThan: const Duration(hours: 4),
+    );
+    _videoController!.addListener(() {
+      if (mounted) setState(() {});
+    });
+    _videoController!.initialize().then((_) {
+      if (mounted) {
+        setState(() {});
+        _videoController!.setLooping(true);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _videoController?.removeListener(() {
+      if (mounted) setState(() {});
+    });
+    _videoController?.dispose();
+    super.dispose();
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$minutes:$seconds";
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 0),
       height: 350,
@@ -547,8 +468,85 @@ class _PostMediaState extends State<PostMedia>
       ),
     );
   }
+}
 
-  Widget _buildAudioItem() {
+class PostAudioMedia extends StatefulWidget {
+  final String audioUrl;
+
+  const PostAudioMedia({
+    super.key,
+    required this.audioUrl,
+  });
+
+  @override
+  State<PostAudioMedia> createState() => _PostAudioMediaState();
+}
+
+class _PostAudioMediaState extends State<PostAudioMedia>
+    with SingleTickerProviderStateMixin {
+  AudioPlayer? _audioPlayer;
+  bool _isPlaying = false;
+  Duration _duration = Duration.zero;
+  Duration _position = Duration.zero;
+  late AnimationController _waveformController;
+  final List<double> _waveform =
+      List.generate(50, (index) => math.Random().nextDouble() * 0.5 + 0.5);
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeAudio();
+    _waveformController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..repeat();
+  }
+
+  void _initializeAudio() {
+    _audioPlayer = AudioPlayer();
+    _audioPlayer!.onPlayerStateChanged.listen((state) {
+      setState(() {
+        _isPlaying = state == PlayerState.playing;
+      });
+    });
+    _audioPlayer!.onDurationChanged.listen((duration) {
+      setState(() {
+        _duration = duration;
+      });
+    });
+    _audioPlayer!.onPositionChanged.listen((position) {
+      setState(() {
+        _position = position;
+      });
+    });
+    _audioPlayer!.setSourceUrl(widget.audioUrl);
+  }
+
+  Future<void> _playPauseAudio() async {
+    if (_audioPlayer == null) return;
+    if (_isPlaying) {
+      await _audioPlayer!.pause();
+    } else {
+      await _audioPlayer!.resume();
+    }
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$minutes:$seconds";
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer?.dispose();
+    _waveformController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
@@ -576,7 +574,6 @@ class _PostMediaState extends State<PostMedia>
         mainAxisSize: MainAxisSize.min,
         children: [
           Row(
-            // mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 decoration: BoxDecoration(
@@ -644,9 +641,6 @@ class _PostMediaState extends State<PostMedia>
       ),
     );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }
 
 class WaveformPainter extends CustomPainter {
@@ -948,13 +942,6 @@ class _FullScreenMediaViewState extends State<FullScreenMediaView> {
                   icon: const Icon(Icons.close, color: Colors.white),
                   onPressed: () => Navigator.pop(context),
                 ),
-                // actions: [
-                //   IconButton(
-                //     icon:
-                //         const Icon(Icons.fullscreen_exit, color: Colors.white),
-                //     onPressed: () => Navigator.pop(context),
-                //   ),
-                // ],
               ),
             ),
         ],
