@@ -54,6 +54,7 @@ class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
         setState(() {
           _errorMessage = 'Invalid response from server';
           _isFetchingSocieties = false;
+          _moderatedSocieties = [];
         });
         return;
       }
@@ -76,6 +77,7 @@ class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
       setState(() {
         _errorMessage = 'Failed to load societies: $e';
         _isFetchingSocieties = false;
+        _moderatedSocieties = [];
       });
     }
   }
@@ -166,7 +168,7 @@ class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
                       decoration: BoxDecoration(
                         color: cardBackground,
                         borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(6),
+                          top: Radius.circular(16),
                         ),
                         boxShadow: [
                           BoxShadow(
@@ -176,99 +178,155 @@ class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
                           ),
                         ],
                       ),
-                      child: SingleChildScrollView(
-                        controller: scrollController,
-                        padding: const EdgeInsets.all(16),
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Drag handle
-                              Center(
-                                child: Container(
-                                  width: 40,
-                                  height: 4,
-                                  margin: const EdgeInsets.only(bottom: 16),
-                                  decoration: BoxDecoration(
-                                    color: mutedForeground,
-                                    borderRadius: BorderRadius.circular(2),
-                                  ),
-                                ),
-                              ),
-                              // Title
-                              Text(
-                                'Create New Gathering',
-                                style: TextStyle(
-                                  color: foreground,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w500,
-                                  letterSpacing: -0.5,
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                              // Society selection
-                              _isFetchingSocieties
-                                  ? const Center(
-                                      child: CircularProgressIndicator())
-                                  : _moderatedSocieties.isEmpty
-                                      ? Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 16),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'No moderated societies found',
-                                                style: TextStyle(
-                                                  color: mutedForeground,
-                                                  fontSize: 14,
-                                                  letterSpacing: -0.3,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 8),
-                                              TextButton(
-                                                onPressed:
-                                                    _fetchModeratedSocieties,
-                                                child: Text(
-                                                  'Retry',
-                                                  style: TextStyle(
-                                                    color: primaryColor,
-                                                    fontSize: 14,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
+                      child: _isFetchingSocieties
+                          ? const Center(child: CircularProgressIndicator())
+                          : _moderatedSocieties.isEmpty
+                              ? SingleChildScrollView(
+                                  controller: scrollController,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        const SizedBox(height: 16),
+                                        Icon(
+                                          Icons.lock_outline,
+                                          size: 48,
+                                          color: mutedForeground,
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          'Not Allowed',
+                                          style: TextStyle(
+                                            color: foreground,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w500,
                                           ),
-                                        )
-                                      : DropdownButtonFormField<String>(
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'You need to be a moderator of a society to create gatherings and your society should have atleast 25 members',
+                                          style: TextStyle(
+                                            color: mutedForeground,
+                                            fontSize: 14,
+                                            letterSpacing: -0.3,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        const SizedBox(height: 24),
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: primaryColor,
+                                            foregroundColor: background,
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 24, vertical: 12),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
+                                            elevation: 0,
+                                          ),
+                                          onPressed: _fetchModeratedSocieties,
+                                          child: const Text(
+                                            'Retry',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        if (_errorMessage != null)
+                                          Text(
+                                            _errorMessage!,
+                                            style: TextStyle(
+                                              color: Colors.red[400],
+                                              fontSize: 14,
+                                              letterSpacing: -0.3,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              : SingleChildScrollView(
+                                  controller: scrollController,
+                                  padding: const EdgeInsets.all(16),
+                                  child: Form(
+                                    key: _formKey,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        // Drag handle
+                                        Center(
+                                          child: Container(
+                                            width: 40,
+                                            height: 4,
+                                            margin: const EdgeInsets.only(
+                                                bottom: 16),
+                                            decoration: BoxDecoration(
+                                              color: mutedForeground,
+                                              borderRadius:
+                                                  BorderRadius.circular(2),
+                                            ),
+                                          ),
+                                        ),
+                                        // Title
+                                        Text(
+                                          'Create New Gathering',
+                                          style: TextStyle(
+                                            color: foreground,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w500,
+                                            letterSpacing: -0.5,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 24),
+                                        // Society selection
+                                        DropdownButtonFormField<String>(
                                           decoration: InputDecoration(
-                                            labelText: 'Society',
+                                            labelText: 'Select Society',
                                             labelStyle: TextStyle(
                                               color: mutedForeground,
                                               fontSize: 14,
                                               letterSpacing: -0.3,
                                             ),
+                                            prefixIcon: Icon(
+                                              Icons.group,
+                                              color: mutedForeground,
+                                              size: 20,
+                                            ),
+                                            filled: true,
+                                            fillColor: accent,
                                             border: OutlineInputBorder(
                                               borderRadius:
-                                                  BorderRadius.circular(6),
-                                              borderSide:
-                                                  BorderSide(color: border),
+                                                  BorderRadius.circular(12),
+                                              borderSide: BorderSide.none,
                                             ),
                                             enabledBorder: OutlineInputBorder(
                                               borderRadius:
-                                                  BorderRadius.circular(6),
-                                              borderSide:
-                                                  BorderSide(color: border),
+                                                  BorderRadius.circular(12),
+                                              borderSide: BorderSide.none,
                                             ),
                                             focusedBorder: OutlineInputBorder(
                                               borderRadius:
-                                                  BorderRadius.circular(6),
+                                                  BorderRadius.circular(12),
                                               borderSide: BorderSide(
-                                                  color: primaryColor),
+                                                color: primaryColor,
+                                                width: 1.5,
+                                              ),
                                             ),
+                                            contentPadding:
+                                                const EdgeInsets.symmetric(
+                                                    vertical: 14,
+                                                    horizontal: 16),
                                           ),
+                                          dropdownColor: cardBackground,
                                           value: _selectedSocietyId,
                                           items: _moderatedSocieties
                                               .map((society) {
@@ -296,223 +354,290 @@ class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
                                             }
                                             return null;
                                           },
+                                          menuMaxHeight: 200,
+                                          style: TextStyle(
+                                            color: foreground,
+                                            fontSize: 14,
+                                          ),
+                                          icon: Icon(
+                                            Icons.arrow_drop_down,
+                                            color: mutedForeground,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
                                         ),
-                              const SizedBox(height: 16),
-                              // Title field
-                              TextFormField(
-                                decoration: InputDecoration(
-                                  labelText: 'Title',
-                                  labelStyle: TextStyle(
-                                    color: mutedForeground,
-                                    fontSize: 14,
-                                    letterSpacing: -0.3,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                    borderSide: BorderSide(color: border),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                    borderSide: BorderSide(color: border),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                    borderSide: BorderSide(color: primaryColor),
-                                  ),
-                                ),
-                                style: TextStyle(
-                                  color: foreground,
-                                  fontSize: 14,
-                                  letterSpacing: -0.3,
-                                ),
-                                validator: (value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Please enter a title';
-                                  }
-                                  return null;
-                                },
-                                onSaved: (value) => _title = value!.trim(),
-                              ),
-                              const SizedBox(height: 16),
-                              // Description field
-                              TextFormField(
-                                decoration: InputDecoration(
-                                  labelText: 'Description (optional)',
-                                  labelStyle: TextStyle(
-                                    color: mutedForeground,
-                                    fontSize: 14,
-                                    letterSpacing: -0.3,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                    borderSide: BorderSide(color: border),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                    borderSide: BorderSide(color: border),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                    borderSide: BorderSide(color: primaryColor),
-                                  ),
-                                ),
-                                style: TextStyle(
-                                  color: foreground,
-                                  fontSize: 14,
-                                  letterSpacing: -0.3,
-                                ),
-                                maxLines: 3,
-                                onSaved: (value) =>
-                                    _description = value?.trim() ?? '',
-                              ),
-                              const SizedBox(height: 16),
-                              // Radius slider
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: accent,
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(color: border),
-                                ),
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Gathering Radius: ${_radius.round()}m',
-                                      style: TextStyle(
-                                        color: foreground,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        letterSpacing: -0.3,
-                                      ),
+                                        const SizedBox(height: 16),
+                                        // Title field
+                                        TextFormField(
+                                          decoration: InputDecoration(
+                                            labelText: 'Title',
+                                            labelStyle: TextStyle(
+                                              color: mutedForeground,
+                                              fontSize: 14,
+                                              letterSpacing: -0.3,
+                                            ),
+                                            filled: true,
+                                            fillColor: accent,
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              borderSide: BorderSide.none,
+                                            ),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              borderSide: BorderSide.none,
+                                            ),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              borderSide: BorderSide(
+                                                  color: primaryColor,
+                                                  width: 1.5),
+                                            ),
+                                          ),
+                                          style: TextStyle(
+                                            color: foreground,
+                                            fontSize: 14,
+                                            letterSpacing: -0.3,
+                                          ),
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.trim().isEmpty) {
+                                              return 'Please enter a title';
+                                            }
+                                            return null;
+                                          },
+                                          onSaved: (value) =>
+                                              _title = value!.trim(),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        // Description field
+                                        TextFormField(
+                                          decoration: InputDecoration(
+                                            labelText: 'Description',
+                                            labelStyle: TextStyle(
+                                              color: mutedForeground,
+                                              fontSize: 14,
+                                              letterSpacing: -0.3,
+                                            ),
+                                            filled: true,
+                                            fillColor: accent,
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              borderSide: BorderSide.none,
+                                            ),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              borderSide: BorderSide.none,
+                                            ),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              borderSide: BorderSide(
+                                                  color: primaryColor,
+                                                  width: 1.5),
+                                            ),
+                                          ),
+                                          style: TextStyle(
+                                            color: foreground,
+                                            fontSize: 14,
+                                            letterSpacing: -0.3,
+                                          ),
+                                          maxLines: 3,
+                                          onSaved: (value) => _description =
+                                              value?.trim() ?? '',
+                                        ),
+                                        const SizedBox(height: 16),
+                                        // Radius slider
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: accent,
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: cardShadow,
+                                                blurRadius: 2,
+                                                offset: const Offset(0, 1),
+                                              ),
+                                            ],
+                                          ),
+                                          padding: const EdgeInsets.all(16),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Gathering Radius: ${_radius.round()}m',
+                                                style: TextStyle(
+                                                  color: foreground,
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w500,
+                                                  letterSpacing: -0.3,
+                                                ),
+                                              ),
+                                              Slider(
+                                                value: _radius,
+                                                min: 50,
+                                                max: 500,
+                                                divisions: 9,
+                                                label: '${_radius.round()}m',
+                                                activeColor: primaryColor,
+                                                inactiveColor: mutedForeground,
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    _radius = value;
+                                                  });
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        // Start time picker
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: accent,
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: cardShadow,
+                                                blurRadius: 2,
+                                                offset: const Offset(0, 1),
+                                              ),
+                                            ],
+                                          ),
+                                          child: ListTile(
+                                            leading: Icon(Icons.event,
+                                                color: primaryColor),
+                                            title: Text(
+                                              'Start Time',
+                                              style: TextStyle(
+                                                color: foreground,
+                                                fontSize: 14,
+                                                letterSpacing: -0.3,
+                                              ),
+                                            ),
+                                            subtitle: Text(
+                                              DateFormat(
+                                                      'MMM dd, yyyy - hh:mm a')
+                                                  .format(_startTime),
+                                              style: TextStyle(
+                                                color: mutedForeground,
+                                                fontSize: 14,
+                                                letterSpacing: -0.3,
+                                              ),
+                                            ),
+                                            trailing: Icon(Icons.edit,
+                                                color: primaryColor),
+                                            onTap: () =>
+                                                _selectDateTime(context, true),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        // End time picker
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: accent,
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: cardShadow,
+                                                blurRadius: 2,
+                                                offset: const Offset(0, 1),
+                                              ),
+                                            ],
+                                          ),
+                                          child: ListTile(
+                                            leading: Icon(Icons.event_available,
+                                                color: primaryColor),
+                                            title: Text(
+                                              'End Time',
+                                              style: TextStyle(
+                                                color: foreground,
+                                                fontSize: 14,
+                                                letterSpacing: -0.3,
+                                              ),
+                                            ),
+                                            subtitle: Text(
+                                              DateFormat(
+                                                      'MMM dd, yyyy - hh:mm a')
+                                                  .format(_endTime),
+                                              style: TextStyle(
+                                                color: mutedForeground,
+                                                fontSize: 14,
+                                                letterSpacing: -0.3,
+                                              ),
+                                            ),
+                                            trailing: Icon(Icons.edit,
+                                                color: primaryColor),
+                                            onTap: () =>
+                                                _selectDateTime(context, false),
+                                          ),
+                                        ),
+                                        // Error message
+                                        if (_errorMessage != null)
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 16),
+                                            child: Text(
+                                              _errorMessage!,
+                                              style: TextStyle(
+                                                color: Colors.red[400],
+                                                fontSize: 14,
+                                                letterSpacing: -0.3,
+                                              ),
+                                            ),
+                                          ),
+                                        const SizedBox(height: 24),
+                                        // Submit button
+                                        SizedBox(
+                                          width: double.infinity,
+                                          child: ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: primaryColor,
+                                              foregroundColor: background,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 12),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              elevation: 2,
+                                            ),
+                                            onPressed:
+                                                _isLoading ? null : _submitForm,
+                                            child: _isLoading
+                                                ? const SizedBox(
+                                                    width: 20,
+                                                    height: 20,
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                      color: Colors.white,
+                                                      strokeWidth: 2,
+                                                    ),
+                                                  )
+                                                : const Text(
+                                                    'Create Gathering',
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      letterSpacing: -0.3,
+                                                    ),
+                                                  ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    Slider(
-                                      value: _radius,
-                                      min: 50,
-                                      max: 500,
-                                      divisions: 9,
-                                      label: '${_radius.round()}m',
-                                      activeColor: primaryColor,
-                                      inactiveColor: mutedForeground,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _radius = value;
-                                        });
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              // Start time picker
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: accent,
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(color: border),
-                                ),
-                                child: ListTile(
-                                  leading:
-                                      Icon(Icons.event, color: primaryColor),
-                                  title: Text(
-                                    'Start Time',
-                                    style: TextStyle(
-                                      color: foreground,
-                                      fontSize: 14,
-                                      letterSpacing: -0.3,
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    DateFormat('MMM dd, yyyy - hh:mm a')
-                                        .format(_startTime),
-                                    style: TextStyle(
-                                      color: mutedForeground,
-                                      fontSize: 14,
-                                      letterSpacing: -0.3,
-                                    ),
-                                  ),
-                                  trailing:
-                                      Icon(Icons.edit, color: primaryColor),
-                                  onTap: () => _selectDateTime(context, true),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              // End time picker
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: accent,
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(color: border),
-                                ),
-                                child: ListTile(
-                                  leading: Icon(Icons.event_available,
-                                      color: primaryColor),
-                                  title: Text(
-                                    'End Time',
-                                    style: TextStyle(
-                                      color: foreground,
-                                      fontSize: 14,
-                                      letterSpacing: -0.3,
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    DateFormat('MMM dd, yyyy - hh:mm a')
-                                        .format(_endTime),
-                                    style: TextStyle(
-                                      color: mutedForeground,
-                                      fontSize: 14,
-                                      letterSpacing: -0.3,
-                                    ),
-                                  ),
-                                  trailing:
-                                      Icon(Icons.edit, color: primaryColor),
-                                  onTap: () => _selectDateTime(context, false),
-                                ),
-                              ),
-                              // Error message
-                              if (_errorMessage != null)
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 16),
-                                  child: Text(
-                                    _errorMessage!,
-                                    style: TextStyle(
-                                      color: Colors.red[400],
-                                      fontSize: 14,
-                                      letterSpacing: -0.3,
-                                    ),
                                   ),
                                 ),
-                              const SizedBox(height: 24),
-                              // Submit button
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: primaryColor,
-                                    foregroundColor: background,
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 12),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    elevation: 0,
-                                  ),
-                                  onPressed: _submitForm,
-                                  child: const Text(
-                                    'Create Gathering',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      letterSpacing: -0.3,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
                     );
                   },
                 ),
@@ -567,27 +692,26 @@ class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
 
     if (pickedDate != null) {
       final pickedTime = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.fromDateTime(initialDate),
-        builder: (context, child) {
-          return Theme(
-            data: Theme.of(context).copyWith(
-              colorScheme: ColorScheme.light(
-                primary: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white
-                    : Colors.black,
-                onPrimary: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.black
-                    : Colors.white,
-                onSurface: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white
-                    : Colors.black,
+          context: context,
+          initialTime: TimeOfDay.fromDateTime(initialDate),
+          builder: (context, child) {
+            return Theme(
+              data: Theme.of(context).copyWith(
+                colorScheme: ColorScheme.light(
+                  primary: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,
+                  onPrimary: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.black
+                      : Colors.white,
+                  onSurface: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,
+                ),
               ),
-            ),
-            child: child!,
-          );
-        },
-      );
+              child: child!,
+            );
+          });
 
       if (pickedTime != null) {
         final newDateTime = DateTime(
@@ -601,7 +725,6 @@ class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
         setState(() {
           if (isStartTime) {
             _startTime = newDateTime;
-            // Ensure end time is at least 30 minutes later and within 5 hours
             if (_endTime
                 .isBefore(_startTime.add(const Duration(minutes: 30)))) {
               _endTime = _startTime.add(const Duration(minutes: 30));
@@ -622,7 +745,6 @@ class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
 
       final now = DateTime.now();
 
-      // Validate start time is not in the past
       if (_startTime.isBefore(now)) {
         setState(() {
           _errorMessage = 'Start time cannot be in the past';
@@ -630,7 +752,6 @@ class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
         return;
       }
 
-      // Validate location
       if (_selectedLocation == null) {
         setState(() {
           _errorMessage = 'Please select a location on the map';
@@ -638,7 +759,6 @@ class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
         return;
       }
 
-      // Validate minimum duration (30 minutes)
       if (_endTime.isBefore(_startTime.add(const Duration(minutes: 30)))) {
         setState(() {
           _errorMessage = 'Gathering must last at least 30 minutes';
@@ -646,7 +766,6 @@ class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
         return;
       }
 
-      // Validate maximum duration (5 hours)
       if (_endTime.difference(_startTime).inHours > 5) {
         setState(() {
           _errorMessage = 'Gathering cannot exceed 5 hours';
@@ -654,10 +773,9 @@ class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
         return;
       }
 
-      // Validate society selection
-      if (_moderatedSocieties.isNotEmpty && _selectedSocietyId == null) {
+      if (_moderatedSocieties.isEmpty || _selectedSocietyId == null) {
         setState(() {
-          _errorMessage = 'Please select a society';
+          _errorMessage = 'You must be a moderator to create a gathering';
         });
         return;
       }
@@ -683,20 +801,42 @@ class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
 
         log('Create Gathering Payload: $data');
 
-        final response = await _apiClient.post('/api/gatherings', data);
+        await _apiClient.post('/api/gatherings', data);
+
+        // Check if widget is still mounted after async operation
+        if (!mounted) {
+          log('Widget is no longer mounted after API call');
+          return;
+        }
+
+        // Use a local context to avoid potential issues
+        final scaffoldMessenger = ScaffoldMessenger.of(context);
+        final navigator = Navigator.of(context);
+
+        scaffoldMessenger.showSnackBar(
+          const SnackBar(content: Text('Gathering created successfully')),
+        );
+
+        // Delay navigation to ensure SnackBar is visible
+        await Future.delayed(const Duration(seconds: 1));
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Gathering created successfully')),
-          );
-          Navigator.pop(context);
+          navigator.pop();
         }
-      } catch (e) {
-        log('Error creating gathering: $e');
-        setState(() {
-          _errorMessage = 'Failed to create gathering: $e';
-          _isLoading = false;
-        });
+      } catch (e, stackTrace) {
+        log('Error creating gathering: $e', stackTrace: stackTrace);
+        if (mounted) {
+          setState(() {
+            _errorMessage = 'Failed to create gathering. Please try again.';
+            _isLoading = false;
+          });
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }
