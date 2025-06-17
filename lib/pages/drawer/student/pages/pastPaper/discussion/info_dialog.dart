@@ -178,22 +178,105 @@ class InfoDialog extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildInfoRow('Uploaded by', file['uploadedBy']['name'],
-                        foreground, mutedForeground),
-                    _buildInfoRow('Username', file['uploadedBy']['username'],
-                        foreground, mutedForeground),
-                    _buildInfoRow(
-                        'Email',
-                        file['uploadedBy']['universityEmail'],
-                        foreground,
-                        mutedForeground),
-                    _buildInfoRow(
-                        'Uploaded at',
-                        DateTime.parse(file['uploadedAt'])
-                            .toString()
-                            .split('.')[0],
-                        foreground,
-                        mutedForeground),
+                    Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: Icon(
+                            Icons.person,
+                            color: primary,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                file['uploadedBy']['name'],
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: foreground,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '@${file['uploadedBy']['username']}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: mutedForeground,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                file['uploadedBy']['universityEmail'],
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: mutedForeground,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.message,
+                            color: primary,
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            // TODO: Implement message functionality
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: muted,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        'Uploaded at: ${DateTime.parse(file['uploadedAt']).toString().split('.')[0]}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: mutedForeground,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // TODO: Implement connect functionality
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'Connect',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -230,10 +313,10 @@ class InfoDialog extends StatelessWidget {
                                 children: [
                                   if (teacher['imageUrl'] != null)
                                     Container(
-                                      width: 40,
-                                      height: 40,
+                                      width: 48,
+                                      height: 48,
                                       decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(20),
+                                        borderRadius: BorderRadius.circular(24),
                                         image: DecorationImage(
                                           image:
                                               NetworkImage(teacher['imageUrl']),
@@ -243,15 +326,16 @@ class InfoDialog extends StatelessWidget {
                                     )
                                   else
                                     Container(
-                                      width: 40,
-                                      height: 40,
+                                      width: 48,
+                                      height: 48,
                                       decoration: BoxDecoration(
                                         color: primary.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(20),
+                                        borderRadius: BorderRadius.circular(24),
                                       ),
                                       child: Icon(
                                         Icons.person,
                                         color: primary,
+                                        size: 24,
                                       ),
                                     ),
                                   const SizedBox(width: 12),
@@ -268,6 +352,7 @@ class InfoDialog extends StatelessWidget {
                                             color: foreground,
                                           ),
                                         ),
+                                        const SizedBox(height: 2),
                                         Text(
                                           teacher['email'],
                                           style: TextStyle(
@@ -275,37 +360,65 @@ class InfoDialog extends StatelessWidget {
                                             color: mutedForeground,
                                           ),
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                  if (teacher['rating'] != null)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: primary.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.star,
-                                            size: 14,
-                                            color: primary,
-                                          ),
-                                          const SizedBox(width: 4),
+                                        if (teacher['campusOrigin'] !=
+                                            null) ...[
+                                          const SizedBox(height: 2),
                                           Text(
-                                            '${teacher['rating']}',
+                                            teacher['campusOrigin']['name'] ??
+                                                'Unknown Campus',
                                             style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w500,
-                                              color: primary,
+                                              fontSize: 11,
+                                              color: mutedForeground,
                                             ),
                                           ),
                                         ],
-                                      ),
+                                      ],
                                     ),
+                                  ),
+                                  Column(
+                                    children: [
+                                      if (teacher['rating'] != null)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: primary.withOpacity(0.1),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.star,
+                                                size: 14,
+                                                color: primary,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                '${teacher['rating']}',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: primary,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      const SizedBox(height: 8),
+                                      IconButton(
+                                        icon: Icon(
+                                          Icons.message,
+                                          color: primary,
+                                          size: 20,
+                                        ),
+                                        onPressed: () {
+                                          // TODO: Implement message functionality
+                                        },
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
                               const SizedBox(height: 12),
@@ -378,7 +491,32 @@ class InfoDialog extends StatelessWidget {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
+                                const SizedBox(height: 8),
                               ],
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    // TODO: Implement connect functionality
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: primary,
+                                    foregroundColor: Colors.white,
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 8),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Connect with ${teacher['name']}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ))

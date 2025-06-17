@@ -715,199 +715,217 @@ class _DiscussionViewState extends State<DiscussionView> {
                                                       ],
                                                     ),
                                                     child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Row(
-                                                          children: [
-                                                            GestureDetector(
-                                                              onTap: () {
-                                                                Navigator.push(
-                                                                  context,
-                                                                  MaterialPageRoute(
-                                                                    builder:
-                                                                        (context) =>
-                                                                            ProfilePage(
-                                                                      userId: file[
-                                                                              'uploadedBy']
-                                                                          [
-                                                                          '_id'],
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Row(
+                                                            children: [
+                                                              GestureDetector(
+                                                                onTap: () {
+                                                                  Navigator
+                                                                      .push(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                      builder:
+                                                                          (context) =>
+                                                                              ProfilePage(
+                                                                        userId: file['uploadedBy']
+                                                                            [
+                                                                            '_id'],
+                                                                      ),
                                                                     ),
+                                                                  );
+                                                                },
+                                                                child:
+                                                                    Container(
+                                                                  width: 48,
+                                                                  height: 48,
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: primary
+                                                                        .withOpacity(
+                                                                            0.1),
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            24),
                                                                   ),
-                                                                );
-                                                              },
-                                                              child: Container(
-                                                                width: 40,
-                                                                height: 40,
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                  color: primary
-                                                                      .withOpacity(
-                                                                          0.1),
-                                                                  borderRadius:
-                                                                      BorderRadius
-                                                                          .circular(
-                                                                              20),
-                                                                ),
-                                                                child: Icon(
-                                                                  Icons.person,
-                                                                  color:
-                                                                      primary,
+                                                                  child: Icon(
+                                                                    Icons
+                                                                        .person,
+                                                                    color:
+                                                                        primary,
+                                                                    size: 24,
+                                                                  ),
                                                                 ),
                                                               ),
+                                                              const SizedBox(
+                                                                  width: 12),
+                                                              Expanded(
+                                                                child: Column(
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    Text(
+                                                                      file['uploadedBy']
+                                                                          [
+                                                                          'name'],
+                                                                      style:
+                                                                          TextStyle(
+                                                                        fontSize:
+                                                                            16,
+                                                                        fontWeight:
+                                                                            FontWeight.w600,
+                                                                        color:
+                                                                            foreground,
+                                                                      ),
+                                                                    ),
+                                                                    const SizedBox(
+                                                                        height:
+                                                                            2),
+                                                                    Text(
+                                                                      '@${file['uploadedBy']['username']}',
+                                                                      style:
+                                                                          TextStyle(
+                                                                        fontSize:
+                                                                            11,
+                                                                        color:
+                                                                            mutedForeground,
+                                                                      ),
+                                                                    ),
+                                                                    const SizedBox(
+                                                                        height:
+                                                                            2),
+                                                                    Text(
+                                                                      file['uploadedBy']
+                                                                          [
+                                                                          'universityEmail'],
+                                                                      style:
+                                                                          TextStyle(
+                                                                        fontSize:
+                                                                            11,
+                                                                        color:
+                                                                            mutedForeground,
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          const SizedBox(
+                                                              height: 12),
+                                                          Container(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .symmetric(
+                                                                    horizontal:
+                                                                        8,
+                                                                    vertical:
+                                                                        4),
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: muted,
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          6),
                                                             ),
-                                                            const SizedBox(
-                                                                width: 12),
-                                                            Expanded(
-                                                              child: Column(
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .start,
-                                                                children: [
-                                                                  Text(
-                                                                    file['uploadedBy']
-                                                                        [
-                                                                        'name'],
+                                                            child: Text(
+                                                              'Uploaded at: ${DateTime.parse(file['uploadedAt']).toString().split('.')[0]}',
+                                                              style: TextStyle(
+                                                                fontSize: 12,
+                                                                color:
+                                                                    mutedForeground,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                              height: 12),
+                                                          Row(
+                                                            children: [
+                                                              Expanded(
+                                                                child:
+                                                                    ElevatedButton(
+                                                                  onPressed:
+                                                                      () {
+                                                                    // TODO: Implement connect functionality
+                                                                    ScaffoldMessenger.of(
+                                                                            context)
+                                                                        .showSnackBar(
+                                                                      const SnackBar(
+                                                                        content:
+                                                                            Text('Connect functionality coming soon!'),
+                                                                      ),
+                                                                    );
+                                                                  },
+                                                                  style: ElevatedButton
+                                                                      .styleFrom(
+                                                                    backgroundColor:
+                                                                        primary,
+                                                                    foregroundColor:
+                                                                        Colors
+                                                                            .white,
+                                                                    padding:
+                                                                        const EdgeInsets
+                                                                            .symmetric(
+                                                                      vertical:
+                                                                          8,
+                                                                    ),
+                                                                    shape:
+                                                                        RoundedRectangleBorder(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              8),
+                                                                    ),
+                                                                  ),
+                                                                  child:
+                                                                      const Text(
+                                                                    'Connect',
                                                                     style:
                                                                         TextStyle(
                                                                       fontSize:
-                                                                          16,
+                                                                          14,
                                                                       fontWeight:
                                                                           FontWeight
-                                                                              .w600,
-                                                                      color:
-                                                                          foreground,
+                                                                              .w500,
                                                                     ),
                                                                   ),
-                                                                  Text(
-                                                                    '@${file['uploadedBy']['username']}',
-                                                                    style:
-                                                                        TextStyle(
-                                                                      fontSize:
-                                                                          12,
-                                                                      color:
-                                                                          mutedForeground,
-                                                                    ),
-                                                                  ),
-                                                                  Text(
-                                                                    file['uploadedBy']
-                                                                        [
-                                                                        'universityEmail'],
-                                                                    style:
-                                                                        TextStyle(
-                                                                      fontSize:
-                                                                          12,
-                                                                      color:
-                                                                          mutedForeground,
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            ),
-                                                            IconButton(
-                                                              icon: Icon(
-                                                                Icons.message,
-                                                                color: primary,
-                                                                size: 20,
-                                                              ),
-                                                              onPressed: () {
-                                                                Navigator.push(
-                                                                  context,
-                                                                  MaterialPageRoute(
-                                                                    builder:
-                                                                        (context) =>
-                                                                            ChatPage(
-                                                                      userId: file[
-                                                                              'uploadedBy']
-                                                                          [
-                                                                          '_id'],
-                                                                      userName:
-                                                                          file['uploadedBy']
-                                                                              [
-                                                                              'name'],
-                                                                    ),
-                                                                  ),
-                                                                );
-                                                              },
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        const SizedBox(
-                                                            height: 12),
-                                                        Container(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .symmetric(
-                                                                  horizontal: 8,
-                                                                  vertical: 4),
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            color: muted,
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        6),
-                                                          ),
-                                                          child: Text(
-                                                            'Uploaded at: ${DateTime.parse(file['uploadedAt']).toString().split('.')[0]}',
-                                                            style: TextStyle(
-                                                              fontSize: 12,
-                                                              color:
-                                                                  mutedForeground,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                            height: 12),
-                                                        SizedBox(
-                                                          width:
-                                                              double.infinity,
-                                                          child: ElevatedButton(
-                                                            onPressed: () {
-                                                              // TODO: Implement connect functionality
-                                                              ScaffoldMessenger
-                                                                      .of(context)
-                                                                  .showSnackBar(
-                                                                const SnackBar(
-                                                                  content: Text(
-                                                                      'Connect functionality coming soon!'),
                                                                 ),
-                                                              );
-                                                            },
-                                                            style:
-                                                                ElevatedButton
-                                                                    .styleFrom(
-                                                              backgroundColor:
-                                                                  primary,
-                                                              foregroundColor:
-                                                                  Colors.white,
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .symmetric(
-                                                                      vertical:
-                                                                          8),
-                                                              shape:
-                                                                  RoundedRectangleBorder(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            8),
                                                               ),
-                                                            ),
-                                                            child: const Text(
-                                                              'Connect',
-                                                              style: TextStyle(
-                                                                fontSize: 14,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500,
+                                                              const SizedBox(
+                                                                  width: 8),
+                                                              IconButton(
+                                                                icon: Icon(
+                                                                  Icons.message,
+                                                                  color:
+                                                                      primary,
+                                                                  size: 20,
+                                                                ),
+                                                                onPressed: () {
+                                                                  developer.log(
+                                                                      "-File ${file['uploadedBy']['_id']}");
+                                                                  Navigator
+                                                                      .push(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                      builder:
+                                                                          (context) =>
+                                                                              ChatPage(
+                                                                        userId: file['uploadedBy']
+                                                                            [
+                                                                            '_id'],
+                                                                        userName:
+                                                                            file['uploadedBy']['name'],
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                },
                                                               ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
+                                                            ],
+                                                          )
+                                                        ]),
                                                   ),
                                                   if (file['teachers'] !=
                                                           null &&
@@ -984,10 +1002,10 @@ class _DiscussionViewState extends State<DiscussionView> {
                                                                                 );
                                                                               },
                                                                               child: Container(
-                                                                                width: 40,
-                                                                                height: 40,
+                                                                                width: 48,
+                                                                                height: 48,
                                                                                 decoration: BoxDecoration(
-                                                                                  borderRadius: BorderRadius.circular(20),
+                                                                                  borderRadius: BorderRadius.circular(24),
                                                                                   image: DecorationImage(
                                                                                     image: NetworkImage(teacher['imageUrl']),
                                                                                     fit: BoxFit.cover,
@@ -998,25 +1016,28 @@ class _DiscussionViewState extends State<DiscussionView> {
                                                                           else
                                                                             GestureDetector(
                                                                               onTap: () {
-                                                                                Navigator.push(
-                                                                                  context,
-                                                                                  MaterialPageRoute(
-                                                                                    builder: (context) => ProfilePage(
-                                                                                      userId: teacher['_id'],
+                                                                                if (teacher['userAttachedBool'] == true) {
+                                                                                  Navigator.push(
+                                                                                    context,
+                                                                                    MaterialPageRoute(
+                                                                                      builder: (context) => ProfilePage(
+                                                                                        userId: teacher['userAttached']['_id'],
+                                                                                      ),
                                                                                     ),
-                                                                                  ),
-                                                                                );
+                                                                                  );
+                                                                                }
                                                                               },
                                                                               child: Container(
-                                                                                width: 40,
-                                                                                height: 40,
+                                                                                width: 48,
+                                                                                height: 48,
                                                                                 decoration: BoxDecoration(
                                                                                   color: primary.withOpacity(0.1),
-                                                                                  borderRadius: BorderRadius.circular(20),
+                                                                                  borderRadius: BorderRadius.circular(24),
                                                                                 ),
                                                                                 child: Icon(
                                                                                   Icons.person,
                                                                                   color: primary,
+                                                                                  size: 24,
                                                                                 ),
                                                                               ),
                                                                             ),
@@ -1029,6 +1050,7 @@ class _DiscussionViewState extends State<DiscussionView> {
                                                                               children: [
                                                                                 GestureDetector(
                                                                                   onTap: () {
+                                                                                    developer.log("-Teacher $teacher userAttachedBool ${teacher['userAttachedBool']}");
                                                                                     if (teacher['userAttachedBool'] == true) {
                                                                                       Navigator.push(
                                                                                         context,
@@ -1049,14 +1071,16 @@ class _DiscussionViewState extends State<DiscussionView> {
                                                                                     ),
                                                                                   ),
                                                                                 ),
+                                                                                const SizedBox(height: 2),
                                                                                 Text(
                                                                                   teacher['email'],
                                                                                   style: TextStyle(
-                                                                                    fontSize: 12,
+                                                                                    fontSize: 11,
                                                                                     color: mutedForeground,
                                                                                   ),
                                                                                 ),
                                                                                 if (teacher['campusOrigin'] != null) ...[
+                                                                                  const SizedBox(height: 2),
                                                                                   Text(
                                                                                     teacher['campusOrigin']['name'] ?? 'Unknown Campus',
                                                                                     style: TextStyle(
@@ -1067,58 +1091,6 @@ class _DiscussionViewState extends State<DiscussionView> {
                                                                                 ],
                                                                               ],
                                                                             ),
-                                                                          ),
-                                                                          Row(
-                                                                            mainAxisSize:
-                                                                                MainAxisSize.min,
-                                                                            children: [
-                                                                              if (teacher['rating'] != null)
-                                                                                Container(
-                                                                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                                                                  decoration: BoxDecoration(
-                                                                                    color: primary.withOpacity(0.1),
-                                                                                    borderRadius: BorderRadius.circular(12),
-                                                                                  ),
-                                                                                  child: Row(
-                                                                                    mainAxisSize: MainAxisSize.min,
-                                                                                    children: [
-                                                                                      Icon(
-                                                                                        Icons.star,
-                                                                                        size: 14,
-                                                                                        color: primary,
-                                                                                      ),
-                                                                                      const SizedBox(width: 4),
-                                                                                      Text(
-                                                                                        '${teacher['rating']}',
-                                                                                        style: TextStyle(
-                                                                                          fontSize: 12,
-                                                                                          fontWeight: FontWeight.w500,
-                                                                                          color: primary,
-                                                                                        ),
-                                                                                      ),
-                                                                                    ],
-                                                                                  ),
-                                                                                ),
-                                                                              const SizedBox(width: 8),
-                                                                              IconButton(
-                                                                                icon: Icon(
-                                                                                  Icons.message,
-                                                                                  color: primary,
-                                                                                  size: 20,
-                                                                                ),
-                                                                                onPressed: () {
-                                                                                  Navigator.push(
-                                                                                    context,
-                                                                                    MaterialPageRoute(
-                                                                                      builder: (context) => ChatPage(
-                                                                                        userId: teacher['_id'],
-                                                                                        userName: teacher['name'],
-                                                                                      ),
-                                                                                    ),
-                                                                                  );
-                                                                                },
-                                                                              ),
-                                                                            ],
                                                                           ),
                                                                         ],
                                                                       ),
@@ -1145,7 +1117,7 @@ class _DiscussionViewState extends State<DiscussionView> {
                                                                             'Department: ${teacher['department']['name']}',
                                                                             style:
                                                                                 TextStyle(
-                                                                              fontSize: 12,
+                                                                              fontSize: 11,
                                                                               color: mutedForeground,
                                                                             ),
                                                                           ),
@@ -1154,39 +1126,80 @@ class _DiscussionViewState extends State<DiscussionView> {
                                                                             height:
                                                                                 8),
                                                                       ],
-                                                                      if (teacher[
-                                                                              'onLeave'] !=
-                                                                          null) ...[
-                                                                        Container(
-                                                                          padding: const EdgeInsets
-                                                                              .symmetric(
-                                                                              horizontal: 8,
-                                                                              vertical: 4),
-                                                                          decoration:
-                                                                              BoxDecoration(
-                                                                            color: teacher['onLeave']
-                                                                                ? Colors.orange.withOpacity(0.1)
-                                                                                : Colors.green.withOpacity(0.1),
-                                                                            borderRadius:
-                                                                                BorderRadius.circular(6),
-                                                                          ),
-                                                                          child:
-                                                                              Text(
-                                                                            teacher['onLeave']
-                                                                                ? 'On Leave'
-                                                                                : 'Active',
-                                                                            style:
-                                                                                TextStyle(
-                                                                              fontSize: 12,
-                                                                              color: teacher['onLeave'] ? Colors.orange : Colors.green,
-                                                                              fontWeight: FontWeight.w500,
+                                                                      Row(
+                                                                        children: [
+                                                                          if (teacher['onLeave'] !=
+                                                                              null) ...[
+                                                                            Container(
+                                                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                                              decoration: BoxDecoration(
+                                                                                color: teacher['onLeave'] ? Colors.orange.withOpacity(0.1) : Colors.green.withOpacity(0.1),
+                                                                                borderRadius: BorderRadius.circular(6),
+                                                                              ),
+                                                                              child: Text(
+                                                                                teacher['onLeave'] ? 'On Leave' : 'Active',
+                                                                                style: TextStyle(
+                                                                                  fontSize: 12,
+                                                                                  color: teacher['onLeave'] ? Colors.orange : Colors.green,
+                                                                                  fontWeight: FontWeight.w500,
+                                                                                ),
+                                                                              ),
                                                                             ),
+                                                                          ],
+                                                                          const SizedBox(
+                                                                              width: 8),
+                                                                          if (teacher['rating'] !=
+                                                                              null)
+                                                                            Container(
+                                                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                                              decoration: BoxDecoration(
+                                                                                color: primary.withOpacity(0.1),
+                                                                                borderRadius: BorderRadius.circular(12),
+                                                                              ),
+                                                                              child: Row(
+                                                                                mainAxisSize: MainAxisSize.min,
+                                                                                children: [
+                                                                                  Icon(
+                                                                                    Icons.star,
+                                                                                    size: 14,
+                                                                                    color: primary,
+                                                                                  ),
+                                                                                  const SizedBox(width: 4),
+                                                                                  Text(
+                                                                                    '${teacher['rating']}',
+                                                                                    style: TextStyle(
+                                                                                      fontSize: 12,
+                                                                                      fontWeight: FontWeight.w500,
+                                                                                      color: primary,
+                                                                                    ),
+                                                                                  ),
+                                                                                ],
+                                                                              ),
+                                                                            ),
+                                                                          const SizedBox(
+                                                                              height: 8),
+                                                                          IconButton(
+                                                                            icon:
+                                                                                Icon(
+                                                                              Icons.message,
+                                                                              color: primary,
+                                                                              size: 20,
+                                                                            ),
+                                                                            onPressed:
+                                                                                () {
+                                                                              Navigator.push(
+                                                                                context,
+                                                                                MaterialPageRoute(
+                                                                                  builder: (context) => ChatPage(
+                                                                                    userId: teacher['_id'],
+                                                                                    userName: teacher['name'],
+                                                                                  ),
+                                                                                ),
+                                                                              );
+                                                                            },
                                                                           ),
-                                                                        ),
-                                                                        const SizedBox(
-                                                                            height:
-                                                                                8),
-                                                                      ],
+                                                                        ],
+                                                                      ),
                                                                       if (teacher['feedbackSummary'] !=
                                                                               null &&
                                                                           teacher['feedbackSummary']
