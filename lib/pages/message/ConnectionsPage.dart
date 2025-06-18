@@ -17,13 +17,16 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _apiClient = ApiClient();
-
   List _requests = [];
   List _connections = [];
+  List _searchResults = [];
   bool _isLoadingRequests = true;
   bool _isLoadingConnections = true;
+  bool _isLoadingSearch = false;
   String? _errorMessageRequests;
   String? _errorMessageConnections;
+  String? _errorMessageSearch;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -89,6 +92,45 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage>
     }
   }
 
+  Future _searchCampusUsers(String query) async {
+    if (query.isEmpty) {
+      setState(() {
+        _searchResults = [];
+        _errorMessageSearch = null;
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoadingSearch = true;
+      _errorMessageSearch = null;
+    });
+
+    try {
+      final response = await _apiClient.get(
+        '/api/user/search-campus-users',
+        queryParameters: {'query': query},
+      );
+      setState(() {
+        _searchResults = response['users'] ?? [];
+        _isLoadingSearch = false;
+      });
+    } catch (e) {
+      String errorMsg = 'Failed to search users';
+      if (e is dio.DioException) {
+        errorMsg +=
+            ': ${e.response?.statusCode} ${e.response?.data['message'] ?? e.message}';
+        debugPrint('Dio error searching campus users: $errorMsg');
+      } else {
+        debugPrint('Unexpected error searching campus users: $e');
+      }
+      setState(() {
+        _errorMessageSearch = errorMsg;
+        _isLoadingSearch = false;
+      });
+    }
+  }
+
   Future _handleRequest(String toUserId, String action) async {
     try {
       final endpoint = action == 'accept'
@@ -116,6 +158,7 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage>
   @override
   void dispose() {
     _tabController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -160,7 +203,7 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage>
                   indicatorColor: primary,
                   tabs: const [
                     Tab(text: 'Messages'),
-                    Tab(text: 'Something'),
+                    Tab(text: 'Search'),
                     Tab(text: 'Requests'),
                   ],
                 ),
@@ -274,12 +317,147 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage>
                               },
                             ),
 
-              // Something Tab
-              Center(
-                child: Text(
-                  'Something (Not Implemented)',
-                  style: TextStyle(color: mutedForeground),
-                ),
+              // Search Tab
+              Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Search users on your campus...',
+                        hintStyle: TextStyle(color: mutedForeground),
+                        prefixIcon: Icon(Icons.search, color: mutedForeground),
+                        filled: true,
+                        fillColor: accent,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: border),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: primary),
+                        ),
+                      ),
+                      style: TextStyle(color: foreground),
+                      onChanged: (value) {
+                        _searchCampusUsers(value.trim());
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    child: _isLoadingSearch
+                        ? const Center(child: CircularProgressIndicator())
+                        : _errorMessageSearch != null
+                            ? Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      _errorMessageSearch!,
+                                      style: TextStyle(color: mutedForeground),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    ElevatedButton(
+                                      onPressed: () => _searchCampusUsers(
+                                          _searchController.text.trim()),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: primary,
+                                        foregroundColor: foreground,
+                                      ),
+                                      child: const Text('Retry'),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : _searchResults.isEmpty
+                                ? Center(
+                                    child: Text(
+                                      _searchController.text.isEmpty
+                                          ? 'Enter a name or username to search'
+                                          : 'No users found',
+                                      style: TextStyle(color: mutedForeground),
+                                    ),
+                                  )
+                                : ListView.builder(
+                                    padding: const EdgeInsets.all(8),
+                                    itemCount: _searchResults.length,
+                                    itemBuilder: (context, index) {
+                                      final user = _searchResults[index];
+                                      return GestureDetector(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => ProfilePage(
+                                                userId: user['_id'],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: Container(
+                                          margin: const EdgeInsets.symmetric(
+                                              vertical: 4),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 12, vertical: 8),
+                                          decoration: BoxDecoration(
+                                            color: accent,
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              CircleAvatar(
+                                                radius: 24,
+                                                backgroundImage: user[
+                                                            'profilePicture'] !=
+                                                        null
+                                                    ? NetworkImage(
+                                                        user['profilePicture'])
+                                                    : const AssetImage(
+                                                            'assets/images/profilepic2.jpg')
+                                                        as ImageProvider,
+                                              ),
+                                              const SizedBox(width: 12),
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      user['name'] ?? 'Unknown',
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        fontSize: 16,
+                                                        color: foreground,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 2),
+                                                    Text(
+                                                      '@${user['username'] ?? 'unknown'}',
+                                                      style: TextStyle(
+                                                        color: mutedForeground,
+                                                        fontSize: 12,
+                                                      ),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                  ),
+                ],
               ),
 
               // Connection Requests Tab
