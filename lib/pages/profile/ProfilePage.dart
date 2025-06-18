@@ -33,6 +33,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
   List<dynamic> _societies = [];
   List<dynamic> _moderatedSocieties = [];
   List<dynamic> _connections = [];
+  List<dynamic> _uploadedPapers = [];
   File? _mediaFile;
 
   bool _isLoadingDetails = true;
@@ -45,7 +46,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
     final auth = ref.read(authProvider);
     final isOwnProfile =
         widget.userId == null || widget.userId == auth.user?['_id'];
-    _tabController = TabController(length: isOwnProfile ? 2 : 2, vsync: this);
+    _tabController = TabController(length: isOwnProfile ? 3 : 3, vsync: this);
     _fetchDetailedProfileData();
   }
 
@@ -95,57 +96,120 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
         return;
       }
 
-      final results = await Future.wait([
-        _apiClient.get('/api/user/profile', queryParameters: {'id': userId}),
-        _apiClient.get('/api/user/subscribedSocieties',
-            queryParameters: {'id': userId}),
-        _apiClient.get('/api/user/moderated-societies',
-            queryParameters: {'id': userId}),
-        _apiClient
-            .get('/api/user/connections', queryParameters: {'id': userId}),
-      ]);
+      // Handle each API call independently to prevent one failure from breaking the entire profile
+      Map<String, dynamic>? profileResponse;
+      Map<String, dynamic>? societiesResponse;
+      Map<String, dynamic>? moderatedSocietiesResponse;
+      Map<String, dynamic>? connectionsResponse;
+      Map<String, dynamic>? papersResponse;
 
-      final profileResponse = results[0];
-      final societiesResponse = results[1];
-      final moderatedSocietiesResponse = results[2];
-      final connectionsResponse = results[3];
-
-      if (profileResponse.containsKey('error') ||
-          profileResponse['profile'] == null) {
-        setState(() {
-          _isLoadingDetails = false;
-          _errorMessage = profileResponse['error'] ?? 'User not found';
-        });
-        return;
+      // Fetch profile data
+      try {
+        profileResponse = await _apiClient
+            .get('/api/user/profile', queryParameters: {'id': userId});
+      } catch (e) {
+        debugPrint('Error fetching profile: $e');
       }
 
-      setState(() {
-        _detailedProfile = profileResponse as Map<String, dynamic>;
-        _posts = (_detailedProfile?['profile']['posts'] ?? [])
-            .where((post) => post['author']['_id'] == userId)
-            .toList();
-        _societies = societiesResponse['joinedSocieties'] ?? [];
-        _moderatedSocieties = moderatedSocietiesResponse ?? [];
-        _connections = connectionsResponse['connections'] ?? [];
+      // Fetch societies data
+      try {
+        societiesResponse = await _apiClient.get(
+            '/api/user/subscribedSocieties',
+            queryParameters: {'id': userId});
+      } catch (e) {
+        debugPrint('Error fetching societies: $e');
+      }
 
-        _basicProfile ??= {
-          '_id': _detailedProfile?['_id'],
-          'name': _detailedProfile?['name'],
-          'username': _detailedProfile?['username'],
-          'joined': _detailedProfile?['joined'],
-          'profile': {
-            'picture': _detailedProfile?['profile']?['picture'],
-            'bio': _detailedProfile?['profile']?['bio'] ?? '',
-          }
-        };
+      // Fetch moderated societies data
+      try {
+        moderatedSocietiesResponse = await _apiClient.get(
+            '/api/user/moderated-societies',
+            queryParameters: {'id': userId});
+      } catch (e) {
+        debugPrint('Error fetching moderated societies: $e');
+      }
+
+      // Fetch connections data
+      try {
+        connectionsResponse = await _apiClient
+            .get('/api/user/connections', queryParameters: {'id': userId});
+      } catch (e) {
+        debugPrint('Error fetching connections: $e');
+      }
+
+      // Fetch papers data
+      try {
+        papersResponse = await _apiClient
+            .get('/api/pastpaper/profile/papers?userId=$userId');
+      } catch (e) {
+        debugPrint('Error fetching papers: $e');
+      }
+
+      // Check if we have at least some profile data
+      final hasProfileData = profileResponse != null &&
+          !profileResponse.containsKey('error') &&
+          profileResponse['profile'] != null;
+
+      setState(() {
+        // Set detailed profile if available
+        if (hasProfileData) {
+          _detailedProfile = profileResponse as Map<String, dynamic>;
+          _posts = (_detailedProfile?['profile']['posts'] ?? [])
+              .where((post) => post['author']['_id'] == userId)
+              .toList();
+        }
+
+        // Set other data if available, otherwise use empty defaults
+        _societies =
+            (societiesResponse?['joinedSocieties'] as List<dynamic>?) ?? [];
+        _moderatedSocieties =
+            (moderatedSocietiesResponse as List<dynamic>?) ?? [];
+        _connections =
+            (connectionsResponse?['connections'] as List<dynamic>?) ?? [];
+        _uploadedPapers = (papersResponse?['data']?['profile']
+                ?['papersUploaded'] as List<dynamic>?) ??
+            [];
+
+        // Update basic profile if detailed data is available
+        if (hasProfileData) {
+          _basicProfile ??= {
+            '_id': _detailedProfile?['_id'],
+            'name': _detailedProfile?['name'],
+            'username': _detailedProfile?['username'],
+            'joined': _detailedProfile?['joined'],
+            'profile': {
+              'picture': _detailedProfile?['profile']?['picture'],
+              'bio': _detailedProfile?['profile']?['bio'] ?? '',
+            }
+          };
+        }
 
         _isLoadingDetails = false;
+
+        // Set error message only if no data could be loaded at all
+        final auth = ref.read(authProvider);
+        final isOwnProfile =
+            widget.userId == null || widget.userId == auth.user?['_id'];
+
+        if (!hasProfileData && !isOwnProfile) {
+          _errorMessage = 'User not found';
+        } else if (!hasProfileData && isOwnProfile) {
+          _errorMessage = 'Some profile data could not be loaded';
+        }
       });
     } catch (e) {
-      debugPrint('Error fetching profile data: $e');
+      debugPrint('Error in _fetchDetailedProfileData: $e');
       setState(() {
         _isLoadingDetails = false;
-        _errorMessage = 'Failed to load some profile data';
+        final auth = ref.read(authProvider);
+        final isOwnProfile =
+            widget.userId == null || widget.userId == auth.user?['_id'];
+
+        if (!isOwnProfile) {
+          _errorMessage = 'Failed to load profile data';
+        } else {
+          _errorMessage = 'Some profile data could not be loaded';
+        }
       });
     }
   }
@@ -211,16 +275,458 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
     super.dispose();
   }
 
+  // Helper method to check if specific data is available
+  bool _hasData(String dataType) {
+    switch (dataType) {
+      case 'posts':
+        return _posts.isNotEmpty;
+      case 'societies':
+        return _societies.isNotEmpty || _moderatedSocieties.isNotEmpty;
+      case 'papers':
+        return _uploadedPapers.isNotEmpty;
+      case 'connections':
+        return _connections.isNotEmpty;
+      default:
+        return false;
+    }
+  }
+
+  // Helper method to show partial loading state
+  Widget _buildPartialLoadingState(String dataType, Color mutedForeground) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.cloud_off,
+            size: 48,
+            color: mutedForeground,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Unable to load $dataType',
+            style: TextStyle(
+              color: mutedForeground,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Please try refreshing the page',
+            style: TextStyle(
+              color: mutedForeground,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPastPapersTab(Color background, Color foreground, Color border,
+      Color mutedForeground, Color accent, Color primary) {
+    if (_isLoadingDetails) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // Get the user's uploaded papers from the state
+    final uploadedPapers = _uploadedPapers;
+
+    // Check if we have papers data
+    if (!_hasData('papers')) {
+      // If we're not loading and have no papers, show appropriate message
+      if (_detailedProfile == null) {
+        return _buildPartialLoadingState('past papers', mutedForeground);
+      }
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.description_outlined,
+              size: 64,
+              color: mutedForeground,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No past papers uploaded yet',
+              style: TextStyle(
+                color: mutedForeground,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Papers you upload will appear here',
+              style: TextStyle(
+                color: mutedForeground,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16.0),
+      itemCount: uploadedPapers.length,
+      itemBuilder: (context, index) {
+        final paper = uploadedPapers[index];
+        final files = paper['files'] ?? [];
+
+        return Card(
+          color: accent,
+          margin: const EdgeInsets.only(bottom: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: border),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Paper header
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        paper['type'] ?? 'Unknown Type',
+                        style: TextStyle(
+                          color: primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        paper['category'] ?? 'Unknown Category',
+                        style: const TextStyle(
+                          color: Colors.green,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Paper name
+                Text(
+                  paper['name'] ?? 'Untitled Paper',
+                  style: TextStyle(
+                    color: foreground,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // Paper details
+                Row(
+                  children: [
+                    Icon(Icons.school, color: mutedForeground, size: 16),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Term: ${paper['term'] ?? 'Unknown'}',
+                      style: TextStyle(color: mutedForeground, fontSize: 12),
+                    ),
+                    const SizedBox(width: 16),
+                    Icon(Icons.calendar_today,
+                        color: mutedForeground, size: 16),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Year: ${paper['academicYear'] ?? 'Unknown'}',
+                      style: TextStyle(color: mutedForeground, fontSize: 12),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+
+                // Files count
+                Row(
+                  children: [
+                    Icon(Icons.attach_file, color: mutedForeground, size: 16),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${files.length} file${files.length != 1 ? 's' : ''} uploaded',
+                      style: TextStyle(color: mutedForeground, fontSize: 12),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Metadata
+                if (paper['metadata'] != null) ...[
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: background,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: border),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildMetadataItem(
+                          'Views',
+                          paper['metadata']['views']?.toString() ?? '0',
+                          Icons.visibility,
+                          mutedForeground,
+                        ),
+                        _buildMetadataItem(
+                          'Downloads',
+                          paper['metadata']['downloads']?.toString() ?? '0',
+                          Icons.download,
+                          mutedForeground,
+                        ),
+                        _buildMetadataItem(
+                          'Answers',
+                          paper['metadata']['answers']?.toString() ?? '0',
+                          Icons.question_answer,
+                          mutedForeground,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+
+                // Files list
+                if (files.isNotEmpty) ...[
+                  Text(
+                    'Uploaded Files:',
+                    style: TextStyle(
+                      color: foreground,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ...files
+                      .map<Widget>((file) => Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: background,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: border),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.picture_as_pdf,
+                                  color: Colors.red,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'File ${files.indexOf(file) + 1}',
+                                        style: TextStyle(
+                                          color: foreground,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      Text(
+                                        'Uploaded: ${_formatDate(file['uploadedAt'])}',
+                                        style: TextStyle(
+                                          color: mutedForeground,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (file['teachers'] != null &&
+                                    file['teachers'].isNotEmpty)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      '${file['teachers'].length} teacher${file['teachers'].length != 1 ? 's' : ''}',
+                                      style: const TextStyle(
+                                        color: Colors.blue,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ))
+                      .toList(),
+                ],
+
+                const SizedBox(height: 12),
+
+                // Action buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          // Navigate to discussion view
+                          Navigator.pushNamed(
+                            context,
+                            AppRoutes.discussionViewScreen,
+                            arguments: {
+                              '_id': paper['_id'],
+                              'paperType': paper['type'],
+                              'subjectId': paper['subjectId'],
+                            },
+                          );
+                        },
+                        icon: const Icon(Icons.forum, size: 16),
+                        label: const Text('View Discussion'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed: () {
+                        // Show paper details
+                        _showPaperDetails(paper);
+                      },
+                      icon: Icon(Icons.info_outline, color: primary),
+                      tooltip: 'View Details',
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMetadataItem(
+      String label, String value, IconData icon, Color color) {
+    return Column(
+      children: [
+        Icon(icon, color: color, size: 16),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            color: color,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            color: color,
+            fontSize: 10,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatDate(String? dateString) {
+    if (dateString == null) return 'Unknown';
+    try {
+      final date = DateTime.parse(dateString);
+      return '${date.day}/${date.month}/${date.year}';
+    } catch (e) {
+      return 'Invalid Date';
+    }
+  }
+
+  void _showPaperDetails(Map<String, dynamic> paper) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Paper Details'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Name: ${paper['name'] ?? 'Unknown'}'),
+              Text('Type: ${paper['type'] ?? 'Unknown'}'),
+              Text('Category: ${paper['category'] ?? 'Unknown'}'),
+              Text('Term: ${paper['term'] ?? 'Unknown'}'),
+              Text('Academic Year: ${paper['academicYear'] ?? 'Unknown'}'),
+              if (paper['metadata'] != null) ...[
+                const SizedBox(height: 16),
+                const Text('Statistics:',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                Text('Views: ${paper['metadata']['views'] ?? 0}'),
+                Text('Downloads: ${paper['metadata']['downloads'] ?? 0}'),
+                Text('Answers: ${paper['metadata']['answers'] ?? 0}'),
+                Text(
+                    'Total Questions: ${paper['metadata']['totalQuestions'] ?? 0}'),
+                Text(
+                    'Answered Questions: ${paper['metadata']['answeredQuestions'] ?? 0}'),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildPostsTab(Color background, Color foreground, Color border,
       Color mutedForeground, Color accent) {
     if (_isLoadingDetails) {
       return const Center(child: CircularProgressIndicator());
     }
-    if (_posts.isEmpty) {
+
+    // Check if we have posts data
+    if (!_hasData('posts')) {
+      // If we're not loading and have no posts, show appropriate message
+      if (_detailedProfile == null) {
+        return _buildPartialLoadingState('posts', mutedForeground);
+      }
       return Center(
           child:
               Text('No posts yet', style: TextStyle(color: mutedForeground)));
     }
+
     return ListView.builder(
       padding: const EdgeInsets.all(8.0),
       itemCount: _posts.length,
@@ -261,7 +767,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
 
     final allSocieties = societyMap.values.toList();
 
-    if (allSocieties.isEmpty) {
+    // Check if we have societies data
+    if (!_hasData('societies')) {
+      // If we're not loading and have no societies, show appropriate message
+      if (_detailedProfile == null) {
+        return _buildPartialLoadingState('societies', mutedForeground);
+      }
       return Center(
           child: Text('No societies joined',
               style: TextStyle(color: mutedForeground)));
@@ -478,15 +989,24 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
     const primary = Color(0xFF8B5CF6);
 
     if (_errorMessage != null) {
-      return Scaffold(
-        backgroundColor: background,
-        body: Center(
-          child: Text(
-            _errorMessage!,
-            style: TextStyle(color: mutedForeground),
+      final isOwnProfile =
+          widget.userId == null || widget.userId == auth.user?['_id'];
+
+      // For own profile, continue to show basic profile even with error
+      if (isOwnProfile && _basicProfile != null) {
+        // Continue to show the profile, error will be handled in the UI
+      } else {
+        // For other users' profiles, show error screen
+        return Scaffold(
+          backgroundColor: background,
+          body: Center(
+            child: Text(
+              _errorMessage!,
+              style: TextStyle(color: mutedForeground),
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
 
     if (_basicProfile == null) {
@@ -506,11 +1026,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
         backgroundColor: background,
         elevation: 0,
         actions: [
-          if (isOwnProfile)
+          if (isOwnProfile) ...[
+            IconButton(
+              icon: Icon(Icons.refresh, color: foreground),
+              onPressed:
+                  _isLoadingDetails ? null : () => _fetchDetailedProfileData(),
+              tooltip: 'Refresh profile data',
+            ),
             IconButton(
               icon: Icon(Icons.more_horiz, color: foreground),
               onPressed: () => Navigator.pushNamed(context, AppRoutes.settings),
             ),
+          ],
         ],
       ),
       body: NestedScrollView(
@@ -605,6 +1132,35 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                         style: TextStyle(color: mutedForeground),
                       ),
                     ],
+                    // Show error indicator for own profile when there's an error
+                    if (_errorMessage != null && isOwnProfile) ...[
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border:
+                              Border.all(color: Colors.orange.withOpacity(0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.warning_amber,
+                                color: Colors.orange, size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _errorMessage!,
+                                style: const TextStyle(
+                                  color: Colors.orange,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     _isLoadingDetails
                         ? const CircularProgressIndicator()
@@ -676,6 +1232,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                   tabs: const [
                     Tab(text: 'Posts'),
                     Tab(text: 'Societies'),
+                    Tab(text: 'Past Papers'),
                   ],
                 ),
                 background,
@@ -689,6 +1246,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
             _buildPostsTab(
                 background, foreground, border, mutedForeground, accent),
             _buildSocietyTab(background, foreground, border, mutedForeground,
+                accent, primary),
+            _buildPastPapersTab(background, foreground, border, mutedForeground,
                 accent, primary),
           ],
         ),
