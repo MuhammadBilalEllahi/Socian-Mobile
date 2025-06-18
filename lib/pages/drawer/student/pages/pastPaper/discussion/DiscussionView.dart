@@ -4,8 +4,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:socian/core/utils/constants.dart';
+import 'package:socian/pages/drawer/student/pages/pastPaper/discussion/info_dialog.dart';
 import 'package:socian/shared/services/api_client.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -273,7 +275,7 @@ class _DiscussionViewState extends State<DiscussionView> {
             child: Text(
               value,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 11.5,
                 color: mutedForeground,
               ),
             ),
@@ -281,6 +283,26 @@ class _DiscussionViewState extends State<DiscussionView> {
         ],
       ),
     );
+  }
+
+  String formatUploadedDate(String rawDate) {
+    final date = DateTime.parse(rawDate);
+    final day = date.day;
+    final suffix = (day >= 11 && day <= 13)
+        ? 'th'
+        : [
+            'th',
+            'st',
+            'nd',
+            'rd',
+            'th',
+            'th',
+            'th',
+            'th',
+            'th',
+            'th'
+          ][day % 10];
+    return '$day$suffix ${DateFormat('MMM yyyy hh:mm a').format(date)}';
   }
 
   @override
@@ -372,8 +394,59 @@ class _DiscussionViewState extends State<DiscussionView> {
                   child: Column(
                     children: [
                       Expanded(
-                        child: PdfViewer(
-                          pdfFile: pdfFile,
+                        child: Stack(
+                          children: [
+                            PdfViewer(
+                              pdfFile: pdfFile,
+                            ),
+                            // Info icon for single files - positioned at bottom right
+                            if (papers.isNotEmpty &&
+                                papers[currentIndex]['files'] != null &&
+                                papers[currentIndex]['files'].length == 1)
+                              Positioned(
+                                bottom: 16,
+                                right: 16,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.black.withOpacity(0.7)
+                                        : Colors.white.withOpacity(0.9),
+                                    borderRadius: BorderRadius.circular(24),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.2),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      final file =
+                                          papers[currentIndex]['files'][0];
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => InfoDialog(
+                                          file: file,
+                                          paper: papers[currentIndex],
+                                          fileIndex: 0,
+                                        ),
+                                      );
+                                    },
+                                    child: Icon(
+                                      Icons.info_outline,
+                                      color: Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Colors.white
+                                          : Colors.black87,
+                                      size: 22,
+                                    ),
+                                    // tooltip: 'View file information',
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                       if (papers.isNotEmpty &&
@@ -833,9 +906,9 @@ class _DiscussionViewState extends State<DiscussionView> {
                                                                           6),
                                                             ),
                                                             child: Text(
-                                                              'Uploaded at: ${DateTime.parse(file['uploadedAt']).toString().split('.')[0]}',
+                                                              'Uploaded at: ${formatUploadedDate(file['uploadedAt'])}',
                                                               style: TextStyle(
-                                                                fontSize: 12,
+                                                                fontSize: 11,
                                                                 color:
                                                                     mutedForeground,
                                                               ),
@@ -1062,13 +1135,25 @@ class _DiscussionViewState extends State<DiscussionView> {
                                                                                       );
                                                                                     }
                                                                                   },
-                                                                                  child: Text(
-                                                                                    teacher['name'],
-                                                                                    style: TextStyle(
-                                                                                      fontSize: 16,
-                                                                                      fontWeight: FontWeight.w600,
-                                                                                      color: foreground,
-                                                                                    ),
+                                                                                  child: Row(
+                                                                                    children: [
+                                                                                      Text(
+                                                                                        teacher['name'],
+                                                                                        style: TextStyle(
+                                                                                          fontSize: 16,
+                                                                                          fontWeight: FontWeight.w600,
+                                                                                          color: foreground,
+                                                                                        ),
+                                                                                      ),
+                                                                                      if (teacher['userAttachedBool'] == true) ...[
+                                                                                        const Icon(
+                                                                                          Icons.verified,
+                                                                                          color: Colors.blue,
+                                                                                          size: 16,
+                                                                                        ),
+                                                                                        const SizedBox(width: 4),
+                                                                                      ]
+                                                                                    ],
                                                                                   ),
                                                                                 ),
                                                                                 const SizedBox(height: 2),
@@ -1137,7 +1222,7 @@ class _DiscussionViewState extends State<DiscussionView> {
                                                                                 borderRadius: BorderRadius.circular(6),
                                                                               ),
                                                                               child: Text(
-                                                                                teacher['onLeave'] ? 'On Leave' : 'Active',
+                                                                                teacher['onLeave'] ? 'On Leave' : 'Activly Teaching',
                                                                                 style: TextStyle(
                                                                                   fontSize: 12,
                                                                                   color: teacher['onLeave'] ? Colors.orange : Colors.green,
@@ -1431,14 +1516,13 @@ class _DiscussionViewState extends State<DiscussionView> {
                                                             mutedForeground),
                                                         _buildInfoRow(
                                                             'Last Accessed',
-                                                            DateTime.parse(papers[
+                                                            formatUploadedDate(papers[
                                                                             currentIndex]
                                                                         [
                                                                         'metadata']
                                                                     [
                                                                     'lastAccessed'])
-                                                                .toString()
-                                                                .split('.')[0],
+                                                                .toString(),
                                                             foreground,
                                                             mutedForeground),
                                                       ],

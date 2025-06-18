@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:socian/core/utils/constants.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../../../../../pages/message/ChatPage.dart';
+import '../../../../../../pages/profile/ProfilePage.dart';
 
 class InfoDialog extends StatelessWidget {
   final Map<String, dynamic> file;
@@ -12,6 +17,25 @@ class InfoDialog extends StatelessWidget {
     required this.paper,
     required this.fileIndex,
   });
+  String formatUploadedDate(String rawDate) {
+    final date = DateTime.parse(rawDate);
+    final day = date.day;
+    final suffix = (day >= 11 && day <= 13)
+        ? 'th'
+        : [
+            'th',
+            'st',
+            'nd',
+            'rd',
+            'th',
+            'th',
+            'th',
+            'th',
+            'th',
+            'th'
+          ][day % 10];
+    return '$day$suffix ${DateFormat('MMM yyyy hh:mm a').format(date)}';
+  }
 
   Widget _buildInfoRow(
       String label, String value, Color foreground, Color mutedForeground) {
@@ -143,19 +167,115 @@ class InfoDialog extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: accent,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: border),
-                ),
-                child: SelectableText(
-                  "${ApiConstants.baseUrl}/api/uploads/${file['url']}",
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontFamily: 'monospace',
-                    color: foreground,
+              GestureDetector(
+                onTap: () async {
+                  final url =
+                      "${ApiConstants.baseUrl}/api/uploads/${file['url']}";
+                  try {
+                    if (await canLaunchUrl(Uri.parse(url))) {
+                      await launchUrl(
+                        Uri.parse(url),
+                        mode: LaunchMode.externalApplication,
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Could not open URL: $url'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error opening URL: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                onLongPress: () {
+                  final url =
+                      "${ApiConstants.baseUrl}/api/uploads/${file['url']}";
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      backgroundColor: background,
+                      title: Text(
+                        'PDF URL',
+                        style: TextStyle(color: foreground),
+                      ),
+                      content: SelectableText(
+                        url,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'monospace',
+                          color: foreground,
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: Text(
+                            'Close',
+                            style: TextStyle(color: primary),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            try {
+                              if (await canLaunchUrl(Uri.parse(url))) {
+                                await launchUrl(
+                                  Uri.parse(url),
+                                  mode: LaunchMode.externalApplication,
+                                );
+                                Navigator.of(context).pop();
+                              }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Error opening URL: $e'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          },
+                          child: Text(
+                            'Open',
+                            style: TextStyle(color: primary),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: accent,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: border),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          "${ApiConstants.baseUrl}/api/uploads/${file['url']}",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontFamily: 'monospace',
+                            color: foreground,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.open_in_new,
+                        size: 16,
+                        color: mutedForeground,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -169,28 +289,48 @@ class InfoDialog extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Container(
+                margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: accent,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: border),
+                  border: Border.all(color: border, width: 1),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: primary.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: Icon(
-                            Icons.person,
-                            color: primary,
-                            size: 24,
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProfilePage(
+                                  userId: file['uploadedBy']['_id'],
+                                ),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: Icon(
+                              Icons.person,
+                              color: primary,
+                              size: 24,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -210,7 +350,7 @@ class InfoDialog extends StatelessWidget {
                               Text(
                                 '@${file['uploadedBy']['username']}',
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 11,
                                   color: mutedForeground,
                                 ),
                               ),
@@ -218,22 +358,12 @@ class InfoDialog extends StatelessWidget {
                               Text(
                                 file['uploadedBy']['universityEmail'],
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 11,
                                   color: mutedForeground,
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.message,
-                            color: primary,
-                            size: 20,
-                          ),
-                          onPressed: () {
-                            // TODO: Implement message functionality
-                          },
                         ),
                       ],
                     ),
@@ -246,7 +376,7 @@ class InfoDialog extends StatelessWidget {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        'Uploaded at: ${DateTime.parse(file['uploadedAt']).toString().split('.')[0]}',
+                        'Uploaded at: ${formatUploadedDate(file['uploadedAt'])}',
                         style: TextStyle(
                           fontSize: 12,
                           color: mutedForeground,
@@ -254,28 +384,56 @@ class InfoDialog extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // TODO: Implement connect functionality
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              // TODO: Implement connect functionality
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      'Connect functionality coming soon!'),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primary,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text(
+                              'Connect',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                           ),
                         ),
-                        child: const Text(
-                          'Connect',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
+                        const SizedBox(width: 8),
+                        IconButton(
+                          icon: Icon(
+                            Icons.message,
+                            color: primary,
+                            size: 20,
                           ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ChatPage(
+                                  userId: file['uploadedBy']['_id'],
+                                  userName: file['uploadedBy']['name'],
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
@@ -312,30 +470,60 @@ class InfoDialog extends StatelessWidget {
                               Row(
                                 children: [
                                   if (teacher['imageUrl'] != null)
-                                    Container(
-                                      width: 48,
-                                      height: 48,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(24),
-                                        image: DecorationImage(
-                                          image:
-                                              NetworkImage(teacher['imageUrl']),
-                                          fit: BoxFit.cover,
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => ProfilePage(
+                                              userId: teacher['_id'],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        width: 48,
+                                        height: 48,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(24),
+                                          image: DecorationImage(
+                                            image: NetworkImage(
+                                                teacher['imageUrl']),
+                                            fit: BoxFit.cover,
+                                          ),
                                         ),
                                       ),
                                     )
                                   else
-                                    Container(
-                                      width: 48,
-                                      height: 48,
-                                      decoration: BoxDecoration(
-                                        color: primary.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(24),
-                                      ),
-                                      child: Icon(
-                                        Icons.person,
-                                        color: primary,
-                                        size: 24,
+                                    GestureDetector(
+                                      onTap: () {
+                                        if (teacher['userAttachedBool'] ==
+                                            true) {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => ProfilePage(
+                                                userId: teacher['userAttached']
+                                                    ['_id'],
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      child: Container(
+                                        width: 48,
+                                        height: 48,
+                                        decoration: BoxDecoration(
+                                          color: primary.withOpacity(0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(24),
+                                        ),
+                                        child: Icon(
+                                          Icons.person,
+                                          color: primary,
+                                          size: 24,
+                                        ),
                                       ),
                                     ),
                                   const SizedBox(width: 12),
@@ -344,19 +532,50 @@ class InfoDialog extends StatelessWidget {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Text(
-                                          teacher['name'],
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                            color: foreground,
+                                        GestureDetector(
+                                          onTap: () {
+                                            if (teacher['userAttachedBool'] ==
+                                                true) {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      ProfilePage(
+                                                    userId:
+                                                        teacher['userAttached']
+                                                            ['_id'],
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                          },
+                                          child: Row(
+                                            children: [
+                                              Text(
+                                                teacher['name'],
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: foreground,
+                                                ),
+                                              ),
+                                              if (teacher['userAttachedBool'] ==
+                                                  true) ...[
+                                                const Icon(
+                                                  Icons.verified,
+                                                  color: Colors.blue,
+                                                  size: 16,
+                                                ),
+                                                const SizedBox(width: 4),
+                                              ]
+                                            ],
                                           ),
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
                                           teacher['email'],
                                           style: TextStyle(
-                                            fontSize: 12,
+                                            fontSize: 11,
                                             color: mutedForeground,
                                           ),
                                         ),
@@ -375,50 +594,6 @@ class InfoDialog extends StatelessWidget {
                                       ],
                                     ),
                                   ),
-                                  Column(
-                                    children: [
-                                      if (teacher['rating'] != null)
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 8, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            color: primary.withOpacity(0.1),
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                Icons.star,
-                                                size: 14,
-                                                color: primary,
-                                              ),
-                                              const SizedBox(width: 4),
-                                              Text(
-                                                '${teacher['rating']}',
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: primary,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      const SizedBox(height: 8),
-                                      IconButton(
-                                        icon: Icon(
-                                          Icons.message,
-                                          color: primary,
-                                          size: 20,
-                                        ),
-                                        onPressed: () {
-                                          // TODO: Implement message functionality
-                                        },
-                                      ),
-                                    ],
-                                  ),
                                 ],
                               ),
                               const SizedBox(height: 12),
@@ -433,38 +608,92 @@ class InfoDialog extends StatelessWidget {
                                   child: Text(
                                     'Department: ${teacher['department']['name']}',
                                     style: TextStyle(
-                                      fontSize: 12,
+                                      fontSize: 11,
                                       color: mutedForeground,
                                     ),
                                   ),
                                 ),
                                 const SizedBox(height: 8),
                               ],
-                              if (teacher['onLeave'] != null) ...[
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: teacher['onLeave']
-                                        ? Colors.orange.withOpacity(0.1)
-                                        : Colors.green.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    teacher['onLeave'] ? 'On Leave' : 'Active',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: teacher['onLeave']
-                                          ? Colors.orange
-                                          : Colors.green,
-                                      fontWeight: FontWeight.w500,
+                              Row(
+                                children: [
+                                  if (teacher['onLeave'] != null) ...[
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: teacher['onLeave']
+                                            ? Colors.orange.withOpacity(0.1)
+                                            : Colors.green.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        teacher['onLeave']
+                                            ? 'On Leave'
+                                            : 'Activly Teaching',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: teacher['onLeave']
+                                              ? Colors.orange
+                                              : Colors.green,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
                                     ),
+                                  ],
+                                  const SizedBox(width: 8),
+                                  if (teacher['rating'] != null)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: primary.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.star,
+                                            size: 14,
+                                            color: primary,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            '${teacher['rating']}',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500,
+                                              color: primary,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  const SizedBox(height: 8),
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.message,
+                                      color: primary,
+                                      size: 20,
+                                    ),
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ChatPage(
+                                            userId: teacher['_id'],
+                                            userName: teacher['name'],
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
-                                ),
-                                const SizedBox(height: 8),
-                              ],
+                                ],
+                              ),
                               if (teacher['feedbackSummary'] != null &&
                                   teacher['feedbackSummary'].isNotEmpty) ...[
+                                const SizedBox(height: 8),
                                 Text(
                                   'Recent Feedback:',
                                   style: TextStyle(
@@ -491,13 +720,19 @@ class InfoDialog extends StatelessWidget {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                const SizedBox(height: 8),
                               ],
+                              const SizedBox(height: 12),
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
                                   onPressed: () {
-                                    // TODO: Implement connect functionality
+                                    // TODO: Implement connect functionality for teachers
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            'Connect with ${teacher['name']} coming soon!'),
+                                      ),
+                                    );
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: primary,
@@ -603,9 +838,7 @@ class InfoDialog extends StatelessWidget {
                         mutedForeground),
                     _buildInfoRow(
                         'Last Accessed',
-                        DateTime.parse(paper['metadata']['lastAccessed'])
-                            .toString()
-                            .split('.')[0],
+                        formatUploadedDate(paper['metadata']['lastAccessed']),
                         foreground,
                         mutedForeground),
                   ],
