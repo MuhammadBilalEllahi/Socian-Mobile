@@ -1,7 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:socian/pages/explore/SocietyProvider.dart';
 import 'package:socian/pages/explore/components/shimmer/vertical_shimmer_list.dart';
 import 'package:socian/pages/explore/society.model.dart';
-import 'package:flutter/material.dart';
+
 import 'vertical_society_card.dart';
 
 class VerticalSocietiesList extends StatelessWidget {
@@ -13,6 +14,7 @@ class VerticalSocietiesList extends StatelessWidget {
   final Color muted;
   final Color joinedBg;
   final Color joinedFg;
+  final VoidCallback? onCardTap;
 
   const VerticalSocietiesList({
     super.key,
@@ -24,6 +26,7 @@ class VerticalSocietiesList extends StatelessWidget {
     required this.joinedBg,
     required this.joinedFg,
     this.filterFn,
+    this.onCardTap,
   });
 
   @override
@@ -75,6 +78,7 @@ class VerticalSocietiesList extends StatelessWidget {
             muted: muted,
             joinedBg: joinedBg,
             joinedFg: joinedFg,
+            onCardTap: onCardTap,
           )));
     }
     if (filteredPublic.isNotEmpty) {
@@ -99,6 +103,7 @@ class VerticalSocietiesList extends StatelessWidget {
             muted: muted,
             joinedBg: joinedBg,
             joinedFg: joinedFg,
+            onCardTap: onCardTap,
           )));
     }
     if (filteredOther.isNotEmpty) {
@@ -123,6 +128,7 @@ class VerticalSocietiesList extends StatelessWidget {
             muted: muted,
             joinedBg: joinedBg,
             joinedFg: joinedFg,
+            onCardTap: onCardTap,
           )));
     }
     return ListView(
@@ -132,19 +138,3 @@ class VerticalSocietiesList extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
