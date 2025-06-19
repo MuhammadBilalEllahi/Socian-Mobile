@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/core/utils/constants.dart';
 import 'package:socian/pages/profile/settings/ServerSelectionPage.dart';
+import 'package:socian/pages/profile/settings/YourSocieties.dart';
+
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -97,16 +99,28 @@ class SettingsPage extends ConsumerWidget {
           ),
 
  _buildSection(
-            'Create',
+            'Societies',
             [
               _buildListTile(
-                'Society',
+                'Create a Society',
                 Icons.people_alt_outlined,
                 () {
                   // Navigate to personal info edit
                   Navigator.push(
                       context, 
     MaterialPageRoute(builder: (context) => const CreateSocietyPage()),
+                      );
+                },
+                isDarkMode,
+              ),
+              _buildListTile(
+                'Your Societies',
+                Icons.people_alt_outlined,
+                () {
+                  // Navigate to personal info edit
+                  Navigator.push(
+                      context, 
+    MaterialPageRoute(builder: (context) =>  YourSocieties()),
                       );
                 },
                 isDarkMode,
