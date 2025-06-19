@@ -204,7 +204,7 @@ class PostImageMedia extends StatelessWidget {
         child: GestureDetector(
           onTap: onTap,
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
+            // borderRadius: BorderRadius.circular(12),
             child: CachedNetworkImage(
               imageUrl: imageUrl,
               cacheManager: CustomCacheManager(),

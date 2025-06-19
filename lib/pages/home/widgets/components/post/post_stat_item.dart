@@ -29,14 +29,14 @@ class PostStatItem extends StatelessWidget {
           children: [
             Icon(
               icon,
-              size: 20,
+              size: 18,
               color: isActive ? Colors.red : Colors.grey[600],
             ),
             const SizedBox(width: 4),
             Text(
               count > 0 ? count.toString() : '',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 12,
                 color: isActive ? Colors.red : Colors.grey[600],
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
               ),

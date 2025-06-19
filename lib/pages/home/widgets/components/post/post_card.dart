@@ -1,15 +1,16 @@
-import 'package:socian/core/utils/constants.dart';
-import 'package:socian/features/auth/providers/auth_provider.dart';
-import 'package:socian/pages/profile/ProfilePage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/pages/home/widgets/components/post/CreatePost.dart';
+import 'package:socian/pages/profile/ProfilePage.dart';
 import 'package:socian/shared/services/api_client.dart';
 import 'package:timeago/timeago.dart' as timeago;
+
 import 'date_badge.dart';
 import 'post_media.dart';
 import 'post_stat_item.dart';
-import 'package:socian/pages/home/widgets/components/post/CreatePost.dart';
 
 class PostCard extends ConsumerStatefulWidget {
   final dynamic post;
@@ -151,7 +152,7 @@ class _PostCardState extends ConsumerState<PostCard> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 16),
       decoration: BoxDecoration(
         color: isDark ? const Color.fromARGB(0, 0, 0, 0) : Colors.white,
       ),
@@ -174,7 +175,7 @@ class _PostCardState extends ConsumerState<PostCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildUserInfo(isDark, formattedDate),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 _buildPostContent(isDark),
               ],
             ),
@@ -193,207 +194,213 @@ class _PostCardState extends ConsumerState<PostCard> {
     final societyName = isSocietyPost ? widget.post['society']['name'] : '';
     final author = widget.post['author'] ?? {};
 
-    return Row(
-      children: [
-        GestureDetector(
-          onTap: author['_id'] != null && author['username']?.isNotEmpty == true
-              ? () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ProfilePage(userId: author['_id']),
-                    ),
-                  );
-                }
-              : null,
-          child: CircleAvatar(
-            radius: 18,
-            backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
-            backgroundImage: author['profile'] != null
-                ? NetworkImage(author['profile']['picture'] ?? '')
-                : const AssetImage('assets/default_profile_picture.png')
-                    as ImageProvider,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap:
+                author['_id'] != null && author['username']?.isNotEmpty == true
+                    ? () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ProfilePage(userId: author['_id']),
+                          ),
+                        );
+                      }
+                    : null,
+            child: CircleAvatar(
+              radius: 18,
+              backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
+              backgroundImage: author['profile'] != null
+                  ? NetworkImage(author['profile']['picture'] ?? '')
+                  : const AssetImage('assets/default_profile_picture.png')
+                      as ImageProvider,
+            ),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: author['_id'] != null &&
-                            author['username']?.isNotEmpty == true
-                        ? () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    ProfilePage(userId: author['_id']),
-                              ),
-                            );
-                          }
-                        : null,
-                    child: Text(
-                      author['name'] ?? '{Deleted}',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: author['_id'] != null &&
+                              author['username']?.isNotEmpty == true
+                          ? () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      ProfilePage(userId: author['_id']),
+                                ),
+                              );
+                            }
+                          : null,
+                      child: Text(
+                        author['name'] ?? '{Deleted}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                          color: isDark ? Colors.white : Colors.black,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 3),
+                      child: Text(
+                        widget.flairType == Flairs.university.value
+                            ? (widget.post['author']['university']
+                                        ?['universityId']?['name']
+                                    ?.toString() ??
+                                '')
+                            : (widget.post['author']?['university']
+                                        ?['departmentId']?['name']
+                                    ?.toString() ??
+                                ''),
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.lightBlueAccent,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    if (isSocietyPost) ...[
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.arrow_right,
+                        size: 16,
                         color: isDark ? Colors.white : Colors.black,
                       ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(left: 3),
-                    child: Text(
-                      widget.flairType == Flairs.university.value
-                          ? (widget.post['author']['university']
-                                      ?['universityId']?['name']
-                                  ?.toString() ??
-                              '')
-                          : (widget.post['author']?['university']
-                                      ?['departmentId']?['name']
-                                  ?.toString() ??
-                              ''),
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.lightBlueAccent,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
+                      const SizedBox(width: 4),
+                      Text(
+                        societyName,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                          color: isDark ? Colors.white : Colors.black,
+                        ),
                       ),
-                    ),
-                  ),
-                  if (isSocietyPost) ...[
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.arrow_right,
-                      size: 16,
-                      color: isDark ? Colors.white : Colors.black,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      societyName,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12,
-                        color: isDark ? Colors.white : Colors.black,
-                      ),
-                    ),
+                    ],
                   ],
-                ],
-              ),
-              const SizedBox(height: 1),
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: author['_id'] != null &&
-                            author['username']?.isNotEmpty == true
-                        ? () {
+                ),
+                const SizedBox(height: 1),
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: author['_id'] != null &&
+                              author['username']?.isNotEmpty == true
+                          ? () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      ProfilePage(userId: author['_id']),
+                                ),
+                              );
+                            }
+                          : null,
+                      child: Text(
+                        '@${author['username'] ?? ''}',
+                        style: TextStyle(
+                          color: isDark ? Colors.grey[400] : Colors.grey[600],
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      width: 4,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    DateBadge(date: formattedDate),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.more_horiz,
+              color: isDark ? Colors.white : Colors.black,
+              size: 20,
+            ),
+            onPressed: () async {
+              if (author['_id'] == currentUserId) {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (context) => SafeArea(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.edit, color: Colors.blue),
+                          title: const Text('Edit Post'),
+                          onTap: () {
+                            Navigator.pop(context);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    ProfilePage(userId: author['_id']),
+                                builder: (context) => CreatePost(
+                                  isEditing: true,
+                                  postData: widget.post,
+                                ),
                               ),
                             );
-                          }
-                        : null,
-                    child: Text(
-                      '@${author['username'] ?? ''}',
-                      style: TextStyle(
-                        color: isDark ? Colors.grey[400] : Colors.grey[600],
-                        fontSize: 10,
-                      ),
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.delete, color: Colors.red),
+                          title: const Text('Delete Post'),
+                          onTap: () {
+                            Navigator.pop(context);
+                            _showDeleteConfirmation(widget.post['_id']);
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Container(
-                    width: 4,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.grey[400] : Colors.grey[600],
-                      shape: BoxShape.circle,
+                );
+              } else {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (context) => SafeArea(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ListTile(
+                          leading:
+                              const Icon(Icons.report, color: Colors.orange),
+                          title: const Text('Report Post'),
+                          onTap: () {
+                            Navigator.pop(context);
+                            _showReportDialog(widget.post['_id']);
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  DateBadge(date: formattedDate),
-                ],
-              ),
-            ],
+                );
+              }
+            },
           ),
-        ),
-        IconButton(
-          icon: Icon(
-            Icons.more_horiz,
-            color: isDark ? Colors.white : Colors.black,
-            size: 20,
-          ),
-          onPressed: () async {
-            if (author['_id'] == currentUserId) {
-              showModalBottomSheet(
-                context: context,
-                builder: (context) => SafeArea(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ListTile(
-                        leading: const Icon(Icons.edit, color: Colors.blue),
-                        title: const Text('Edit Post'),
-                        onTap: () {
-                          Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CreatePost(
-                                isEditing: true,
-                                postData: widget.post,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.delete, color: Colors.red),
-                        title: const Text('Delete Post'),
-                        onTap: () {
-                          Navigator.pop(context);
-                          _showDeleteConfirmation(widget.post['_id']);
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            } else {
-              showModalBottomSheet(
-                context: context,
-                builder: (context) => SafeArea(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ListTile(
-                        leading: const Icon(Icons.report, color: Colors.orange),
-                        title: const Text('Report Post'),
-                        onTap: () {
-                          Navigator.pop(context);
-                          _showReportDialog(widget.post['_id']);
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-          },
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildPostContent(bool isDark) {
     return Padding(
-      padding: const EdgeInsets.only(left: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -406,7 +413,7 @@ class _PostCardState extends ConsumerState<PostCard> {
               height: 1.2,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Text(
             widget.post['body'] ?? '',
             style: TextStyle(
@@ -744,7 +751,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
         'postId': postId,
       });
       debugPrint('Comments response: $response');
-      if (response is List && response.isNotEmpty) {
+      if (response.isNotEmpty) {
         final comments = response[0]['comments']
                 ?.where((c) => !(c['isDeleted'] ?? false))
                 .toList() ??
@@ -842,20 +849,27 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
       ),
       body: SingleChildScrollView(
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 1),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildUserInfo(foreground, mutedForeground, formattedDate),
-              const SizedBox(height: 16),
-              _buildPostContent(foreground),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child:
+                    _buildUserInfo(foreground, mutedForeground, formattedDate),
+              ),
+              const SizedBox(height: 4),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: _buildPostContent(foreground),
+              ),
               if (media != null && media.isNotEmpty) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: 4),
                 PostMedia(media: media),
               ],
-              const SizedBox(height: 16),
+              const SizedBox(height: 4),
               _buildActionButtons(foreground, mutedForeground),
-              const SizedBox(height: 16),
+              const SizedBox(height: 4),
               _buildCommentsSection(
                   foreground, mutedForeground, border, accent, background),
             ],
@@ -886,14 +900,14 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                 }
               : null,
           child: CircleAvatar(
-            radius: 24,
+            radius: 18,
             backgroundImage: author['profile'] != null
                 ? NetworkImage(author['profile']['picture'] ?? '')
                 : const AssetImage('assets/default_profile_picture.png')
                     as ImageProvider,
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 8),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -917,7 +931,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                       author['name'] ?? '{Deleted}',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        fontSize: 16,
+                        fontSize: 13,
                         color: foreground,
                       ),
                     ),
@@ -935,7 +949,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -943,7 +957,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                     const SizedBox(width: 4),
                     Icon(
                       Icons.arrow_right,
-                      size: 20,
+                      size: 16,
                       color: foreground,
                     ),
                     const SizedBox(width: 4),
@@ -951,7 +965,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                       societyName,
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        fontSize: 16,
+                        fontSize: 13,
                         color: foreground,
                       ),
                     ),
@@ -978,11 +992,11 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                       '@${author['username'] ?? ''}',
                       style: TextStyle(
                         color: mutedForeground,
-                        fontSize: 14,
+                        fontSize: 11,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 4),
                   Container(
                     width: 4,
                     height: 4,
@@ -991,7 +1005,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                       shape: BoxShape.circle,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 4),
                   DateBadge(date: formattedDate),
                 ],
               ),
@@ -1002,7 +1016,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
           icon: Icon(
             Icons.more_horiz,
             color: foreground,
-            size: 24,
+            size: 20,
           ),
           onPressed: () async {
             if (author['_id'] == currentUserId) {
@@ -1073,17 +1087,17 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
         Text(
           widget.post['title'] ?? '',
           style: TextStyle(
-            fontSize: 20,
+            fontSize: 16,
             fontWeight: FontWeight.w700,
             color: foreground,
             height: 1.2,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 4),
         Text(
           widget.post['body'] ?? '',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 12,
             height: 1.5,
             color: foreground,
           ),
@@ -1128,296 +1142,325 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
 
   Widget _buildCommentsSection(Color foreground, Color mutedForeground,
       Color border, Color accent, Color background) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Comments',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: foreground,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Comments',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: foreground,
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _commentController,
-                decoration: InputDecoration(
-                  hintText: 'Write a comment...',
-                  hintStyle: TextStyle(color: mutedForeground),
-                  filled: true,
-                  fillColor: accent,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: border),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: foreground),
-                  ),
-                ),
-                style: TextStyle(color: foreground),
-                maxLines: 3,
-                minLines: 1,
-              ),
-            ),
-            const SizedBox(width: 8),
-            TextButton(
-              onPressed: _isPostingComment
-                  ? null
-                  : () =>
-                      _postComment(widget.post['_id'], _commentController.text),
-              style: TextButton.styleFrom(
-                backgroundColor: foreground,
-                foregroundColor: background,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: _isPostingComment
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation(Colors.white),
-                      ),
-                    )
-                  : const Text(
-                      'Post',
-                      style: TextStyle(fontWeight: FontWeight.w600),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _commentController,
+                  decoration: InputDecoration(
+                    hintText: 'Write a comment...',
+                    hintStyle: TextStyle(color: mutedForeground),
+                    filled: true,
+                    fillColor: accent,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(4),
+                      borderSide: BorderSide(color: border),
                     ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        FutureBuilder<List<dynamic>>(
-          future: _commentsFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(
-                child: Text(
-                  'Failed to load comments',
-                  style: TextStyle(color: mutedForeground),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(4),
+                      borderSide: BorderSide(color: border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(4),
+                      borderSide: BorderSide(color: foreground),
+                    ),
+                  ),
+                  style: TextStyle(color: foreground),
+                  maxLines: 3,
+                  minLines: 1,
                 ),
-              );
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Center(
-                child: Text(
-                  'No comments yet',
-                  style: TextStyle(color: mutedForeground),
-                ),
-              );
-            }
-
-            final comments = snapshot.data!;
-            return ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: comments.length,
-              separatorBuilder: (context, index) => Divider(
-                color: border,
-                height: 24,
               ),
-              itemBuilder: (context, index) {
-                final comment = comments[index];
-                final author = comment['author'] ?? {};
-                final voteId = comment['voteId'] ?? {};
-                final commentId = comment['_id'];
-                final createdAt = DateTime.parse(comment['createdAt']);
-                final timeAgo = timeago.format(createdAt, locale: 'en_short');
-                final replyCount = (comment['replies'] as List?)?.length ?? 0;
+              const SizedBox(width: 4),
+              TextButton(
+                onPressed: _isPostingComment
+                    ? null
+                    : () => _postComment(
+                        widget.post['_id'], _commentController.text),
+                style: TextButton.styleFrom(
+                  backgroundColor: foreground,
+                  foregroundColor: background,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: _isPostingComment
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation(Colors.white),
+                        ),
+                      )
+                    : const Text(
+                        'Post',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          FutureBuilder<List<dynamic>>(
+            future: _commentsFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    'Failed to load comments',
+                    style: TextStyle(color: mutedForeground),
+                  ),
+                );
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return Center(
+                  child: Text(
+                    'No comments yet',
+                    style: TextStyle(color: mutedForeground),
+                  ),
+                );
+              }
 
-                _isCommentLiked[commentId] ??= false;
-                _isCommentDisliked[commentId] ??= false;
-                _isCommentVoting[commentId] ??= false;
+              final comments = snapshot.data!;
+              return ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: comments.length,
+                separatorBuilder: (context, index) => Divider(
+                  color: border,
+                  height: 4,
+                ),
+                itemBuilder: (context, index) {
+                  final comment = comments[index];
+                  final author = comment['author'] ?? {};
+                  final voteId = comment['voteId'] ?? {};
+                  final commentId = comment['_id'];
+                  final createdAt = DateTime.parse(comment['createdAt']);
+                  final timeAgo = timeago.format(createdAt, locale: 'en_short');
+                  final replyCount = (comment['replies'] as List?)?.length ?? 0;
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                  _isCommentLiked[commentId] ??= false;
+                  _isCommentDisliked[commentId] ??= false;
+                  _isCommentVoting[commentId] ??= false;
+                  final isDark =
+                      Theme.of(context).brightness == Brightness.dark;
+                  return Container(
+                    // color: isDark
+                    //     ? Colors.black12
+                    //     : const Color.fromARGB(176, 255, 255, 255),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: border,
+                        ),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        GestureDetector(
-                          onTap: author['_id'] != null &&
-                                  author['username']?.isNotEmpty == true
-                              ? () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          ProfilePage(userId: author['_id']),
+                        Row(
+                          children: [
+                            GestureDetector(
+                              onTap: author['_id'] != null &&
+                                      author['username']?.isNotEmpty == true
+                                  ? () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ProfilePage(
+                                              userId: author['_id']),
+                                        ),
+                                      );
+                                    }
+                                  : null,
+                              child: CircleAvatar(
+                                radius: 12,
+                                backgroundImage: author['profile'] != null
+                                    ? NetworkImage(
+                                        author['profile']['picture'] ?? '')
+                                    : const AssetImage(
+                                            'assets/default_profile_picture.png')
+                                        as ImageProvider,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  GestureDetector(
+                                    onTap: author['_id'] != null &&
+                                            author['username']?.isNotEmpty ==
+                                                true
+                                        ? () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    ProfilePage(
+                                                        userId: author['_id']),
+                                              ),
+                                            );
+                                          }
+                                        : null,
+                                    child: Text(
+                                      author['name'] ?? '{Deleted}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 12,
+                                        color: foreground,
+                                      ),
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: author['_id'] != null &&
+                                            author['username']?.isNotEmpty ==
+                                                true
+                                        ? () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    ProfilePage(
+                                                        userId: author['_id']),
+                                              ),
+                                            );
+                                          }
+                                        : null,
+                                    child: Text(
+                                      '@${author['username'] ?? ''} • $timeAgo',
+                                      style: TextStyle(
+                                        color: mutedForeground,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.more_horiz,
+                                color: mutedForeground,
+                                size: 20,
+                              ),
+                              onPressed: () async {
+                                if (author['_id'] == currentUserId) {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    builder: (context) => SafeArea(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          ListTile(
+                                            leading: const Icon(Icons.delete,
+                                                color: Colors.red),
+                                            title: const Text('Delete Comment'),
+                                            onTap: () {
+                                              Navigator.pop(context);
+                                              _showDeleteConfirmation(
+                                                  commentId: commentId);
+                                            },
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   );
                                 }
-                              : null,
-                          child: CircleAvatar(
-                            radius: 16,
-                            backgroundImage: author['profile'] != null
-                                ? NetworkImage(
-                                    author['profile']['picture'] ?? '')
-                                : const AssetImage(
-                                        'assets/default_profile_picture.png')
-                                    as ImageProvider,
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 26),
+                          child: Text(
+                            comment['comment'] ?? '',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: foreground,
+                              height: 1.4,
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        const SizedBox(height: 4),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 26),
+                          child: Row(
                             children: [
-                              GestureDetector(
-                                onTap: author['_id'] != null &&
-                                        author['username']?.isNotEmpty == true
-                                    ? () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => ProfilePage(
-                                                userId: author['_id']),
-                                          ),
-                                        );
-                                      }
-                                    : null,
-                                child: Text(
-                                  author['name'] ?? '{Deleted}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                    color: foreground,
-                                  ),
-                                ),
+                              PostStatItem(
+                                icon: _isCommentLiked[commentId]!
+                                    ? Icons.favorite
+                                    : Icons.favorite_outline,
+                                count: voteId['upVotesCount'] ?? 0,
+                                onTap: () => _voteComment(commentId, 'upvote'),
+                                isActive: _isCommentLiked[commentId]!,
                               ),
+                              const SizedBox(width: 8),
+                              PostStatItem(
+                                icon: _isCommentDisliked[commentId]!
+                                    ? Icons.thumb_down
+                                    : Icons.thumb_down_outlined,
+                                count: voteId['downVotesCount'] ?? 0,
+                                onTap: () =>
+                                    _voteComment(commentId, 'downvote'),
+                                isActive: _isCommentDisliked[commentId]!,
+                              ),
+                              const SizedBox(width: 8),
                               GestureDetector(
-                                onTap: author['_id'] != null &&
-                                        author['username']?.isNotEmpty == true
-                                    ? () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => ProfilePage(
-                                                userId: author['_id']),
-                                          ),
-                                        );
-                                      }
-                                    : null,
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => CommentRepliesPage(
+                                        postId: widget.post['_id'],
+                                        commentId: commentId,
+                                        commentAuthor:
+                                            author['name'] ?? '{Deleted}',
+                                      ),
+                                    ),
+                                  );
+                                },
                                 child: Text(
-                                  '@${author['username'] ?? ''} • $timeAgo',
+                                  replyCount == 0
+                                      ? 'Reply'
+                                      : '$replyCount repl${replyCount == 1 ? 'y' : 'ies'}',
                                   style: TextStyle(
                                     color: mutedForeground,
-                                    fontSize: 12,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.more_horiz,
-                            color: mutedForeground,
-                            size: 20,
-                          ),
-                          onPressed: () async {
-                            if (author['_id'] == currentUserId) {
-                              showModalBottomSheet(
-                                context: context,
-                                builder: (context) => SafeArea(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      ListTile(
-                                        leading: const Icon(Icons.delete,
-                                            color: Colors.red),
-                                        title: const Text('Delete Comment'),
-                                        onTap: () {
-                                          Navigator.pop(context);
-                                          _showDeleteConfirmation(
-                                              commentId: commentId);
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                        ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      comment['comment'] ?? '',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: foreground,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        PostStatItem(
-                          icon: _isCommentLiked[commentId]!
-                              ? Icons.favorite
-                              : Icons.favorite_outline,
-                          count: voteId['upVotesCount'] ?? 0,
-                          onTap: () => _voteComment(commentId, 'upvote'),
-                          isActive: _isCommentLiked[commentId]!,
-                        ),
-                        const SizedBox(width: 16),
-                        PostStatItem(
-                          icon: _isCommentDisliked[commentId]!
-                              ? Icons.thumb_down
-                              : Icons.thumb_down_outlined,
-                          count: voteId['downVotesCount'] ?? 0,
-                          onTap: () => _voteComment(commentId, 'downvote'),
-                          isActive: _isCommentDisliked[commentId]!,
-                        ),
-                        const SizedBox(width: 16),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => CommentRepliesPage(
-                                  postId: widget.post['_id'],
-                                  commentId: commentId,
-                                  commentAuthor: author['name'] ?? '{Deleted}',
-                                ),
-                              ),
-                            );
-                          },
-                          child: Text(
-                            replyCount == 0
-                                ? 'Reply'
-                                : '$replyCount repl${replyCount == 1 ? 'y' : 'ies'}',
-                            style: TextStyle(
-                              color: mutedForeground,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                );
-              },
-            );
-          },
-        ),
-      ],
+                  );
+                },
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -1518,7 +1561,7 @@ class _CommentRepliesPageState extends ConsumerState<CommentRepliesPage> {
       });
       debugPrint('Replies response: $response');
       final replies =
-          response?.where((r) => !(r['isDeleted'] ?? false)).toList() ?? [];
+          response.where((r) => !(r['isDeleted'] ?? false)).toList() ?? [];
       setState(() {
         _replies = replies;
       });
@@ -1804,7 +1847,7 @@ class _CommentRepliesPageState extends ConsumerState<CommentRepliesPage> {
                     _isReplyVoting[replyId] ??= false;
 
                     return Padding(
-                      padding: const EdgeInsets.only(left: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
