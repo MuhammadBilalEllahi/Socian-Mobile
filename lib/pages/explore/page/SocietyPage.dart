@@ -870,7 +870,10 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                           final roleImage = role['picture'];
                           final roleId = role['_id']?.toString();
 
-                          return Stack(
+                          return 
+                          
+                          
+                          Stack(
                             clipBehavior: Clip.none,
                             children: [
                               AnimatedContainer(
@@ -1035,6 +1038,10 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                                 ),
                             ],
                           );
+
+
+
+
                         },
                       ),
                     )
