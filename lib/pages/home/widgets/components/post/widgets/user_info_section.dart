@@ -7,26 +7,26 @@ import 'location_text_selector.dart';
 class UserInfoSection extends ConsumerWidget {
   final PostType postType;
   final String? selectedLocation;
-  final Function(String?) onLocationSelected;
-  final Function() onLocationCleared;
+  // final Function(String?) onLocationSelected;
+  // final Function() onLocationCleared;
 
   const UserInfoSection({
     super.key,
     required this.postType,
     required this.selectedLocation,
-    required this.onLocationSelected,
-    required this.onLocationCleared,
+    // required this.onLocationSelected,
+    // required this.onLocationCleared,
   });
 
-  void _showLocationTextSelector(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => LocationTextSelector(
-        selectedLocation: selectedLocation,
-        onLocationSelected: onLocationSelected,
-      ),
-    );
-  }
+  // void _showLocationTextSelector(BuildContext context) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => LocationTextSelector(
+  //       selectedLocation: selectedLocation,
+  //       onLocationSelected: onLocationSelected,
+  //     ),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -79,55 +79,66 @@ class UserInfoSection extends ConsumerWidget {
               ),
             ],
           ),
-          if (postType == PostType.personal) ...[
-            const SizedBox(height: 12),
-            GestureDetector(
-              onTap: () => _showLocationTextSelector(context),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.grey[900] : Colors.grey[100],
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: theme.dividerColor.withOpacity(0.1),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.location_on_outlined,
-                      size: 16,
-                      color: theme.colorScheme.onSurface.withOpacity(0.6),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      selectedLocation ?? 'Add location',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: selectedLocation != null
-                            ? theme.colorScheme.onSurface
-                            : theme.colorScheme.onSurface.withOpacity(0.6),
-                        fontWeight: selectedLocation != null
-                            ? FontWeight.w500
-                            : FontWeight.normal,
-                      ),
-                    ),
-                    if (selectedLocation != null) ...[
-                      const SizedBox(width: 8),
-                      GestureDetector(
-                        onTap: onLocationCleared,
-                        child: Icon(
-                          Icons.close,
-                          size: 16,
-                          color: theme.colorScheme.onSurface.withOpacity(0.6),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          ],
+
+
+          // if (postType == PostType.personal) ...[
+          //   const SizedBox(height: 12),
+
+          //   GestureDetector(
+          //     // onTap: () => _showLocationTextSelector(context),
+          //     child: Container(
+          //       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          //       decoration: BoxDecoration(
+          //         color: isDark ? Colors.grey[900] : Colors.grey[100],
+          //         borderRadius: BorderRadius.circular(8),
+          //         border: Border.all(
+          //           color: theme.dividerColor.withOpacity(0.1),
+          //         ),
+          //       ),
+          //       child: Row(
+          //         mainAxisSize: MainAxisSize.min,
+          //         children: [
+          //           Icon(
+          //             Icons.location_on_outlined,
+          //             size: 16,
+          //             color: theme.colorScheme.onSurface.withOpacity(0.6),
+          //           ),
+          //           const SizedBox(width: 8),
+          //           Text(
+          //             selectedLocation ?? 'Add location',
+          //             style: theme.textTheme.bodyMedium?.copyWith(
+          //               color: selectedLocation != null
+          //                   ? theme.colorScheme.onSurface
+          //                   : theme.colorScheme.onSurface.withOpacity(0.6),
+          //               fontWeight: selectedLocation != null
+          //                   ? FontWeight.w500
+          //                   : FontWeight.normal,
+          //             ),
+          //           ),
+          //           if (selectedLocation != null) ...[
+          //             const SizedBox(width: 8),
+          //             GestureDetector(
+          //               // onTap: onLocationCleared,
+          //               child: Icon(
+          //                 Icons.close,
+          //                 size: 16,
+          //                 color: theme.colorScheme.onSurface.withOpacity(0.6),
+          //               ),
+          //             ),
+          //           ],
+          //         ],
+          //       ),
+
+
+          //     ),
+          //   ),
+
+
+          // ],
+
+
+
+
         ],
       ),
     );

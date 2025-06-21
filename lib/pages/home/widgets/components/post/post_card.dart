@@ -144,6 +144,7 @@ class _PostCardState extends ConsumerState<PostCard> {
     }
   }
 
+//original post code
   @override
   Widget build(BuildContext context) {
     final media = widget.post['media'] as List?;
@@ -152,10 +153,39 @@ class _PostCardState extends ConsumerState<PostCard> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 10),
+      // decoration: BoxDecoration(
+      //   color: isDark ? const Color.fromARGB(0, 0, 0, 0) : Colors.white,
+      //   border:
+      //   const Border(
+      //     bottom: BorderSide(
+      //       color: Colors.grey, // Change color as needed
+      //       width: 0.5, // Change thickness as needed
+      //     ),
+      //   ),
+      // ),
+
       decoration: BoxDecoration(
-        color: isDark ? const Color.fromARGB(0, 0, 0, 0) : Colors.white,
+        color: isDark ? const Color(0xFF1E1E2D) : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withOpacity(0.4)
+                : Colors.grey.withOpacity(0.2),
+            blurRadius: 10,
+            spreadRadius: 0,
+            offset: const Offset(0, 6),
+          ),
+        ],
+        border: Border(
+          bottom: BorderSide(
+            color: isDark ? const Color(0xFF393952) : const Color(0xFFE0E0E0),
+            width: 7.5,
+          ),
+        ),
       ),
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -188,14 +218,254 @@ class _PostCardState extends ConsumerState<PostCard> {
     );
   }
 
+////////////////////////////////////////////////////////////////
+  ///Deepseek's version
+
+// Widget _buildUserInfo(bool isDark, String formattedDate) {
+//   final isSocietyPost = widget.post['society'] != null &&
+//       widget.post['society']['name'] != null;
+//   final societyName = isSocietyPost ? widget.post['society']['name'] : '';
+//   final author = widget.post['author'] ?? {};
+
+//   // Get university/department information
+//   final institutionInfo = widget.flairType == Flairs.university.value
+//       ? (widget.post['author']['university']?['universityId']?['name']?.toString() ?? '')
+//       : (widget.post['author']?['university']?['departmentId']?['name']?.toString() ?? '');
+
+//   return Padding(
+//     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+//     child: Row(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         // Avatar with society badge
+//         Stack(
+//           children: [
+//             GestureDetector(
+//               onTap: author['_id'] != null && author['username']?.isNotEmpty == true
+//                   ? () {
+//                       Navigator.push(
+//                         context,
+//                         MaterialPageRoute(
+//                           builder: (context) => ProfilePage(userId: author['_id']),
+//                         ),
+//                       );
+//                     }
+//                   : null,
+//               child: CircleAvatar(
+//                 radius: 22,
+//                 backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
+//                 backgroundImage: author['profile'] != null
+//                     ? NetworkImage(author['profile']['picture'] ?? '')
+//                     : const AssetImage('assets/default_profile_picture.png') as ImageProvider,
+//               ),
+//             ),
+//             if (isSocietyPost)
+//               Positioned(
+//                 right: 0,
+//                 bottom: 0,
+//                 child: Container(
+//                   padding: const EdgeInsets.all(4),
+//                   decoration: BoxDecoration(
+//                     color: Colors.blue,
+//                     shape: BoxShape.circle,
+//                     border: Border.all(
+//                       color: isDark ? Colors.grey[900]! : Colors.white,
+//                       width: 2,
+//                     ),
+//                   ),
+//                   child: const Icon(Icons.group, size: 14, color: Colors.white),
+//                 ),
+//               ),
+//           ],
+//         ),
+//         const SizedBox(width: 12),
+//         Expanded(
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               // Society name (if applicable)
+//               if (isSocietyPost)
+//                 Padding(
+//                   padding: const EdgeInsets.only(bottom: 2),
+//                   child: Text(
+//                     societyName,
+//                     style: TextStyle(
+//                       fontWeight: FontWeight.w600,
+//                       fontSize: 13,
+//                       color: isDark ? Colors.blue[200] : Colors.blue[700],
+//                     ),
+//                   ),
+//                 ),
+
+//               // Author name and institution in a single line
+//               Row(
+//                 children: [
+//                   GestureDetector(
+//                     onTap: author['_id'] != null &&
+//                             author['username']?.isNotEmpty == true
+//                         ? () {
+//                             Navigator.push(
+//                               context,
+//                               MaterialPageRoute(
+//                                 builder: (context) => ProfilePage(userId: author['_id']),
+//                               ),
+//                             );
+//                           }
+//                         : null,
+//                     child: Text(
+//                       author['name'] ?? '{Deleted}',
+//                       style: TextStyle(
+//                         fontWeight: FontWeight.bold,
+//                         fontSize: 15,
+//                         color: isDark ? Colors.white : Colors.black,
+//                       ),
+//                     ),
+//                   ),
+//                   if (institutionInfo.isNotEmpty) ...[
+//                     const SizedBox(width: 6),
+//                     Text(
+//                       '•',
+//                       style: TextStyle(
+//                         color: isDark ? Colors.grey[400] : Colors.grey[600],
+//                       ),
+//                     ),
+//                     const SizedBox(width: 6),
+//                     Flexible(
+//                       child: Text(
+//                         institutionInfo,
+//                         overflow: TextOverflow.ellipsis,
+//                         style: TextStyle(
+//                           fontSize: 13,
+//                           color: isDark ? Colors.grey[400] : Colors.grey[600],
+//                         ),
+//                       ),
+//                     ),
+//                   ],
+//                 ],
+//               ),
+//               const SizedBox(height: 2),
+
+//               // Username and date
+//               Row(
+//                 children: [
+//                   Text(
+//                     '@${author['username'] ?? ''}',
+//                     style: TextStyle(
+//                       color: isDark ? Colors.grey[400] : Colors.grey[600],
+//                       fontSize: 12,
+//                     ),
+//                   ),
+//                   const SizedBox(width: 8),
+//                   _buildDotSeparator(isDark),
+//                   const SizedBox(width: 8),
+//                   DateBadge(date: formattedDate),
+//                 ],
+//               ),
+//             ],
+//           ),
+//         ),
+//         // Options menu button
+//         IconButton(
+//           icon: Icon(
+//             Icons.more_horiz,
+//             color: isDark ? Colors.grey[400] : Colors.grey[600],
+//             size: 22,
+//           ),
+//           onPressed: () => _showOptionsMenu(author['_id']),
+//         ),
+//       ],
+//     ),
+//   );
+// }
+
+// // Helper widget for dot separator
+// Widget _buildDotSeparator(bool isDark) {
+//   return Container(
+//     width: 4,
+//     height: 4,
+//     decoration: BoxDecoration(
+//       color: isDark ? Colors.grey[400] : Colors.grey[600],
+//       shape: BoxShape.circle,
+//     ),
+//   );
+// }
+
+// // Options menu handler
+// void _showOptionsMenu(String? authorId) {
+//   if (authorId == currentUserId) {
+//     showModalBottomSheet(
+//       context: context,
+//       builder: (context) => SafeArea(
+//         child: Column(
+//           mainAxisSize: MainAxisSize.min,
+//           children: [
+//             ListTile(
+//               leading: const Icon(Icons.edit, color: Colors.blue),
+//               title: const Text('Edit Post'),
+//               onTap: () {
+//                 Navigator.pop(context);
+//                 Navigator.push(
+//                   context,
+//                   MaterialPageRoute(
+//                     builder: (context) => CreatePost(
+//                       isEditing: true,
+//                       postData: widget.post,
+//                     ),
+//                   ),
+//                 );
+//               },
+//             ),
+//             ListTile(
+//               leading: const Icon(Icons.delete, color: Colors.red),
+//               title: const Text('Delete Post'),
+//               onTap: () {
+//                 Navigator.pop(context);
+//                 _showDeleteConfirmation(widget.post['_id']);
+//               },
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   } else {
+//     showModalBottomSheet(
+//       context: context,
+//       builder: (context) => SafeArea(
+//         child: Column(
+//           mainAxisSize: MainAxisSize.min,
+//           children: [
+//             ListTile(
+//               leading: const Icon(Icons.report, color: Colors.orange),
+//               title: const Text('Report Post'),
+//               onTap: () {
+//                 Navigator.pop(context);
+//                 _showReportDialog(widget.post['_id']);
+//               },
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+// claude's version (fixed by grok which further refined by chatgpt)
   Widget _buildUserInfo(bool isDark, String formattedDate) {
     final isSocietyPost = widget.post['society'] != null &&
         widget.post['society']['name'] != null;
     final societyName = isSocietyPost ? widget.post['society']['name'] : '';
     final author = widget.post['author'] ?? {};
 
+    final departmentName = widget.flairType == Flairs.university.value
+        ? (widget.post['author']['university']?['universityId']?['name']
+                ?.toString() ??
+            '')
+        : (widget.post['author']?['university']?['departmentId']?['name']
+                ?.toString() ??
+            '');
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
       child: Row(
         children: [
           GestureDetector(
@@ -211,20 +481,42 @@ class _PostCardState extends ConsumerState<PostCard> {
                         );
                       }
                     : null,
-            child: CircleAvatar(
-              radius: 18,
-              backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
-              backgroundImage: author['profile'] != null
-                  ? NetworkImage(author['profile']['picture'] ?? '')
-                  : const AssetImage('assets/default_profile_picture.png')
-                      as ImageProvider,
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.blue.withOpacity(0.8),
+                    Colors.purple.withOpacity(0.8),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(2),
+              child: CircleAvatar(
+                radius: 18,
+                backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
+                backgroundImage: author['profile'] != null
+                    ? NetworkImage(author['profile']['picture'] ?? '')
+                    : const AssetImage('assets/default_profile_picture.png')
+                        as ImageProvider,
+              ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // First line: Name, department (if applicable), and society
                 Row(
                   children: [
                     GestureDetector(
@@ -243,52 +535,73 @@ class _PostCardState extends ConsumerState<PostCard> {
                       child: Text(
                         author['name'] ?? '{Deleted}',
                         style: TextStyle(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                           fontSize: 12,
                           color: isDark ? Colors.white : Colors.black,
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 3),
-                      child: Text(
-                        widget.flairType == Flairs.university.value
-                            ? (widget.post['author']['university']
-                                        ?['universityId']?['name']
-                                    ?.toString() ??
-                                '')
-                            : (widget.post['author']?['university']
-                                        ?['departmentId']?['name']
-                                    ?.toString() ??
-                                ''),
-                        overflow: TextOverflow.ellipsis,
+                    if (!isSocietyPost && departmentName.isNotEmpty) ...[
+                      const SizedBox(width: 6),
+                      Text(
+                        departmentName,
                         style: const TextStyle(
                           color: Colors.lightBlueAccent,
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
                         ),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
+                    ],
                     if (isSocietyPost) ...[
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.arrow_right,
-                        size: 16,
-                        color: isDark ? Colors.white : Colors.black,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        societyName,
+                      const SizedBox(width: 8),
+                      const Text(
+                        "➤ ",
                         style: TextStyle(
-                          fontWeight: FontWeight.w600,
                           fontSize: 12,
-                          color: isDark ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.blue.withOpacity(0.1),
+                              Colors.purple.withOpacity(0.1),
+                            ],
+                          ),
+                          border: Border.all(
+                            color: Colors.blue.withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.group,
+                                size: 12, color: Colors.blue.shade600),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                societyName,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 11,
+                                  color: Colors.blue.shade700,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ],
                 ),
-                const SizedBox(height: 1),
+                const SizedBox(height: 2),
+                // Username and Date (no containers)
                 Row(
                   children: [
                     GestureDetector(
@@ -307,8 +620,9 @@ class _PostCardState extends ConsumerState<PostCard> {
                       child: Text(
                         '@${author['username'] ?? ''}',
                         style: TextStyle(
-                          color: isDark ? Colors.grey[400] : Colors.grey[600],
+                          color: isDark ? Colors.grey[300] : Colors.grey[700],
                           fontSize: 10,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
@@ -317,12 +631,24 @@ class _PostCardState extends ConsumerState<PostCard> {
                       width: 4,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.blue.withOpacity(0.6),
+                            Colors.purple.withOpacity(0.6),
+                          ],
+                        ),
                         shape: BoxShape.circle,
                       ),
                     ),
                     const SizedBox(width: 8),
-                    DateBadge(date: formattedDate),
+                    Text(
+                      formattedDate,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: isDark ? Colors.grey[300] : Colors.grey[700],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -331,7 +657,7 @@ class _PostCardState extends ConsumerState<PostCard> {
           IconButton(
             icon: Icon(
               Icons.more_horiz,
-              color: isDark ? Colors.white : Colors.black,
+              color: isDark ? Colors.grey[400] : Colors.grey[600],
               size: 20,
             ),
             onPressed: () async {
@@ -398,6 +724,7 @@ class _PostCardState extends ConsumerState<PostCard> {
     );
   }
 
+///////////////////////////////////////////////
   Widget _buildPostContent(bool isDark) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -1006,7 +1333,10 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  DateBadge(date: formattedDate),
+                  DateBadge(
+                    date: formattedDate,
+                    fontSize: 10,
+                  ),
                 ],
               ),
             ],

@@ -1,32 +1,32 @@
+import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 
-import 'package:socian/core/utils/constants.dart';
-import 'package:socian/pages/explore/SocietyProvider.dart';
-import 'package:socian/shared/services/api_client.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:video_player/video_player.dart';
-import 'package:record/record.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
-import 'dart:io';
-import 'widgets/user_info_section.dart';
+import 'package:record/record.dart';
+import 'package:socian/core/utils/constants.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/pages/explore/SocietyProvider.dart';
+import 'package:socian/shared/services/api_client.dart';
+import 'package:video_player/video_player.dart';
+
+import 'widgets/location_section.dart';
+import 'widgets/media_controls.dart';
+import 'widgets/media_preview.dart';
 import 'widgets/post_type_selector.dart';
 import 'widgets/society_selector.dart';
-import 'widgets/location_section.dart';
-import 'widgets/media_preview.dart';
+import 'widgets/user_info_section.dart';
 import 'widgets/voice_note_section.dart';
-import 'widgets/media_controls.dart';
-import 'dart:async';
-import 'package:http_parser/http_parser.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 enum PostType { personal, society }
 
@@ -112,32 +112,31 @@ class _CreatePostState extends ConsumerState<CreatePost> {
     super.dispose();
   }
 
-Future<void> _pickMultipleMedia() async {
-  try {
-    final result = await FilePicker.platform.pickFiles(
-      allowMultiple: true,
-      type: FileType.custom,
-      allowedExtensions: ['jpg', 'png', 'mp4', 'mov'], // add more if needed
-      withData: true
-    );
+  Future<void> _pickMultipleMedia() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+          allowMultiple: true,
+          type: FileType.custom,
+          allowedExtensions: ['jpg', 'png', 'mp4', 'mov'], // add more if needed
+          withData: true);
 
-    if (result != null && result.files.isNotEmpty) {
-      setState(() {
-        _mediaFiles.addAll(result.files.map((f) => File(f.path!)));
-        for (var file in result.files) {
-          if (file.extension == 'mp4' || file.extension == 'mov') {
-            _initializeVideoController(File(file.path!));
+      if (result != null && result.files.isNotEmpty) {
+        setState(() {
+          _mediaFiles.addAll(result.files.map((f) => File(f.path!)));
+          for (var file in result.files) {
+            if (file.extension == 'mp4' || file.extension == 'mov') {
+              _initializeVideoController(File(file.path!));
+            }
           }
-        }
-      });
+        });
+      }
+    } catch (e) {
+      debugPrint('Error picking multiple files: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error picking multiple files: $e')),
+      );
     }
-  } catch (e) {
-    debugPrint('Error picking multiple files: $e');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error picking multiple files: $e')),
-    );
   }
-}
 
   Future<void> _pickMedia(ImageSource source, bool isVideo) async {
     try {
@@ -588,6 +587,7 @@ Future<void> _pickMultipleMedia() async {
 
     return Scaffold(
       backgroundColor: isDark ? Colors.black : Colors.white,
+      // backgroundColor: Colors.red,
       appBar: AppBar(
         backgroundColor: isDark ? Colors.black : Colors.white,
         elevation: 0,
@@ -642,15 +642,15 @@ Future<void> _pickMultipleMedia() async {
             UserInfoSection(
               postType: _postType,
               selectedLocation: _selectedLocation,
-              onLocationSelected: _selectLocation,
-              onLocationCleared: () {
-                setState(() {
-                  _selectedLocation = null;
-                  _currentPosition = null;
-                  _markers = {};
-                  _showMap = false;
-                });
-              },
+              // onLocationSelected: _selectLocation,
+            //   onLocationCleared: () {
+            //     setState(() {
+            //       _selectedLocation = null;
+            //       _currentPosition = null;
+            //       _markers = {};
+            //       _showMap = false;
+            //     });
+            //   },
             ),
             PostTypeSelector(
               selectedType: _postType,
