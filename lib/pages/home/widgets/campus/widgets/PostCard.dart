@@ -57,7 +57,7 @@ class DateBadge extends StatelessWidget {
 
   const DateBadge({
     super.key,
-    required this.date,
+    required this.date, required int fontSize,
   });
 
   @override
@@ -285,7 +285,7 @@ class _PostCardState extends State<PostCard> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  DateBadge(date: formattedDate),
+                  DateBadge(date: formattedDate, fontSize: 10,),
                 ],
               ),
             ],

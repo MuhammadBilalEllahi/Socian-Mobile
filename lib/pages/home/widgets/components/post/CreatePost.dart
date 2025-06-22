@@ -575,7 +575,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
     final societiesState = ref.watch(societiesProvider);
     final societies = [
       ...societiesState.subscribedSocieties,
-      ...societiesState.publicSocieties,
+      // ...societiesState.publicSocieties,
     ];
     final uniqueSocieties = {for (var s in societies) s.id: s}.values.toList();
     final societyList = uniqueSocieties
@@ -643,14 +643,14 @@ class _CreatePostState extends ConsumerState<CreatePost> {
               postType: _postType,
               selectedLocation: _selectedLocation,
               // onLocationSelected: _selectLocation,
-            //   onLocationCleared: () {
-            //     setState(() {
-            //       _selectedLocation = null;
-            //       _currentPosition = null;
-            //       _markers = {};
-            //       _showMap = false;
-            //     });
-            //   },
+              //   onLocationCleared: () {
+              //     setState(() {
+              //       _selectedLocation = null;
+              //       _currentPosition = null;
+              //       _markers = {};
+              //       _showMap = false;
+              //     });
+              //   },
             ),
             PostTypeSelector(
               selectedType: _postType,
@@ -742,24 +742,24 @@ class _CreatePostState extends ConsumerState<CreatePost> {
                   _isVoiceSelected ? _startRecording : _selectVoice,
               onVoiceNoteStop: _stopRecording,
               isRecording: _isRecording,
-              showMap: _showMap,
-              onMapToggle: () {
-                if (_postType == PostType.society) {
-                  setState(() {
-                    if (!_showMap) {
-                      _mediaFiles.clear();
-                      for (var controller in _videoControllers.values) {
-                        controller.dispose();
-                      }
-                      _videoControllers.clear();
-                      _voiceNote = null;
-                      _isPlaying = false;
-                      _isVoiceSelected = false;
-                    }
-                    _showMap = !_showMap;
-                  });
-                }
-              },
+              // showMap: _showMap,
+              // onMapToggle: () {
+              //   if (_postType == PostType.society) {
+              //     setState(() {
+              //       if (!_showMap) {
+              //         _mediaFiles.clear();
+              //         for (var controller in _videoControllers.values) {
+              //           controller.dispose();
+              //         }
+              //         _videoControllers.clear();
+              //         _voiceNote = null;
+              //         _isPlaying = false;
+              //         _isVoiceSelected = false;
+              //       }
+              //       _showMap = !_showMap;
+              //     });
+              //   }
+              // },
               postType: _postType,
               mediaFiles: _mediaFiles,
               voiceNote: _voiceNote,
