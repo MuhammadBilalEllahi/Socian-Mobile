@@ -606,31 +606,35 @@ class _CreatePostState extends ConsumerState<CreatePost> {
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: _isLoading ? null : _createPost,
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              backgroundColor: isDark ? Colors.white : Colors.black,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextButton(
+              onPressed: _isLoading ? null : _createPost,
+              style: TextButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                backgroundColor: isDark ? Colors.white : Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
+              child: _isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.black,
+                      ),
+                    )
+                  : Text(
+                      widget.isEditing ? 'Update' : 'Post',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: isDark ? Colors.black : Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
             ),
-            child: _isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.black,
-                    ),
-                  )
-                : Text(
-                    widget.isEditing ? 'Update' : 'Post',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: isDark ? Colors.black : Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
           ),
         ],
       ),

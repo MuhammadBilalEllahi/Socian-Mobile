@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
+
 import '../CreatePost.dart';
-import 'location_text_selector.dart';
 
 class UserInfoSection extends ConsumerWidget {
   final PostType postType;
@@ -33,6 +33,7 @@ class UserInfoSection extends ConsumerWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final user = ref.watch(authProvider).user;
+    final auth = ref.read(authProvider);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -41,20 +42,27 @@ class UserInfoSection extends ConsumerWidget {
         children: [
           Row(
             children: [
+              // CircleAvatar(
+              //   radius: 20,
+              //   backgroundImage: user?['photoUrl'] != null
+              //       // ? NetworkImage(user!['profile']?['picture'] as String)
+              //       ? NetworkImage(auth.user?['profile']?['picture'])
+              //       : null,
+              //   child: user?['photoUrl'] == null
+              //       ? Text(
+              //           (user?['name'] as String?)?[0].toUpperCase() ?? 'U',
+              //           style: theme.textTheme.titleMedium?.copyWith(
+              //             color: theme.colorScheme.onPrimary,
+              //             fontWeight: FontWeight.w600,
+              //           ),
+              //         )
+              //       : null,
+              // ),
+
               CircleAvatar(
                 radius: 20,
-                backgroundImage: user?['photoUrl'] != null
-                    ? NetworkImage(user!['photoUrl'] as String)
-                    : null,
-                child: user?['photoUrl'] == null
-                    ? Text(
-                        (user?['name'] as String?)?[0].toUpperCase() ?? 'U',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: theme.colorScheme.onPrimary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      )
-                    : null,
+                backgroundImage:
+                    NetworkImage(auth.user?['profile']?['picture']),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -79,7 +87,6 @@ class UserInfoSection extends ConsumerWidget {
               ),
             ],
           ),
-
 
           // if (postType == PostType.personal) ...[
           //   const SizedBox(height: 12),
@@ -129,18 +136,12 @@ class UserInfoSection extends ConsumerWidget {
           //         ],
           //       ),
 
-
           //     ),
           //   ),
 
-
           // ],
-
-
-
-
         ],
       ),
     );
   }
-} 
+}

@@ -187,7 +187,7 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage>
               SliverAppBar(
                 backgroundColor: background,
                 title: Text(
-                  'Connections',
+                  'Updates',
                   style: TextStyle(
                     color: foreground,
                     fontSize: 24,

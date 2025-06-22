@@ -25,7 +25,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 2),
+      duration: const Duration(seconds: 3),
     );
     _animationController.forward();
     Future.delayed(const Duration(seconds: 3), () {
@@ -88,7 +88,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             ),
           ),
           AnimatedPositioned(
-            duration: const Duration(seconds: 2),
+            duration: const Duration(seconds: 3),
             top:
                 _moveToTop ? 120 : MediaQuery.of(context).size.height / 2 - 100,
             left: 0,
@@ -99,7 +99,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 Text(
                   AppConstants.appName,
                   style: TextStyle(
-                    fontSize: 66,
+                    fontSize: 40,
                     fontWeight: FontWeight.bold,
                     color: isDarkMode ? Colors.white : Colors.black87,
                     letterSpacing: 1.2,
