@@ -98,7 +98,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
       // Handle each API call independently to prevent one failure from breaking the entire profile
       Map<String, dynamic>? profileResponse;
       Map<String, dynamic>? societiesResponse;
-      Map<String, dynamic>? moderatedSocietiesResponse;
+      List<dynamic>? moderatedSocietiesResponse;
       Map<String, dynamic>? connectionsResponse;
       Map<String, dynamic>? papersResponse;
 
@@ -124,6 +124,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
         moderatedSocietiesResponse = await _apiClient.get(
             '/api/user/moderated-societies',
             queryParameters: {'id': userId});
+        debugPrint('Moderated societies response: $moderatedSocietiesResponse');
       } catch (e) {
         debugPrint('Error fetching moderated societies: $e');
       }
@@ -161,13 +162,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
         // Set other data if available, otherwise use empty defaults
         _societies =
             (societiesResponse?['joinedSocieties'] as List<dynamic>?) ?? [];
-        _moderatedSocieties =
-            (moderatedSocietiesResponse as List<dynamic>?) ?? [];
+        _moderatedSocieties = moderatedSocietiesResponse ?? [];
         _connections =
             (connectionsResponse?['connections'] as List<dynamic>?) ?? [];
         _uploadedPapers = (papersResponse?['data']?['profile']
                 ?['papersUploaded'] as List<dynamic>?) ??
             [];
+
+        // Log for debugging
+        debugPrint('Subscribed societies: $_societies');
+        debugPrint('Moderated societies: $_moderatedSocieties');
 
         // Update basic profile if detailed data is available
         if (hasProfileData) {

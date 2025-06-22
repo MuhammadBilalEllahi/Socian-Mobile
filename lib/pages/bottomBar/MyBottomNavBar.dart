@@ -23,13 +23,17 @@ class MyBottomNavBar extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: isDark ? Colors.black.withOpacity(0.3) : Colors.black.withOpacity(0.05),
+            color: isDark
+                ? Colors.black.withOpacity(0.3)
+                : Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
+          color: isDark
+              ? Colors.white.withOpacity(0.1)
+              : Colors.black.withOpacity(0.05),
           width: 1,
         ),
       ),
@@ -40,7 +44,9 @@ class MyBottomNavBar extends StatelessWidget {
           backgroundColor: Colors.transparent,
           elevation: 0,
           selectedItemColor: isDark ? Colors.white : Colors.black,
-          unselectedItemColor: isDark ? Colors.white.withOpacity(0.5) : Colors.black.withOpacity(0.5),
+          unselectedItemColor: isDark
+              ? Colors.white.withOpacity(0.5)
+              : Colors.black.withOpacity(0.5),
           selectedFontSize: 12,
           unselectedFontSize: 12,
           showUnselectedLabels: true,
@@ -55,10 +61,10 @@ class MyBottomNavBar extends StatelessWidget {
             ),
             BottomNavigationBarItem(
               icon: Icon(
-                Icons.chat_bubble_rounded,
+                Icons.security_update_good_outlined,
                 size: selectedIndex == 1 ? selectedIconSize : iconSize,
               ),
-              label: 'Messages',
+              label: 'Updates',
             ),
             BottomNavigationBarItem(
               icon: Icon(

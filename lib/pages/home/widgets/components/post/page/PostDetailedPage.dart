@@ -35,7 +35,8 @@ class _PostDetailedPageState extends State<PostDetailedPage> {
     final accent = isDark ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
 
     return Scaffold(
-      backgroundColor: background,
+      // backgroundColor: background,
+      backgroundColor: Colors.red,
       appBar: AppBar(
         backgroundColor: background,
         elevation: 0,
@@ -121,7 +122,10 @@ class _PostDetailedPageState extends State<PostDetailedPage> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  DateBadge(date: formattedDate),
+                  DateBadge(
+                    date: formattedDate,
+                    fontSize: 10,
+                  ),
                 ],
               ),
             ],

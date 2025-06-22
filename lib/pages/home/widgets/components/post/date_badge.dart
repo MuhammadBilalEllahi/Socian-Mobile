@@ -5,7 +5,7 @@ class DateBadge extends StatelessWidget {
 
   const DateBadge({
     super.key,
-    required this.date,
+    required this.date, required int fontSize,
   });
 
   @override
