@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -43,6 +45,13 @@ class _SocietyVerificationState extends State<SocietyVerification> {
   // Society and Moderator Lists
   List<Map<String, dynamic>> _moderators = [];
   bool _isLoadingData = true;
+
+  // Verification Status
+  bool _hasExistingRequest = false;
+  Map<String, dynamic>? _existingRequest;
+  bool _societyAlreadyVerified = false;
+  bool _isUpdateMode = false;
+  bool _canSubmitNew = true;
 
   // Verification Requirements
   final Map<String, bool> _requirements = {
@@ -96,13 +105,62 @@ class _SocietyVerificationState extends State<SocietyVerification> {
 
   Future<void> _loadInitialData() async {
     try {
-      final moderatorsResponse =
-          await _apiClient.get('/api/user/campus-moderators');
+      // Load moderators and verification status in parallel
+      log('Loading initial data ${widget.societyId}');
+      final futures = await Future.wait([
+        _apiClient.get('/api/user/campus-moderators'),
+        widget.societyId != null
+            ? _apiClient
+                .get('/api/society/verification-status/${widget.societyId}')
+            : Future.value(null),
+      ]);
+
+      final moderatorsResponse = futures[0] as Map<String, dynamic>;
+      final verificationStatusResponse = futures[1] as Map<String, dynamic>?;
 
       if (mounted) {
         setState(() {
           _moderators = List<Map<String, dynamic>>.from(
               moderatorsResponse['moderators'] ?? []);
+
+          // Handle verification status
+          if (verificationStatusResponse != null) {
+            _hasExistingRequest =
+                verificationStatusResponse['hasRequest'] ?? false;
+            _societyAlreadyVerified =
+                verificationStatusResponse['societyVerified'] ?? false;
+            _canSubmitNew = verificationStatusResponse['canSubmitNew'] ?? true;
+            _existingRequest = verificationStatusResponse['request'];
+
+            // If there's an existing request, populate the form with its data
+            if (_hasExistingRequest && _existingRequest != null) {
+              final status = _existingRequest!['status'] as String;
+
+              // Allow updates only for pending and under_review requests
+              _isUpdateMode = (status == 'pending' || status == 'under_review');
+
+              // If request is rejected, allow new submission (don't populate form)
+              if (status != 'rejected') {
+                _selectedModerator =
+                    _existingRequest!['assignedCampusModerator']?['_id'];
+                _communityVoting =
+                    _existingRequest!['communityVoting'] ?? false;
+                _commentsController.text = _existingRequest!['comments'] ?? '';
+
+                // Update requirements from existing request
+                final existingRequirements =
+                    _existingRequest!['requirements'] as Map<String, dynamic>?;
+                if (existingRequirements != null) {
+                  existingRequirements.forEach((key, value) {
+                    if (_requirements.containsKey(key)) {
+                      _requirements[key] = value ?? false;
+                    }
+                  });
+                }
+              }
+            }
+          }
+
           _isLoadingData = false;
         });
       }
@@ -261,10 +319,85 @@ class _SocietyVerificationState extends State<SocietyVerification> {
   }
 
   bool get _isFormValid {
+    // If society is already verified, disable form
+    if (_societyAlreadyVerified) return false;
+
+    // If there's an existing request but cannot submit new, disable form
+    if (_hasExistingRequest &&
+        _existingRequest != null &&
+        !_canSubmitNew &&
+        !_isUpdateMode) {
+      return false;
+    }
+
+    // In update mode, allow updates with new content
+    if (_isUpdateMode) {
+      final hasNewCustomDocuments = _customDocuments.isNotEmpty;
+      final hasNewRequirements = _hasNewRequirements();
+      final hasNewComments = _hasNewComments();
+      return hasNewCustomDocuments || hasNewRequirements || hasNewComments;
+    }
+
+    // For new requests (including after rejection)
     final hasBasicRequirements = _requirements.values.any((req) => req);
     final hasCustomDocuments = _customDocuments.isNotEmpty;
     return (hasBasicRequirements || hasCustomDocuments) &&
         _selectedSocietyId != null;
+  }
+
+  bool _hasNewRequirements() {
+    if (_existingRequest == null) return false;
+
+    final existingRequirements =
+        _existingRequest!['requirements'] as Map<String, dynamic>?;
+    if (existingRequirements == null) return true;
+
+    // Check if any requirement is being set from false to true
+    return _requirements.entries.any((entry) {
+      final current = entry.value;
+      final existing = existingRequirements[entry.key] ?? false;
+      return current && !existing; // New requirement being added
+    });
+  }
+
+  bool _hasNewComments() {
+    if (_existingRequest == null) return true;
+
+    final existingComments = _existingRequest!['comments'] as String? ?? '';
+    final currentComments = _commentsController.text.trim();
+
+    // Allow if comments are longer (expanding) or if no existing comments
+    return currentComments.isNotEmpty &&
+        (existingComments.isEmpty ||
+            currentComments.length > existingComments.length);
+  }
+
+  String _getSubmitButtonText() {
+    if (_societyAlreadyVerified) {
+      return 'Society Already Verified';
+    }
+
+    if (_isUpdateMode) {
+      return 'Update Verification Request';
+    }
+
+    if (_hasExistingRequest && _existingRequest != null) {
+      final status = _existingRequest!['status'] as String;
+      switch (status) {
+        case 'pending':
+          return 'Request Already Submitted';
+        case 'under_review':
+          return 'Request Under Review';
+        case 'rejected':
+          return 'Submit New Verification Request';
+        case 'approved':
+          return 'Request Already Approved';
+        default:
+          return 'Submit Verification Request';
+      }
+    }
+
+    return 'Submit Verification Request';
   }
 
   Future<void> _submitVerificationRequest() async {
@@ -274,8 +407,13 @@ class _SocietyVerificationState extends State<SocietyVerification> {
     }
 
     if (!_isFormValid) {
-      _showErrorSnackBar(
-          'Please upload at least one verification document or custom document');
+      if (_isUpdateMode) {
+        _showErrorSnackBar(
+            'Please add new documents, requirements, or expand comments to strengthen your request');
+      } else {
+        _showErrorSnackBar(
+            'Please upload at least one verification document or custom document');
+      }
       return;
     }
 
@@ -284,26 +422,25 @@ class _SocietyVerificationState extends State<SocietyVerification> {
     });
 
     try {
-      // Create FormData for file uploads
-      final formData = <String, dynamic>{
-        'societyId': _selectedSocietyId,
-        'moderatorId': _selectedModerator,
-        'communityVoting': _communityVoting,
-        'comments': _commentsController.text.trim(),
-        'requirements': _requirements,
-        'customDocumentNames': _customDocumentNames,
-      };
-
-      // In a real implementation, you would upload files separately
-      // For now, we'll just send the form data
-      await _apiClient.post('/api/society/verification-request', formData);
+      if (_isUpdateMode) {
+        // Update existing request
+        await _updateVerificationRequest();
+      } else {
+        // Create new request (including after rejection)
+        await _createVerificationRequest();
+      }
 
       if (mounted) {
         _showSuccessDialog();
       }
     } catch (e) {
+      final actionType = _isUpdateMode
+          ? "update"
+          : (_hasExistingRequest && _existingRequest?['status'] == 'rejected')
+              ? "resubmit"
+              : "submit";
       _showErrorSnackBar(
-          'Failed to submit verification request: ${e.toString()}');
+          'Failed to $actionType verification request: ${e.toString()}');
     } finally {
       if (mounted) {
         setState(() {
@@ -313,7 +450,92 @@ class _SocietyVerificationState extends State<SocietyVerification> {
     }
   }
 
+  Future<void> _createVerificationRequest() async {
+    final formData = <String, dynamic>{
+      'societyId': _selectedSocietyId,
+      'moderatorId': _selectedModerator,
+      'communityVoting': _communityVoting.toString(),
+      'comments': _commentsController.text.trim(),
+      'requirements': jsonEncode(_requirements),
+      'customDocumentNames': jsonEncode(_customDocumentNames),
+    };
+
+    // Add files to form data if they exist
+    if (_registrationCertificate != null) {
+      formData['registrationCertificate'] = _registrationCertificate;
+    }
+
+    if (_eventPicture != null) {
+      formData['eventPicture'] = _eventPicture;
+    }
+
+    if (_advisorEmailScreenshot != null) {
+      formData['advisorEmailScreenshot'] = _advisorEmailScreenshot;
+    }
+
+    if (_customDocuments.isNotEmpty) {
+      formData['customDocuments'] = _customDocuments;
+    }
+
+    await _apiClient.postFormData(
+        '/api/society/verification-request', formData);
+  }
+
+  Future<void> _updateVerificationRequest() async {
+    if (_existingRequest == null) return;
+
+    final requestId = _existingRequest!['id'];
+    final formData = <String, dynamic>{
+      'communityVoting': _communityVoting.toString(),
+      'comments': _commentsController.text.trim(),
+      'requirements': jsonEncode(_requirements),
+      'customDocumentNames': jsonEncode(_customDocumentNames),
+    };
+
+    // Add new files for strengthening the request
+    if (_registrationCertificate != null) {
+      formData['registrationCertificate'] = _registrationCertificate;
+    }
+
+    if (_eventPicture != null) {
+      formData['eventPicture'] = _eventPicture;
+    }
+
+    if (_advisorEmailScreenshot != null) {
+      formData['advisorEmailScreenshot'] = _advisorEmailScreenshot;
+    }
+
+    if (_customDocuments.isNotEmpty) {
+      formData['customDocuments'] = _customDocuments;
+    }
+
+    await _apiClient.putFormData(
+        '/api/society/verification-request/$requestId', formData);
+  }
+
   void _showSuccessDialog() {
+    final isUpdate = _isUpdateMode;
+    final isResubmission = _hasExistingRequest &&
+        _existingRequest?['status'] == 'rejected' &&
+        !isUpdate;
+
+    String title;
+    String message;
+
+    if (isUpdate) {
+      title = 'Request Updated';
+      message =
+          'Your society verification request has been updated successfully with additional information. This strengthens your verification case.';
+    } else if (isResubmission) {
+      title = 'Request Resubmitted';
+      message =
+          'Your new verification request has been submitted successfully. We hope you have addressed the previous feedback. You will be notified about the status updates.';
+    } else {
+      title = 'Request Submitted';
+      message =
+          'Your society verification request has been submitted successfully. You will be notified about the status updates.';
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -329,7 +551,7 @@ class _SocietyVerificationState extends State<SocietyVerification> {
             const Icon(Icons.check_circle, color: Colors.green, size: 28),
             const SizedBox(width: 12),
             Text(
-              'Request Submitted',
+              title,
               style: TextStyle(
                 color: _colors['fg'],
                 fontWeight: FontWeight.w600,
@@ -339,7 +561,7 @@ class _SocietyVerificationState extends State<SocietyVerification> {
           ],
         ),
         content: Text(
-          'Your society verification request has been submitted successfully. You will be notified about the status updates.',
+          message,
           style: TextStyle(
             color: _colors['muted'],
             fontSize: 16,
@@ -414,6 +636,12 @@ class _SocietyVerificationState extends State<SocietyVerification> {
                   children: [
                     _buildHeaderCard(),
                     const SizedBox(height: 24),
+                    // Show existing request status if applicable
+                    if (_societyAlreadyVerified) _buildVerifiedStatusCard(),
+                    if (_hasExistingRequest && !_societyAlreadyVerified)
+                      _buildExistingRequestCard(),
+                    if (_hasExistingRequest || _societyAlreadyVerified)
+                      const SizedBox(height: 24),
                     _buildVerificationRequirementsCard(),
                     const SizedBox(height: 24),
                     _buildContactInformationCard(),
@@ -474,7 +702,9 @@ class _SocietyVerificationState extends State<SocietyVerification> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Verify Your Society',
+                      _isUpdateMode
+                          ? 'Strengthen Your Verification'
+                          : 'Verify Your Society',
                       style: TextStyle(
                         color: _colors['fg'],
                         fontSize: 18,
@@ -483,7 +713,9 @@ class _SocietyVerificationState extends State<SocietyVerification> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Get verified with the university community',
+                      _isUpdateMode
+                          ? 'Add more evidence to strengthen your request'
+                          : 'Get verified with the university community',
                       style: TextStyle(
                         color: _colors['muted'],
                         fontSize: 15,
@@ -496,13 +728,318 @@ class _SocietyVerificationState extends State<SocietyVerification> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Submit the required documents and information to verify your society. This process helps ensure authenticity and builds trust within the university community.',
+            _isUpdateMode
+                ? 'Add more evidence to strengthen your request'
+                : (_hasExistingRequest &&
+                        _existingRequest?['status'] == 'rejected' &&
+                        _canSubmitNew)
+                    ? 'Your previous request was rejected. Please review the feedback and submit a new request with improved documentation.'
+                    : 'Submit the required documents and information to verify your society. This process helps ensure authenticity and builds trust within the university community.',
             style: TextStyle(
               color: _colors['muted'],
               fontSize: 14,
               height: 1.4,
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVerifiedStatusCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.green.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.green.withOpacity(0.3), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.verified,
+                  color: Colors.green,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Society Already Verified',
+                      style: TextStyle(
+                        color: Colors.green[700],
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'This society has already been verified',
+                      style: TextStyle(
+                        color: Colors.green[600],
+                        fontSize: 15,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Congratulations! This society has already been verified by the administrators. No further action is required.',
+            style: TextStyle(
+              color: Colors.green[600],
+              fontSize: 14,
+              height: 1.4,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExistingRequestCard() {
+    if (_existingRequest == null) return const SizedBox.shrink();
+
+    final status = _existingRequest!['status'] as String;
+    final processingTime = _existingRequest!['processingTime'] as String? ?? '';
+
+    Color statusColor;
+    IconData statusIcon;
+    String statusText;
+
+    switch (status) {
+      case 'pending':
+        statusColor = Colors.yellow;
+        statusIcon = Icons.pending;
+        statusText = 'Pending Review';
+        break;
+      case 'under_review':
+        statusColor = Colors.blue;
+        statusIcon = Icons.rate_review;
+        statusText = 'Under Review';
+        break;
+      case 'approved':
+        statusColor = Colors.green;
+        statusIcon = Icons.check_circle;
+        statusText = 'Approved';
+        break;
+      case 'rejected':
+        statusColor = Colors.red;
+        statusIcon = Icons.cancel;
+        statusText = 'Rejected';
+        break;
+      default:
+        statusColor = Colors.grey;
+        statusIcon = Icons.help;
+        statusText = 'Unknown Status';
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: statusColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: statusColor.withOpacity(0.3), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  statusIcon,
+                  color: statusColor,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Verification Request Status',
+                      style: TextStyle(
+                        color: statusColor == Colors.yellow
+                            ? Colors.orange[700]
+                            : statusColor,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      statusText,
+                      style: TextStyle(
+                        color: statusColor == Colors.yellow
+                            ? Colors.orange[600]
+                            : statusColor,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Icon(Icons.schedule,
+                  color: statusColor == Colors.yellow
+                      ? Colors.orange[600]
+                      : statusColor,
+                  size: 16),
+              const SizedBox(width: 8),
+              Text(
+                'Processing time: $processingTime',
+                style: TextStyle(
+                  color: statusColor == Colors.yellow
+                      ? Colors.orange[600]
+                      : statusColor,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          if (_existingRequest!['adminReview'] != null &&
+              _existingRequest!['adminReview']['reviewNotes'] != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              'Admin Review:',
+              style: TextStyle(
+                color: statusColor == Colors.yellow
+                    ? Colors.orange[700]
+                    : statusColor,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              _existingRequest!['adminReview']['reviewNotes'],
+              style: TextStyle(
+                color: statusColor == Colors.yellow
+                    ? Colors.orange[600]
+                    : statusColor,
+                fontSize: 14,
+                height: 1.4,
+              ),
+            ),
+          ],
+          if (status == 'rejected' &&
+              _existingRequest!['adminReview'] != null &&
+              _existingRequest!['adminReview']['rejectionReason'] != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              'Rejection Reason:',
+              style: TextStyle(
+                color: Colors.red[700],
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              _existingRequest!['adminReview']['rejectionReason'],
+              style: TextStyle(
+                color: Colors.red[600],
+                fontSize: 14,
+                height: 1.4,
+              ),
+            ),
+          ],
+          if (_isUpdateMode) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.blue.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.edit, color: Colors.blue, size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'You can strengthen this request by adding more documents, requirements, or expanding your comments below.',
+                      style: TextStyle(
+                        color: Colors.blue[700],
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          if (status == 'rejected' && _canSubmitNew) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.green.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.green.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.refresh, color: Colors.green, size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'You can submit a new verification request below. Address the rejection feedback to improve your chances.',
+                      style: TextStyle(
+                        color: Colors.green[700],
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -517,13 +1054,41 @@ class _SocietyVerificationState extends State<SocietyVerification> {
       icon: Icons.checklist,
       children: [
         Text(
-          'You can either provide verification documents below OR upload custom documents in the section below:',
+          _isUpdateMode
+              ? 'Add more documents and requirements to strengthen your verification request:'
+              : 'You can either provide verification documents below OR upload custom documents in the section below:',
           style: TextStyle(
             color: _colors['muted'],
             fontSize: 14,
             fontStyle: FontStyle.italic,
           ),
         ),
+        if (_isUpdateMode) ...[
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.orange.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: Colors.orange.withOpacity(0.3)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.info_outline, color: Colors.orange, size: 16),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Note: Already submitted documents cannot be changed, but you can add new ones.',
+                    style: TextStyle(
+                      color: Colors.orange[700],
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
         const SizedBox(height: 12),
         const SizedBox(height: 16),
         _buildFileUploadTile(
@@ -1179,13 +1744,34 @@ class _SocietyVerificationState extends State<SocietyVerification> {
               ),
             );
           }).toList(),
-          onChanged: (value) {
-            setState(() {
-              _selectedModerator = value;
-              _updateRequirement('moderatorRequest', value != null);
-            });
-          },
+          onChanged: _isUpdateMode && _selectedModerator != null
+              ? null // Disable if already assigned in update mode
+              : (value) {
+                  setState(() {
+                    _selectedModerator = value;
+                    _updateRequirement('moderatorRequest', value != null);
+                  });
+                },
         ),
+        if (_isUpdateMode && _selectedModerator != null) ...[
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const Icon(Icons.lock, color: Colors.grey, size: 16),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Moderator assignment cannot be changed after submission.',
+                  style: TextStyle(
+                    color: _colors['muted'],
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
@@ -1375,7 +1961,7 @@ class _SocietyVerificationState extends State<SocietyVerification> {
                 ],
               )
             : Text(
-                'Submit Verification Request',
+                _getSubmitButtonText(),
                 style: TextStyle(
                   color: _colors['bg'],
                   fontSize: 16,

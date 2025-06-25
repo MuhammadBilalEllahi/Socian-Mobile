@@ -851,6 +851,7 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
         : [];
 
     final showEdit = editable && isModerator;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       children: [
@@ -945,104 +946,180 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
             children: [
               Row(
                 children: [
-                  Expanded(
-                    child: Text(
-                      name,
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w700,
-                        color: colors['fg'],
-                        letterSpacing: 0,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                  Text(
+                    name,
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                      color: colors['fg'],
+                      letterSpacing: -0.5,
+                      height: 1.1,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  if (showEdit)
+                  if (societyData?['verified'] == true) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isDarkMode
+                            ? colors['accent']!.withOpacity(0.1)
+                            : colors['accent']!.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                            color: isDarkMode
+                                ? colors['accent']!.withOpacity(0.2)
+                                : colors['accent']!.withOpacity(0.2)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.verified,
+                              color: isDarkMode
+                                  ? colors['accent']!.withOpacity(0.8)
+                                  : colors['accent']!.withOpacity(0.8),
+                              size: 14),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Verified',
+                            style: TextStyle(
+                              color: isDarkMode
+                                  ? colors['accent']!.withOpacity(0.8)
+                                  : colors['accent']!.withOpacity(0.8),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  if (showEdit) ...[
+                    const SizedBox(width: 8),
                     _MinimalIconButton(
                       icon: Icons.edit,
                       color: colors['accent']!,
                       onTap: _showEditNameDescriptionDialog,
                     ),
+                  ],
                 ],
               ),
               const SizedBox(height: 10),
               if (description.isNotEmpty)
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Padding(
+                  padding: const EdgeInsets.only(right: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              description,
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: colors['muted'],
+                                height: 1.6,
+                                fontWeight: FontWeight.w400,
+                                letterSpacing: -0.1,
+                              ),
+                            ),
+                          ),
+                          if (showEdit) ...[
+                            const SizedBox(width: 8),
+                            _MinimalIconButton(
+                              icon: Icons.edit,
+                              color: colors['accent']!,
+                              onTap: _showEditNameDescriptionDialog,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              if (description.isNotEmpty) const SizedBox(height: 18),
+              Padding(
+                padding: const EdgeInsets.only(right: 24),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: colors['border']!.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child:
+                          Icon(Icons.group, size: 16, color: colors['muted']),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      '$members members',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: colors['muted'],
+                        letterSpacing: -0.1,
+                      ),
+                    ),
+                    if (!isModerator) ...[
+                      const Spacer(),
+                      _MinimalButton(
+                        icon: isMember ? Icons.check : Icons.add,
+                        label: isMember ? 'Joined' : 'Join',
+                        colors: colors,
+                        onTap: toggleMembership,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 28),
+              Padding(
+                padding: const EdgeInsets.only(right: 24),
+                child: Row(
                   children: [
                     Expanded(
                       child: Text(
-                        '❝$description❞',
+                        'Moderators',
                         style: TextStyle(
-                          fontSize: 16,
-                          color: colors['muted'],
-                          height: 1.5,
-                          fontWeight: FontWeight.w400,
-                          letterSpacing: 0,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                          color: colors['fg'],
+                          letterSpacing: -0.3,
                         ),
                       ),
                     ),
                     if (showEdit)
-                      _MinimalIconButton(
-                        icon: Icons.edit,
-                        color: colors['accent']!,
-                        onTap: _showEditNameDescriptionDialog,
+                      GestureDetector(
+                        onTap: _showAddModeratorDialog,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: colors['border']!.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(6),
+                            border:
+                                Border.all(color: colors['border']!, width: 1),
+                          ),
+                          child: Icon(
+                            Icons.add,
+                            color: colors['accent'],
+                            size: 16,
+                          ),
+                        ),
                       ),
                   ],
                 ),
-              if (description.isNotEmpty) const SizedBox(height: 18),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Icon(Icons.group, size: 20, color: colors['muted']),
-                  const SizedBox(width: 8),
-                  Text(
-                    '$members members',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
-                      color: colors['muted'],
-                      letterSpacing: 0,
-                    ),
-                  ),
-                  if (!isModerator) ...[
-                    const Spacer(),
-                    _MinimalButton(
-                      icon: isMember ? Icons.remove : Icons.add_circle,
-                      label: isMember ? 'Leave' : 'Join',
-                      colors: colors,
-                      onTap: toggleMembership,
-                    ),
-                  ],
-                ],
-              ),
-              const SizedBox(height: 28),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Moderators',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: colors['fg'],
-                        letterSpacing: 0,
-                      ),
-                    ),
-                  ),
-                  if (showEdit)
-                    _MinimalIconButton(
-                      icon: Icons.add,
-                      color: colors['accent']!,
-                      onTap: _showAddModeratorDialog,
-                    ),
-                ],
               ),
               const SizedBox(height: 12),
               moderators.isNotEmpty
                   ? SizedBox(
-                      height: 120,
+                      height: 60,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         itemCount: moderators.length,
@@ -1054,7 +1131,7 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                           final modImage = moderator?['profile']?['picture'];
                           final modId = moderator?['_id']?.toString();
                           return Padding(
-                            padding: const EdgeInsets.only(right: 12),
+                            padding: const EdgeInsets.only(right: 10),
                             child: GestureDetector(
                               onTap: modId != null
                                   ? () {
@@ -1068,62 +1145,87 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                                     }
                                   : null,
                               child: Container(
-                                width: 150,
+                                // width: 160,
+
                                 decoration: BoxDecoration(
                                   color: colors['bg'],
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
                                     color: colors['border']!,
                                     width: 1,
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: colors['muted']!.withOpacity(0.2),
-                                      blurRadius: 4,
-                                      offset: const Offset(0, 2),
+                                      color: Colors.black.withOpacity(0.02),
+                                      blurRadius: 1,
+                                      offset: const Offset(0, 1),
                                     ),
                                   ],
                                 ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    CircleAvatar(
-                                      radius: 24,
-                                      backgroundImage: modImage != null
-                                          ? NetworkImage(modImage)
-                                          : null,
-                                      backgroundColor: colors['border'],
-                                      child: modImage == null
-                                          ? Icon(
-                                              Icons.person,
-                                              size: 24,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        width: 32,
+                                        height: 32,
+                                        decoration: BoxDecoration(
+                                          color: colors['border']!
+                                              .withOpacity(0.5),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          image: modImage != null
+                                              ? DecorationImage(
+                                                  image: NetworkImage(modImage),
+                                                  fit: BoxFit.cover,
+                                                )
+                                              : null,
+                                        ),
+                                        child: modImage == null
+                                            ? Icon(
+                                                Icons.person,
+                                                size: 20,
+                                                color: colors['muted'],
+                                              )
+                                            : null,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            modName,
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              color: colors['fg'],
+                                              letterSpacing: -0.1,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          // const SizedBox(height: 2),
+                                          Text(
+                                            '@$modUsername',
+                                            style: TextStyle(
+                                              fontSize: 8,
+                                              fontWeight: FontWeight.w400,
                                               color: colors['muted'],
-                                            )
-                                          : null,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      modName,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: colors['fg'],
-                                        letterSpacing: 0,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    Text(
-                                      '@$modUsername',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w400,
-                                        color: colors['muted'],
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
+                                              letterSpacing: -0.1,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ],
+                                      )
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -1143,27 +1245,42 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                         ),
                       ),
                     ),
-              const SizedBox(height: 28),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Roles',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: colors['fg'],
-                        letterSpacing: 0,
+              const SizedBox(height: 18),
+              Padding(
+                padding: const EdgeInsets.only(right: 24),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Roles',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                          color: colors['fg'],
+                          letterSpacing: -0.3,
+                        ),
                       ),
                     ),
-                  ),
-                  if (showEdit)
-                    _MinimalIconButton(
-                      icon: Icons.add,
-                      color: colors['accent']!,
-                      onTap: _showAddRoleDialog,
-                    ),
-                ],
+                    if (showEdit)
+                      GestureDetector(
+                        onTap: _showAddRoleDialog,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: colors['border']!.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(6),
+                            border:
+                                Border.all(color: colors['border']!, width: 1),
+                          ),
+                          child: Icon(
+                            Icons.add,
+                            color: colors['accent'],
+                            size: 16,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
               const SizedBox(height: 12),
               roles.isNotEmpty || showEdit
@@ -1531,31 +1648,54 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
             ),
             SliverToBoxAdapter(
               child: Container(
-                margin: const EdgeInsets.fromLTRB(0, 28, 0, 0),
-                padding: const EdgeInsets.only(bottom: 10.0, left: 24),
+                margin: const EdgeInsets.fromLTRB(0, 32, 0, 0),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 decoration: BoxDecoration(
+                  color: colors['bg'],
                   border: Border(
                     bottom: BorderSide(color: colors['border']!, width: 1),
                   ),
                 ),
                 child: Row(
                   children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: colors['border']!.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child:
+                          Icon(Icons.article, size: 16, color: colors['muted']),
+                    ),
+                    const SizedBox(width: 12),
                     Text(
                       'Posts',
                       style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
                         color: colors['fg'],
-                        letterSpacing: 0,
+                        letterSpacing: -0.3,
                       ),
                     ),
-                    // const Spacer(),
-                    // _MinimalButton(
-                    //   icon: Icons.add,
-                    //   label: 'Create Post',
-                    //   colors: colors,
-                    //   onTap: () {},
-                    // ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: colors['border']!.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${posts.length}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: colors['muted'],
+                          letterSpacing: -0.1,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -1670,14 +1810,19 @@ class _EditNameDescriptionDialogState
       backgroundColor: widget.colors['bg'],
       surfaceTintColor: widget.colors['bg'],
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: widget.colors['border']!, width: 1.5),
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(color: widget.colors['border']!, width: 1),
       ),
+      contentPadding: const EdgeInsets.all(24),
+      titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+      actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       title: Text(
         'Edit Society',
         style: TextStyle(
           color: widget.colors['fg'],
           fontWeight: FontWeight.w600,
+          fontSize: 18,
+          letterSpacing: -0.3,
         ),
       ),
       content: Column(
@@ -1685,85 +1830,126 @@ class _EditNameDescriptionDialogState
         children: [
           TextField(
             controller: nameController,
-            style: TextStyle(color: widget.colors['fg']),
+            style: TextStyle(
+              color: widget.colors['fg'],
+              fontSize: 14,
+              letterSpacing: -0.1,
+            ),
             decoration: InputDecoration(
               labelText: 'Name',
-              labelStyle: TextStyle(color: widget.colors['muted']),
+              labelStyle: TextStyle(
+                color: widget.colors['muted'],
+                fontSize: 13,
+              ),
               filled: true,
               fillColor: widget.colors['bg'],
               enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(color: widget.colors['border']!),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(6),
               ),
               focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: widget.colors['accent']!),
-                borderRadius: BorderRadius.circular(8),
+                borderSide:
+                    BorderSide(color: widget.colors['accent']!, width: 1.5),
+                borderRadius: BorderRadius.circular(6),
               ),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             ),
           ),
           const SizedBox(height: 16),
           TextField(
             controller: descController,
-            style: TextStyle(color: widget.colors['fg']),
+            style: TextStyle(
+              color: widget.colors['fg'],
+              fontSize: 14,
+              letterSpacing: -0.1,
+            ),
             maxLines: 3,
             decoration: InputDecoration(
               labelText: 'Description',
-              labelStyle: TextStyle(color: widget.colors['muted']),
+              labelStyle: TextStyle(
+                color: widget.colors['muted'],
+                fontSize: 13,
+              ),
               filled: true,
               fillColor: widget.colors['bg'],
               enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(color: widget.colors['border']!),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(6),
               ),
               focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: widget.colors['accent']!),
-                borderRadius: BorderRadius.circular(8),
+                borderSide:
+                    BorderSide(color: widget.colors['accent']!, width: 1.5),
+                borderRadius: BorderRadius.circular(6),
               ),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             ),
           ),
         ],
       ),
       actions: [
         TextButton(
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            minimumSize: const Size(0, 36),
+          ),
           child: Text(
             'Cancel',
             style: TextStyle(
               color: widget.colors['muted'],
               fontWeight: FontWeight.w500,
+              fontSize: 13,
+              letterSpacing: -0.1,
             ),
           ),
           onPressed: () => Navigator.of(context).pop(false),
         ),
-        TextButton(
-          child: Text(
-            'Save',
-            style: TextStyle(
-              color: widget.colors['accent'],
-              fontWeight: FontWeight.w600,
-            ),
+        const SizedBox(width: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: widget.colors['accent'],
+            borderRadius: BorderRadius.circular(6),
           ),
-          onPressed: () async {
-            final newName = nameController.text.trim();
-            final newDesc = descController.text.trim();
-            if (newName.isNotEmpty) {
-              try {
-                await widget.apiClient.put('/api/society/${widget.societyId}', {
-                  'name': newName,
-                  'description': newDesc,
-                });
-                widget.onSave();
-                if (mounted) {
-                  Navigator.of(context).pop(true);
-                }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: ${e.toString()}')),
-                  );
+          child: TextButton(
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              minimumSize: const Size(0, 36),
+              foregroundColor: widget.colors['bg'],
+            ),
+            child: Text(
+              'Save',
+              style: TextStyle(
+                color: widget.colors['bg'],
+                fontWeight: FontWeight.w500,
+                fontSize: 13,
+                letterSpacing: -0.1,
+              ),
+            ),
+            onPressed: () async {
+              final newName = nameController.text.trim();
+              final newDesc = descController.text.trim();
+              if (newName.isNotEmpty) {
+                try {
+                  await widget.apiClient
+                      .put('/api/society/${widget.societyId}', {
+                    'name': newName,
+                    'description': newDesc,
+                  });
+                  widget.onSave();
+                  if (mounted) {
+                    Navigator.of(context).pop(true);
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: ${e.toString()}')),
+                    );
+                  }
                 }
               }
-            }
-          },
+            },
+          ),
         ),
       ],
     );
@@ -2305,7 +2491,7 @@ class _MinimalIconButton extends StatelessWidget {
   }
 }
 
-class _MinimalButton extends StatelessWidget {
+class _MinimalButton extends StatefulWidget {
   final IconData icon;
   final String label;
   final Map<String, Color> colors;
@@ -2319,38 +2505,56 @@ class _MinimalButton extends StatelessWidget {
   });
 
   @override
+  State<_MinimalButton> createState() => _MinimalButtonState();
+}
+
+class _MinimalButtonState extends State<_MinimalButton> {
+  bool _isPressed = false;
+
+  @override
   Widget build(BuildContext context) {
-    return Material(
-      color: colors['bg'],
-      borderRadius: BorderRadius.circular(8),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(8),
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 16),
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: colors['border']!,
-              width: 1.2,
-            ),
-            borderRadius: BorderRadius.circular(8),
-            color: colors['bg'],
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      onTap: widget.onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 100),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        decoration: BoxDecoration(
+          color: _isPressed
+              ? widget.colors['border']!.withOpacity(0.1)
+              : widget.colors['bg'],
+          border: Border.all(
+            color: widget.colors['border']!,
+            width: 1,
           ),
-          child: Row(
-            children: [
-              Icon(icon, size: 18, color: colors['accent']),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  color: colors['accent'],
-                  fontWeight: FontWeight.w600,
-                  fontSize: 15,
-                  letterSpacing: 0,
-                ),
+          borderRadius: BorderRadius.circular(6),
+          boxShadow: _isPressed
+              ? []
+              : [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.02),
+                    blurRadius: 1,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(widget.icon, size: 16, color: widget.colors['accent']),
+            const SizedBox(width: 6),
+            Text(
+              widget.label,
+              style: TextStyle(
+                color: widget.colors['accent'],
+                fontWeight: FontWeight.w500,
+                fontSize: 13,
+                letterSpacing: -0.1,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
