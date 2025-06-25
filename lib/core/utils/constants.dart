@@ -99,7 +99,7 @@ class ApiConstants {
 }
 
 class AppConstants {
-  static const String appName = "Beyond the Class";
+  static const String appName = "Beyond The Class";
   static const String appSlogan =
       "Discover New Horizons, Look Beyond the Class";
   static const String appSloganNewLine =
