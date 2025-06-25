@@ -25,8 +25,6 @@ class _SocietyVerificationState extends State<SocietyVerification> {
 
   // Form Controllers
   final _societyController = TextEditingController();
-  final _advisorEmailController = TextEditingController();
-  final _adminEmailController = TextEditingController();
   final _commentsController = TextEditingController();
 
   // Form State
@@ -39,9 +37,10 @@ class _SocietyVerificationState extends State<SocietyVerification> {
   File? _registrationCertificate;
   File? _eventPicture;
   File? _advisorEmailScreenshot;
+  final List<File> _customDocuments = [];
+  final List<String> _customDocumentNames = [];
 
   // Society and Moderator Lists
-  List<Map<String, dynamic>> _societies = [];
   List<Map<String, dynamic>> _moderators = [];
   bool _isLoadingData = true;
 
@@ -50,8 +49,6 @@ class _SocietyVerificationState extends State<SocietyVerification> {
     'registrationCertificate': false,
     'eventPicture': false,
     'advisorEmailScreenshot': false,
-    'advisorEmail': false,
-    'adminEmail': false,
     'moderatorRequest': false,
     'communityVoting': false,
   };
@@ -93,23 +90,17 @@ class _SocietyVerificationState extends State<SocietyVerification> {
   @override
   void dispose() {
     _societyController.dispose();
-    _advisorEmailController.dispose();
-    _adminEmailController.dispose();
     _commentsController.dispose();
     super.dispose();
   }
 
   Future<void> _loadInitialData() async {
     try {
-      final [societiesResponse, moderatorsResponse] = await Future.wait([
-        _apiClient.get('/api/society/all'),
-        _apiClient.get('/api/user/campus-moderators'),
-      ]);
+      final moderatorsResponse =
+          await _apiClient.get('/api/user/campus-moderators');
 
       if (mounted) {
         setState(() {
-          _societies = List<Map<String, dynamic>>.from(
-              societiesResponse['societies'] ?? []);
           _moderators = List<Map<String, dynamic>>.from(
               moderatorsResponse['moderators'] ?? []);
           _isLoadingData = false;
@@ -125,7 +116,7 @@ class _SocietyVerificationState extends State<SocietyVerification> {
     }
   }
 
-  Future<void> _pickFile(String type) async {
+  Future<void> _pickFile(String type, {int? customIndex}) async {
     try {
       if (type == 'eventPicture') {
         final ImagePicker picker = ImagePicker();
@@ -140,6 +131,36 @@ class _SocietyVerificationState extends State<SocietyVerification> {
           setState(() {
             _eventPicture = File(image.path);
             _requirements['eventPicture'] = true;
+          });
+        }
+      } else if (type == 'customDocument') {
+        if (_customDocuments.length >= 5) {
+          _showErrorSnackBar('Maximum 5 custom documents allowed');
+          return;
+        }
+
+        // Show dialog to enter document name first
+        final documentName = await _showDocumentNameDialog();
+        if (documentName == null || documentName.trim().isEmpty) return;
+
+        FilePickerResult? result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'],
+          allowMultiple: false,
+        );
+
+        if (result != null && result.files.single.path != null) {
+          final file = File(result.files.single.path!);
+          setState(() {
+            if (customIndex != null && customIndex < _customDocuments.length) {
+              // Replace existing document
+              _customDocuments[customIndex] = file;
+              _customDocumentNames[customIndex] = documentName.trim();
+            } else {
+              // Add new document
+              _customDocuments.add(file);
+              _customDocumentNames.add(documentName.trim());
+            }
           });
         }
       } else {
@@ -170,6 +191,69 @@ class _SocietyVerificationState extends State<SocietyVerification> {
     }
   }
 
+  Future<String?> _showDocumentNameDialog() async {
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: _colors['bg'],
+        surfaceTintColor: _colors['bg'],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: _colors['border']!, width: 1),
+        ),
+        title: Text(
+          'Document Name',
+          style: TextStyle(
+            color: _colors['fg'],
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: TextField(
+          controller: controller,
+          style: TextStyle(color: _colors['fg']),
+          decoration: _buildInputDecoration('Enter document name'),
+          autofocus: true,
+          maxLength: 50,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: _colors['muted']),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              final name = controller.text.trim();
+              if (name.isNotEmpty) {
+                Navigator.pop(context, name);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Please enter a document name'),
+                    backgroundColor: Colors.red.shade600,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                  ),
+                );
+              }
+            },
+            child: Text(
+              'Add',
+              style: TextStyle(
+                color: _colors['accent'],
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _updateRequirement(String key, bool value) {
     setState(() {
       _requirements[key] = value;
@@ -177,12 +261,21 @@ class _SocietyVerificationState extends State<SocietyVerification> {
   }
 
   bool get _isFormValid {
-    return _requirements.values.any((req) => req) && _selectedSocietyId != null;
+    final hasBasicRequirements = _requirements.values.any((req) => req);
+    final hasCustomDocuments = _customDocuments.isNotEmpty;
+    return (hasBasicRequirements || hasCustomDocuments) &&
+        _selectedSocietyId != null;
   }
 
   Future<void> _submitVerificationRequest() async {
-    if (!_formKey.currentState!.validate() || !_isFormValid) {
-      _showErrorSnackBar('Please complete the required fields');
+    if (!_formKey.currentState!.validate()) {
+      _showErrorSnackBar('Please correct the form errors');
+      return;
+    }
+
+    if (!_isFormValid) {
+      _showErrorSnackBar(
+          'Please upload at least one verification document or custom document');
       return;
     }
 
@@ -194,12 +287,11 @@ class _SocietyVerificationState extends State<SocietyVerification> {
       // Create FormData for file uploads
       final formData = <String, dynamic>{
         'societyId': _selectedSocietyId,
-        'advisorEmail': _advisorEmailController.text.trim(),
-        'adminEmail': _adminEmailController.text.trim(),
         'moderatorId': _selectedModerator,
         'communityVoting': _communityVoting,
         'comments': _commentsController.text.trim(),
         'requirements': _requirements,
+        'customDocumentNames': _customDocumentNames,
       };
 
       // In a real implementation, you would upload files separately
@@ -315,15 +407,12 @@ class _SocietyVerificationState extends State<SocietyVerification> {
               ),
             )
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
               child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildHeaderCard(),
-                    const SizedBox(height: 24),
-                    _buildSocietySelectionCard(),
                     const SizedBox(height: 24),
                     _buildVerificationRequirementsCard(),
                     const SizedBox(height: 24),
@@ -419,75 +508,23 @@ class _SocietyVerificationState extends State<SocietyVerification> {
     );
   }
 
-  Widget _buildSocietySelectionCard() {
-    return _buildCard(
-      title: 'Society Information',
-      icon: Icons.groups,
-      children: [
-        DropdownButtonFormField<String>(
-          value: _selectedSocietyId,
-          decoration: InputDecoration(
-            labelText: 'Select Society Name',
-            labelStyle: TextStyle(color: _colors['muted']),
-            filled: true,
-            fillColor: _colors['bg'],
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: _colors['border']!),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: _colors['accent']!, width: 2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: Colors.red),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: Colors.red, width: 2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          dropdownColor: _colors['bg'],
-          style: TextStyle(color: _colors['fg']),
-          items: _societies.map((society) {
-            return DropdownMenuItem<String>(
-              value: society['_id'],
-              child: Text(
-                society['name'] ?? 'Unknown',
-                style: TextStyle(color: _colors['fg']),
-              ),
-            );
-          }).toList(),
-          onChanged: (value) {
-            setState(() {
-              _selectedSocietyId = value;
-            });
-          },
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Please select a society';
-            }
-            return null;
-          },
-        ),
-      ],
-    );
-  }
-
   Widget _buildVerificationRequirementsCard() {
+    final hasVerificationDocs = _requirements.values.any((req) => req);
+    final hasCustomDocs = _customDocuments.isNotEmpty;
+
     return _buildCard(
       title: 'Verification Requirements',
       icon: Icons.checklist,
       children: [
         Text(
-          'Please provide at least one of the following requirements:',
+          'You can either provide verification documents below OR upload custom documents in the section below:',
           style: TextStyle(
             color: _colors['muted'],
             fontSize: 14,
             fontStyle: FontStyle.italic,
           ),
         ),
+        const SizedBox(height: 12),
         const SizedBox(height: 16),
         _buildFileUploadTile(
           'Registration Certificate',
@@ -510,6 +547,8 @@ class _SocietyVerificationState extends State<SocietyVerification> {
           _advisorEmailScreenshot,
           Icons.email,
         ),
+        const SizedBox(height: 24),
+        _buildCustomDocumentsSection(),
       ],
     );
   }
@@ -590,9 +629,7 @@ class _SocietyVerificationState extends State<SocietyVerification> {
                   IconButton(
                     icon: Icon(Icons.visibility,
                         color: _colors['accent'], size: 20),
-                    onPressed: () {
-                      // Preview file functionality
-                    },
+                    onPressed: () => _showDocumentPreview(file, title),
                   ),
                   IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red, size: 20),
@@ -624,52 +661,513 @@ class _SocietyVerificationState extends State<SocietyVerification> {
     );
   }
 
+  Widget _buildCustomDocumentsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.folder_open, color: _colors['accent'], size: 20),
+            const SizedBox(width: 8),
+            Text(
+              'Additional Documents',
+              style: TextStyle(
+                color: _colors['fg'],
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              '${_customDocuments.length}/5',
+              style: TextStyle(
+                color: _colors['muted'],
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Upload up to 5 custom documents. These can be used instead of or in addition to the verification documents above.',
+          style: TextStyle(
+            color: _colors['muted'],
+            fontSize: 13,
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+        const SizedBox(height: 16),
+        // Display existing custom documents
+        ...List.generate(_customDocuments.length, (index) {
+          return _buildCustomDocumentTile(index);
+        }),
+        // Add new document button
+        if (_customDocuments.length < 5) _buildAddCustomDocumentButton(),
+      ],
+    );
+  }
+
+  Widget _buildCustomDocumentTile(int index) {
+    final file = _customDocuments[index];
+    final name = _customDocumentNames[index];
+    final fileName = file.path.split('/').last;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: _colors['bg'],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.blue.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.blue.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Icon(
+            Icons.insert_drive_file,
+            color: Colors.blue,
+            size: 20,
+          ),
+        ),
+        title: Text(
+          name,
+          style: TextStyle(
+            color: _colors['fg'],
+            fontWeight: FontWeight.w600,
+            fontSize: 15,
+          ),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Custom document',
+              style: TextStyle(
+                color: _colors['muted'],
+                fontSize: 13,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              fileName,
+              style: const TextStyle(
+                color: Colors.blue,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(Icons.visibility, color: _colors['accent'], size: 20),
+              onPressed: () => _showDocumentPreview(file, name),
+              tooltip: 'Preview document',
+            ),
+            IconButton(
+              icon: Icon(Icons.edit, color: _colors['accent'], size: 20),
+              onPressed: () => _pickFile('customDocument', customIndex: index),
+              tooltip: 'Replace document',
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+              onPressed: () => _removeCustomDocument(index),
+              tooltip: 'Remove document',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAddCustomDocumentButton() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: _colors['bg'],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: _colors['border']!,
+          width: 1,
+          style: BorderStyle.solid,
+        ),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: _colors['accent']!.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            Icons.add,
+            color: _colors['accent'],
+            size: 20,
+          ),
+        ),
+        title: Text(
+          'Add Custom Document',
+          style: TextStyle(
+            color: _colors['fg'],
+            fontWeight: FontWeight.w600,
+            fontSize: 15,
+          ),
+        ),
+        subtitle: Text(
+          'Upload additional supporting documents',
+          style: TextStyle(
+            color: _colors['muted'],
+            fontSize: 13,
+          ),
+        ),
+        trailing: Icon(
+          Icons.upload_file,
+          color: _colors['accent'],
+          size: 20,
+        ),
+        onTap: () => _pickFile('customDocument'),
+      ),
+    );
+  }
+
+  void _removeCustomDocument(int index) {
+    setState(() {
+      _customDocuments.removeAt(index);
+      _customDocumentNames.removeAt(index);
+    });
+  }
+
+  void _showDocumentPreview(File file, String title) {
+    final fileName = file.path.split('/').last.toLowerCase();
+    final fileExtension = fileName.split('.').last;
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => Dialog(
+        backgroundColor: _colors['bg'],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.8,
+            maxWidth: MediaQuery.of(context).size.width * 0.9,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: _colors['bg'],
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
+                  border: Border(
+                    bottom: BorderSide(color: _colors['border']!),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      _getFileIcon(fileExtension),
+                      color: _colors['accent'],
+                      size: 24,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: TextStyle(
+                              color: _colors['fg'],
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            fileName,
+                            style: TextStyle(
+                              color: _colors['muted'],
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close, color: _colors['muted']),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+              // Content
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  child: _buildFilePreviewContent(file, fileExtension),
+                ),
+              ),
+              // Footer
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: _colors['bg'],
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(16),
+                    bottomRight: Radius.circular(16),
+                  ),
+                  border: Border(
+                    top: BorderSide(color: _colors['border']!),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'File size: ${_getFileSizeString(file)}',
+                        style: TextStyle(
+                          color: _colors['muted'],
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        // You could add functionality to open with external app here
+                      },
+                      icon: Icon(Icons.open_in_new, color: _colors['accent']),
+                      label: Text(
+                        'Open Externally',
+                        style: TextStyle(color: _colors['accent']),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilePreviewContent(File file, String fileExtension) {
+    if (['jpg', 'jpeg', 'png'].contains(fileExtension)) {
+      return _buildImagePreview(file);
+    } else if (['pdf', 'doc', 'docx'].contains(fileExtension)) {
+      return _buildDocumentPreview(file, fileExtension);
+    } else {
+      return _buildUnsupportedFilePreview(fileExtension);
+    }
+  }
+
+  Widget _buildImagePreview(File file) {
+    return Center(
+      child: InteractiveViewer(
+        panEnabled: true,
+        scaleEnabled: true,
+        child: Image.file(
+          file,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.broken_image,
+                  size: 64,
+                  color: _colors['muted'],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Unable to load image',
+                  style: TextStyle(
+                    color: _colors['muted'],
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDocumentPreview(File file, String fileExtension) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          _getFileIcon(fileExtension),
+          size: 64,
+          color: _colors['accent'],
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Document Preview',
+          style: TextStyle(
+            color: _colors['fg'],
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Preview not available for ${fileExtension.toUpperCase()} files',
+          style: TextStyle(
+            color: _colors['muted'],
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'File: ${file.path.split('/').last}',
+          style: TextStyle(
+            color: _colors['muted'],
+            fontSize: 12,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildUnsupportedFilePreview(String fileExtension) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.insert_drive_file,
+          size: 64,
+          color: _colors['muted'],
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Preview Not Available',
+          style: TextStyle(
+            color: _colors['fg'],
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'File type ${fileExtension.toUpperCase()} is not supported for preview',
+          style: TextStyle(
+            color: _colors['muted'],
+            fontSize: 14,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  IconData _getFileIcon(String extension) {
+    switch (extension.toLowerCase()) {
+      case 'pdf':
+        return Icons.picture_as_pdf;
+      case 'doc':
+      case 'docx':
+        return Icons.description;
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+        return Icons.image;
+      default:
+        return Icons.insert_drive_file;
+    }
+  }
+
+  String _getFileSizeString(File file) {
+    try {
+      final bytes = file.lengthSync();
+      if (bytes < 1024) return '$bytes B';
+      if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    } catch (e) {
+      return 'Unknown size';
+    }
+  }
+
   Widget _buildContactInformationCard() {
     return _buildCard(
       title: 'Contact Information',
       icon: Icons.contact_mail,
       children: [
-        TextFormField(
-          controller: _advisorEmailController,
-          style: TextStyle(color: _colors['fg']),
-          decoration: _buildInputDecoration('Faculty Advisor Email'),
-          keyboardType: TextInputType.emailAddress,
-          onChanged: (value) {
-            _updateRequirement('advisorEmail', value.trim().isNotEmpty);
-          },
-          validator: (value) {
-            if (value?.trim().isNotEmpty == true) {
-              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                  .hasMatch(value!)) {
-                return 'Please enter a valid email address';
-              }
-            }
-            return null;
-          },
+        Text(
+          'Request help from a campus moderator to assist with your verification:',
+          style: TextStyle(
+            color: _colors['muted'],
+            fontSize: 14,
+            fontStyle: FontStyle.italic,
+          ),
         ),
-        const SizedBox(height: 16),
-        TextFormField(
-          controller: _adminEmailController,
-          style: TextStyle(color: _colors['fg']),
-          decoration: _buildInputDecoration('University Admin Email'),
-          keyboardType: TextInputType.emailAddress,
-          onChanged: (value) {
-            _updateRequirement('adminEmail', value.trim().isNotEmpty);
-          },
-          validator: (value) {
-            if (value?.trim().isNotEmpty == true) {
-              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                  .hasMatch(value!)) {
-                return 'Please enter a valid email address';
-              }
-            }
-            return null;
-          },
+        const SizedBox(height: 20),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.blue.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.blue.withOpacity(0.3)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.help_outline, color: Colors.blue, size: 20),
+                  SizedBox(width: 8),
+                  Text(
+                    'Campus Moderator Assistance',
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Campus moderators can help verify your society and assist with the verification process. Select a moderator to request their assistance.',
+                style: TextStyle(
+                  color: Colors.blue.shade700,
+                  fontSize: 14,
+                  height: 1.3,
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
           value: _selectedModerator,
-          decoration: _buildInputDecoration('Campus Moderator (Optional)'),
+          decoration:
+              _buildInputDecoration('Request Help from Campus Moderator'),
           dropdownColor: _colors['bg'],
           style: TextStyle(color: _colors['fg']),
           items: _moderators.map((moderator) {

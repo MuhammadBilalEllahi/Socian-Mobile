@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
+import 'package:shimmer/shimmer.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/pages/explore/page/verification/SocietyVerification.dart';
 import 'package:socian/pages/profile/ProfilePage.dart';
@@ -622,6 +623,221 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
     return '${date.year}/${date.month}/${date.day}';
   }
 
+  Widget _buildShimmerIcon(Map<String, Color> colors) {
+    return Shimmer.fromColors(
+      baseColor: colors['border']!.withOpacity(0.3),
+      highlightColor: colors['bg']!.withOpacity(0.1),
+      child: Container(
+        width: 32,
+        height: 32,
+        margin: const EdgeInsets.only(right: 12),
+        decoration: BoxDecoration(
+          color: colors['border'],
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerLayout(Map<String, Color> colors) {
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: _buildShimmerSocietyInfo(colors),
+        ),
+        SliverToBoxAdapter(
+          child: Container(
+            margin: const EdgeInsets.fromLTRB(0, 28, 0, 0),
+            padding: const EdgeInsets.only(bottom: 10.0, left: 24),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: colors['border']!, width: 1),
+              ),
+            ),
+            child: _buildShimmerText(colors, width: 60, height: 16),
+          ),
+        ),
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) => _buildShimmerPost(colors),
+            childCount: 3,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildShimmerSocietyInfo(Map<String, Color> colors) {
+    return Column(
+      children: [
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            _buildShimmerContainer(colors, width: double.infinity, height: 180),
+            Positioned(
+              bottom: -44,
+              left: 32,
+              child: _buildShimmerContainer(colors,
+                  width: 88, height: 88, isCircle: true),
+            ),
+          ],
+        ),
+        const SizedBox(height: 56),
+        Padding(
+          padding: const EdgeInsets.only(left: 24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildShimmerText(colors, width: 200, height: 26),
+              const SizedBox(height: 10),
+              _buildShimmerText(colors, width: double.infinity, height: 16),
+              const SizedBox(height: 6),
+              _buildShimmerText(colors, width: 250, height: 16),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  _buildShimmerContainer(colors,
+                      width: 20, height: 20, isCircle: true),
+                  const SizedBox(width: 8),
+                  _buildShimmerText(colors, width: 100, height: 16),
+                  const Spacer(),
+                  _buildShimmerContainer(colors,
+                      width: 80, height: 32, borderRadius: 8),
+                ],
+              ),
+              const SizedBox(height: 28),
+              _buildShimmerText(colors, width: 120, height: 18),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 120,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: 3,
+                  itemBuilder: (context, index) => Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: _buildShimmerContainer(colors,
+                        width: 150, height: 120, borderRadius: 12),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 28),
+              _buildShimmerText(colors, width: 80, height: 18),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 220,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: 3,
+                  itemBuilder: (context, index) => Padding(
+                    padding: const EdgeInsets.only(right: 16),
+                    child: _buildShimmerContainer(colors,
+                        width: 164, height: 220, borderRadius: 16),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildShimmerPost(Map<String, Color> colors) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+      decoration: BoxDecoration(
+        color: colors['bg'],
+        border: Border(
+          bottom: BorderSide(color: colors['border']!, width: 1),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(left: 20, top: 20, bottom: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                _buildShimmerContainer(colors,
+                    width: 32, height: 32, isCircle: true),
+                const SizedBox(width: 12),
+                Expanded(
+                    child: _buildShimmerText(colors, width: 120, height: 15)),
+                const SizedBox(width: 8),
+                _buildShimmerText(colors, width: 60, height: 12),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _buildShimmerText(colors, width: double.infinity, height: 17),
+            const SizedBox(height: 6),
+            _buildShimmerText(colors, width: 300, height: 15),
+            const SizedBox(height: 6),
+            _buildShimmerText(colors, width: 200, height: 15),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                _buildShimmerContainer(colors,
+                    width: 24, height: 24, isCircle: true),
+                const SizedBox(width: 8),
+                _buildShimmerText(colors, width: 30, height: 14),
+                const SizedBox(width: 16),
+                _buildShimmerContainer(colors,
+                    width: 24, height: 24, isCircle: true),
+                const SizedBox(width: 8),
+                _buildShimmerText(colors, width: 20, height: 14),
+                const SizedBox(width: 16),
+                _buildShimmerContainer(colors,
+                    width: 24, height: 24, isCircle: true),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerContainer(
+    Map<String, Color> colors, {
+    required double width,
+    required double height,
+    bool isCircle = false,
+    double? borderRadius,
+  }) {
+    return Shimmer.fromColors(
+      baseColor: colors['border']!.withOpacity(0.3),
+      highlightColor: colors['bg']!.withOpacity(0.1),
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: colors['border'],
+          borderRadius: isCircle
+              ? BorderRadius.circular(width / 2)
+              : BorderRadius.circular(borderRadius ?? 4),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerText(
+    Map<String, Color> colors, {
+    required double width,
+    required double height,
+  }) {
+    return Shimmer.fromColors(
+      baseColor: colors['border']!.withOpacity(0.3),
+      highlightColor: colors['bg']!.withOpacity(0.1),
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: colors['border'],
+          borderRadius: BorderRadius.circular(4),
+        ),
+      ),
+    );
+  }
+
   Widget _buildSocietyInfo() {
     final colors = _getThemeColors(context);
     final bannerUrl = (societyData?['banner'] ?? '').toString();
@@ -1046,11 +1262,15 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                                                       color: colors['border']!
                                                           .withOpacity(0.1),
                                                       child: Center(
-                                                        child:
-                                                            CircularProgressIndicator(
-                                                          color:
-                                                              colors['accent'],
-                                                          strokeWidth: 2,
+                                                        child: SizedBox(
+                                                          width: 24,
+                                                          height: 24,
+                                                          child:
+                                                              CircularProgressIndicator(
+                                                            color: colors[
+                                                                'accent'],
+                                                            strokeWidth: 2.5,
+                                                          ),
                                                         ),
                                                       ),
                                                     );
@@ -1187,17 +1407,6 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
   @override
   Widget build(BuildContext context) {
     final colors = _getThemeColors(context);
-    if (isLoading) {
-      return Scaffold(
-        backgroundColor: colors['bg'],
-        body: Center(
-          child: CircularProgressIndicator(
-            color: colors['accent'],
-            strokeWidth: 2,
-          ),
-        ),
-      );
-    }
     if (error != null) {
       return Scaffold(
         backgroundColor: colors['bg'],
@@ -1214,20 +1423,19 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
         ),
       );
     }
-    if (societyData == null) {
+    if (isLoading || societyData == null) {
       return Scaffold(
         backgroundColor: colors['bg'],
-        body: Center(
-          child: Text(
-            'No society data found.',
-            style: TextStyle(
-              color: colors['fg'],
-              fontWeight: FontWeight.w600,
-              fontSize: 15,
-              letterSpacing: 0,
-            ),
-          ),
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          iconTheme: IconThemeData(color: colors['fg']),
+          titleSpacing: 0,
+          actions: [
+            _buildShimmerIcon(colors),
+          ],
         ),
+        body: _buildShimmerLayout(colors),
       );
     }
 
@@ -1375,15 +1583,18 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                         if (index < posts.length) {
                           return _buildPostListItem(posts[index]);
                         } else {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 18.0),
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                color: colors['accent'],
-                                strokeWidth: 2,
-                              ),
-                            ),
-                          );
+                          return isLoadingMore
+                              ? _buildShimmerPost(colors)
+                              : Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 18.0),
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      color: colors['accent'],
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                );
                         }
                       },
                       childCount: posts.length + (hasMore ? 1 : 0),
