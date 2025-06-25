@@ -4,8 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:socian/core/utils/constants.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/pages/home/widgets/components/post/CreatePost.dart';
-import 'package:socian/pages/home/widgets/components/post/page/PostDetailsPage.dart'
-    hide PostMedia, PostStatItem;
+import 'package:socian/pages/home/widgets/components/post/page/PostDetailPage.dart';
 import 'package:socian/pages/profile/ProfilePage.dart';
 import 'package:socian/shared/services/api_client.dart';
 
@@ -28,6 +27,7 @@ class PostCard extends ConsumerStatefulWidget {
 
 class _PostCardState extends ConsumerState<PostCard> {
   bool isLiked = false;
+
   bool isDisliked = false;
   bool isVoting = false;
   final _apiClient = ApiClient();
@@ -41,6 +41,11 @@ class _PostCardState extends ConsumerState<PostCard> {
 
     authUser = ref.read(authProvider).user;
     currentUserId = authUser?['_id'];
+
+    final String? yourVoteStatus =
+        widget.post['voteId']['userVotes']?[currentUserId] as String?;
+    isLiked = yourVoteStatus == 'upvote';
+    isDisliked = yourVoteStatus == 'downvote';
   }
 
   Future<void> _votePost(String voteType) async {
@@ -179,7 +184,10 @@ class _PostCardState extends ConsumerState<PostCard> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Delete',
+                style: TextStyle(
+                    color: Color.fromARGB(255, 255, 255, 255),
+                    fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -213,20 +221,20 @@ class _PostCardState extends ConsumerState<PostCard> {
 
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1E1E2D) : Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        // borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
             color: isDark
                 ? Colors.black.withOpacity(0.4)
                 : Colors.grey.withOpacity(0.2),
-            blurRadius: 10,
+            // blurRadius: 10,
             spreadRadius: 0,
             offset: const Offset(0, 6),
           ),
         ],
         border: Border(
           bottom: BorderSide(
-            color: isDark ? const Color(0xFF393952) : const Color(0xFFE0E0E0),
+            color: Theme.of(context).scaffoldBackgroundColor,
             width: 7.5,
           ),
         ),
@@ -530,14 +538,6 @@ class _PostCardState extends ConsumerState<PostCard> {
             child: Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.blue.withOpacity(0.8),
-                    Colors.purple.withOpacity(0.8),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.15),
@@ -611,23 +611,28 @@ class _PostCardState extends ConsumerState<PostCard> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.blue.withOpacity(0.1),
-                              Colors.purple.withOpacity(0.1),
-                            ],
-                          ),
+                          borderRadius: BorderRadius.circular(6),
+                          color: isDark
+                              ? const Color(0xFF18181B) // shadcn dark accent
+                              : const Color(0xFFFAFAFA), // shadcn light accent
                           border: Border.all(
-                            color: Colors.blue.withOpacity(0.3),
+                            color: isDark
+                                ? const Color(0xFF27272A) // shadcn dark border
+                                : const Color(
+                                    0xFFE4E4E7), // shadcn light border
                             width: 1,
                           ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.group,
-                                size: 12, color: Colors.blue.shade600),
+                            Icon(
+                              Icons.group,
+                              size: 12,
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF09090B), // shadcn fg
+                            ),
                             const SizedBox(width: 4),
                             Flexible(
                               child: Text(
@@ -635,7 +640,9 @@ class _PostCardState extends ConsumerState<PostCard> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 11,
-                                  color: Colors.blue.shade700,
+                                  color: isDark
+                                      ? Colors.white
+                                      : const Color(0xFF09090B), // shadcn fg
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -677,12 +684,9 @@ class _PostCardState extends ConsumerState<PostCard> {
                       width: 4,
                       height: 4,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.blue.withOpacity(0.6),
-                            Colors.purple.withOpacity(0.6),
-                          ],
-                        ),
+                        color: isDark
+                            ? const Color(0xFF27272A) // shadcn dark accent
+                            : const Color(0xFFE4E4E7), // shadcn light accent
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -715,7 +719,8 @@ class _PostCardState extends ConsumerState<PostCard> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         ListTile(
-                          leading: const Icon(Icons.edit, color: Colors.blue),
+                          leading: const Icon(Icons.edit,
+                              color: Color.fromARGB(255, 255, 255, 255)),
                           title: const Text('Edit Post'),
                           onTap: () {
                             Navigator.pop(context);

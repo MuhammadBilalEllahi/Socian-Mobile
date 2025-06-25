@@ -5,6 +5,7 @@ import 'package:socian/components/ShiningLinearProgressBar.dart';
 import 'package:socian/core/utils/constants.dart';
 import 'package:socian/pages/home/widgets/components/post/post.dart';
 import 'package:socian/pages/home/widgets/universities/universitypostProvider.dart';
+import 'package:socian/shared/services/api_client.dart';
 
 class AllUniversityPosts extends ConsumerStatefulWidget {
   const AllUniversityPosts({super.key});
@@ -19,6 +20,7 @@ class _AllUniversityPostsState extends ConsumerState<AllUniversityPosts>
   late ScrollController _scrollController;
 
   bool _isFetching = false;
+  Map<String, dynamic> _adminPosts = {};
 
   void _onScroll() {
     final provider = ref.read(universitypostProvider.notifier);
@@ -44,6 +46,13 @@ class _AllUniversityPostsState extends ConsumerState<AllUniversityPosts>
     Future.microtask(() {
       ref.read(universitypostProvider.notifier).fetchPosts();
     });
+
+    final apiClient = ApiClient();
+    final response =
+        apiClient.get('/api/posts/admin/post?allUniversities=true');
+    if (response is Map<String, dynamic>) {
+      _adminPosts = response as Map<String, dynamic>;
+    }
   }
 
   @override
@@ -224,15 +233,27 @@ class _AllUniversityPostsState extends ConsumerState<AllUniversityPosts>
       );
     }
 
+    // Calculate total item count
+    final hasAdminPost = _adminPosts.isNotEmpty;
+    final totalCount = postState.posts.length + (hasAdminPost ? 1 : 0);
+
     return ListView.builder(
       controller: _scrollController,
       padding: EdgeInsets.zero,
-      itemCount: postState.posts.length,
+      itemCount: totalCount,
       // itemExtent: 500,
       // prototypeItem: PostCard(post: postState.posts.first, flairType: Flairs.university.value),
 
       itemBuilder: (context, index) {
-        final post = postState.posts[index];
+        if (hasAdminPost && index == 0) {
+          // First item is the admin post
+          return PostCard(
+              post: _adminPosts, flairType: Flairs.university.value);
+        }
+
+        // Adjust index if admin post is present
+        final postIndex = hasAdminPost ? index - 1 : index;
+        final post = postState.posts[postIndex];
         if (post is! Map<String, dynamic> || post['author']?['_id'] == null) {
           return const SizedBox.shrink();
         }

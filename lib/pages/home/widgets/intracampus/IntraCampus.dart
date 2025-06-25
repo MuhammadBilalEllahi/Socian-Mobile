@@ -5,6 +5,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:socian/components/ShiningLinearProgressBar.dart';
 import 'package:socian/core/utils/constants.dart';
 import 'package:socian/pages/home/widgets/intracampus/intraCampusProvider.dart';
+import 'package:socian/shared/services/api_client.dart';
 
 import '../components/post/post.dart';
 
@@ -18,13 +19,21 @@ class IntraCampus extends ConsumerStatefulWidget {
 class _IntraCampusState extends ConsumerState<IntraCampus>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   late TabController _tabController;
-
+  Map<String, dynamic> _adminPosts = {};
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     Future.microtask(() {
       ref.read(intraCampusPostProvider.notifier).fetchPosts();
+    });
+
+    ApiClient()
+        .get('/api/posts/admin/post?requestUniversity=true')
+        .then((value) {
+      if (value is Map<String, dynamic>) {
+        _adminPosts = value;
+      }
     });
   }
 
@@ -212,11 +221,22 @@ class _IntraCampusState extends ConsumerState<IntraCampus>
       );
     }
 
+    // Calculate total item count
+    final hasAdminPost = _adminPosts.isNotEmpty;
+    final totalCount = postState.posts.length + (hasAdminPost ? 1 : 0);
+
     return ListView.builder(
       padding: EdgeInsets.zero,
-      itemCount: postState.posts.length,
+      itemCount: totalCount,
       itemBuilder: (context, index) {
-        final post = postState.posts[index];
+        if (hasAdminPost && index == 0) {
+          // First item is the admin post
+          return PostCard(post: _adminPosts, flairType: Flairs.campus.value);
+        }
+
+        // Adjust index if admin post is present
+        final postIndex = hasAdminPost ? index - 1 : index;
+        final post = postState.posts[postIndex];
         // debugPrint('Post at index $index: $post (type: ${post.runtimeType})');
 
         // Validate post structure
