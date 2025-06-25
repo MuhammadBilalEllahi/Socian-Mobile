@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
@@ -190,29 +189,20 @@ class _CreateSocietyPageState extends ConsumerState<CreateSocietyPage> {
         'category': 'default',
         'allows': _selectedAllows,
         'president': userId,
+        if (_selectedIcon != null) 'icon': iconFile,
+        if (_selectedBanner != null) 'banner': bannerFile,
         'files': []
       };
 
       // Add files separately (MultipartFile objects can't be JSON encoded)
-      if (iconFile != null) {
-        payload['files'].add(iconFile);
-      }
-      if (bannerFile != null) {
-        payload['files'].add(bannerFile);
-      }
+      // if (iconFile != null) {
+      //   payload['files'].add({'icon': iconFile});
+      // }
+      // if (bannerFile != null) {
+      //   payload['files'].add({'banner': bannerFile});
+      // }
 
       // Debug print without the files (since they can't be JSON encoded)
-      final debugPayload = {
-        'name': _nameController.text.trim(),
-        'description': _descriptionController.text.trim(),
-        'societyTypeId': _selectedSocietyType,
-        'category': 'default',
-        'allows': _selectedAllows,
-        'president': userId,
-        'hasIcon': iconFile != null,
-        'hasBanner': bannerFile != null,
-      };
-      debugPrint('Create Society Payload: ${jsonEncode(debugPayload)}');
 
 // NOTE: ROUTe IN BACKEND IS NOT UPDATED YET, WHEN UPDATED USER "apiClient.postFORMDATA"
       final response = await apiClient.postFormData(
