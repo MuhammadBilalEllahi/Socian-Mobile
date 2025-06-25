@@ -1,9 +1,15 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:dio/dio.dart' as dio;
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as path;
 import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/pages/explore/page/verification/SocietyVerification.dart';
 import 'package:socian/pages/profile/ProfilePage.dart';
 import 'package:socian/shared/services/api_client.dart';
 
@@ -29,6 +35,8 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
   bool isMember = false;
   Map<String, dynamic>? authUser;
   bool editable = false;
+  File? bannerImage;
+  File? iconImage;
 
   // shadcn black/white palette
   static const Color darkBg = Color(0xFF000000);
@@ -204,25 +212,146 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
     }
   }
 
-  Future<void> _showEditImageDialog({required String type}) async {
-    final colors = _getThemeColors(context);
-    final result = await showDialog<bool>(
+  // Future<void> _showEditImageDialog({required String type}) async {
+  //   final colors = _getThemeColors(context);
+  //   final result = await showDialog<bool>(
+  //     context: context,
+  //     builder: (context) => _EditImageDialog(
+  //       colors: colors,
+  //       societyId: widget.societyId,
+  //       type: type,
+  //       initialUrl: societyData?[type] ?? '',
+  //       apiClient: _apiClient,
+  //       onSave: () => fetchSocietyDetails(page: 1, append: false),
+  //     ),
+  //   );
+
+  //   if (result == true && mounted) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //           content: Text('${type == 'icon' ? 'Icon' : 'Banner'} updated')),
+  //     );
+  //   }
+  // }
+
+  Future<void> _pickImage(bool banner, BuildContext context) async {
+    final ImagePicker picker = ImagePicker();
+
+    // Show dialog to choose source
+    final source = await showDialog<ImageSource>(
       context: context,
-      builder: (context) => _EditImageDialog(
-        colors: colors,
-        societyId: widget.societyId,
-        type: type,
-        initialUrl: societyData?[type] ?? '',
-        apiClient: _apiClient,
-        onSave: () => fetchSocietyDetails(page: 1, append: false),
+      builder: (context) => AlertDialog(
+        title: const Text('Select Image Source'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Camera'),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Gallery'),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+          ],
+        ),
       ),
     );
 
-    if (result == true && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('${type == 'icon' ? 'Icon' : 'Banner'} updated')),
+    if (source != null) {
+      final XFile? image = await picker.pickImage(
+        source: source,
+        maxWidth: 1920,
+        maxHeight: 1080,
+        imageQuality: 85,
       );
+
+      if (image != null) {
+        final file = File(image.path);
+        setState(() {
+          if (banner) {
+            bannerImage = file;
+          } else {
+            iconImage = file;
+          }
+        });
+
+        // Automatically upload the selected image
+        await _uploadImage(banner);
+      }
+    }
+  }
+
+  Future<bool> _uploadImage(bool banner) async {
+    final selectedImage = banner ? bannerImage : iconImage;
+    if (selectedImage == null) return false;
+
+    try {
+      final apiClient = ApiClient();
+
+      final formData = {
+        'file': [
+          await MultipartFile.fromFile(
+            selectedImage.path,
+            filename: path.basename(selectedImage.path),
+            contentType: MediaType(
+                'image', path.extension(selectedImage.path).substring(1)),
+          ),
+        ],
+        'societyId': widget.societyId,
+      };
+
+      final response = await apiClient.postFormData(
+          '/api/society/${banner ? 'banner' : 'icon'}/upload', formData);
+
+      print("RESPONSE upload Image $response");
+      if (response['url'] != null) {
+        final url = response['url'];
+        setState(() {
+          societyData?[banner ? 'banner' : 'icon'] = url;
+          // Clear the local image after successful upload
+          if (banner) {
+            bannerImage = null;
+          } else {
+            iconImage = null;
+          }
+        });
+        log("Image uploaded successfully: $url");
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content:
+                  Text('${banner ? 'Banner' : 'Icon'} updated successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+        return true;
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Failed to upload image'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return false;
+      }
+    } catch (e) {
+      log("Error uploading image: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Upload failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return false;
     }
   }
 
@@ -513,8 +642,7 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
           clipBehavior: Clip.none,
           children: [
             GestureDetector(
-              onTap:
-                  showEdit ? () => _showEditImageDialog(type: 'banner') : null,
+              onTap: showEdit ? () => _pickImage(true, context) : null,
               child: Container(
                 height: 180,
                 width: double.infinity,
@@ -551,7 +679,7 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                         child: _MinimalIconButton(
                           icon: Icons.edit,
                           color: colors['accent']!,
-                          onTap: () => _showEditImageDialog(type: 'banner'),
+                          onTap: () => _pickImage(true, context),
                         ),
                       ),
                   ],
@@ -562,8 +690,7 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
               bottom: -44,
               left: 32,
               child: GestureDetector(
-                onTap:
-                    showEdit ? () => _showEditImageDialog(type: 'icon') : null,
+                onTap: showEdit ? () => _pickImage(false, context) : null,
                 child: Stack(
                   children: [
                     iconUrl.isNotEmpty
@@ -585,7 +712,7 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                         child: _MinimalIconButton(
                           icon: Icons.edit,
                           color: colors['accent']!,
-                          onTap: () => _showEditImageDialog(type: 'icon'),
+                          onTap: () => _pickImage(false, context),
                         ),
                       ),
                   ],
@@ -870,10 +997,7 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                           final roleImage = role['picture'];
                           final roleId = role['_id']?.toString();
 
-                          return 
-                          
-                          
-                          Stack(
+                          return Stack(
                             clipBehavior: Clip.none,
                             children: [
                               AnimatedContainer(
@@ -1038,10 +1162,6 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                                 ),
                             ],
                           );
-
-
-
-
                         },
                       ),
                     )
@@ -1134,6 +1254,16 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                     editable = !editable;
                   });
                 }
+                if (value == 'verify') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => SocietyVerification(
+                              societyId: societyData?['_id'],
+                              societyName: societyData?['name'],
+                            )),
+                  );
+                }
               },
               itemBuilder: (BuildContext context) => [
                 PopupMenuItem<String>(
@@ -1148,6 +1278,22 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
                       const SizedBox(width: 8),
                       Text(
                         editable ? 'Disable Edit' : 'Enable Edit',
+                        style: TextStyle(
+                          color: colors['fg'],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                PopupMenuItem<String>(
+                  value: 'verify',
+                  child: Row(
+                    children: [
+                      Icon(Icons.verified, color: colors['accent'], size: 18),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Verify Society',
                         style: TextStyle(
                           color: colors['fg'],
                           fontWeight: FontWeight.w500,

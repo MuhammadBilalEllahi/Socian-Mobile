@@ -811,11 +811,11 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                   final timeAgo = timeago.format(createdAt, locale: 'en_short');
                   final replyCount = (comment['replies'] as List?)?.length ?? 0;
 
-                  log("commentId: ${comment[index]} ");
-                  _isCommentLiked[commentId] = comment[index]['voteId']
-                          ['userVotes']?[currentUserId] ==
+                  log("commentId: $comment ");
+                  _isCommentLiked[commentId] = comment?['voteId']['userVotes']
+                          ?[currentUserId] ==
                       'upvote';
-                  _isCommentDisliked[commentId] = comment[index]['voteId']
+                  _isCommentDisliked[commentId] = comment?['voteId']
                           ?['userVotes']?[currentUserId] ==
                       'downvote';
                   _isCommentVoting[commentId] = false;

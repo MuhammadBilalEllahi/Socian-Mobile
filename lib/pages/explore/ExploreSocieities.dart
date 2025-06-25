@@ -114,6 +114,77 @@ class _ExploreSocietiesState extends ConsumerState<ExploreSocieties> {
 
     return Scaffold(
       backgroundColor: bgColor,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(170),
+        child: AppBar(
+          backgroundColor: cardColor,
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          flexibleSpace: SafeArea(
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              decoration: BoxDecoration(
+                color: cardColor,
+                border: Border(
+                  bottom: BorderSide(color: borderColor, width: 1),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: custom.SearchBar(
+                          controller: searchController,
+                          focusNode: searchFocusNode,
+                          fg: textColor,
+                          cardBg: cardColor,
+                          muted: mutedColor,
+                          border: borderColor,
+                          accent: accentColor,
+                          onClear: () =>
+                              setState(() => searchController.clear()),
+                        ),
+                      ),
+                      if (isSearchActive)
+                        IconButton(
+                          icon: Icon(Icons.close, color: mutedColor),
+                          tooltip: 'Close search',
+                          onPressed: () {
+                            searchFocusNode.unfocus();
+                            setState(() => searchController.clear());
+                          },
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  FilterBar(
+                    allSocieties: allSocieties,
+                    selectedUniversity: selectedUniversity,
+                    selectedCampus: selectedCampus,
+                    selectedAllows: selectedAllows,
+                    onUniversityChanged: (val) => setState(() {
+                      selectedUniversity = val;
+                      selectedCampus = null;
+                    }),
+                    onCampusChanged: (val) =>
+                        setState(() => selectedCampus = val),
+                    onAllowsChanged: (val) =>
+                        setState(() => selectedAllows = val),
+                    fg: textColor,
+                    cardBg: cardColor,
+                    muted: mutedColor,
+                    border: borderColor,
+                    accent: accentColor,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
       body: SafeArea(
         child: RefreshIndicator(
           color: accentColor,
@@ -133,69 +204,6 @@ class _ExploreSocietiesState extends ConsumerState<ExploreSocieties> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Top bar with search and filter
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 20),
-                        decoration: BoxDecoration(
-                          color: cardColor,
-                          border: Border(
-                            bottom: BorderSide(color: borderColor, width: 1),
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: custom.SearchBar(
-                                    controller: searchController,
-                                    focusNode: searchFocusNode,
-                                    fg: textColor,
-                                    cardBg: cardColor,
-                                    muted: mutedColor,
-                                    border: borderColor,
-                                    accent: accentColor,
-                                    onClear: () => setState(
-                                        () => searchController.clear()),
-                                  ),
-                                ),
-                                if (isSearchActive)
-                                  IconButton(
-                                    icon: Icon(Icons.close, color: mutedColor),
-                                    tooltip: 'Close search',
-                                    onPressed: () {
-                                      searchFocusNode.unfocus();
-                                      setState(() => searchController.clear());
-                                    },
-                                  ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            FilterBar(
-                              allSocieties: allSocieties,
-                              selectedUniversity: selectedUniversity,
-                              selectedCampus: selectedCampus,
-                              selectedAllows: selectedAllows,
-                              onUniversityChanged: (val) => setState(() {
-                                selectedUniversity = val;
-                                selectedCampus = null;
-                              }),
-                              onCampusChanged: (val) =>
-                                  setState(() => selectedCampus = val),
-                              onAllowsChanged: (val) =>
-                                  setState(() => selectedAllows = val),
-                              fg: textColor,
-                              cardBg: cardColor,
-                              muted: mutedColor,
-                              border: borderColor,
-                              accent: accentColor,
-                            ),
-                          ],
-                        ),
-                      ),
                       // Main content
                       Padding(
                         padding: const EdgeInsets.symmetric(
