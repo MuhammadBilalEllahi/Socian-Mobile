@@ -2,16 +2,14 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:socian/core/utils/constants.dart';
-import 'package:socian/features/auth/providers/auth_provider.dart';
-import 'package:socian/shared/services/api_client.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
-
-
 import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/shared/services/api_client.dart';
+
 class CreateSocietyPage extends ConsumerStatefulWidget {
   const CreateSocietyPage({super.key});
 
@@ -28,7 +26,7 @@ class _CreateSocietyPageState extends ConsumerState<CreateSocietyPage> {
   CroppedFile? _selectedBanner;
   final _bannerController = TextEditingController();
 
-List<String> _rolesList=[];
+  final List<String> _rolesList = [];
   String? _selectedSocietyType;
   String? _selectedCampus;
   String _selectedAllows = '';
@@ -70,14 +68,15 @@ List<String> _rolesList=[];
     _fetchSocietyTypes();
     _fetchCampuses();
     // _rolesList = [
-      // 'alumni', 'student', 'teacher', 'ext_org', 'all'
-      // 'President',
-      // 'Vice President',
-      // 'Secretary',
-      // 'Treasurer',
-      // 'Member',
+    // 'alumni', 'student', 'teacher', 'ext_org', 'all'
+    // 'President',
+    // 'Vice President',
+    // 'Secretary',
+    // 'Treasurer',
+    // 'Member',
     // ];
-    _rolesList.add(ref.read(authProvider).user?['role'] ?? 'unauthorized'); // Add the user's role
+    _rolesList.add(ref.read(authProvider).user?['role'] ??
+        'unauthorized'); // Add the user's role
   }
 
   @override
@@ -123,180 +122,233 @@ List<String> _rolesList=[];
   }
 
   // Handle form submission
-Future<void> _submitForm() async {
-  if (!_formKey.currentState!.validate()) return;
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
 
-  setState(() {
-    _isLoading = true;
-    _error = null;
-  });
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
 
-  try {
-    final apiClient = ApiClient();
-    final authState = ref.read(authProvider);
-    final userId = authState.user?['_id'];
-    final role = authState.user?['role'];
-    final universityId = authState.user?['references']?['university']?['_id'];
+    try {
+      final apiClient = ApiClient();
+      final authState = ref.read(authProvider);
+      final userId = authState.user?['_id'];
+      final role = authState.user?['role'];
+      final universityId = authState.user?['references']?['university']?['_id'];
 
-    // ✅ Safely flatten _selectedAllows into List<String>
-    final List<String> flatAllows = [];
-
-// NOTE: ROUTe IN BACKEND IS NOT UPDATED YET, WHEN UPDATED USER "apiClient.postFORMDATA"
-        // Prepare multipart files
-    // final iconFile = await MultipartFile.fromFile(
-    //   _selectedIcon!.path,
-    //   filename: 'icon.jpg',
-    // );
-
-    // MultipartFile? bannerFile;
-    // if (_selectedBanner != null) {
-    //   bannerFile = await MultipartFile.fromFile(
-    //     _selectedBanner!.path,
-    //     filename: 'banner.jpg',
-    //   );
-    // }
-
-    // if (_selectedAllows is List) {
-    //   for (var item in _selectedAllows) {
-    //     if (item is String) {
-    //       flatAllows.add(item);
-    //     // ignore: unnecessary_type_check
-    //     } 
-        
-    //     // else if (item is List && item is! String) {
-    //     //   for (var innerItem in item) {
-    //     //     flatAllows.add(innerItem.toString());
-    //     //   }
-    //     // } 
-        
-    //     else {
-    //       flatAllows.add(item.toString());
-    //     }
-    //   }
-    // } else if (_selectedAllows != null) {
-    //   flatAllows.add(_selectedAllows.toString());
-    // }
-
-    debugPrint('Selected Allows (Raw): $_selectedAllows');
-    debugPrint('Selected Allows (Flat): $flatAllows');
-
-    final payload = {
-      'name': _nameController.text.trim(),
-      'description': _descriptionController.text.trim(),
-      'societyTypeId': _selectedSocietyType,
-      'category': 'default',
-      // NOTE: ROUTe IN BACKEND IS NOT UPDATED YET, WHEN UPDATED USER "apiClient.postFORMDATA"
-  //     'icon': iconFile,
-  // 'banner': bannerFile,
-      'allows': _selectedAllows,
-      'president': userId,
-    };
-
-    debugPrint('Create Society Payload: ${jsonEncode(payload)}');
+      // ✅ Safely flatten _selectedAllows into List<String>
+      final List<String> flatAllows = [];
 
 // NOTE: ROUTe IN BACKEND IS NOT UPDATED YET, WHEN UPDATED USER "apiClient.postFORMDATA"
-    final response = await apiClient.post(
-      '/api/society/create',
-       payload,
-    );
+      // Prepare multipart files
+      MultipartFile? iconFile;
+      if (_selectedIcon != null) {
+        iconFile = await MultipartFile.fromFile(
+          _selectedIcon!.path,
+          filename: 'icon.jpg',
+        );
+      }
 
-    if (response['message'] == 'Society created successfully') {
+      MultipartFile? bannerFile;
+      if (_selectedBanner != null) {
+        bannerFile = await MultipartFile.fromFile(
+          _selectedBanner!.path,
+          filename: 'banner.jpg',
+        );
+      }
+
+      // if (_selectedAllows is List) {
+      //   for (var item in _selectedAllows) {
+      //     if (item is String) {
+      //       flatAllows.add(item);
+      //     // ignore: unnecessary_type_check
+      //     }
+
+      //     // else if (item is List && item is! String) {
+      //     //   for (var innerItem in item) {
+      //     //     flatAllows.add(innerItem.toString());
+      //     //   }
+      //     // }
+
+      //     else {
+      //       flatAllows.add(item.toString());
+      //     }
+      //   }
+      // } else if (_selectedAllows != null) {
+      //   flatAllows.add(_selectedAllows.toString());
+      // }
+
+      debugPrint('Selected Allows (Raw): $_selectedAllows');
+      debugPrint('Selected Allows (Flat): $flatAllows');
+
+      // Prepare the form data payload
+      final payload = <String, dynamic>{
+        'name': _nameController.text.trim(),
+        'description': _descriptionController.text.trim(),
+        'societyTypeId': _selectedSocietyType,
+        'category': 'default',
+        'allows': _selectedAllows,
+        'president': userId,
+        'files': []
+      };
+
+      // Add files separately (MultipartFile objects can't be JSON encoded)
+      if (iconFile != null) {
+        payload['files'].add(iconFile);
+      }
+      if (bannerFile != null) {
+        payload['files'].add(bannerFile);
+      }
+
+      // Debug print without the files (since they can't be JSON encoded)
+      final debugPayload = {
+        'name': _nameController.text.trim(),
+        'description': _descriptionController.text.trim(),
+        'societyTypeId': _selectedSocietyType,
+        'category': 'default',
+        'allows': _selectedAllows,
+        'president': userId,
+        'hasIcon': iconFile != null,
+        'hasBanner': bannerFile != null,
+      };
+      debugPrint('Create Society Payload: ${jsonEncode(debugPayload)}');
+
+// NOTE: ROUTe IN BACKEND IS NOT UPDATED YET, WHEN UPDATED USER "apiClient.postFORMDATA"
+      final response = await apiClient.postFormData(
+        '/api/society/create',
+        payload,
+      );
+
+      if (response['message'] == 'Society created successfully') {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Society created successfully')),
+          );
+          Navigator.of(context).pop();
+        }
+      }
+    } catch (e) {
+      log("Error in create society: $e");
+      setState(() {
+        _error = e.toString().contains('Society already Exists')
+            ? 'Society name already exists'
+            : 'Failed to create society: $e';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _mediaPicker({bool isBanner = false}) async {
+    try {
+      // Show dialog to choose source
+      final source = await showDialog<ImageSource>(
+        context: context,
+        builder: (context) {
+          final colors = _getThemeColors(context);
+          return AlertDialog(
+            backgroundColor: colors['bg'],
+            title: Text(
+              'Select Image Source',
+              style: TextStyle(color: colors['fg']),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: Icon(Icons.camera_alt, color: colors['fg']),
+                  title: Text('Camera', style: TextStyle(color: colors['fg'])),
+                  onTap: () => Navigator.pop(context, ImageSource.camera),
+                ),
+                ListTile(
+                  leading: Icon(Icons.photo_library, color: colors['fg']),
+                  title: Text('Gallery', style: TextStyle(color: colors['fg'])),
+                  onTap: () => Navigator.pop(context, ImageSource.gallery),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+
+      if (source == null) return;
+
+      final picker = ImagePicker();
+      final XFile? pickedFile = await picker.pickImage(
+        source: source,
+        maxWidth: 2048,
+        maxHeight: 2048,
+        imageQuality: 85,
+      );
+
+      if (pickedFile == null) return;
+
+      if (isBanner) {
+        final croppedFile = await ImageCropper().cropImage(
+          sourcePath: pickedFile.path,
+          aspectRatio: const CropAspectRatio(ratioX: 3, ratioY: 1),
+          compressQuality: 85,
+          uiSettings: [
+            AndroidUiSettings(
+              toolbarTitle: 'Crop Banner',
+              toolbarColor: Colors.deepPurple,
+              toolbarWidgetColor: Colors.white,
+              initAspectRatio: CropAspectRatioPreset.original,
+              lockAspectRatio: true,
+            ),
+            IOSUiSettings(
+              title: 'Crop Banner',
+              aspectRatioLockEnabled: true,
+              resetAspectRatioEnabled: false,
+            ),
+          ],
+        );
+
+        if (croppedFile != null && mounted) {
+          setState(() {
+            _selectedBanner = croppedFile;
+          });
+        }
+      } else {
+        // For icon, we can crop as square
+        final croppedFile = await ImageCropper().cropImage(
+          sourcePath: pickedFile.path,
+          aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+          compressQuality: 85,
+          uiSettings: [
+            AndroidUiSettings(
+              toolbarTitle: 'Crop Icon',
+              toolbarColor: Colors.deepPurple,
+              toolbarWidgetColor: Colors.white,
+              initAspectRatio: CropAspectRatioPreset.square,
+              lockAspectRatio: true,
+            ),
+            IOSUiSettings(
+              title: 'Crop Icon',
+              aspectRatioLockEnabled: true,
+              resetAspectRatioEnabled: false,
+            ),
+          ],
+        );
+
+        if (croppedFile != null && mounted) {
+          setState(() {
+            _selectedIcon = File(croppedFile.path);
+          });
+        }
+      }
+    } catch (e) {
+      log('Error in image picker/cropper: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Society created successfully')),
+          SnackBar(content: Text('Failed to process image: ${e.toString()}')),
         );
-        Navigator.of(context).pop();
       }
-    }
-  } catch (e) {
-    setState(() {
-      _error = e.toString().contains('Society already Exists')
-          ? 'Society name already exists'
-          : 'Failed to create society: $e';
-    });
-  } finally {
-    setState(() {
-      _isLoading = false;
-    });
-  }
-}
-
-
-Future<void> _mediaPicker(ImageSource source, {bool isBanner = false}) async {
-  try {
-    final picker = ImagePicker();
-    final XFile? pickedFile = await picker.pickImage(
-      source: source,
-      maxWidth: 2048,
-      maxHeight: 2048,
-      imageQuality: 85,
-    );
-
-    if (pickedFile == null) return;
-
-    if (isBanner) {
-      final croppedFile = await ImageCropper().cropImage(
-        sourcePath: pickedFile.path,
-        aspectRatio: const CropAspectRatio(ratioX: 3, ratioY: 1),
-        compressQuality: 85,
-        uiSettings: [
-          AndroidUiSettings(
-            toolbarTitle: 'Crop Banner',
-            toolbarColor: Colors.deepPurple,
-            toolbarWidgetColor: Colors.white,
-            initAspectRatio: CropAspectRatioPreset.original,
-            lockAspectRatio: true,
-          ),
-          IOSUiSettings(
-            title: 'Crop Banner',
-            aspectRatioLockEnabled: true,
-            resetAspectRatioEnabled: false,
-          ),
-        ],
-      );
-
-      if (croppedFile != null && mounted) {
-        setState(() {
-          _selectedBanner = croppedFile;
-        });
-      }
-    } else {
-      // For icon, we can crop as square
-      final croppedFile = await ImageCropper().cropImage(
-        sourcePath: pickedFile.path,
-        aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
-        compressQuality: 85,
-        uiSettings: [
-          AndroidUiSettings(
-            toolbarTitle: 'Crop Icon',
-            toolbarColor: Colors.deepPurple,
-            toolbarWidgetColor: Colors.white,
-            initAspectRatio: CropAspectRatioPreset.square,
-            lockAspectRatio: true,
-          ),
-          IOSUiSettings(
-            title: 'Crop Icon',
-            aspectRatioLockEnabled: true,
-            resetAspectRatioEnabled: false,
-          ),
-        ],
-      );
-
-      if (croppedFile != null && mounted) {
-        setState(() {
-          _selectedIcon = File(croppedFile.path);
-        });
-      }
-    }
-  } catch (e) {
-    log('Error in image picker/cropper: $e');
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to process image: ${e.toString()}')),
-      );
     }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -438,15 +490,15 @@ Future<void> _mediaPicker(ImageSource source, {bool isBanner = false}) async {
                             onSelected: (selected) {
                               setState(() {
                                 if (selected) {
-                                  _selectedAllows=role;
+                                  _selectedAllows = role;
                                 } else {
-                                  _selectedAllows='';
+                                  _selectedAllows = '';
                                 }
                               });
                             },
                             selectedColor: colors['accent']!.withOpacity(0.2),
                             labelStyle: TextStyle(
-                              color: _selectedAllows ==role
+                              color: _selectedAllows == role
                                   ? colors['accent']
                                   : colors['fg'],
                             ),
@@ -456,7 +508,7 @@ Future<void> _mediaPicker(ImageSource source, {bool isBanner = false}) async {
                 const SizedBox(height: 16),
                 // Icon URL
                 GestureDetector(
-                  onTap:()=>_mediaPicker(ImageSource.gallery),
+                  onTap: () => _mediaPicker(),
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -476,19 +528,45 @@ Future<void> _mediaPicker(ImageSource source, {bool isBanner = false}) async {
                     ),
                   ),
                 ),
-                GestureDetector(
-                  onTap: () => _selectedIcon =null,
-                  child: _selectedIcon != null
-                      ? Image.file(
+                if (_selectedIcon != null) ...[
+                  const SizedBox(height: 12),
+                  Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.file(
                           _selectedIcon!,
                           width: 100,
                           height: 100,
-                        )
-                      : const SizedBox.shrink(),
-                ),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Positioned(
+                        right: 4,
+                        top: 4,
+                        child: GestureDetector(
+                          onTap: () => setState(() => _selectedIcon = null),
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withOpacity(0.8),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                const SizedBox(height: 16),
 
                 GestureDetector(
-                  onTap: () => _mediaPicker(ImageSource.gallery, isBanner: true),
+                  onTap: () => _mediaPicker(isBanner: true),
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -508,16 +586,41 @@ Future<void> _mediaPicker(ImageSource source, {bool isBanner = false}) async {
                     ),
                   ),
                 ),
-                GestureDetector(
-                  onTap: () => _selectedBanner =null,
-                  child: _selectedBanner != null
-                      ? Image.file(
+                if (_selectedBanner != null) ...[
+                  const SizedBox(height: 12),
+                  Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.file(
                           File(_selectedBanner!.path),
-                          width: 100,
-                          height: 100,
-                        )
-                      : const SizedBox.shrink(),
-                ),
+                          width: double.infinity,
+                          height: 120,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: GestureDetector(
+                          onTap: () => setState(() => _selectedBanner = null),
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withOpacity(0.8),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 24),
                 // Error message
                 if (_error != null)
@@ -543,7 +646,7 @@ Future<void> _mediaPicker(ImageSource source, {bool isBanner = false}) async {
                     ),
                     child: _isLoading
                         ? CircularProgressIndicator(color: colors['fg'])
-                        : Text(
+                        : const Text(
                             'Create Society',
                             style: TextStyle(
                               fontSize: 16,
