@@ -205,7 +205,7 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                   ),
                   _buildDrawerItem(
                     icon: Icons.people,
-                    title: "Alumni",
+                    title: "Explore World",
                     onTap: () => Navigator.pushNamed(
                       context,
                       AppRoutes.alumniScrolls,

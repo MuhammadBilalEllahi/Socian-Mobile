@@ -52,6 +52,18 @@ class SecureStorageService {
       await _secureStorage.delete(key: key);
     }
   }
+
+  Future<void> saveDeviceId(String deviceId) async {
+    await _secureStorage.write(key: 'deviceId', value: deviceId);
+  }
+
+  Future<String?> getDeviceId() async {
+    return await _secureStorage.read(key: 'deviceId');
+  }
+
+  Future<void> deleteDeviceId() async {
+    await _secureStorage.delete(key: 'deviceId');
+  }
 }
 
 // import 'package:shared_preferences/shared_preferences.dart';

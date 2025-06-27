@@ -19,6 +19,8 @@ class ApiConstants {
     0: "https://api.socian.app", // production
 
     1: "http://192.168.1.1:8080",
+    2: "http://192.168.1.2:8080",
+    3: "http://192.168.1.3:8080",
     10: "http://192.168.1.10:8080",
     4: "http://192.168.1.4:8080",
     5: "http://192.168.1.5:8080",
@@ -33,7 +35,7 @@ class ApiConstants {
     111: "http://10.135.54.210:8080"
   };
 
-  static int _currentUrlIndex = 10;
+  static int _currentUrlIndex = 2;
   static const String _urlIndexCacheKey = 'current_url_index';
 
   static Future<void> initializeBaseUrl() async {
