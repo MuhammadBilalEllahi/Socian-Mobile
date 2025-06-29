@@ -1,7 +1,8 @@
 import 'dart:async';
-import 'package:socian/components/rive/RepeatingThumbAnimation.dart';
-import 'package:socian/core/utils/constants.dart';
+
 import 'package:flutter/material.dart';
+import 'package:socian/components/rive/RepeatingThumbAnimation.dart';
+import 'package:socian/shared/utils/constants.dart';
 
 class PastPaperInfoCard extends StatefulWidget {
   final Map<String, dynamic> paper;
@@ -10,7 +11,7 @@ class PastPaperInfoCard extends StatefulWidget {
   final bool isLast;
   final VoidCallback onChatBoxToggle;
 
-  PastPaperInfoCard({
+  const PastPaperInfoCard({
     super.key,
     required this.paper,
     required this.onPaperSelected,

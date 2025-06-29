@@ -1,19 +1,15 @@
-import 'package:socian/core/utils/constants.dart';
-import 'package:socian/pages/bottomBar/MyBottomNavBar.dart';
-import 'package:socian/pages/explore/ExploreSocieities.dart';
-import 'package:socian/pages/explore/MapsPage.dart';
-
-import 'package:socian/pages/gps/GpsInitialPage.dart';
-import 'package:socian/pages/home/widgets/campus/CampusPosts.dart';
-import 'package:socian/pages/message/ConnectionsPage.dart';
-import 'package:socian/pages/message/Messages.dart';
-import 'package:socian/pages/profile/ProfilePage.dart';
-import 'package:socian/pages/providers/page_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shorebird_code_push/shorebird_code_push.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:socian/pages/bottomBar/MyBottomNavBar.dart';
+import 'package:socian/pages/explore/ExploreSocieities.dart';
+import 'package:socian/pages/gps/GpsInitialPage.dart';
 import 'package:socian/pages/home/widgets/AllView.dart';
+import 'package:socian/pages/message/ConnectionsPage.dart';
+import 'package:socian/pages/profile/ProfilePage.dart';
+import 'package:socian/pages/providers/page_provider.dart';
+import 'package:socian/shared/utils/constants.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -35,7 +31,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     _pages = {
       BottomNavBarRoute.home: const AllView(),
       // BottomNavBarRoute.message: const Messages(),
-      BottomNavBarRoute.message: ConnectionsPage(),
+      BottomNavBarRoute.message: const ConnectionsPage(),
       BottomNavBarRoute.explore: const ExploreSocieties(),
       BottomNavBarRoute.gps: const GpsInitialPage(),
       BottomNavBarRoute.profile: const ProfilePage(),
@@ -259,8 +255,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                   width: double.infinity,
                   child: TextButton(
                     onPressed: () async {
-                      final url = Uri.parse(
-                          'market://details?id=app.socian.community');
+                      final url =
+                          Uri.parse('market://details?id=app.socian.community');
                       if (await canLaunchUrl(url)) {
                         await launchUrl(url);
                       } else {

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:socian/core/utils/constants.dart';
 import 'package:socian/shared/services/api_client.dart';
+import 'package:socian/shared/utils/constants.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:socian/pages/drawer/student/pages/pastPaper/discussion/DiscussionView.dart';
 
 class PastPapers extends StatefulWidget {
   const PastPapers({super.key});

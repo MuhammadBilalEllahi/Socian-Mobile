@@ -3,10 +3,9 @@ import 'package:socian/pages/profile/settings/CreateSocietyPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
-import 'package:socian/core/utils/constants.dart';
+import 'package:socian/shared/utils/constants.dart';
 import 'package:socian/pages/profile/settings/ServerSelectionPage.dart';
 import 'package:socian/pages/profile/settings/YourSocieties.dart';
-
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -98,7 +97,7 @@ class SettingsPage extends ConsumerWidget {
             ],
           ),
 
- _buildSection(
+          _buildSection(
             'Societies',
             [
               _buildListTile(
@@ -107,9 +106,10 @@ class SettingsPage extends ConsumerWidget {
                 () {
                   // Navigate to personal info edit
                   Navigator.push(
-                      context, 
-    MaterialPageRoute(builder: (context) => const CreateSocietyPage()),
-                      );
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const CreateSocietyPage()),
+                  );
                 },
                 isDarkMode,
               ),
@@ -119,9 +119,10 @@ class SettingsPage extends ConsumerWidget {
                 () {
                   // Navigate to personal info edit
                   Navigator.push(
-                      context, 
-    MaterialPageRoute(builder: (context) =>  YourSocieties()),
-                      );
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const YourSocieties()),
+                  );
                 },
                 isDarkMode,
               ),
@@ -200,7 +201,6 @@ class SettingsPage extends ConsumerWidget {
                 isDarkMode,
                 isDestructive: true,
               ),
-              
             ],
           ),
         ],

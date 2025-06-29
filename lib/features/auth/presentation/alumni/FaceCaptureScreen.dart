@@ -8,9 +8,9 @@ import 'package:http_parser/http_parser.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:path/path.dart' as path;
 import 'package:permission_handler/permission_handler.dart';
-import 'package:socian/core/utils/constants.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/shared/services/api_client.dart';
+import 'package:socian/shared/utils/constants.dart';
 
 class FaceCaptureScreen extends ConsumerStatefulWidget {
   const FaceCaptureScreen({super.key});

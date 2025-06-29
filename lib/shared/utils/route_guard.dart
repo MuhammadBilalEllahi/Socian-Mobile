@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:socian/core/utils/constants.dart';
 import 'package:socian/features/auth/presentation/PrivacyPolicyScreen.dart';
 import 'package:socian/features/auth/presentation/alumni/FaceCaptureScreen.dart';
 import 'package:socian/features/auth/presentation/alumni/UploadCardPage.dart';
@@ -35,6 +34,7 @@ import 'package:socian/pages/profile/settings/SettingsPage.dart';
 import 'package:socian/pages/profile/settings/personalInfo/PersonalInfoEditPage.dart';
 import 'package:socian/pages/splashScreen/SplashScreen.dart';
 import 'package:socian/shared/services/WebSocketService.dart';
+import 'package:socian/shared/utils/constants.dart';
 
 // void callPostHog(String userId, String name, String email, String role) async {
 //   await Posthog().identify(

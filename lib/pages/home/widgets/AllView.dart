@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:socian/core/utils/constants.dart';
 import 'package:socian/pages/drawer/student/StudentDrawer.dart';
 import 'package:socian/pages/home/widgets/campus/CampusPosts.dart';
 import 'package:socian/pages/home/widgets/components/post/CreatePost.dart';
 import 'package:socian/pages/home/widgets/intracampus/IntraCampus.dart';
 import 'package:socian/pages/home/widgets/universities/AllUniversityPosts.dart';
+import 'package:socian/shared/utils/constants.dart';
 
 class AllView extends StatefulWidget {
   const AllView({super.key});

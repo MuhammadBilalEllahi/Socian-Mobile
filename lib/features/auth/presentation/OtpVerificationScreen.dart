@@ -2,7 +2,7 @@
 import 'package:socian/features/auth/presentation/NewPasswordScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:socian/core/utils/constants.dart';
+import 'package:socian/shared/utils/constants.dart';
 import 'package:socian/shared/services/api_client.dart';
 
 class OtpVerificationScreen extends ConsumerStatefulWidget {
@@ -16,7 +16,8 @@ class OtpVerificationScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
+  ConsumerState<OtpVerificationScreen> createState() =>
+      _OtpVerificationScreenState();
 }
 
 class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
@@ -87,12 +88,12 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
           gradient: LinearGradient(
             colors: isDarkMode
                 ? [
-                    Color.fromARGB(255, 0, 0, 0),
-                    Color.fromARGB(255, 48, 48, 48)
+                    const Color.fromARGB(255, 0, 0, 0),
+                    const Color.fromARGB(255, 48, 48, 48)
                   ]
                 : [
-                    Color.fromARGB(255, 240, 240, 240),
-                    Color.fromARGB(255, 255, 255, 255)
+                    const Color.fromARGB(255, 240, 240, 240),
+                    const Color.fromARGB(255, 255, 255, 255)
                   ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -128,7 +129,7 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                 maxLength: 6,
                 decoration: InputDecoration(
                   labelText: 'OTP Code',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                   counterText: '',
                   filled: true,
                   fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
@@ -147,7 +148,8 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                   onPressed: _isLoading ? null : _verifyOtp,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: isDarkMode ? Colors.blue[800] : Colors.blue,
+                    backgroundColor:
+                        isDarkMode ? Colors.blue[800] : Colors.blue,
                   ),
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)

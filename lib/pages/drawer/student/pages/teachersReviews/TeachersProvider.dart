@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:socian/shared/services/api_client.dart';
-import 'package:socian/core/utils/constants.dart';
+import 'package:socian/shared/utils/constants.dart';
 
 class TeachersState {
   final List<dynamic> allTeachers;

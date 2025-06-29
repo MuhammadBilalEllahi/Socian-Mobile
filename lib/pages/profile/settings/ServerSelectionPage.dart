@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:socian/core/utils/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:socian/shared/utils/constants.dart';
 
 class ServerSelectionPage extends StatefulWidget {
   const ServerSelectionPage({super.key});

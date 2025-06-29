@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:socian/core/utils/constants.dart';
+import 'package:socian/components/widgets/my_dropdown.dart';
+import 'package:socian/components/widgets/my_snackbar.dart';
+import 'package:socian/components/widgets/my_textfield.dart';
 import 'package:socian/features/auth/presentation/PrivacyPolicyScreen.dart';
 import 'package:socian/shared/services/api_client.dart';
 import 'package:socian/shared/services/secure_storage_service.dart';
-import 'package:socian/shared/widgets/my_dropdown.dart';
-import 'package:socian/shared/widgets/my_snackbar.dart';
-import 'package:socian/shared/widgets/my_textfield.dart';
+import 'package:socian/shared/utils/constants.dart';
 
 class SignUpForm extends StatefulWidget {
   final String role;

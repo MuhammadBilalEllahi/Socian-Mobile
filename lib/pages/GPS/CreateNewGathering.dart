@@ -1,6 +1,4 @@
-
-
-import 'package:socian/core/utils/constants.dart';
+import 'package:socian/shared/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:socian/shared/services/api_client.dart';
@@ -359,7 +357,7 @@ class _CreateNewGatheringState extends ConsumerState<CreateNewGathering> {
                                     elevation: 0,
                                   ),
                                   onPressed: _submitForm,
-                                  child: Text(
+                                  child: const Text(
                                     'Create Gathering',
                                     style: TextStyle(
                                       fontSize: 14,
@@ -462,7 +460,8 @@ class _CreateNewGatheringState extends ConsumerState<CreateNewGathering> {
           if (isStartTime) {
             _startTime = newDateTime;
             // Ensure end time is at least 30 minutes later and within 5 hours
-            if (_endTime.isBefore(_startTime.add(const Duration(minutes: 30)))) {
+            if (_endTime
+                .isBefore(_startTime.add(const Duration(minutes: 30)))) {
               _endTime = _startTime.add(const Duration(minutes: 30));
             } else if (_endTime.difference(_startTime).inHours > 5) {
               _endTime = _startTime.add(const Duration(hours: 5));

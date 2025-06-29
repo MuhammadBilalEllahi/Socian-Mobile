@@ -14,10 +14,10 @@ import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
-import 'package:socian/core/utils/constants.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/pages/explore/SocietyProvider.dart';
 import 'package:socian/shared/services/api_client.dart';
+import 'package:socian/shared/utils/constants.dart';
 import 'package:video_player/video_player.dart';
 
 import 'widgets/location_section.dart';

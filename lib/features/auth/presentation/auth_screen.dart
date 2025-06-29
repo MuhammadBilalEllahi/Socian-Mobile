@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:socian/core/utils/constants.dart';
+import 'package:socian/shared/utils/constants.dart';
 import 'package:socian/features/auth/presentation/widgets/login_form.dart';
 import 'package:socian/features/auth/presentation/NewPasswordScreen.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
@@ -41,18 +41,16 @@ class AuthScreen extends ConsumerWidget {
           gradient: LinearGradient(
             colors: isDarkMode
                 ? [
-                    Color.fromARGB(255, 0, 0, 0),
-                    Color.fromARGB(255, 48, 48, 48)
+                    const Color.fromARGB(255, 0, 0, 0),
+                    const Color.fromARGB(255, 48, 48, 48)
                   ]
                 : [
-                    Color.fromARGB(255, 240, 240, 240),
-                    Color.fromARGB(255, 255, 255, 255)
+                    const Color.fromARGB(255, 240, 240, 240),
+                    const Color.fromARGB(255, 255, 255, 255)
                   ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
-
-          
         ),
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -98,7 +96,8 @@ class AuthScreen extends ConsumerWidget {
                           child: Text(
                             "Forgot Password?",
                             style: TextStyle(
-                              color: isDarkMode ? Colors.blue[200] : Colors.blue,
+                              color:
+                                  isDarkMode ? Colors.blue[200] : Colors.blue,
                               fontSize: 14,
                             ),
                           ),
@@ -110,7 +109,8 @@ class AuthScreen extends ConsumerWidget {
                             Text(
                               "Don't have an account?",
                               style: TextStyle(
-                                color: isDarkMode ? Colors.white : Colors.black87,
+                                color:
+                                    isDarkMode ? Colors.white : Colors.black87,
                                 fontSize: 14,
                               ),
                             ),
@@ -190,7 +190,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
     setState(() => isLoading = true);
     try {
       final apiClient = ApiClient();
-      final endpoint = '/api/auth/forgot-password';
+      const endpoint = '/api/auth/forgot-password';
       final fullUrl = '${ApiConstants.baseUrl}$endpoint';
 
       //debugPrint('Making forgot password request to: $fullUrl');
@@ -244,7 +244,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
     setState(() => isLoading = true);
     try {
       final apiClient = ApiClient();
-      final endpoint = '/api/auth/verify/otp/password';
+      const endpoint = '/api/auth/verify/otp/password';
       final fullUrl = '${ApiConstants.baseUrl}$endpoint';
 
       //debugPrint('Making OTP verification request to: $fullUrl');
@@ -390,7 +390,8 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content: Text('Please enter a valid email address')),
+                              content:
+                                  Text('Please enter a valid email address')),
                         );
                       }
                       return;
@@ -414,7 +415,8 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content: Text('Please enter a valid 6-digit OTP')),
+                              content:
+                                  Text('Please enter a valid 6-digit OTP')),
                         );
                       }
                       return;
@@ -433,9 +435,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
                   }
                 : null,
             child: Text(
-              isResendEnabled
-                  ? "Resend OTP"
-                  : "Resend OTP (${countdown}s)",
+              isResendEnabled ? "Resend OTP" : "Resend OTP (${countdown}s)",
               style: TextStyle(
                 color: isResendEnabled
                     ? (isDarkMode ? Colors.blue[200] : Colors.blue)
@@ -448,26 +448,3 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

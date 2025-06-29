@@ -8,12 +8,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:path/path.dart' as path;
-import 'package:socian/core/utils/constants.dart';
+import 'package:socian/components/widgets/my_dropdown.dart';
+import 'package:socian/components/widgets/my_snackbar.dart';
 import 'package:socian/features/auth/presentation/alumni/FaceCaptureScreen.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/shared/services/api_client.dart';
-import 'package:socian/shared/widgets/my_dropdown.dart';
-import 'package:socian/shared/widgets/my_snackbar.dart';
+import 'package:socian/shared/utils/constants.dart';
 
 class UploadCardPage extends ConsumerStatefulWidget {
   const UploadCardPage({super.key});

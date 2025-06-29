@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:socian/core/utils/constants.dart';
-import 'package:socian/core/utils/route_guard.dart';
 import 'package:socian/shared/services/WebSocketService.dart';
 import 'package:socian/shared/services/shared_preferences.dart';
+import 'package:socian/shared/utils/constants.dart';
+import 'package:socian/shared/utils/route_guard.dart';
 import 'package:socian/theme/AppThemes.dart';
 
 void main() async {

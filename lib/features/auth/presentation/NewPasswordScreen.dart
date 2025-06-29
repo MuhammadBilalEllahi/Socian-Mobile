@@ -1,8 +1,8 @@
-import 'package:socian/core/utils/constants.dart';
-import 'package:socian/features/auth/presentation/auth_screen.dart';
-import 'package:socian/shared/services/api_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:socian/features/auth/presentation/auth_screen.dart';
+import 'package:socian/shared/services/api_client.dart';
+import 'package:socian/shared/utils/constants.dart';
 
 class NewPasswordScreen extends ConsumerStatefulWidget {
   final String token;
@@ -40,7 +40,7 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen> {
 
     try {
       final apiClient = ApiClient();
-      final endpoint = '/api/auth/newPassword';
+      const endpoint = '/api/auth/newPassword';
       final fullUrl = '${ApiConstants.baseUrl}$endpoint';
 
       // debugPrint('Making new password request to: $fullUrl');
@@ -109,12 +109,12 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen> {
           gradient: LinearGradient(
             colors: isDarkMode
                 ? [
-                    Color.fromARGB(255, 0, 0, 0),
-                    Color.fromARGB(255, 48, 48, 48)
+                    const Color.fromARGB(255, 0, 0, 0),
+                    const Color.fromARGB(255, 48, 48, 48)
                   ]
                 : [
-                    Color.fromARGB(255, 240, 240, 240),
-                    Color.fromARGB(255, 255, 255, 255)
+                    const Color.fromARGB(255, 240, 240, 240),
+                    const Color.fromARGB(255, 255, 255, 255)
                   ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -230,7 +230,8 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen> {
                     onPressed: _isLoading ? null : _resetPassword,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: isDarkMode ? Colors.blue[800] : Colors.blue,
+                      backgroundColor:
+                          isDarkMode ? Colors.blue[800] : Colors.blue,
                     ),
                     child: _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)

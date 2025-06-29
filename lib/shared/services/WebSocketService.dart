@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:developer';
+
 import 'package:flutter/widgets.dart';
-import 'package:socian/core/utils/constants.dart';
+import 'package:socian/shared/utils/constants.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 /// Singleton WebSocketService for robust, single-connection management using socket_io_client
@@ -96,19 +97,19 @@ class WebSocketService with WidgetsBindingObserver {
     }
   }
 
-void joinNotification(String userId) {
-  log("Joining notification room for user: $userId, joinNotifications");
-  if (_isConnected && _socket != null) {
-    _socket!.emit('joinNotifications', userId);
-    debugPrint(" Joined notification room for user: $userId");
+  void joinNotification(String userId) {
+    log("Joining notification room for user: $userId, joinNotifications");
+    if (_isConnected && _socket != null) {
+      _socket!.emit('joinNotifications', userId);
+      debugPrint(" Joined notification room for user: $userId");
 
-    // Optional: Listen to new notifications
-    _socket!.on('newNotification', (notification) {
-      debugPrint(" New notification received: $notification");
-      _messageController?.add({'newNotification': notification});
-    });
+      // Optional: Listen to new notifications
+      _socket!.on('newNotification', (notification) {
+        debugPrint(" New notification received: $notification");
+        _messageController?.add({'newNotification': notification});
+      });
+    }
   }
-}
 
   /// Listen to incoming messages
   Stream<dynamic> get messages {

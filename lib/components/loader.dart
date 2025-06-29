@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:socian/core/utils/constants.dart';
+import 'package:socian/shared/utils/constants.dart';
 
 class LogoLoader extends StatefulWidget {
   const LogoLoader({super.key});
@@ -8,7 +8,8 @@ class LogoLoader extends StatefulWidget {
   State<LogoLoader> createState() => _LogoLoaderState();
 }
 
-class _LogoLoaderState extends State<LogoLoader> with SingleTickerProviderStateMixin {
+class _LogoLoaderState extends State<LogoLoader>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
 
@@ -32,7 +33,8 @@ class _LogoLoaderState extends State<LogoLoader> with SingleTickerProviderStateM
       TweenSequenceItem(
         tween: Tween<double>(begin: 0.2, end: 1.0),
         weight: 10.0,
-      ),TweenSequenceItem(
+      ),
+      TweenSequenceItem(
         tween: Tween<double>(begin: 0.1, end: 0.0),
         weight: 10.0,
       ),

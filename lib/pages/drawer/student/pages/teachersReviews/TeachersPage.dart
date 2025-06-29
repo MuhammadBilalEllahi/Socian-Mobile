@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:socian/components/_buildShimmerEffect.dart';
-import 'package:socian/core/utils/rbac.dart';
+import 'package:socian/components/effects/_buildShimmerEffect.dart';
+import 'package:socian/components/widgets/my_snackbar.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/shared/services/api_client.dart';
-import 'package:socian/shared/widgets/my_snackbar.dart';
+import 'package:socian/shared/utils/rbac.dart';
 
 import 'TeacherDetailsPage.dart';
 import 'TeachersProvider.dart'; // import the provider

@@ -1,9 +1,8 @@
-
 import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-import 'package:socian/core/utils/constants.dart';
+import 'package:socian/shared/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:socian/shared/services/api_client.dart';
@@ -21,13 +20,13 @@ class GatheringsView extends ConsumerStatefulWidget {
 class _GatheringsViewState extends ConsumerState<GatheringsView> {
   final String baseUrl = ApiConstants.baseUrl;
   final ApiClient _apiClient = ApiClient();
-  List<Map<String, dynamic>> _currentGatherings = [];
+  final List<Map<String, dynamic>> _currentGatherings = [];
   String? errorMessage;
   bool _isLoading = true;
   IO.Socket? _socket;
   GoogleMapController? _mapController;
   LatLng? _userLocation;
-  Map<String, BitmapDescriptor> _gatheringIcons = {};
+  final Map<String, BitmapDescriptor> _gatheringIcons = {};
   Set<Marker> _markers = {};
   Set<Circle> _circles = {};
   static const LatLng _defaultLocation = LatLng(37.7749, -122.4194);
@@ -71,7 +70,8 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
 
       if (permission == LocationPermission.deniedForever) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location permission permanently denied')),
+          const SnackBar(
+              content: Text('Location permission permanently denied')),
         );
         setState(() {
           _userLocation = _defaultLocation;
@@ -80,7 +80,8 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
         return;
       }
 
-      final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.medium);
+      final position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.medium);
       setState(() {
         _userLocation = LatLng(position.latitude, position.longitude);
       });
@@ -138,7 +139,8 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
         if (gatheringId == null || attendees == null) return;
 
         setState(() {
-          final index = _currentGatherings.indexWhere((g) => g['_id']?.toString() == gatheringId);
+          final index = _currentGatherings
+              .indexWhere((g) => g['_id']?.toString() == gatheringId);
           if (index != -1) {
             _currentGatherings[index]['attendees'] = attendees;
             _updateMapElements();
@@ -147,7 +149,8 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
       });
 
       _socket?.on('error', (error) => debugPrint('Socket error: $error'));
-      _socket?.on('disconnect', (_) => debugPrint('Disconnected from Socket.IO server'));
+      _socket?.on('disconnect',
+          (_) => debugPrint('Disconnected from Socket.IO server'));
     } catch (e) {
       debugPrint('Socket initialization error: $e');
     }
@@ -165,11 +168,16 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
 
       setState(() {
         _currentGatherings.clear();
-        final gatherings = (response as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [];
+        final gatherings =
+            (response as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [];
 
         for (var gathering in gatherings) {
-          final startTime = DateTime.tryParse(gathering['startTime']?.toString() ?? '')?.toLocal();
-          final endTime = DateTime.tryParse(gathering['endTime']?.toString() ?? '')?.toLocal();
+          final startTime =
+              DateTime.tryParse(gathering['startTime']?.toString() ?? '')
+                  ?.toLocal();
+          final endTime =
+              DateTime.tryParse(gathering['endTime']?.toString() ?? '')
+                  ?.toLocal();
 
           if (startTime == null || endTime == null) continue;
 
@@ -182,7 +190,10 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
       });
 
       await _updateMapElements();
-      debugPrint('Current gatherings: ${_currentGatherings.map((g) => {'title': g['title'], 'attendees': (g['attendees'] as List<dynamic>?)?.length ?? 0}).toList()}');
+      debugPrint('Current gatherings: ${_currentGatherings.map((g) => {
+            'title': g['title'],
+            'attendees': (g['attendees'] as List<dynamic>?)?.length ?? 0
+          }).toList()}');
     } catch (e) {
       debugPrint('Error fetching gatherings: $e');
       setState(() {
@@ -200,15 +211,20 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
       final gatheringId = gathering['_id']?.toString() ?? '';
       final title = gathering['title']?.toString() ?? 'Untitled';
       final location = LatLng(
-        double.tryParse(gathering['location']?['latitude']?.toString() ?? '') ?? 0.0,
-        double.tryParse(gathering['location']?['longitude']?.toString() ?? '') ?? 0.0,
+        double.tryParse(gathering['location']?['latitude']?.toString() ?? '') ??
+            0.0,
+        double.tryParse(
+                gathering['location']?['longitude']?.toString() ?? '') ??
+            0.0,
       );
       final radius = int.tryParse(gathering['radius']?.toString() ?? '') ?? 100;
-      final attendeesCount = (gathering['attendees'] as List<dynamic>?)?.length ?? 0;
+      final attendeesCount =
+          (gathering['attendees'] as List<dynamic>?)?.length ?? 0;
 
       // Generate or retrieve icon
       if (!_gatheringIcons.containsKey(gatheringId)) {
-        _gatheringIcons[gatheringId] = await _createGatheringIcon(gatheringId, title, attendeesCount);
+        _gatheringIcons[gatheringId] =
+            await _createGatheringIcon(gatheringId, title, attendeesCount);
       }
 
       // Generate deterministic color based on gathering ID
@@ -252,7 +268,8 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
     );
   }
 
-  Future<BitmapDescriptor> _createGatheringIcon(String gatheringId, String title, int attendeesCount) async {
+  Future<BitmapDescriptor> _createGatheringIcon(
+      String gatheringId, String title, int attendeesCount) async {
     final pictureRecorder = ui.PictureRecorder();
     final canvas = Canvas(pictureRecorder);
     final paint = Paint()..color = _generateColor(gatheringId);
@@ -262,10 +279,12 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
     canvas.drawCircle(const Offset(size / 2, size / 2), size / 2, paint);
 
     // Truncate title if too long
-    final displayTitle = title.length > 20 ? '${title.substring(0, 17)}...' : title;
+    final displayTitle =
+        title.length > 20 ? '${title.substring(0, 17)}...' : title;
 
     // Format attendee count
-    final attendeeText = attendeesCount == 1 ? '1 attendee' : '$attendeesCount attendees';
+    final attendeeText =
+        attendeesCount == 1 ? '1 attendee' : '$attendeesCount attendees';
 
     // Draw title
     final titlePainter = TextPainter(
@@ -283,7 +302,8 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
     titlePainter.layout(maxWidth: size - 8);
     titlePainter.paint(
       canvas,
-      Offset((size - titlePainter.width) / 2, (size / 2) - titlePainter.height - 4),
+      Offset((size - titlePainter.width) / 2,
+          (size / 2) - titlePainter.height - 4),
     );
 
     // Draw attendee count
@@ -316,8 +336,10 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final background = isDarkMode ? const Color(0xFF09090B) : Colors.white;
     final foreground = isDarkMode ? Colors.white : const Color(0xFF09090B);
-    final mutedForeground = isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
-    final primaryColor = isDarkMode ? const Color(0xFF6366F1) : const Color(0xFF4F46E5);
+    final mutedForeground =
+        isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+    final primaryColor =
+        isDarkMode ? const Color(0xFF6366F1) : const Color(0xFF4F46E5);
 
     return Scaffold(
       backgroundColor: background,
@@ -383,7 +405,8 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primaryColor,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -464,10 +487,15 @@ class Gathering {
     return Gathering(
       id: json['_id']?.toString() ?? '',
       title: json['title']?.toString() ?? 'Untitled',
-      location: Location.fromJson(json['location'] as Map<String, dynamic>? ?? {}),
+      location:
+          Location.fromJson(json['location'] as Map<String, dynamic>? ?? {}),
       radius: int.tryParse(json['radius']?.toString() ?? '') ?? 100,
-      startTime: DateTime.tryParse(json['startTime']?.toString() ?? '')?.toLocal() ?? DateTime.now(),
-      endTime: DateTime.tryParse(json['endTime']?.toString() ?? '')?.toLocal() ?? DateTime.now(),
+      startTime:
+          DateTime.tryParse(json['startTime']?.toString() ?? '')?.toLocal() ??
+              DateTime.now(),
+      endTime:
+          DateTime.tryParse(json['endTime']?.toString() ?? '')?.toLocal() ??
+              DateTime.now(),
       attendees: (json['attendees'] as List<dynamic>?) ?? [],
     );
   }
@@ -486,19 +514,3 @@ class Location {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

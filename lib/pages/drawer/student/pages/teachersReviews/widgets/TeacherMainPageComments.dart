@@ -3,14 +3,14 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:socian/core/utils/constants.dart';
-import 'package:socian/core/utils/rbac.dart';
+import 'package:socian/components/widgets/my_snackbar.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/pages/drawer/student/pages/teachersReviews/pages/TeacherFeedbackDetailedPage.dart';
 import 'package:socian/pages/drawer/student/pages/teachersReviews/widgets/EditFeedBackSheet.dart';
 import 'package:socian/pages/drawer/student/pages/teachersReviews/widgets/gif_picker.dart';
 import 'package:socian/shared/services/api_client.dart';
-import 'package:socian/shared/widgets/my_snackbar.dart';
+import 'package:socian/shared/utils/constants.dart';
+import 'package:socian/shared/utils/rbac.dart';
 
 class TeacherMainPageComments extends ConsumerStatefulWidget {
   final String teacherId;
@@ -646,27 +646,27 @@ class _CommentItemState extends ConsumerState<_CommentItem> {
                       const SizedBox(width: 8),
                       Text(
                         'Teacher Response',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w500,
-                              color: widget.isDark
-                                  ? Colors.white.withOpacity(0.7)
-                                  : Colors.black.withOpacity(0.7),
-                            ),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: widget.isDark
+                              ? Colors.white.withOpacity(0.7)
+                              : Colors.black.withOpacity(0.7),
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Text(
                     widget.comment['teacherDirectComment']['comment'],
-                    style: Theme.of(context).textTheme.bodyMedium,
+                    style: theme.textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     _formatDate(
                         widget.comment['teacherDirectComment']['createdAt']),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.5),
-                        ),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                    ),
                   ),
                 ],
               ),

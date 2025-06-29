@@ -1,6 +1,5 @@
-import 'package:socian/core/utils/constants.dart';
-import 'package:socian/features/auth/presentation/student_signupScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:socian/shared/utils/constants.dart';
 
 class RoleSelectionPage extends StatelessWidget {
   const RoleSelectionPage({super.key});
@@ -15,12 +14,12 @@ class RoleSelectionPage extends StatelessWidget {
           gradient: LinearGradient(
             colors: isDarkMode
                 ? [
-                    Color.fromARGB(255, 0, 0, 0),
-                    Color.fromARGB(255, 48, 48, 48)
+                    const Color.fromARGB(255, 0, 0, 0),
+                    const Color.fromARGB(255, 48, 48, 48)
                   ]
                 : [
-                    Color.fromARGB(255, 240, 240, 240),
-                    Color.fromARGB(255, 255, 255, 255)
+                    const Color.fromARGB(255, 240, 240, 240),
+                    const Color.fromARGB(255, 255, 255, 255)
                   ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -109,12 +108,12 @@ class RoleSelectionPage extends StatelessWidget {
           gradient: LinearGradient(
             colors: isDarkMode
                 ? [
-                    Color.fromARGB(255, 42, 40, 40),
-                    Color.fromARGB(255, 69, 69, 69)
+                    const Color.fromARGB(255, 42, 40, 40),
+                    const Color.fromARGB(255, 69, 69, 69)
                   ]
                 : [
-                    Color.fromARGB(255, 250, 250, 250),
-                    Color.fromARGB(255, 230, 230, 230)
+                    const Color.fromARGB(255, 250, 250, 250),
+                    const Color.fromARGB(255, 230, 230, 230)
                   ],
           ),
           borderRadius: BorderRadius.circular(15),
@@ -139,12 +138,12 @@ class RoleSelectionPage extends StatelessWidget {
                 gradient: LinearGradient(
                   colors: isDarkMode
                       ? [
-                          Color.fromARGB(255, 32, 32, 32),
-                          Color.fromARGB(255, 69, 69, 69)
+                          const Color.fromARGB(255, 32, 32, 32),
+                          const Color.fromARGB(255, 69, 69, 69)
                         ]
                       : [
-                          Color.fromARGB(255, 240, 240, 240),
-                          Color.fromARGB(255, 220, 220, 220)
+                          const Color.fromARGB(255, 240, 240, 240),
+                          const Color.fromARGB(255, 220, 220, 220)
                         ],
                 ),
               ),
@@ -173,8 +172,8 @@ class RoleSelectionPage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       color: isDarkMode
-                          ? Color.fromARGB(255, 170, 170, 170)
-                          : Color.fromARGB(255, 100, 100, 100),
+                          ? const Color.fromARGB(255, 170, 170, 170)
+                          : const Color.fromARGB(255, 100, 100, 100),
                     ),
                   ),
                 ],

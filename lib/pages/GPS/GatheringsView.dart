@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:socian/core/utils/constants.dart';
+import 'package:socian/shared/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:socian/shared/services/api_client.dart';
@@ -18,7 +18,7 @@ class GatheringsView extends ConsumerStatefulWidget {
 class _GatheringsViewState extends ConsumerState<GatheringsView> {
   final String baseUrl = ApiConstants.baseUrl;
   final ApiClient _apiClient = ApiClient();
-  List<Map<String, dynamic>> _currentGatherings = [];
+  final List<Map<String, dynamic>> _currentGatherings = [];
   String? errorMessage;
   bool _isLoading = true;
   IO.Socket? _socket;
@@ -68,7 +68,8 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
 
       if (permission == LocationPermission.deniedForever) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location permission permanently denied')),
+          const SnackBar(
+              content: Text('Location permission permanently denied')),
         );
         setState(() {
           _userLocation = _defaultLocation;
@@ -77,7 +78,8 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
         return;
       }
 
-      final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.medium);
+      final position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.medium);
       setState(() {
         _userLocation = LatLng(position.latitude, position.longitude);
       });
@@ -135,7 +137,8 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
         if (gatheringId == null || attendees == null) return;
 
         setState(() {
-          final index = _currentGatherings.indexWhere((g) => g['_id']?.toString() == gatheringId);
+          final index = _currentGatherings
+              .indexWhere((g) => g['_id']?.toString() == gatheringId);
           if (index != -1) {
             _currentGatherings[index]['attendees'] = attendees;
             _updateMapElements();
@@ -144,7 +147,8 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
       });
 
       _socket?.on('error', (error) => debugPrint('Socket error: $error'));
-      _socket?.on('disconnect', (_) => debugPrint('Disconnected from Socket.IO server'));
+      _socket?.on('disconnect',
+          (_) => debugPrint('Disconnected from Socket.IO server'));
     } catch (e) {
       debugPrint('Socket initialization error: $e');
     }
@@ -162,11 +166,16 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
 
       setState(() {
         _currentGatherings.clear();
-        final gatherings = (response as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [];
+        final gatherings =
+            (response as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [];
 
         for (var gathering in gatherings) {
-          final startTime = DateTime.tryParse(gathering['startTime']?.toString() ?? '')?.toLocal();
-          final endTime = DateTime.tryParse(gathering['endTime']?.toString() ?? '')?.toLocal();
+          final startTime =
+              DateTime.tryParse(gathering['startTime']?.toString() ?? '')
+                  ?.toLocal();
+          final endTime =
+              DateTime.tryParse(gathering['endTime']?.toString() ?? '')
+                  ?.toLocal();
 
           if (startTime == null || endTime == null) continue;
 
@@ -179,7 +188,10 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
       });
 
       await _updateMapElements();
-      debugPrint('Current gatherings: ${_currentGatherings.map((g) => {'title': g['title'], 'attendees': (g['attendees'] as List<dynamic>?)?.length ?? 0}).toList()}');
+      debugPrint('Current gatherings: ${_currentGatherings.map((g) => {
+            'title': g['title'],
+            'attendees': (g['attendees'] as List<dynamic>?)?.length ?? 0
+          }).toList()}');
     } catch (e) {
       debugPrint('Error fetching gatherings: $e');
       setState(() {
@@ -196,8 +208,11 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
     for (var gathering in _currentGatherings) {
       final gatheringId = gathering['_id']?.toString() ?? '';
       final location = LatLng(
-        double.tryParse(gathering['location']?['latitude']?.toString() ?? '') ?? 0.0,
-        double.tryParse(gathering['location']?['longitude']?.toString() ?? '') ?? 0.0,
+        double.tryParse(gathering['location']?['latitude']?.toString() ?? '') ??
+            0.0,
+        double.tryParse(
+                gathering['location']?['longitude']?.toString() ?? '') ??
+            0.0,
       );
       final radius = int.tryParse(gathering['radius']?.toString() ?? '') ?? 100;
 
@@ -241,8 +256,10 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final background = isDarkMode ? const Color(0xFF09090B) : Colors.white;
     final foreground = isDarkMode ? Colors.white : const Color(0xFF09090B);
-    final mutedForeground = isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
-    final primaryColor = isDarkMode ? const Color(0xFF6366F1) : const Color(0xFF4F46E5);
+    final mutedForeground =
+        isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+    final primaryColor =
+        isDarkMode ? const Color(0xFF6366F1) : const Color(0xFF4F46E5);
 
     return Scaffold(
       backgroundColor: background,
@@ -308,7 +325,8 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primaryColor,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -353,17 +371,21 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
                           },
                           myLocationEnabled: true,
                           myLocationButtonEnabled: true,
-                          markers: {}, // No markers
+                          markers: const {}, // No markers
                           circles: _circles,
                         ),
-                         Positioned(
+                        Positioned(
                           left: 10,
-                          top: kToolbarHeight + MediaQuery.of(context).padding.top + 10, // Below AppBar
+                          top: kToolbarHeight +
+                              MediaQuery.of(context).padding.top +
+                              10, // Below AppBar
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 300),
-                            width: MediaQuery.of(context).size.width * 0.5, // 50% of screen width
+                            width: MediaQuery.of(context).size.width *
+                                0.5, // 50% of screen width
                             height: _isDropdownOpen
-                                ? MediaQuery.of(context).size.height * 0.6 // Max 60% height when open
+                                ? MediaQuery.of(context).size.height *
+                                    0.6 // Max 60% height when open
                                 : 50.0, // Fixed height when closed
                             decoration: BoxDecoration(
                               color: background.withOpacity(0.9),
@@ -372,7 +394,7 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.2),
                                   blurRadius: 8,
-                                  offset: Offset(0, 2),
+                                  offset: const Offset(0, 2),
                                 ),
                               ],
                             ),
@@ -385,9 +407,11 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
                                     });
                                   },
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 12),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
                                           'Details',
@@ -398,7 +422,9 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
                                           ),
                                         ),
                                         Icon(
-                                          _isDropdownOpen ? Icons.expand_less : Icons.expand_more,
+                                          _isDropdownOpen
+                                              ? Icons.expand_less
+                                              : Icons.expand_more,
                                           color: foreground,
                                         ),
                                       ],
@@ -411,16 +437,28 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
                                       padding: const EdgeInsets.all(8),
                                       itemCount: _currentGatherings.length,
                                       itemBuilder: (context, index) {
-                                        final gathering = _currentGatherings[index];
-                                        final gatheringId = gathering['_id']?.toString() ?? '';
-                                        final title = gathering['title']?.toString() ?? 'Untitled';
-                                        final attendeesCount = (gathering['attendees'] as List<dynamic>?)?.length ?? 0;
-                                        final color = _gatheringColors[gatheringId] ?? Colors.grey;
+                                        final gathering =
+                                            _currentGatherings[index];
+                                        final gatheringId =
+                                            gathering['_id']?.toString() ?? '';
+                                        final title =
+                                            gathering['title']?.toString() ??
+                                                'Untitled';
+                                        final attendeesCount =
+                                            (gathering['attendees']
+                                                        as List<dynamic>?)
+                                                    ?.length ??
+                                                0;
+                                        final color =
+                                            _gatheringColors[gatheringId] ??
+                                                Colors.grey;
 
                                         return Padding(
-                                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 8.0),
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               Text(
                                                 title,
@@ -434,7 +472,9 @@ class _GatheringsViewState extends ConsumerState<GatheringsView> {
                                               ),
                                               const SizedBox(height: 4),
                                               Text(
-                                                attendeesCount == 1 ? '1 joinee' : '$attendeesCount joinees',
+                                                attendeesCount == 1
+                                                    ? '1 joinee'
+                                                    : '$attendeesCount joinees',
                                                 style: TextStyle(
                                                   color: mutedForeground,
                                                   fontSize: 14,
@@ -487,10 +527,15 @@ class Gathering {
     return Gathering(
       id: json['_id']?.toString() ?? '',
       title: json['title']?.toString() ?? 'Untitled',
-      location: Location.fromJson(json['location'] as Map<String, dynamic>? ?? {}),
+      location:
+          Location.fromJson(json['location'] as Map<String, dynamic>? ?? {}),
       radius: int.tryParse(json['radius']?.toString() ?? '') ?? 100,
-      startTime: DateTime.tryParse(json['startTime']?.toString() ?? '')?.toLocal() ?? DateTime.now(),
-      endTime: DateTime.tryParse(json['endTime']?.toString() ?? '')?.toLocal() ?? DateTime.now(),
+      startTime:
+          DateTime.tryParse(json['startTime']?.toString() ?? '')?.toLocal() ??
+              DateTime.now(),
+      endTime:
+          DateTime.tryParse(json['endTime']?.toString() ?? '')?.toLocal() ??
+              DateTime.now(),
       attendees: (json['attendees'] as List<dynamic>?) ?? [],
     );
   }

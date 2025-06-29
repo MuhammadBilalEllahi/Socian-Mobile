@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-import 'package:socian/core/utils/constants.dart';
+import 'package:socian/components/widgets/my_snackbar.dart';
 import 'package:socian/features/auth/domain/auth_state.dart';
 import 'package:socian/features/auth/domain/auth_usecase.dart';
 import 'package:socian/shared/services/secure_storage_service.dart';
-import 'package:socian/shared/widgets/my_snackbar.dart';
+import 'package:socian/shared/utils/constants.dart';
 
 class AuthController extends StateNotifier<AuthState> {
   final AuthUseCases authUseCases;

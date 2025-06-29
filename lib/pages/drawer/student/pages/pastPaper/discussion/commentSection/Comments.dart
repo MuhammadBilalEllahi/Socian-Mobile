@@ -1,7 +1,6 @@
-import 'package:socian/core/utils/constants.dart';
-import 'package:socian/pages/drawer/student/pages/pastPaper/discussion/answerPage/components/AddAnswer.dart';
 import 'package:flutter/material.dart';
 import 'package:socian/shared/services/api_client.dart';
+import 'package:socian/shared/utils/constants.dart';
 
 class Comments extends StatefulWidget {
   final String toBeDiscussedId;
@@ -19,7 +18,7 @@ class _CommentsState extends State<Comments> {
   final TextEditingController _replyController = TextEditingController();
   final TextEditingController _commentController = TextEditingController();
 
-  List<dynamic> _cachedComments = [];
+  final List<dynamic> _cachedComments = [];
 
   @override
   void didChangeDependencies() {
@@ -147,7 +146,7 @@ class _CommentsState extends State<Comments> {
                 Navigator.pop(context);
                 _deleteComment(comment['_id']);
               },
-              child: Text('Delete', style: TextStyle(color: Colors.red)),
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
             ),
           ],
           SimpleDialogOption(
@@ -262,7 +261,7 @@ class _CommentsState extends State<Comments> {
             onPressed: () {
               Navigator.pop(context);
             },
-            child: Text('Delete', style: TextStyle(color: Colors.white)),
+            child: const Text('Delete', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

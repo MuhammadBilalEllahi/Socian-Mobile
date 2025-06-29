@@ -1,6 +1,6 @@
-import 'package:socian/core/utils/constants.dart';
-import 'package:socian/features/auth/presentation/widgets/signup_form.dart';
 import 'package:flutter/material.dart';
+import 'package:socian/features/auth/presentation/widgets/signup_form.dart';
+import 'package:socian/shared/utils/constants.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -24,12 +24,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
           gradient: LinearGradient(
             colors: isDarkMode
                 ? [
-                    Color.fromARGB(255, 0, 0, 0),
-                    Color.fromARGB(255, 48, 48, 48)
+                    const Color.fromARGB(255, 0, 0, 0),
+                    const Color.fromARGB(255, 48, 48, 48)
                   ]
                 : [
-                    Color.fromARGB(255, 240, 240, 240),
-                    Color.fromARGB(255, 255, 255, 255)
+                    const Color.fromARGB(255, 240, 240, 240),
+                    const Color.fromARGB(255, 255, 255, 255)
                   ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,

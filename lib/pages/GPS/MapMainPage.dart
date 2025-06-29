@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:socian/core/utils/constants.dart';
+import 'package:socian/shared/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -21,8 +21,8 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
   GoogleMapController? _mapController;
   LatLng? _userLocation;
   String? errorMessage;
-  Set<Marker> _markers = {};
-  Set<Circle> _circles = {};
+  final Set<Marker> _markers = {};
+  final Set<Circle> _circles = {};
   IO.Socket? _socket;
   double _radius = 500.0;
   int _userCountInRadius = 0;
@@ -54,14 +54,17 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
 
       _socket?.on('attendeeLocationUpdate', (data) {
         if (data != null) {
-          final userId = data['userId']?.toString() ?? data['id']?.toString() ?? 'unknown';
-          final isWithinRadius = _isWithinRadius(data['latitude'], data['longitude']);
-          
+          final userId =
+              data['userId']?.toString() ?? data['id']?.toString() ?? 'unknown';
+          final isWithinRadius =
+              _isWithinRadius(data['latitude'], data['longitude']);
+
           setState(() {
             // Remove existing marker if it exists
             _markers.removeWhere((m) => m.markerId.value == userId);
-            
-            if (isWithinRadius && userId != ref.read(authProvider).user?['id']?.toString()) {
+
+            if (isWithinRadius &&
+                userId != ref.read(authProvider).user?['id']?.toString()) {
               _markers.add(
                 Marker(
                   markerId: MarkerId(userId),
@@ -81,9 +84,11 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
           setState(() {
             // Clear all markers except the user's own marker
             _markers.removeWhere((m) => m.markerId.value != "user_location");
-            
+
             for (var user in data) {
-              final userId = user['userId']?.toString() ?? user['id']?.toString() ?? 'unknown';
+              final userId = user['userId']?.toString() ??
+                  user['id']?.toString() ??
+                  'unknown';
               if (_isWithinRadius(user['latitude'], user['longitude']) &&
                   userId != ref.read(authProvider).user?['id']?.toString()) {
                 _markers.add(
@@ -102,7 +107,8 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
       });
 
       _socket?.on('error', (error) => debugPrint('Socket error: $error'));
-      _socket?.on('disconnect', (_) => debugPrint('Disconnected from Socket.IO server'));
+      _socket?.on('disconnect',
+          (_) => debugPrint('Disconnected from Socket.IO server'));
     } catch (e) {
       debugPrint('Socket initialization error: $e');
     }
@@ -110,7 +116,8 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
 
   void _updateUserCount() {
     // Count all markers except the user's own marker
-    _userCountInRadius = _markers.where((m) => m.markerId.value != "user_location").length;
+    _userCountInRadius =
+        _markers.where((m) => m.markerId.value != "user_location").length;
   }
 
   Future<void> _setMarkerIcons() async {
@@ -128,7 +135,7 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
         _markers.removeWhere((m) => m.markerId.value != "user_location");
         _updateUserCount();
       });
-      
+
       await _checkPermissionsAndFetchLocation().timeout(
         const Duration(seconds: 15),
         onTimeout: () {
@@ -182,7 +189,7 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
       _userLocation = LatLng(position.latitude, position.longitude);
       // Remove existing user marker if it exists
       _markers.removeWhere((m) => m.markerId.value == "user_location");
-      
+
       final auth = ref.read(authProvider);
       _markers.add(Marker(
         markerId: const MarkerId("user_location"),
@@ -195,7 +202,8 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
       _updateUserCount();
     });
 
-    _mapController?.animateCamera(CameraUpdate.newLatLngZoom(_userLocation!, 15));
+    _mapController
+        ?.animateCamera(CameraUpdate.newLatLngZoom(_userLocation!, 15));
     _sendLocationUpdate();
     _requestNearbyAttendees();
   }
@@ -476,8 +484,7 @@ class _MapMainPageState extends ConsumerState<MapMainPage> {
                                   fontSize: 14,
                                 ),
                               ),
-                            ))
-                        .toList(),
+                            )),
                   ],
                 ),
               ),

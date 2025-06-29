@@ -1,12 +1,8 @@
-import 'dart:convert';
-
-import 'package:socian/core/utils/constants.dart';
-import 'package:socian/features/auth/domain/auth_state.dart';
-import 'package:socian/features/auth/providers/auth_provider.dart';
-import 'package:socian/shared/services/api_client.dart';
-import 'package:socian/shared/widgets/my_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:socian/features/auth/domain/auth_state.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/shared/utils/constants.dart';
 
 class LoginForm extends ConsumerStatefulWidget {
   const LoginForm({super.key});
@@ -22,19 +18,12 @@ class _LoginFormState extends ConsumerState<LoginForm> {
 
   // State for toggling password visibility
   bool isPasswordVisible = false;
-  
 
- 
-
-
-@override
+  @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    
   }
-
-
 
   void _login() async {
     if (emailController.text.isEmpty || passwordController.text.isEmpty) {
@@ -53,12 +42,10 @@ class _LoginFormState extends ConsumerState<LoginForm> {
 
     try {
       await ref.read(authProvider.notifier).login(
-        context,
+            context,
             emailController.text.trim(),
             passwordController.text,
           );
-
-        
 
       // ScaffoldMessenger.of(context).showSnackBar(
       //   const SnackBar(
@@ -67,7 +54,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
       //   ),
       // );
     } catch (e) {
-              // showSnackbar(context, e.toString(), isError: true);
+      // showSnackbar(context, e.toString(), isError: true);
 
       // ScaffoldMessenger.of(context).showSnackBar(
       //   SnackBar(
@@ -90,14 +77,14 @@ class _LoginFormState extends ConsumerState<LoginForm> {
     final textColor = isDarkMode ? Colors.white : Colors.black87;
     final gradientColors = isDarkMode
         ? [
-            Color.fromARGB(255, 18, 18, 18),
-            Color.fromARGB(255, 0, 0, 0),
-            Color.fromARGB(255, 31, 31, 31)
+            const Color.fromARGB(255, 18, 18, 18),
+            const Color.fromARGB(255, 0, 0, 0),
+            const Color.fromARGB(255, 31, 31, 31)
           ]
         : [
-            Color.fromARGB(255, 240, 240, 240),
-            Color.fromARGB(255, 220, 220, 220),
-            Color.fromARGB(255, 200, 200, 200)
+            const Color.fromARGB(255, 240, 240, 240),
+            const Color.fromARGB(255, 220, 220, 220),
+            const Color.fromARGB(255, 200, 200, 200)
           ];
 
     ref.listen<AuthState>(authProvider, (previous, next) {

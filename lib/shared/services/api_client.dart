@@ -5,8 +5,8 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:socian/core/utils/constants.dart';
 import 'package:socian/shared/services/secure_storage_service.dart';
+import 'package:socian/shared/utils/constants.dart';
 
 class ApiClient {
   final Dio _dio;

@@ -8,9 +8,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-import 'package:socian/core/utils/constants.dart';
 import 'package:socian/shared/services/api_client.dart';
 import 'package:socian/shared/services/secure_storage_service.dart';
+import 'package:socian/shared/utils/constants.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ScheduledGatherings extends ConsumerStatefulWidget {
@@ -1099,8 +1099,8 @@ class _GatheringDetailScreenState extends State<GatheringDetailScreen>
                   // Optional: Expand card on tap (not implemented for minimal design)
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
                     color: background,
                     borderRadius: BorderRadius.circular(16),

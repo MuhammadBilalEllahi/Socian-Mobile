@@ -1,5 +1,5 @@
-import 'package:socian/shared/services/api_client.dart';
 import 'package:socian/features/auth/data/auth_repo.dart';
+import 'package:socian/shared/services/api_client.dart';
 
 class AuthRepoImpl implements AuthRepo {
   final ApiClient apiClient;
@@ -10,9 +10,6 @@ class AuthRepoImpl implements AuthRepo {
   Future<Map<String, dynamic>> login(String email, String password) async {
     // debugPrint("5 - File: auth_repo_impl.dart - This is credentials: $email and $password");
 
-
-   
-
     final response = await apiClient.post(
       '/api/auth/login',
       {"email": email, "password": password},
@@ -21,8 +18,7 @@ class AuthRepoImpl implements AuthRepo {
   }
 }
 
-
-// import 'package:socian/core/utils/constants.dart';
+// import 'package:socian/shared/utils/constants.dart';
 // import 'package:socian/shared/services/api_client.dart';
 
 // import 'auth_repo.dart';

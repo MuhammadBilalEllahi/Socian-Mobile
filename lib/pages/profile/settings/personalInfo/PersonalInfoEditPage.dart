@@ -1,17 +1,17 @@
 import 'dart:developer';
 
-import 'package:socian/core/utils/constants.dart';
-import 'package:socian/features/auth/providers/auth_provider.dart';
-import 'package:socian/pages/profile/settings/personalInfo/ChangePassword.dart';
-import 'package:socian/pages/profile/settings/personalInfo/ProfileImageUploadPage.dart';
-import 'package:socian/shared/services/api_client.dart';
-import 'package:socian/shared/widgets/my_dropdown.dart';
-import 'package:socian/shared/widgets/my_snackbar.dart';
-import 'package:socian/utils/authstateChanger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:socian/components/widgets/my_dropdown.dart';
+import 'package:socian/components/widgets/my_snackbar.dart';
+import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/pages/profile/settings/personalInfo/ChangePassword.dart';
+import 'package:socian/pages/profile/settings/personalInfo/ProfileImageUploadPage.dart';
+import 'package:socian/shared/services/api_client.dart';
+import 'package:socian/shared/utils/authstateChanger.dart';
+import 'package:socian/shared/utils/constants.dart';
 
 class PersonalInfoEditPage extends ConsumerStatefulWidget {
   const PersonalInfoEditPage({super.key});
@@ -53,7 +53,7 @@ class _PersonalInfoEditPageState extends ConsumerState<PersonalInfoEditPage> {
   bool disableDepartmentField = false;
   bool disableDateTimeField = false;
 
-String _forSubmision ='';
+  String _forSubmision = '';
   @override
   void initState() {
     super.initState();
@@ -73,17 +73,16 @@ String _forSubmision ='';
     if (user?['profile']?['graduationYear'] != null) {
       log('Raw graduationYear from user: ${user?['profile']?['graduationYear']}');
 
-  final parsedDate = DateTime.parse(user?['profile']?['graduationYear'] ?? '');
-  graduationYearController.text = DateFormat('d MMMM y').format(parsedDate);
-  _selectedGraduationDate = parsedDate;
-}
-
-
+      final parsedDate =
+          DateTime.parse(user?['profile']?['graduationYear'] ?? '');
+      graduationYearController.text = DateFormat('d MMMM y').format(parsedDate);
+      _selectedGraduationDate = parsedDate;
+    }
 
     userDepartmentId = user?['university']?['departmentId']?['_id'];
     userDepartmentName = user?['university']?['departmentId']?['name'];
     disableDepartmentField = user?['changedDepartmentOnce'] ?? false;
-    disableDateTimeField= user?['changedGraduationYearOnce']?? false;
+    disableDateTimeField = user?['changedGraduationYearOnce'] ?? false;
   }
 
   @override
@@ -226,7 +225,7 @@ String _forSubmision ='';
           otpController.clear();
         });
 
-        final userData = response['$val'];
+        final userData = response[val];
         AuthStateChanger.updateAuthState(ref, emailString, val.toString());
       }
       if (mounted) {
@@ -306,247 +305,265 @@ String _forSubmision ='';
 //   );
 // }
 
-Future<void> _pickGraduationDate(BuildContext context) async {
-
-  final shouldContinue = await showDialog<bool>(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          return AlertDialog(
-            backgroundColor: Colors.black,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+  Future<void> _pickGraduationDate(BuildContext context) async {
+    final shouldContinue = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.black,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+          ),
+          title: const Text(
+            "Update Graduation Year?",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: 18,
             ),
-            title: const Text(
-              "Update Graduation Year?",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-                fontSize: 18,
-              ),
-            ),
-            content: const Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "You can only change your graduation year once.",
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
-                ),
-                Text(
-                  "*Choose wisely because once date is crossed your account will be converted to alumni account.",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  "To change it again, contact:",
-                  style: TextStyle(
-                    color: Colors.white54,
-                    fontSize: 13,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  "ceo@socian.me",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text(
-                  "Cancel",
-                  style: TextStyle(color: Colors.white70),
+          ),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "You can only change your graduation year once.",
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 14,
                 ),
               ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text(
-                  "Go Ahead",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+              Text(
+                "*Choose wisely because once date is crossed your account will be converted to alumni account.",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                "To change it again, contact:",
+                style: TextStyle(
+                  color: Colors.white54,
+                  fontSize: 13,
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                "ceo@socian.me",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
                 ),
               ),
             ],
-          );
-        },
-      );
-
-      if (shouldContinue != true) {
-        return;
-      }
-
-      
-  final now = DateTime.now();
-  final currentYear = now.year;
-
-  List<int> years = List.generate(10, (index) => currentYear  + index);
-  List<int> months = List.generate(12, (index) => index + 1);
-  List<int> days = List.generate(31, (index) => index + 1);
-
-  int selectedYear = _selectedGraduationDate?.year ?? currentYear;
-  int selectedMonth = _selectedGraduationDate?.month ?? now.month;
-  int selectedDay = _selectedGraduationDate?.day ?? now.day;
-
-  await showModalBottomSheet(
-    context: context,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-    ),
-    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-    builder: (context) {
-  return StatefulBuilder(
-    builder: (context, setModalState) {
-      return SizedBox(
-        height: 350,
-        child: Column(
-          children: [
-            const SizedBox(height: 12),
-            const Text(
-              'Select Graduation Date',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  // Day Picker
-                  Expanded(
-                    child: ListWheelScrollView.useDelegate(
-                      itemExtent: 40,
-                      diameterRatio: 1.2,
-                      physics: FixedExtentScrollPhysics(),
-                      onSelectedItemChanged: (index) {
-                        setModalState(() => selectedDay = days[index]);
-                      },
-                      childDelegate: ListWheelChildBuilderDelegate(
-                        builder: (context, index) {
-                          final isSelected = days[index] == selectedDay;
-                          return Center(
-                            child: Text(
-                              days[index].toString().padLeft(2, '0'),
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                color: isSelected ? Colors.blueAccent : Colors.grey,
-                              ),
-                            ),
-                          );
-                        },
-                        childCount: days.length,
-                      ),
-                    ),
-                  ),
-                  // Month Picker
-                  Expanded(
-                    child: ListWheelScrollView.useDelegate(
-                      itemExtent: 40,
-                      diameterRatio: 1.2,
-                      physics: FixedExtentScrollPhysics(),
-                      onSelectedItemChanged: (index) {
-                        setModalState(() => selectedMonth = months[index]);
-                      },
-                      childDelegate: ListWheelChildBuilderDelegate(
-                        builder: (context, index) {
-                          final isSelected = months[index] == selectedMonth;
-                          return Center(
-                            child: Text(
-                              DateFormat.MMM().format(DateTime(0, months[index])),
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                color: isSelected ? Colors.blueAccent : Colors.grey,
-                              ),
-                            ),
-                          );
-                        },
-                        childCount: months.length,
-                      ),
-                    ),
-                  ),
-                  // Year Picker
-                  Expanded(
-                    child: ListWheelScrollView.useDelegate(
-                      itemExtent: 40,
-                      diameterRatio: 1.2,
-                      physics: FixedExtentScrollPhysics(),
-                      onSelectedItemChanged: (index) {
-                        setModalState(() => selectedYear = years[index]);
-                      },
-                      childDelegate: ListWheelChildBuilderDelegate(
-                        builder: (context, index) {
-                          final isSelected = years[index] == selectedYear;
-                          return Center(
-                            child: Text(
-                              years[index].toString(),
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                color: isSelected ? Colors.blueAccent : Colors.grey,
-                              ),
-                            ),
-                          );
-                        },
-                        childCount: years.length,
-                      ),
-                    ),
-                  ),
-                ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text(
+                "Cancel",
+                style: TextStyle(color: Colors.white70),
               ),
             ),
-            const SizedBox(height: 12),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                shape: StadiumBorder(),
-                padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text(
+                "Go Ahead",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              onPressed: () {
-                final picked = DateTime.utc(selectedYear, selectedMonth, selectedDay);
-                setState(() {
-                  _selectedGraduationDate = picked;
-                  graduationYearController.text = DateFormat('d MMMM y').format(picked);
-                  _forSubmision = picked.toIso8601String();
-                });
-                Navigator.of(context).pop();
-                updateGraduationYear();
-              },
-              child: const Text("Confirm"),
             ),
-            const SizedBox(height: 12),
           ],
+        );
+      },
+    );
+
+    if (shouldContinue != true) {
+      return;
+    }
+
+    final now = DateTime.now();
+    final currentYear = now.year;
+
+    List<int> years = List.generate(10, (index) => currentYear + index);
+    List<int> months = List.generate(12, (index) => index + 1);
+    List<int> days = List.generate(31, (index) => index + 1);
+
+    int selectedYear = _selectedGraduationDate?.year ?? currentYear;
+    int selectedMonth = _selectedGraduationDate?.month ?? now.month;
+    int selectedDay = _selectedGraduationDate?.day ?? now.day;
+
+    await showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
-      );
-    },
-  );
-});
-}
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (context, setModalState) {
+              return SizedBox(
+                height: 350,
+                child: Column(
+                  children: [
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Select Graduation Date',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          // Day Picker
+                          Expanded(
+                            child: ListWheelScrollView.useDelegate(
+                              itemExtent: 40,
+                              diameterRatio: 1.2,
+                              physics: const FixedExtentScrollPhysics(),
+                              onSelectedItemChanged: (index) {
+                                setModalState(() => selectedDay = days[index]);
+                              },
+                              childDelegate: ListWheelChildBuilderDelegate(
+                                builder: (context, index) {
+                                  final isSelected = days[index] == selectedDay;
+                                  return Center(
+                                    child: Text(
+                                      days[index].toString().padLeft(2, '0'),
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: isSelected
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                        color: isSelected
+                                            ? Colors.blueAccent
+                                            : Colors.grey,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                childCount: days.length,
+                              ),
+                            ),
+                          ),
+                          // Month Picker
+                          Expanded(
+                            child: ListWheelScrollView.useDelegate(
+                              itemExtent: 40,
+                              diameterRatio: 1.2,
+                              physics: const FixedExtentScrollPhysics(),
+                              onSelectedItemChanged: (index) {
+                                setModalState(
+                                    () => selectedMonth = months[index]);
+                              },
+                              childDelegate: ListWheelChildBuilderDelegate(
+                                builder: (context, index) {
+                                  final isSelected =
+                                      months[index] == selectedMonth;
+                                  return Center(
+                                    child: Text(
+                                      DateFormat.MMM()
+                                          .format(DateTime(0, months[index])),
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: isSelected
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                        color: isSelected
+                                            ? Colors.blueAccent
+                                            : Colors.grey,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                childCount: months.length,
+                              ),
+                            ),
+                          ),
+                          // Year Picker
+                          Expanded(
+                            child: ListWheelScrollView.useDelegate(
+                              itemExtent: 40,
+                              diameterRatio: 1.2,
+                              physics: const FixedExtentScrollPhysics(),
+                              onSelectedItemChanged: (index) {
+                                setModalState(
+                                    () => selectedYear = years[index]);
+                              },
+                              childDelegate: ListWheelChildBuilderDelegate(
+                                builder: (context, index) {
+                                  final isSelected =
+                                      years[index] == selectedYear;
+                                  return Center(
+                                    child: Text(
+                                      years[index].toString(),
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: isSelected
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                        color: isSelected
+                                            ? Colors.blueAccent
+                                            : Colors.grey,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                childCount: years.length,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        shape: const StadiumBorder(),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 32, vertical: 12),
+                      ),
+                      onPressed: () {
+                        final picked = DateTime.utc(
+                            selectedYear, selectedMonth, selectedDay);
+                        setState(() {
+                          _selectedGraduationDate = picked;
+                          graduationYearController.text =
+                              DateFormat('d MMMM y').format(picked);
+                          _forSubmision = picked.toIso8601String();
+                        });
+                        Navigator.of(context).pop();
+                        updateGraduationYear();
+                      },
+                      child: const Text("Confirm"),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                ),
+              );
+            },
+          );
+        });
+  }
 
   Future<void> updateGraduationYear() async {
     try {
-      
-if(_forSubmision == ''){
-  showSnackbar(context, "Check if date is selected");
-  return ;
-}
+      if (_forSubmision == '') {
+        showSnackbar(context, "Check if date is selected");
+        return;
+      }
       log("User chose to continue");
 
       final response = await apiClient.put('/api/user/graduation-year/change',
-          {'graduationYearDateTime':_forSubmision});
+          {'graduationYearDateTime': _forSubmision});
       log("RESPONSE $response ${response['message'] == null}");
 
       if (response['access_token'] != null) {
@@ -790,7 +807,7 @@ if(_forSubmision == ''){
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
                         child: TextButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
@@ -806,12 +823,13 @@ if(_forSubmision == ''){
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => ChangePassword(),
+                                  builder: (context) => const ChangePassword(),
                                 ),
                               );
                             },
                             child: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 12),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12),
                               child: Text("Change Password",
                                   style: TextStyle(
                                     fontSize: 14,
@@ -848,7 +866,8 @@ if(_forSubmision == ''){
               if (showChangeDeptIcon &&
                   userDepartmentId != '' &&
                   userDepartmentId != selectedDepartment) ...[
-                IconButton(onPressed: updateDepartment, icon: Icon(Icons.check))
+                IconButton(
+                    onPressed: updateDepartment, icon: const Icon(Icons.check))
               ],
 
               // Name Section
@@ -895,8 +914,7 @@ if(_forSubmision == ''){
                 ),
               ),
 
-              if (role == AppRoles.student || role == AppRoles.alumni)
-               ...[
+              if (role == AppRoles.student || role == AppRoles.alumni) ...[
                 Text('Graduation Year',
                     style: TextStyle(
                         fontSize: 14,
@@ -904,7 +922,9 @@ if(_forSubmision == ''){
                         color: textColor)),
                 const SizedBox(height: 8),
                 GestureDetector(
-                  onTap: () => (disableDateTimeField || role == AppRoles.alumni) ? null : _pickGraduationDate(context),
+                  onTap: () => (disableDateTimeField || role == AppRoles.alumni)
+                      ? null
+                      : _pickGraduationDate(context),
                   child: AbsorbPointer(
                     child: TextField(
                       controller: graduationYearController,
@@ -1023,7 +1043,7 @@ if(_forSubmision == ''){
                 ),
                 if (_enableOtpField) ...[
                   if (_requireUniversityOtp) ...[
-                    Text('University Email OTP',
+                    const Text('University Email OTP',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -1060,7 +1080,7 @@ if(_forSubmision == ''){
                     ),
                     const SizedBox(height: 16),
                   ],
-                  Text('Personal Email OTP',
+                  const Text('Personal Email OTP',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -1172,7 +1192,7 @@ if(_forSubmision == ''){
                   ),
                 ),
                 if (_enableSecondaryEmailOtpField) ...[
-                  Text('Personal Email OTP',
+                  const Text('Personal Email OTP',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,

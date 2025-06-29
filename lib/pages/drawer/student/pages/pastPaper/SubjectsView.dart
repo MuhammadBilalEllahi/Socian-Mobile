@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:socian/core/utils/constants.dart';
 import 'package:socian/shared/services/api_client.dart';
+import 'package:socian/shared/utils/constants.dart';
 
 import 'upload_modal.dart';
 

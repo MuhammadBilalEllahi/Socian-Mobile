@@ -1,4 +1,4 @@
-import 'package:socian/core/utils/constants.dart';
+import 'package:socian/shared/utils/constants.dart';
 
 class Permissions {
   static const superAdmin = {

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:socian/core/utils/constants.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/pages/profile/settings/CreateSocietyPage.dart';
 import 'package:socian/pages/providers/page_provider.dart';
+import 'package:socian/shared/utils/constants.dart';
 
 class StudentDrawer extends ConsumerStatefulWidget {
   const StudentDrawer({super.key});

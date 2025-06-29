@@ -2,10 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:socian/components/ShiningLinearProgressBar.dart';
-import 'package:socian/core/utils/constants.dart';
+import 'package:socian/components/effects/ShiningLinearProgressBar.dart';
 import 'package:socian/pages/home/widgets/campus/PostProvider.dart';
 import 'package:socian/shared/services/api_client.dart';
+import 'package:socian/shared/utils/constants.dart';
 
 import '../components/post/post.dart';
 

@@ -1,4 +1,4 @@
-// import 'package:socian/core/utils/constants.dart';
+// import 'package:socian/shared/utils/constants.dart';
 // import 'package:socian/pages/bottomBar/MyBottomNavBar.dart';
 // import 'package:socian/pages/explore/ExploreSocieities.dart';
 // import 'package:socian/pages/gps/GpsInitialPage.dart';

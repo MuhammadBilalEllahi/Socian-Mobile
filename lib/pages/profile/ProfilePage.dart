@@ -1,16 +1,17 @@
 import 'dart:developer';
 import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http_parser/http_parser.dart';
-import 'package:socian/core/utils/constants.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/pages/explore/page/SocietyPage.dart';
 import 'package:socian/pages/home/widgets/components/post/post.dart';
 import 'package:socian/pages/message/ChatPage.dart';
 import 'package:socian/pages/profile/widgets/ConnectionsListPage.dart';
 import 'package:socian/shared/services/api_client.dart';
+import 'package:socian/shared/utils/constants.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   final String? userId;
