@@ -719,6 +719,15 @@ class _PostCardState extends ConsumerState<PostCard> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         ListTile(
+                          leading:
+                              const Icon(Icons.report, color: Colors.orange),
+                          title: const Text('Report Post'),
+                          onTap: () {
+                            Navigator.pop(context);
+                            _showReportDialog(widget.post['_id']);
+                          },
+                        ),
+                        ListTile(
                           leading: const Icon(Icons.edit,
                               color: Color.fromARGB(255, 255, 255, 255)),
                           title: const Text('Edit Post'),

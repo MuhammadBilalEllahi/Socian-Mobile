@@ -8,6 +8,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/shared/services/api_client.dart';
+import 'package:socian/shared/utils/constants.dart';
 
 class CreateSocietyPage extends ConsumerStatefulWidget {
   const CreateSocietyPage({super.key});
@@ -76,6 +77,16 @@ class _CreateSocietyPageState extends ConsumerState<CreateSocietyPage> {
     // ];
     _rolesList.add(ref.read(authProvider).user?['role'] ??
         'unauthorized'); // Add the user's role
+    if (ref.read(authProvider).user?['role'] == AppSuperRoles.moderator) {
+      _rolesList.add(AppRoles.student);
+      _rolesList.add(AppRoles.teacher);
+      _rolesList.add(AppRoles.alumni);
+
+      _rolesList.add("all");
+    }
+    if (ref.read(authProvider).user?['role'] == AppRoles.teacher) {
+      _rolesList.add(AppRoles.student);
+    }
   }
 
   @override
