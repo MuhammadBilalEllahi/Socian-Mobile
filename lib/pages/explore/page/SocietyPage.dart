@@ -136,7 +136,7 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
       debugPrint('Error checking membership status: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to check membership status')),
+          const SnackBar(content: Text(' ')),
         );
       }
     }

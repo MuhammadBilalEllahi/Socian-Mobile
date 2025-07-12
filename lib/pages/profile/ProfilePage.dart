@@ -73,7 +73,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
           'profile': {
             'picture': auth.user?['profile']?['picture'],
             'bio': auth.user?['profile']?['bio'] ?? '',
-          }
+          },
+          'university': auth.user?['university'],
+          'role': auth.user?['role'],
         };
       });
     }
@@ -184,7 +186,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
             'profile': {
               'picture': _detailedProfile?['profile']?['picture'],
               'bio': _detailedProfile?['profile']?['bio'] ?? '',
-            }
+            },
+            'university': _detailedProfile?['university'],
+            'role': _detailedProfile?['role'],
           };
         }
 
@@ -279,7 +283,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
     super.dispose();
   }
 
-  // Helper method to check if specific data is available
   bool _hasData(String dataType) {
     switch (dataType) {
       case 'posts':
@@ -295,7 +298,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
     }
   }
 
-  // Helper method to show partial loading state
   Widget _buildPartialLoadingState(String dataType, Color mutedForeground) {
     return Center(
       child: Column(
@@ -334,12 +336,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
       return const Center(child: CircularProgressIndicator());
     }
 
-    // Get the user's uploaded papers from the state
     final uploadedPapers = _uploadedPapers;
 
-    // Check if we have papers data
     if (!_hasData('papers')) {
-      // If we're not loading and have no papers, show appropriate message
       if (_detailedProfile == null) {
         return _buildPartialLoadingState('past papers', mutedForeground);
       }
@@ -393,7 +392,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Paper header
                 Row(
                   children: [
                     Container(
@@ -432,8 +430,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                   ],
                 ),
                 const SizedBox(height: 12),
-
-                // Paper name
                 Text(
                   paper['name'] ?? 'Untitled Paper',
                   style: TextStyle(
@@ -443,8 +439,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                   ),
                 ),
                 const SizedBox(height: 8),
-
-                // Paper details
                 Row(
                   children: [
                     Icon(Icons.school, color: mutedForeground, size: 16),
@@ -464,8 +458,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                   ],
                 ),
                 const SizedBox(height: 8),
-
-                // Files count
                 Row(
                   children: [
                     Icon(Icons.attach_file, color: mutedForeground, size: 16),
@@ -477,8 +469,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                   ],
                 ),
                 const SizedBox(height: 12),
-
-                // Metadata
                 if (paper['metadata'] != null) ...[
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -513,8 +503,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                   ),
                   const SizedBox(height: 12),
                 ],
-
-                // Files list
                 if (files.isNotEmpty) ...[
                   Text(
                     'Uploaded Files:',
@@ -588,16 +576,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                           ))
                       .toList(),
                 ],
-
                 const SizedBox(height: 12),
-
-                // Action buttons
                 Row(
                   children: [
                     Expanded(
                       child: ElevatedButton.icon(
                         onPressed: () {
-                          // Navigate to discussion view
                           Navigator.pushNamed(
                             context,
                             AppRoutes.discussionViewScreen,
@@ -623,7 +607,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                     const SizedBox(width: 8),
                     IconButton(
                       onPressed: () {
-                        // Show paper details
                         _showPaperDetails(paper);
                       },
                       icon: Icon(Icons.info_outline, color: primary),
@@ -720,9 +703,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
       return const Center(child: CircularProgressIndicator());
     }
 
-    // Check if we have posts data
     if (!_hasData('posts')) {
-      // If we're not loading and have no posts, show appropriate message
       if (_detailedProfile == null) {
         return _buildPartialLoadingState('posts', mutedForeground);
       }
@@ -750,10 +731,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
       return const Center(child: CircularProgressIndicator());
     }
 
-    // Create a map to merge societies, prioritizing moderated ones
     final societyMap = <String, Map<String, dynamic>>{};
 
-    // First, add all subscribed societies
     for (var society in _societies) {
       societyMap[society['_id']] = {
         ...society,
@@ -761,7 +740,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
       };
     }
 
-    // Then, update or add moderated societies
     for (var society in _moderatedSocieties) {
       societyMap[society['_id']] = {
         ...society,
@@ -771,9 +749,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
 
     final allSocieties = societyMap.values.toList();
 
-    // Check if we have societies data
     if (!_hasData('societies')) {
-      // If we're not loading and have no societies, show appropriate message
       if (_detailedProfile == null) {
         return _buildPartialLoadingState('societies', mutedForeground);
       }
@@ -787,7 +763,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
       itemCount: allSocieties.length,
       itemBuilder: (context, index) {
         final society = allSocieties[index];
-        final memberCount = society['totalMembers']?.toString() ?? '0';
         final isModerated = society['isModerated'] ?? false;
         return Card(
           color: accent,
@@ -824,42 +799,26 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                         ),
                       ),
                     ),
-                    Row(
-                      children: [
-                        if (isModerated)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.blue,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Text(
-                              'Moderator',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: primary,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            '$memberCount members',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    // Row(
+                    //   children: [
+                    //     if (isModerated)
+                    //       Container(
+                    //         padding: const EdgeInsets.symmetric(
+                    //             horizontal: 8, vertical: 4),
+                    //         decoration: BoxDecoration(
+                    //           color: Colors.blue,
+                    //           borderRadius: BorderRadius.circular(12),
+                    //         ),
+                    //         child: const Text(
+                    //           'Moderator',
+                    //           style: TextStyle(
+                    //             color: Colors.white,
+                    //             fontSize: 12,
+                    //           ),
+                    //         ),
+                    //       ),
+                    //   ],
+                    // ),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -996,11 +955,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
       final isOwnProfile =
           widget.userId == null || widget.userId == auth.user?['_id'];
 
-      // For own profile, continue to show basic profile even with error
       if (isOwnProfile && _basicProfile != null) {
-        // Continue to show the profile, error will be handled in the UI
+        // Continue to show the profile
       } else {
-        // For other users' profiles, show error screen
         return Scaffold(
           backgroundColor: background,
           body: Center(
@@ -1111,21 +1068,26 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                       ],
                     ),
                     const SizedBox(height: 8),
+                    // In the build method, replace the university info display section with this:
+
                     Row(
                       children: [
                         Text(
-                          auth.user?['university']?['campusId']?['name'] ??
-                              'Unknown Campus',
+                          _basicProfile?['university']?['campusId'] is Map
+                              ? _basicProfile!['university']['campusId']
+                                      ['name'] ??
+                                  ' ' //unknown
+                              : ' ', //unknown
                           style: TextStyle(color: mutedForeground),
                         ),
                         Text(
-                          ' - ${auth.user?['university']?['departmentId']?['name'] ?? 'Unknown Department'}',
+                          ' - ${_basicProfile?['university']?['departmentId'] is Map ? _basicProfile!['university']['departmentId']['name'] ?? '' : ' '}',
                           style: TextStyle(color: mutedForeground),
                         ),
                       ],
                     ),
                     Text(
-                      auth.user?['role'] ?? 'Unknown Role',
+                      _basicProfile?['role']?.toString() ?? 'Unknown Role',
                       style: TextStyle(color: mutedForeground),
                     ),
                     if (_basicProfile?['profile']['bio']?.isNotEmpty ??
@@ -1136,7 +1098,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                         style: TextStyle(color: mutedForeground),
                       ),
                     ],
-                    // Show error indicator for own profile when there's an error
                     if (_errorMessage != null && isOwnProfile) ...[
                       const SizedBox(height: 16),
                       Container(
