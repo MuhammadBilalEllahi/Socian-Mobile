@@ -426,7 +426,10 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
               ),
               if (media != null && media.isNotEmpty) ...[
                 const SizedBox(height: 4),
-                PostMedia(media: media),
+                PostMedia(
+                    post: widget.post,
+                    flairType: Flairs.campus.value,
+                    media: media),
               ],
               const SizedBox(height: 4),
               _buildActionButtons(foreground, mutedForeground),

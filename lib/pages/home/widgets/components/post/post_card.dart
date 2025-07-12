@@ -264,7 +264,11 @@ class _PostCardState extends ConsumerState<PostCard> {
               ],
             ),
           ),
-          PostMedia(media: media),
+          PostMedia(
+            media: media,
+            post: widget.post,
+            flairType: widget.flairType,
+          ),
           const SizedBox(height: 4),
           _buildActionButtons(),
         ],
