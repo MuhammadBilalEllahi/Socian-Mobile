@@ -66,8 +66,9 @@ class _IntraCampusState extends ConsumerState<IntraCampus>
 
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
-        if (notification.metrics.pixels ==
-            notification.metrics.maxScrollExtent) {
+        // if (notification.metrics.pixels ==
+        //     notification.metrics.maxScrollExtent) {
+        if (notification.metrics.extentAfter < 300) {
           if (!postState.isLoading && postState.hasNextPage) {
             ref.read(intraCampusPostProvider.notifier).fetchPosts();
           }

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
-import 'location_text_selector.dart';
-import 'location_search_modal.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 import '../CreatePost.dart';
+import 'location_search_modal.dart';
+import 'location_text_selector.dart';
 
 class LocationSection extends StatefulWidget {
   final PostType postType;
@@ -192,7 +193,8 @@ class _LocationSectionState extends State<LocationSection> {
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: _mapSelectedAddress != null
                                   ? theme.colorScheme.onSurface
-                                  : theme.colorScheme.onSurface.withOpacity(0.6),
+                                  : theme.colorScheme.onSurface
+                                      .withOpacity(0.6),
                             ),
                           ),
                         ],
@@ -264,7 +266,8 @@ class _LocationSectionState extends State<LocationSection> {
                         Marker(
                           markerId: const MarkerId('selected_location'),
                           position: latLng,
-                          infoWindow: const InfoWindow(title: 'Selected Location'),
+                          infoWindow:
+                              const InfoWindow(title: 'Selected Location'),
                         ),
                       };
                     });
@@ -320,4 +323,4 @@ class _LocationSectionState extends State<LocationSection> {
       ],
     );
   }
-} 
+}

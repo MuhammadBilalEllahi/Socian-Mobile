@@ -908,26 +908,53 @@ class _FullScreenMediaViewState extends State<FullScreenMediaView> {
                   ),
                 );
               }
-
               return GestureDetector(
                 onTap: () {
                   setState(() {
                     _showControls = !_showControls;
                   });
                 },
-                child: Center(
-                  child: CachedNetworkImage(
-                    imageUrl: file,
-                    cacheManager: CustomCacheManager(),
+                child: InteractiveViewer(
+                  panEnabled: true,
+                  scaleEnabled: true,
+                  boundaryMargin: const EdgeInsets.all(20),
+                  minScale: 0.8,
+                  maxScale: 4.0,
+                  child: FittedBox(
                     fit: BoxFit.contain,
-                    placeholder: (context, url) => const Center(
-                      child: CircularProgressIndicator(),
+                    child: CachedNetworkImage(
+                      imageUrl: file,
+                      cacheManager: CustomCacheManager(),
+                      fit: BoxFit.contain,
+                      placeholder: (context, url) => const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                      errorWidget: (context, url, error) =>
+                          const Icon(Icons.error),
                     ),
-                    errorWidget: (context, url, error) =>
-                        const Icon(Icons.error),
                   ),
                 ),
               );
+
+              // return GestureDetector(
+              //   onTap: () {
+              //     setState(() {
+              //       _showControls = !_showControls;
+              //     });
+              //   },
+              //   child: Center(
+              //     child: CachedNetworkImage(
+              //       imageUrl: file,
+              //       cacheManager: CustomCacheManager(),
+              //       fit: BoxFit.contain,
+              //       placeholder: (context, url) => const Center(
+              //         child: CircularProgressIndicator(),
+              //       ),
+              //       errorWidget: (context, url, error) =>
+              //           const Icon(Icons.error),
+              //     ),
+              //   ),
+              // );
             },
           ),
           if (_showControls)

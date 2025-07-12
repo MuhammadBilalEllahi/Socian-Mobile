@@ -1,6 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import 'dart:io';
 
 class FullScreenMediaView extends StatefulWidget {
   final List<File> mediaFiles;
@@ -88,7 +89,7 @@ class _FullScreenMediaViewState extends State<FullScreenMediaView> {
         itemBuilder: (context, index) {
           final file = widget.mediaFiles[index];
           final isVideo = file.path.toLowerCase().endsWith('.mp4');
-          
+
           if (isVideo) {
             final controller = widget.videoControllers[file.path];
             if (controller != null) {
@@ -142,4 +143,4 @@ class _FullScreenMediaViewState extends State<FullScreenMediaView> {
       ),
     );
   }
-} 
+}

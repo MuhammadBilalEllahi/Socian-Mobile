@@ -42,7 +42,14 @@ class IntraCampusPostProvider extends ChangeNotifier {
   }) async {
     _startProgressAnimation();
 
+    // if (!refreshIt &&
+    //     _hasFetched &&
+    //     _lastFetchedTime != null &&
+    //     DateTime.now().difference(_lastFetchedTime!) < cacheDuration) {
+    //   return;
+    // }
     if (!refreshIt &&
+        _page == 1 && // only cache page 1
         _hasFetched &&
         _lastFetchedTime != null &&
         DateTime.now().difference(_lastFetchedTime!) < cacheDuration) {

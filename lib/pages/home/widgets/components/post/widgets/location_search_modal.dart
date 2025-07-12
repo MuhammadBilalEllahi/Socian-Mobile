@@ -42,9 +42,10 @@ class _LocationSearchModalState extends State<LocationSearchModal> {
           'Multan, Pakistan',
           'Peshawar, Pakistan',
           'Quetta, Pakistan',
-        ].where((location) => 
-          location.toLowerCase().contains(query.toLowerCase())
-        ).toList();
+        ]
+            .where((location) =>
+                location.toLowerCase().contains(query.toLowerCase()))
+            .toList();
         _isLoading = false;
       });
     });
@@ -156,7 +157,8 @@ class _LocationSearchModalState extends State<LocationSearchModal> {
                   child: CircularProgressIndicator(),
                 ),
               )
-            else if (_searchResults.isEmpty && _searchController.text.isNotEmpty)
+            else if (_searchResults.isEmpty &&
+                _searchController.text.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Center(
@@ -200,7 +202,8 @@ class _LocationSearchModalState extends State<LocationSearchModal> {
                             Icon(
                               Icons.location_on_outlined,
                               size: 20,
-                              color: theme.colorScheme.onSurface.withOpacity(0.6),
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.6),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -223,4 +226,4 @@ class _LocationSearchModalState extends State<LocationSearchModal> {
       ),
     );
   }
-} 
+}
