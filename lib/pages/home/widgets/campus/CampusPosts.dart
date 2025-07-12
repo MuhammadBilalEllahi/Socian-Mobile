@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:socian/ads/NativeAdPostWidget.dart';
 import 'package:socian/components/effects/ShiningLinearProgressBar.dart';
 import 'package:socian/pages/home/widgets/campus/PostProvider.dart';
 import 'package:socian/shared/services/api_client.dart';
@@ -67,8 +68,9 @@ class _CampusPostsState extends ConsumerState<CampusPosts>
 
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
-        if (notification.metrics.pixels ==
-            notification.metrics.maxScrollExtent - 100) {
+        // if (notification.metrics.pixels ==
+        //     notification.metrics.maxScrollExtent - 100) {
+        if (notification.metrics.extentAfter < 300) {
           if (!postState.isLoading) {
             ref.read(postProvider.notifier).fetchPosts();
           }
@@ -235,40 +237,47 @@ class _CampusPostsState extends ConsumerState<CampusPosts>
       );
     }
 
-    // Calculate total item count
     final hasAdminPost = _adminPosts.isNotEmpty;
-    final totalCount = postState.posts.length + (hasAdminPost ? 1 : 0);
+    final posts = postState.posts;
+    const adFrequency = 4;
+
+    final totalAds = (posts.length / adFrequency).floor();
+    final totalItems = posts.length + totalAds + (hasAdminPost ? 1 : 0);
 
     return ListView.builder(
       padding: EdgeInsets.zero,
-      itemCount: totalCount,
+      itemCount: totalItems,
       itemBuilder: (context, index) {
+        // 1. Admin post
         if (hasAdminPost && index == 0) {
-          // First item is the admin post
           return PostCard(
               post: _adminPosts['post'], flairType: Flairs.campus.value);
         }
 
-        // Adjust index if admin post is present
-        final postIndex = hasAdminPost ? index - 1 : index;
-        final post = postState.posts[postIndex];
-        // debugPrint('Post at index $index: $post (type: ${post.runtimeType})');
+        int adjustedIndex = hasAdminPost ? index - 1 : index;
 
-        // Validate post structure
+        // 2. Ad every 5th slot
+        if ((adjustedIndex + 1) % (adFrequency + 1) == 0) {
+          return const NativeAdPostWidget();
+        }
+
+        // 3. Calculate post index considering how many ads already inserted
+        final adsBefore = (adjustedIndex / (adFrequency + 1)).floor();
+        final postIndex = adjustedIndex - adsBefore;
+
+        if (postIndex >= posts.length) return const SizedBox.shrink();
+
+        final post = posts[postIndex];
+
         if (post is! Map<String, dynamic> || post['author']?['_id'] == null) {
-          // debugPrint('Invalid post at index $index: $post');
           return const SizedBox.shrink();
         }
 
-        // Fetch user data for author
-        // log("VALUE OF FLAIR TYPE ${Flairs.campus.value}");
-        return Column(children: [
-          PostCard(
-            post: post,
-            flairType: Flairs.department.value,
-          ),
-          // if( index % 10 ==0 )...[const NativeAdPostWidget()]
-        ]);
+        return PostCard(
+          key: ValueKey(post["_id"]),
+          post: post,
+          flairType: Flairs.department.value,
+        );
       },
     );
   }
