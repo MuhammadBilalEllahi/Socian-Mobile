@@ -50,18 +50,23 @@ class _AllUniversityPostsState extends ConsumerState<AllUniversityPosts>
     });
 
     Future.microtask(() async {
-      try {
-        final apiClient = ApiClient();
-        final response =
-            await apiClient.get('/api/posts/admin/post?allUniversities=true');
-        if (response is Map<String, dynamic>) {
-          log("All UNIVERSTIES ______________ $response");
-          _adminPosts = response;
-        }
-      } catch (e) {
-        debugPrint("Error in All Universities $e");
-      }
+      await fetchAdminPosts();
     });
+  }
+
+  Future<void> fetchAdminPosts() async {
+    try {
+      final apiClient = ApiClient();
+      final response =
+          await apiClient.get('/api/posts/admin/post?allUniversities=true');
+      if (response is Map<String, dynamic>) {
+        log("All UNIVERSTIES ______________ $response");
+        _adminPosts = response;
+      }
+    } catch (e) {
+      _adminPosts = {};
+      debugPrint("Error in All Universities $e");
+    }
   }
 
   @override
@@ -84,6 +89,7 @@ class _AllUniversityPostsState extends ConsumerState<AllUniversityPosts>
       onNotification: (ScrollNotification notification) {
         if (notification is OverscrollNotification &&
             notification.overscroll < 0) {
+          fetchAdminPosts();
           // User is pulling down
           ref.read(universitypostProvider.notifier).fetchPosts(
                 refreshIt: true,

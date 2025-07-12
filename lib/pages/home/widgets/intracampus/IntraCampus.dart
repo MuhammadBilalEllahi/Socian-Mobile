@@ -29,15 +29,24 @@ class _IntraCampusState extends ConsumerState<IntraCampus>
     Future.microtask(() {
       ref.read(intraCampusPostProvider.notifier).fetchPosts();
     });
-
-    ApiClient()
-        .get('/api/posts/admin/post?requestUniversity=true')
-        .then((value) {
-      if (value is Map<String, dynamic>) {
-        _adminPosts = value['post'];
-        log("_adminPosts in intra $_adminPosts");
-      }
+    Future.microtask(() async {
+      await fetchAdminPosts();
     });
+  }
+
+  Future<void> fetchAdminPosts() async {
+    try {
+      final apiClient = ApiClient();
+      final response =
+          await apiClient.get('/api/posts/admin/post?requestUniversity=true');
+      if (response is Map<String, dynamic>) {
+        log("All UNIVERSTIES ______________ $response");
+        _adminPosts = response;
+      }
+    } catch (e) {
+      _adminPosts = {};
+      debugPrint("Error in All Universities $e");
+    }
   }
 
   @override
@@ -67,6 +76,7 @@ class _IntraCampusState extends ConsumerState<IntraCampus>
         if (notification is OverscrollNotification &&
             notification.overscroll < 0) {
           // User is pulling down
+          fetchAdminPosts();
           ref.read(intraCampusPostProvider.notifier).fetchPosts(
                 refreshIt: true,
               );
@@ -236,7 +246,7 @@ class _IntraCampusState extends ConsumerState<IntraCampus>
           // First item is the admin post
           return PostCard(
               key: ValueKey(index),
-              post: _adminPosts,
+              post: _adminPosts["post"],
               flairType: Flairs.campus.value);
         }
 
