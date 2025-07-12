@@ -32,10 +32,11 @@ class ApiConstants {
     11: "http://192.168.1.11:8080",
     90: "http://10.135.48.250:8080",
     100: "http://10.135.55.56:8080",
-    111: "http://10.135.54.210:8080"
+    111: "http://10.135.54.210:8080",
+    101: "https://192.bilalellahi.com"
   };
 
-  static int _currentUrlIndex = 6;
+  static int _currentUrlIndex = 101;
   static const String _urlIndexCacheKey = 'current_url_index';
 
   static Future<void> initializeBaseUrl() async {
