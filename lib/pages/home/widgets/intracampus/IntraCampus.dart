@@ -1,4 +1,6 @@
 // import 'package:socian/services/user_info_provider.dart';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
@@ -32,7 +34,8 @@ class _IntraCampusState extends ConsumerState<IntraCampus>
         .get('/api/posts/admin/post?requestUniversity=true')
         .then((value) {
       if (value is Map<String, dynamic>) {
-        _adminPosts = value;
+        _adminPosts = value['post'];
+        log("_adminPosts in intra $_adminPosts");
       }
     });
   }
@@ -231,7 +234,10 @@ class _IntraCampusState extends ConsumerState<IntraCampus>
       itemBuilder: (context, index) {
         if (hasAdminPost && index == 0) {
           // First item is the admin post
-          return PostCard(post: _adminPosts, flairType: Flairs.campus.value);
+          return PostCard(
+              key: ValueKey(index),
+              post: _adminPosts,
+              flairType: Flairs.campus.value);
         }
 
         // Adjust index if admin post is present
@@ -249,6 +255,7 @@ class _IntraCampusState extends ConsumerState<IntraCampus>
         // log("VALUE OF FLAIR TYPE ${Flairs.campus.value}");
         return Column(children: [
           PostCard(
+            key: ValueKey(index),
             post: post,
             flairType: Flairs.campus.value,
           ),

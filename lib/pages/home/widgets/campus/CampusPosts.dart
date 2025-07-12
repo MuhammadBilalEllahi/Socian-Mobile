@@ -1,4 +1,6 @@
 // import 'package:socian/services/user_info_provider.dart';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
@@ -28,15 +30,20 @@ class _CampusPostsState extends ConsumerState<CampusPosts>
       ref.read(postProvider.notifier).fetchPosts();
     });
 
-    try {
-      final response =
-          ApiClient().get('/api/posts/admin/post?requestCampus=true');
-      if (response is Map<String, dynamic>) {
-        _adminPosts = response as Map<String, dynamic>;
+    Future.microtask(() async {
+      try {
+        final apiClient = ApiClient();
+        final response =
+            await apiClient.get('/api/posts/admin/post?requestCampus=true');
+        log("CAMPUS _adminPosts $response");
+        if (response is Map<String, dynamic>) {
+          _adminPosts = response;
+          log("_adminPosts $_adminPosts");
+        }
+      } catch (e) {
+        print("error: $e");
       }
-    } catch (e) {
-      print("error: $e");
-    }
+    });
   }
 
   @override
@@ -233,7 +240,8 @@ class _CampusPostsState extends ConsumerState<CampusPosts>
       itemBuilder: (context, index) {
         if (hasAdminPost && index == 0) {
           // First item is the admin post
-          return PostCard(post: _adminPosts, flairType: Flairs.campus.value);
+          return PostCard(
+              post: _adminPosts['post'], flairType: Flairs.campus.value);
         }
 
         // Adjust index if admin post is present

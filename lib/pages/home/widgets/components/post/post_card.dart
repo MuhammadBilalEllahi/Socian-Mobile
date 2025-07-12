@@ -43,7 +43,7 @@ class _PostCardState extends ConsumerState<PostCard> {
     currentUserId = authUser?['_id'];
 
     final String? yourVoteStatus =
-        widget.post['voteId']['userVotes']?[currentUserId] as String?;
+        widget.post['voteId']?['userVotes']?[currentUserId] as String?;
     isLiked = yourVoteStatus == 'upvote';
     isDisliked = yourVoteStatus == 'downvote';
   }

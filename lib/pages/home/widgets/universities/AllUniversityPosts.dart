@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
@@ -47,12 +49,19 @@ class _AllUniversityPostsState extends ConsumerState<AllUniversityPosts>
       ref.read(universitypostProvider.notifier).fetchPosts();
     });
 
-    final apiClient = ApiClient();
-    final response =
-        apiClient.get('/api/posts/admin/post?allUniversities=true');
-    if (response is Map<String, dynamic>) {
-      _adminPosts = response as Map<String, dynamic>;
-    }
+    Future.microtask(() async {
+      try {
+        final apiClient = ApiClient();
+        final response =
+            await apiClient.get('/api/posts/admin/post?allUniversities=true');
+        if (response is Map<String, dynamic>) {
+          log("All UNIVERSTIES ______________ $response");
+          _adminPosts = response;
+        }
+      } catch (e) {
+        debugPrint("Error in All Universities $e");
+      }
+    });
   }
 
   @override
@@ -248,7 +257,9 @@ class _AllUniversityPostsState extends ConsumerState<AllUniversityPosts>
         if (hasAdminPost && index == 0) {
           // First item is the admin post
           return PostCard(
-              post: _adminPosts, flairType: Flairs.university.value);
+              key: ValueKey(_adminPosts['_id']),
+              post: _adminPosts['post'],
+              flairType: Flairs.university.value);
         }
 
         // Adjust index if admin post is present

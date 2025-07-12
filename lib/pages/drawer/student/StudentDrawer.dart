@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/pages/profile/settings/CreateSocietyPage.dart';
 import 'package:socian/pages/providers/page_provider.dart';
 import 'package:socian/shared/utils/constants.dart';
 
@@ -250,52 +251,52 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
               ),
             ),
 
-            // Container(
-            //   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            //   child: ElevatedButton(
-            //     onPressed: () {
-            //       Navigator.push(
-            //         context,
-            //         MaterialPageRoute(
-            //             builder: (context) => const CreateSocietyPage()),
-            //       );
-            //     },
-            //     style: ElevatedButton.styleFrom(
-            //       backgroundColor: isDarkMode ? Colors.white : Colors.black,
-            //       foregroundColor: isDarkMode ? Colors.black : Colors.white,
-            //       elevation: 0,
-            //       shadowColor: Colors.transparent,
-            //       shape: RoundedRectangleBorder(
-            //         borderRadius: BorderRadius.circular(8),
-            //         side: BorderSide(
-            //           color: isDarkMode ? Colors.white : Colors.black,
-            //           width: 1,
-            //         ),
-            //       ),
-            //       padding:
-            //           const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            //     ),
-            //     child: Row(
-            //       mainAxisAlignment: MainAxisAlignment.center,
-            //       children: [
-            //         Icon(
-            //           Icons.add,
-            //           size: 18,
-            //           color: isDarkMode ? Colors.black : Colors.white,
-            //         ),
-            //         const SizedBox(width: 8),
-            //         Text(
-            //           "Create Society",
-            //           style: TextStyle(
-            //             fontSize: 14,
-            //             fontWeight: FontWeight.w500,
-            //             color: isDarkMode ? Colors.black : Colors.white,
-            //           ),
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // ),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const CreateSocietyPage()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isDarkMode ? Colors.white : Colors.black,
+                  foregroundColor: isDarkMode ? Colors.black : Colors.white,
+                  elevation: 0,
+                  shadowColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(
+                      color: isDarkMode ? Colors.white : Colors.black,
+                      width: 1,
+                    ),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.add,
+                      size: 18,
+                      color: isDarkMode ? Colors.black : Colors.white,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Create Society",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: isDarkMode ? Colors.black : Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
 
             // Footer
             Container(
