@@ -36,7 +36,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
   List<dynamic> _uploadedPapers = [];
   File? _mediaFile;
 
-  bool _isLoadingDetails = true;
+  bool _isLoadingPosts = true;
+  bool _isLoadingSocieties = true;
+  bool _isLoadingConnections = true;
+  bool _isLoadingPapers = true;
   String? _errorMessage;
 
   @override
@@ -83,7 +86,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
 
   Future<void> _fetchDetailedProfileData() async {
     setState(() {
-      _isLoadingDetails = true;
+      _isLoadingPosts = true;
+      _isLoadingSocieties = true;
+      _isLoadingConnections = true;
+      _isLoadingPapers = true;
       _errorMessage = null;
     });
 
@@ -92,7 +98,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
       final userId = widget.userId ?? auth.user?['_id'];
       if (userId == null) {
         setState(() {
-          _isLoadingDetails = false;
+          _isLoadingPosts = false;
+          _isLoadingSocieties = false;
+          _isLoadingConnections = false;
+          _isLoadingPapers = false;
           _errorMessage = 'User not logged in';
         });
         return;
@@ -109,7 +118,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
       try {
         profileResponse = await _apiClient
             .get('/api/user/profile', queryParameters: {'id': userId});
-        log("____USER PROFILE_____ $profileResponse ________");
+        log("____USER PROFILE_____ $profileResponse ________ ${profileResponse?['super_role']}");
       } catch (e) {
         debugPrint('Error fetching profile: $e');
       }
@@ -154,24 +163,49 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
           !profileResponse.containsKey('error') &&
           profileResponse['profile'] != null;
 
+      // Fetch posts based on user role
+      List<dynamic> posts = [];
+      if (hasProfileData) {
+        try {
+          if (profileResponse['super_role'] == "super") {
+            final response =
+                await _apiClient.get("/api/posts/admin/profile/posts");
+            posts = response['posts'] ?? [];
+            log("____ADMIN POSTS_____ ${response['posts']} ________");
+          } else {
+            posts = (profileResponse['profile']['posts'] ?? [])
+                .where((post) => post['author']['_id'] == userId)
+                .toList();
+            log("____REGULAR POSTS_____ $posts ________");
+          }
+        } catch (e) {
+          debugPrint('Error fetching posts: $e');
+          posts = [];
+        }
+      }
+
       setState(() {
         // Set detailed profile if available
         if (hasProfileData) {
           _detailedProfile = profileResponse as Map<String, dynamic>;
-          _posts = (_detailedProfile?['profile']['posts'] ?? [])
-              .where((post) => post['author']['_id'] == userId)
-              .toList();
+          _posts = posts;
         }
+        _isLoadingPosts = false;
 
         // Set other data if available, otherwise use empty defaults
         _societies =
             (societiesResponse?['joinedSocieties'] as List<dynamic>?) ?? [];
         _moderatedSocieties = moderatedSocietiesResponse ?? [];
+        _isLoadingSocieties = false;
+
         _connections =
             (connectionsResponse?['connections'] as List<dynamic>?) ?? [];
+        _isLoadingConnections = false;
+
         _uploadedPapers = (papersResponse?['data']?['profile']
                 ?['papersUploaded'] as List<dynamic>?) ??
             [];
+        _isLoadingPapers = false;
 
         // Log for debugging
         debugPrint('Subscribed societies: $_societies');
@@ -193,8 +227,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
           };
         }
 
-        _isLoadingDetails = false;
-
         // Set error message only if no data could be loaded at all
         final auth = ref.read(authProvider);
         final isOwnProfile =
@@ -209,7 +241,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
     } catch (e) {
       debugPrint('Error in _fetchDetailedProfileData: $e');
       setState(() {
-        _isLoadingDetails = false;
+        _isLoadingPosts = false;
+        _isLoadingSocieties = false;
+        _isLoadingConnections = false;
+        _isLoadingPapers = false;
         final auth = ref.read(authProvider);
         final isOwnProfile =
             widget.userId == null || widget.userId == auth.user?['_id'];
@@ -331,10 +366,77 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
     );
   }
 
+  Widget _buildShimmerList() {
+    return ListView.builder(
+      itemCount: 3,
+      padding: const EdgeInsets.all(16),
+      itemBuilder: (context, index) => _buildShimmerCard(),
+    );
+  }
+
+  Widget _buildShimmerCard() {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: double.infinity,
+              height: 20,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              height: 16,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: MediaQuery.of(context).size.width * 0.6,
+              height: 16,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerGrid() {
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 1.5,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+      ),
+      itemCount: 4,
+      itemBuilder: (context, index) => Container(
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
+
   Widget _buildPastPapersTab(Color background, Color foreground, Color border,
       Color mutedForeground, Color accent, Color primary) {
-    if (_isLoadingDetails) {
-      return const Center(child: CircularProgressIndicator());
+    if (_isLoadingPapers) {
+      return _buildShimmerList();
     }
 
     final uploadedPapers = _uploadedPapers;
@@ -700,8 +802,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
 
   Widget _buildPostsTab(Color background, Color foreground, Color border,
       Color mutedForeground, Color accent) {
-    if (_isLoadingDetails) {
-      return const Center(child: CircularProgressIndicator());
+    if (_isLoadingPosts) {
+      return _buildShimmerList();
     }
 
     if (!_hasData('posts')) {
@@ -728,8 +830,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
 
   Widget _buildSocietyTab(Color background, Color foreground, Color border,
       Color mutedForeground, Color accent, Color primary) {
-    if (_isLoadingDetails) {
-      return const Center(child: CircularProgressIndicator());
+    if (_isLoadingSocieties) {
+      return _buildShimmerList();
     }
 
     final societyMap = <String, Map<String, dynamic>>{};
@@ -800,26 +902,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                         ),
                       ),
                     ),
-                    // Row(
-                    //   children: [
-                    //     if (isModerated)
-                    //       Container(
-                    //         padding: const EdgeInsets.symmetric(
-                    //             horizontal: 8, vertical: 4),
-                    //         decoration: BoxDecoration(
-                    //           color: Colors.blue,
-                    //           borderRadius: BorderRadius.circular(12),
-                    //         ),
-                    //         child: const Text(
-                    //           'Moderator',
-                    //           style: TextStyle(
-                    //             color: Colors.white,
-                    //             fontSize: 12,
-                    //           ),
-                    //         ),
-                    //       ),
-                    //   ],
-                    // ),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -991,8 +1073,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
           if (isOwnProfile) ...[
             IconButton(
               icon: Icon(Icons.refresh, color: foreground),
-              onPressed:
-                  _isLoadingDetails ? null : () => _fetchDetailedProfileData(),
+              onPressed: (_isLoadingPosts ||
+                      _isLoadingSocieties ||
+                      _isLoadingConnections ||
+                      _isLoadingPapers)
+                  ? null
+                  : () => _fetchDetailedProfileData(),
               tooltip: 'Refresh profile data',
             ),
             IconButton(
@@ -1128,8 +1214,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                       ),
                     ],
                     const SizedBox(height: 16),
-                    _isLoadingDetails
-                        ? const CircularProgressIndicator()
+                    _isLoadingConnections
+                        ? Container(
+                            width: 16,
+                            height: 16,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          )
                         : Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -1177,7 +1270,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                                 ),
                             ],
                           ),
-                    if (!isOwnProfile && !_isLoadingDetails) ...[
+                    if (!isOwnProfile && !_isLoadingConnections) ...[
                       const SizedBox(height: 16),
                       _buildConnectButton(
                           _basicProfile!['_id'], primary, foreground),
