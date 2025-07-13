@@ -2662,6 +2662,8 @@ import 'package:shimmer/shimmer.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/pages/explore/page/ModeratorsPage.dart';
 import 'package:socian/pages/explore/page/verification/SocietyVerification.dart';
+import 'package:socian/pages/home/widgets/components/post/page/PostDetailPage.dart';
+import 'package:socian/pages/home/widgets/components/post/post_stat_item.dart';
 import 'package:socian/shared/services/api_client.dart';
 
 class SocietyPage extends ConsumerStatefulWidget {
@@ -2785,9 +2787,9 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
     } catch (e) {
       debugPrint('Error checking membership status: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to check membership status')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(content: Text('Failed to check membership status')),
+        // );
       }
     }
   }
@@ -3110,149 +3112,252 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
     }
   }
 
-  Widget _buildPostListItem(Map<String, dynamic> post) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  Widget _buildPostListItem(BuildContext context, Map<String, dynamic> post) {
     final colors = _getThemeColors(context);
-    final author = post['author'];
-    final upvotes = post['upvotes'] ?? 0;
-    final downvotes = post['downvotes'] ?? 0;
-    final commentsCount = post['commentsCount'] ?? 0;
+    final author = post['author'] ?? {};
+    final timeAgo = post['createdAt'] != null
+        ? _timeAgo(DateTime.tryParse(post['createdAt']) ?? DateTime.now())
+        : '';
     final title = post['title'] ?? 'Untitled';
     final content = post['content'] ?? '';
-    final createdAt = post['createdAt'];
-    final timeAgo = createdAt != null
-        ? _timeAgo(DateTime.tryParse(createdAt) ?? DateTime.now())
-        : '';
+    final commentsCount = post['commentsCount'] ?? 0;
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-      decoration: BoxDecoration(
-        color: colors['bg'],
-        border: Border(
-          bottom: BorderSide(color: colors['border']!, width: 1),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.only(left: 20, top: 20, bottom: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                if (author != null && author?['profile']?['picture'] != null)
-                  CircleAvatar(
-                    radius: 16,
-                    backgroundImage:
-                        NetworkImage(author?['profile']?['picture']),
-                    backgroundColor: colors['border'],
-                  )
-                else
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: colors['border'],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(Icons.person, size: 18, color: colors['muted']),
+    return Consumer(
+      builder: (context, ref, child) {
+        final authUser = ref.watch(authProvider).user;
+        final currentUserId = authUser?['_id'];
+        final voteId = post['voteId'] ?? {};
+        bool isLiked = voteId['userVotes']?[currentUserId] == 'upvote';
+        bool isDisliked = voteId['userVotes']?[currentUserId] == 'downvote';
+        bool isVoting = false;
+
+        Future<void> votePost(String voteType) async {
+          if (isVoting) return;
+          final apiClient = ApiClient();
+          final previousUpVotes = voteId['upVotesCount'] ?? 0;
+          final previousDownVotes = voteId['downVotesCount'] ?? 0;
+          final previousIsLiked = isLiked;
+          final previousIsDisliked = isDisliked;
+
+          // Optimistic UI update
+          if (voteType == 'upvote') {
+            if (isLiked) {
+              voteId['upVotesCount'] = (voteId['upVotesCount'] ?? 0) - 1;
+              isLiked = false;
+            } else {
+              voteId['upVotesCount'] = (voteId['upVotesCount'] ?? 0) + 1;
+              if (isDisliked) {
+                voteId['downVotesCount'] = (voteId['downVotesCount'] ?? 0) - 1;
+                isDisliked = false;
+              }
+              isLiked = true;
+            }
+          } else if (voteType == 'downvote') {
+            if (isDisliked) {
+              voteId['downVotesCount'] = (voteId['downVotesCount'] ?? 0) - 1;
+              isDisliked = false;
+            } else {
+              voteId['downVotesCount'] = (voteId['downVotesCount'] ?? 0) + 1;
+              if (isLiked) {
+                voteId['upVotesCount'] = (voteId['upVotesCount'] ?? 0) - 1;
+                isLiked = false;
+              }
+              isDisliked = true;
+            }
+          }
+
+          try {
+            final response = await apiClient.post('/api/posts/vote-post', {
+              'postId': post['_id'],
+              'voteType': voteType,
+            });
+            voteId['upVotesCount'] = response['upVotesCount'];
+            voteId['downVotesCount'] = response['downVotesCount'];
+            if (response['noneSelected'] == true) {
+              isLiked = false;
+              isDisliked = false;
+            } else {
+              isLiked =
+                  voteType == 'upvote' && response['noneSelected'] != true;
+              isDisliked =
+                  voteType == 'downvote' && response['noneSelected'] != true;
+            }
+          } catch (e) {
+            debugPrint('Error voting: $e');
+            voteId['upVotesCount'] = previousUpVotes;
+            voteId['downVotesCount'] = previousDownVotes;
+            isLiked = previousIsLiked;
+            isDisliked = previousIsDisliked;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Failed to vote: $e')),
+            );
+          } finally {
+            isVoting = false;
+          }
+        }
+
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+          decoration: BoxDecoration(
+            color: colors['bg'],
+            border: Border(
+              bottom: BorderSide(color: colors['border']!, width: 1),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 20, top: 20, bottom: 20),
+            child: GestureDetector(
+
+
+           onTap: () {
+            
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => PostDetailPage(
+              //       post: post,
+              //       flairType: 1,
+              //     ),
+              //   ),
+              // );
+            },        
+
+
+
+
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      if (author['profile']?['picture'] != null)
+                        CircleAvatar(
+                          radius: 16,
+                          backgroundImage:
+                              NetworkImage(author['profile']['picture']),
+                          backgroundColor: colors['border'],
+                        )
+                      else
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: colors['border'],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(Icons.person,
+                              size: 18, color: colors['muted']),
+                        ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          author['name'] ?? 'Anonymous',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 15,
+                            color: colors['fg'],
+                            letterSpacing: 0,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        timeAgo,
+                        style: TextStyle(
+                          color: colors['muted'],
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          letterSpacing: 0,
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      )
+                    ],
                   ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    author?['name'] ?? 'Anonymous',
+                  const SizedBox(height: 12),
+                  Text(
+                    title,
                     style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 17,
                       color: colors['fg'],
                       letterSpacing: 0,
                     ),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  timeAgo,
-                  style: TextStyle(
-                    color: colors['muted'],
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                    letterSpacing: 0,
+                  if (content.trim().isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      content,
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: colors['muted'],
+                        height: 1.5,
+                        fontWeight: FontWeight.w400,
+                        letterSpacing: 0,
+                      ),
+                      maxLines: 4,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                  const SizedBox(height: 18),
+                  Row(
+                    children: [
+                      PostStatItem(
+                        icon: isLiked ? Icons.favorite : Icons.favorite_outline,
+                        count: voteId['upVotesCount'] ?? 0,
+                        onTap: () => votePost('upvote'),
+                        isActive: isLiked,
+                      ),
+                      const SizedBox(width: 2),
+                      PostStatItem(
+                        icon: isDisliked
+                            ? Icons.thumb_down
+                            : Icons.thumb_down_outlined,
+                        count: voteId['downVotesCount'] ?? 0,
+                        onTap: () => votePost('downvote'),
+                        isActive: isDisliked,
+                      ),
+                      const SizedBox(width: 16),
+                      
+                    ],
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 17,
-                color: colors['fg'],
-                letterSpacing: 0,
+                ],
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
-            if (content.trim().isNotEmpty) ...[
-              const SizedBox(height: 6),
-              Text(
-                content,
-                style: TextStyle(
-                  fontSize: 15,
-                  color: colors['muted'],
-                  height: 1.5,
-                  fontWeight: FontWeight.w400,
-                  letterSpacing: 0,
-                ),
-                maxLines: 4,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-            const SizedBox(height: 18),
-            Row(
-              children: [
-                _MinimalIconButton(
-                  icon: Icons.arrow_upward_rounded,
-                  color: colors['accent']!,
-                  onTap: () {},
-                ),
-                const SizedBox(width: 2),
-                Text(
-                  '${upvotes - downvotes}',
-                  style: TextStyle(
-                    color: colors['fg'],
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                _MinimalIconButton(
-                  icon: Icons.mode_comment_outlined,
-                  color: colors['muted']!,
-                  onTap: () {},
-                ),
-                const SizedBox(width: 2),
-                Text(
-                  '$commentsCount',
-                  style: TextStyle(
-                    color: colors['muted'],
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                _MinimalIconButton(
-                  icon: Icons.share_outlined,
-                  color: colors['muted']!,
-                  onTap: () {},
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
+
+
+
+
+
+
+
+
+
+
 
   String _timeAgo(DateTime date) {
     final now = DateTime.now();
@@ -3767,266 +3872,265 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
               ),
               const SizedBox(height: 18),
 
-Padding(
-  padding: const EdgeInsets.only(right: 24),
-  child: Row(
-    children: [
-      Expanded(
-        child: Text(
-          'Roles',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w600,
-            color: colors['fg'],
-            letterSpacing: -0.3,
-          ),
-        ),
-      ),
-      if (showEdit)
-        GestureDetector(
-          onTap: _showAddRoleDialog,
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: colors['border']!.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: colors['border']!, width: 1.2),
-            ),
-            child: Icon(
-              Icons.add,
-              color: colors['accent'],
-              size: 20,
-            ),
-          ),
-        ),
-    ],
-  ),
-),
-const SizedBox(height: 12),
-roles.isNotEmpty || showEdit
-    ? SizedBox(
-        height: 220,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.only(left: 16),
-          itemCount: roles.length + (showEdit ? 1 : 0),
-          separatorBuilder: (context, index) => const SizedBox(width: 16),
-          itemBuilder: (context, index) {
-            if (showEdit && index == roles.length) {
-              return GestureDetector(
-                onTap: _showAddRoleDialog,
-                child: Container(
-                  width: 164,
-                  decoration: BoxDecoration(
-                    color: colors['bg'],
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: colors['border']!,
-                      width: 1.2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+              Padding(
+                padding: const EdgeInsets.only(right: 24),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Roles',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                          color: colors['fg'],
+                          letterSpacing: -0.3,
+                        ),
                       ),
-                      BoxShadow(
-                        color: colors['accent']!.withOpacity(0.02),
-                        blurRadius: 4,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.add,
-                      size: 40,
-                      color: colors['accent'],
                     ),
-                  ),
+                    if (showEdit)
+                      GestureDetector(
+                        onTap: _showAddRoleDialog,
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: colors['border']!.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                                color: colors['border']!, width: 1.2),
+                          ),
+                          child: Icon(
+                            Icons.add,
+                            color: colors['accent'],
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-              );
-            }
+              ),
+              const SizedBox(height: 12),
+              roles.isNotEmpty || showEdit
+                  ? SizedBox(
+                      height: 220,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.only(left: 16),
+                        itemCount: roles.length + (showEdit ? 1 : 0),
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(width: 16),
+                        itemBuilder: (context, index) {
+                          if (showEdit && index == roles.length) {
+                            return GestureDetector(
+                              onTap: _showAddRoleDialog,
+                              child: Container(
+                                width: 164,
+                                decoration: BoxDecoration(
+                                  color: colors['bg'],
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: colors['border']!,
+                                    width: 1.2,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.04),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                    BoxShadow(
+                                      color:
+                                          colors['accent']!.withOpacity(0.02),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 1),
+                                    ),
+                                  ],
+                                ),
+                                child: Center(
+                                  child: Icon(
+                                    Icons.add,
+                                    size: 40,
+                                    color: colors['accent'],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
 
-            final role = roles[index];
-            final roleTitle = role['role'] ?? 'Unknown';
-            final roleName = role['user']?['name'] ?? 'Unknown';
-            final roleImage = role['user']?['profile']?['picture'];
-            final roleId = role['_id']?.toString() ?? '';
+                          final role = roles[index];
+                          final roleTitle = role['role'] ?? 'Unknown';
+                          final roleName = role['user']?['name'] ?? 'Unknown';
+                          final roleImage =
+                              role['user']?['profile']?['picture'];
+                          final roleId = role['_id']?.toString() ?? '';
 
-            return Stack(
-              clipBehavior: Clip.none,
-              children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeInOut,
-                  width: 164,
-                  decoration: BoxDecoration(
-                    color: colors['bg'],
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: colors['border']!,
-                      width: 1.2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                      BoxShadow(
-                        color: colors['accent']!.withOpacity(0.02),
-                        blurRadius: 4,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Stack(
-                        children: [
-                          AspectRatio(
-                            aspectRatio: 4 / 3,
-                            child: roleImage != null
-                                ? Image.network(
-                                    roleImage,
-                                    fit: BoxFit.cover,
-                                    loadingBuilder: (context, child, loadingProgress) {
-                                      if (loadingProgress == null) return child;
-                                      return Container(
-                                        color: colors['border']!.withOpacity(0.1),
-                                        child: Center(
-                                          child: SizedBox(
-                                            width: 24,
-                                            height: 24,
-                                            child: CircularProgressIndicator(
-                                              color: colors['accent'],
-                                              strokeWidth: 2.5,
+                          return Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                curve: Curves.easeInOut,
+                                width: 164,
+                                decoration: BoxDecoration(
+                                  color: colors['bg'],
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: colors['border']!,
+                                    width: 1.2,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.04),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                    BoxShadow(
+                                      color:
+                                          colors['accent']!.withOpacity(0.02),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 1),
+                                    ),
+                                  ],
+                                ),
+                                clipBehavior: Clip.antiAlias,
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Stack(
+                                      children: [
+                                        AspectRatio(
+                                          aspectRatio: 4 / 3,
+                                          child: roleImage != null
+                                              ? Image.network(
+                                                  roleImage,
+                                                  fit: BoxFit.cover,
+                                                  loadingBuilder: (context,
+                                                      child, loadingProgress) {
+                                                    if (loadingProgress == null)
+                                                      return child;
+                                                    return Container(
+                                                      color: colors['border']!
+                                                          .withOpacity(0.1),
+                                                      child: Center(
+                                                        child: SizedBox(
+                                                          width: 24,
+                                                          height: 24,
+                                                          child:
+                                                              CircularProgressIndicator(
+                                                            color: colors[
+                                                                'accent'],
+                                                            strokeWidth: 2.5,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                  errorBuilder: (context, error,
+                                                          stackTrace) =>
+                                                      _buildImageFallback(
+                                                          colors),
+                                                )
+                                              : _buildImageFallback(colors),
+                                        ),
+                                        Positioned.fill(
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                begin: Alignment.topCenter,
+                                                end: Alignment.bottomCenter,
+                                                colors: [
+                                                  Colors.transparent,
+                                                  Colors.black
+                                                      .withOpacity(0.02),
+                                                ],
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      );
-                                    },
-                                    errorBuilder: (context, error, stackTrace) =>
-                                        _buildImageFallback(colors),
-                                  )
-                                : _buildImageFallback(colors),
-                          ),
-                          Positioned.fill(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    Colors.transparent,
-                                    Colors.black.withOpacity(0.02),
+                                      ],
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          14, 12, 14, 14),
+                                      decoration: BoxDecoration(
+                                        color: colors['bg']!.withOpacity(0.98),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            roleTitle.toUpperCase(),
+                                            style: TextStyle(
+                                              fontSize: 11.5,
+                                              fontWeight: FontWeight.w800,
+                                              color: colors['accent'],
+                                              letterSpacing: 0.8,
+                                              height: 1.2,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 6),
+                                          Text(
+                                            roleName,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: colors['fg'],
+                                              letterSpacing: 0.1,
+                                              height: 1.3,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Container(
+                                            height: 2,
+                                            width: 24,
+                                            decoration: BoxDecoration(
+                                              color: colors['accent']!
+                                                  .withOpacity(0.2),
+                                              borderRadius:
+                                                  BorderRadius.circular(1),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
-                            ),
+                              if (showEdit && roleId.isNotEmpty)
+                                Positioned(
+                                  right: -6,
+                                  top: -6,
+                                  child: _EnhancedDeleteButton(
+                                    onTap: () => _deleteRole(roleId, roleTitle),
+                                    colors: colors,
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
+                      ),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Center(
+                        child: Text(
+                          'No roles assigned.',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w400,
+                            color: colors['muted'],
+                            letterSpacing: 0,
                           ),
-                        ],
-                      ),
-                      Container(
-                        padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
-                        decoration: BoxDecoration(
-                          color: colors['bg']!.withOpacity(0.98),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              roleTitle.toUpperCase(),
-                              style: TextStyle(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w800,
-                                color: colors['accent'],
-                                letterSpacing: 0.8,
-                                height: 1.2,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              roleName,
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: colors['fg'],
-                                letterSpacing: 0.1,
-                                height: 1.3,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 8),
-                            Container(
-                              height: 2,
-                              width: 24,
-                              decoration: BoxDecoration(
-                                color: colors['accent']!.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(1),
-                              ),
-                            ),
-                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                if (showEdit && roleId.isNotEmpty)
-                  Positioned(
-                    right: -6,
-                    top: -6,
-                    child: _EnhancedDeleteButton(
-                      onTap: () => _deleteRole(roleId, roleTitle),
-                      colors: colors,
                     ),
-                  ),
-              ],
-            );
-          },
-        ),
-      )
-    : Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Center(
-          child: Text(
-            'No roles assigned.',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w400,
-              color: colors['muted'],
-              letterSpacing: 0,
-            ),
-          ),
-        ),
-      ),
 
-
-
-
-
-
-
-      //hellooooooooooo
-
-
-
-
-
-
-
-
-
-
-
-
-
+              //hellooooooooooo
             ],
           ),
         ),
@@ -4234,7 +4338,8 @@ roles.isNotEmpty || showEdit
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         if (index < posts.length) {
-                          return _buildPostListItem(posts[index]);
+                          // return _buildPostListItem(context, posts[index]);
+                          return _buildPostListItem(context, posts[index]);
                         } else {
                           return isLoadingMore
                               ? _buildShimmerPost(colors)
@@ -4852,7 +4957,7 @@ class _AddRoleDialogState extends State<_AddRoleDialog> {
                                               'Add Role Response: $response');
 
                                           // ✅ Success check
-                                          
+
                                           if (response['success'] == true) {
                                             if (mounted) {
                                               ScaffoldMessenger.of(context)
@@ -5555,7 +5660,8 @@ class _EnhancedDeleteButtonState extends State<_EnhancedDeleteButton>
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.redAccent.withOpacity(_isHovered ? 0.4 : 0.3),
+                      color:
+                          Colors.redAccent.withOpacity(_isHovered ? 0.4 : 0.3),
                       blurRadius: _isHovered ? 8 : 6,
                       offset: const Offset(0, 2),
                     ),
