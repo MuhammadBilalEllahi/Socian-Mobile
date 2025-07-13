@@ -1,3 +1,4 @@
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +14,15 @@ void main() async {
   await dotenv.load(fileName: ".env");
   await WebSocketService().connect();
   await MobileAds.instance.initialize();
+  final deviceInfo = DeviceInfoPlugin();
+  final androidInfo = await deviceInfo.androidInfo;
+  final androidId = androidInfo.id;
+  MobileAds.instance.updateRequestConfiguration(
+    RequestConfiguration(
+      testDeviceIds: ['69B5A27736A2F4EFB67F6E96D9D24EEF'],
+    ),
+  );
+
   MobileAds.instance.setAppMuted(true);
 
   // final config = PostHogConfig(dotenv.env['POSTHOG_API'] ?? '');
