@@ -36,7 +36,7 @@ class ApiConstants {
     101: "https://192.bilalellahi.com"
   };
 
-  static int _currentUrlIndex = 101;
+  static int _currentUrlIndex = -2;
   static const String _urlIndexCacheKey = 'current_url_index';
 
   static Future<void> initializeBaseUrl() async {
@@ -182,6 +182,10 @@ class AppAssets {
   static const String anime = 'assets/images/anime.png';
   static const String profilePic = 'assets/images/profilepic.jpg';
   static const String googleAuth = 'assets/images/googleAuth.png';
+
+  static const String alumnisp = 'assets/images/alumnisp.jpg';
+  static const String teachersp = 'assets/images/teachersp.jpg';
+  static const String studentsp = 'assets/images/studentsp.jpg';
 }
 
 enum BottomNavBarRoute { home, message, explore, gps, profile }

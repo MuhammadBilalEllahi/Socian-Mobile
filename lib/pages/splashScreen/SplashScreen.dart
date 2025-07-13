@@ -132,37 +132,37 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     children: [
                       _buildInfoContainer(
-                        AppAssets.splashBackground2,
-                        'Student - Individuals',
-                        'Hic venit exemplum illud',
+                        AppAssets.studentsp,
+                        'Students',
+                        'Connecting students, alumni, and educators in one collaborative digital space',
                         isDarkMode
                             ? const Color.fromARGB(255, 31, 31, 31)
                             : Colors.grey[200]!,
                       ),
                       _buildInfoContainer(
-                        AppAssets.anime,
-                        'Teacher - Individuals',
-                        'Hic venit exemplum illud',
+                        AppAssets.teachersp,
+                        'Teachers',
+                        'Where university life meets innovation',
                         isDarkMode
                             ? const Color.fromARGB(255, 31, 31, 31)
                             : Colors.grey[200]!,
                       ),
                       _buildInfoContainer(
-                        AppAssets.profilePic,
-                        'Alumni - Individuals',
-                        'Hic venit exemplum illud',
+                        AppAssets.alumnisp,
+                        'Alumni',
+                        'Beyond the boundaries of the classroom',
                         isDarkMode
                             ? const Color.fromARGB(255, 31, 31, 31)
                             : Colors.grey[200]!,
                       ),
-                      _buildInfoContainer(
-                        AppAssets.splashBackground2,
-                        'Organization - Individuals',
-                        'Hic venit exemplum illud',
-                        isDarkMode
-                            ? const Color.fromARGB(255, 31, 31, 31)
-                            : Colors.grey[200]!,
-                      ),
+                      // _buildInfoContainer(
+                      //   AppAssets.splashBackground2,
+                      //   'Organization - Individuals',
+                      //   'Hic venit exemplum illud',
+                      //   isDarkMode
+                      //       ? const Color.fromARGB(255, 31, 31, 31)
+                      //       : Colors.grey[200]!,
+                      // ),
                     ],
                   ),
                 ),
@@ -350,7 +350,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   paragraphTitle,
                   style: TextStyle(
                     color: isDarkMode ? Colors.white : Colors.black87,
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.bold,
                     height: 1.5,
                   ),
@@ -360,7 +360,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   paragraph,
                   style: TextStyle(
                     color: isDarkMode ? Colors.white54 : Colors.black54,
-                    fontSize: 16,
+                    fontSize: 13,
                     fontWeight: FontWeight.w700,
                     height: 1.5,
                   ),
