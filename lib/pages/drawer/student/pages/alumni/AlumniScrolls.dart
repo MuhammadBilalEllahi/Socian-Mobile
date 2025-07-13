@@ -65,8 +65,8 @@ class _AlumniScrollsState extends State<AlumniScrolls> {
       final queryParams = {
         'page': _currentPage.toString(),
         'limit': _pageSize.toString(),
-        if (_selectedRole.toLowerCase() != 'alumni')
-          'role': _selectedRole.toLowerCase(),
+        // if (_selectedRole.toLowerCase() != 'alumni')
+        'role': _selectedRole.toLowerCase(),
         if (_searchQuery.isNotEmpty) 'search': _searchQuery,
       };
 

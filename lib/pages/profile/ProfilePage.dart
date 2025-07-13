@@ -109,6 +109,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
       try {
         profileResponse = await _apiClient
             .get('/api/user/profile', queryParameters: {'id': userId});
+        log("____USER PROFILE_____ $profileResponse ________");
       } catch (e) {
         debugPrint('Error fetching profile: $e');
       }
