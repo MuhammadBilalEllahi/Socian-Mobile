@@ -175,6 +175,9 @@ class AppRoutes {
 
   static const String alumniUploadCard = '/alumni/verif/card';
   static const String alumniLivePicture = '/alumni/verif/live-picture';
+
+  // Moderators routes
+  static const String moderatorsPage = '/moderators';
 }
 
 class AppAssets {

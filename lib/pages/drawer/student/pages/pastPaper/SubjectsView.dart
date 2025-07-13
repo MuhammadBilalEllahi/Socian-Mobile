@@ -170,7 +170,9 @@ class _SubjectsViewState extends State<SubjectsView> {
                     ),
                   );
                 } else if (snapshot.hasData) {
-                  final subjects = snapshot.data!['subjects'] as List<dynamic>;
+                  final data = snapshot.data!;
+                  final subjects = (data['subjects'] ?? []) as List<dynamic>;
+                  // final subjects = snapshot.data!['subjects'] as List<dynamic>;
                   final filteredSubjects = _filterSubjects(subjects);
 
                   return ListView.builder(

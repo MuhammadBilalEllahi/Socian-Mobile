@@ -9,6 +9,7 @@ import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/pages/explore/page/SocietyPage.dart';
 import 'package:socian/pages/home/widgets/components/post/post.dart';
 import 'package:socian/pages/message/ChatPage.dart';
+import 'package:socian/pages/profile/ModActivityTab.dart';
 import 'package:socian/pages/profile/widgets/ConnectionsListPage.dart';
 import 'package:socian/shared/services/api_client.dart';
 import 'package:socian/shared/utils/constants.dart';
@@ -24,7 +25,7 @@ class ProfilePage extends ConsumerStatefulWidget {
 
 class _ProfilePageState extends ConsumerState<ProfilePage>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+  TabController? _tabController;
   final _apiClient = ApiClient();
 
   Map<String, dynamic>? _basicProfile;
@@ -43,10 +44,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
   void initState() {
     super.initState();
     _loadBasicProfile();
-    final auth = ref.read(authProvider);
-    final isOwnProfile =
-        widget.userId == null || widget.userId == auth.user?['_id'];
-    _tabController = TabController(length: isOwnProfile ? 3 : 3, vsync: this);
     _fetchDetailedProfileData();
   }
 
@@ -78,6 +75,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
           'role': auth.user?['role'],
         };
       });
+
+      // Update TabController after basic profile is loaded
+      final isOwnProfile =
+          widget.userId == null || widget.userId == auth.user?['_id'];
+      final isModerator = auth.user?['super_role'] == 'mod';
+      _ensureCorrectTabCount(isOwnProfile, isModerator);
     }
   }
 
@@ -224,6 +227,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
         } else if (!hasProfileData && isOwnProfile) {
           _errorMessage = 'Some profile data could not be loaded';
         }
+
+        // Update TabController after state is set
+        final isModerator = auth.user?['super_role'] == 'mod';
+        _ensureCorrectTabCount(isOwnProfile, isModerator);
       });
     } catch (e) {
       debugPrint('Error in _fetchDetailedProfileData: $e');
@@ -299,7 +306,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
 
   @override
   void dispose() {
-    _tabController.dispose();
+    _tabController?.dispose();
     super.dispose();
   }
 
@@ -954,6 +961,28 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
     }
   }
 
+  void _ensureCorrectTabCount(bool isOwnProfile, bool isModerator) {
+    final expectedLength = (isOwnProfile && isModerator) ? 4 : 3;
+
+    if (_tabController == null) {
+      _tabController = TabController(length: expectedLength, vsync: this);
+      return;
+    }
+
+    if (_tabController!.length != expectedLength) {
+      final currentIndex = _tabController!.index;
+      // Only dispose if we're sure we're in a valid state
+      if (!_tabController!.indexIsChanging && mounted) {
+        _tabController!.dispose();
+        _tabController = TabController(length: expectedLength, vsync: this);
+        // Restore the index if it's still valid
+        if (currentIndex < expectedLength) {
+          _tabController!.index = currentIndex;
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
@@ -999,6 +1028,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
 
     final isOwnProfile =
         widget.userId == null || widget.userId == auth.user?['_id'];
+    final isModerator = auth.user?['super_role'] == 'mod';
 
     return Scaffold(
       backgroundColor: background,
@@ -1216,37 +1246,43 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                 ),
               ),
             ),
-            SliverPersistentHeader(
-              pinned: true,
-              delegate: _SliverAppBarDelegate(
-                TabBar(
-                  controller: _tabController,
-                  isScrollable: true,
-                  labelColor: foreground,
-                  unselectedLabelColor: mutedForeground,
-                  indicatorColor: primary,
-                  tabs: const [
-                    Tab(text: 'Posts'),
-                    Tab(text: 'Societies'),
-                    Tab(text: 'Past Papers'),
-                  ],
+            if (_tabController != null)
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _SliverAppBarDelegate(
+                  TabBar(
+                    controller: _tabController!,
+                    isScrollable: true,
+                    labelColor: foreground,
+                    unselectedLabelColor: mutedForeground,
+                    indicatorColor: primary,
+                    tabs: [
+                      const Tab(text: 'Posts'),
+                      const Tab(text: 'Societies'),
+                      const Tab(text: 'Past Papers'),
+                      if (isOwnProfile && isModerator)
+                        const Tab(text: 'Mod Activities'),
+                    ],
+                  ),
+                  background,
                 ),
-                background,
               ),
-            ),
           ];
         },
-        body: TabBarView(
-          controller: _tabController,
-          children: [
-            _buildPostsTab(
-                background, foreground, border, mutedForeground, accent),
-            _buildSocietyTab(background, foreground, border, mutedForeground,
-                accent, primary),
-            _buildPastPapersTab(background, foreground, border, mutedForeground,
-                accent, primary),
-          ],
-        ),
+        body: _tabController == null
+            ? const Center(child: CircularProgressIndicator())
+            : TabBarView(
+                controller: _tabController!,
+                children: [
+                  _buildPostsTab(
+                      background, foreground, border, mutedForeground, accent),
+                  _buildSocietyTab(background, foreground, border,
+                      mutedForeground, accent, primary),
+                  _buildPastPapersTab(background, foreground, border,
+                      mutedForeground, accent, primary),
+                  if (isOwnProfile && isModerator) const ModActivityTab(),
+                ],
+              ),
       ),
     );
   }

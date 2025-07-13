@@ -1,12 +1,19 @@
+import 'dart:io';
+import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:socian/shared/services/api_client.dart';
 import 'package:socian/shared/utils/constants.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:open_filex/open_filex.dart';
 
 import '../../../../../../pages/message/ChatPage.dart';
 import '../../../../../../pages/profile/ProfilePage.dart';
 
-class InfoDialog extends StatelessWidget {
+class InfoDialog extends StatefulWidget {
   final Map<String, dynamic> file;
   final Map<String, dynamic> paper;
   final int fileIndex;
@@ -17,6 +24,368 @@ class InfoDialog extends StatelessWidget {
     required this.paper,
     required this.fileIndex,
   });
+
+  @override
+  State<InfoDialog> createState() => _InfoDialogState();
+}
+
+class _InfoDialogState extends State<InfoDialog> {
+  late Map<String, dynamic> paper;
+  bool isDownloading = false;
+  double downloadProgress = 0.0;
+  String downloadStatus = '';
+  final apiClient = ApiClient();
+  final dio = Dio();
+
+  @override
+  void initState() {
+    super.initState();
+    paper = Map<String, dynamic>.from(widget.paper);
+  }
+
+  Future<void> _trackDownload() async {
+    if (isDownloading) return;
+
+    setState(() {
+      isDownloading = true;
+    });
+
+    try {
+      await apiClient.post('/api/pastpaper/download/${paper['_id']}', {});
+
+      // Update local download count
+      setState(() {
+        paper['metadata']['downloads'] =
+            (paper['metadata']['downloads'] ?? 0) + 1;
+      });
+
+      // Show success message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Download tracked successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error tracking download: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      setState(() {
+        isDownloading = false;
+      });
+    }
+  }
+
+  Future<void> _requestStoragePermission() async {
+    if (Platform.isAndroid) {
+      final status = await Permission.storage.request();
+      if (status != PermissionStatus.granted) {
+        final manageStatus = await Permission.manageExternalStorage.request();
+        if (manageStatus != PermissionStatus.granted) {
+          throw Exception('Storage permission is required to save files');
+        }
+      }
+    }
+  }
+
+  String _getFileNameFromUrl(String url) {
+    final uri = Uri.parse(url);
+    final segments = uri.pathSegments;
+    if (segments.isNotEmpty) {
+      final fileName = segments.last;
+      // Extract the original filename if it exists
+      if (fileName.contains('.pdf')) {
+        return 'socian-$fileName';
+      }
+    }
+    return 'socian-past_paper_${DateTime.now().millisecondsSinceEpoch}.pdf';
+  }
+
+  Future<String?> _pickSaveLocation() async {
+    try {
+      final fileName = _getFileNameFromUrl(widget.file['url']);
+
+      if (Platform.isAndroid) {
+        // For Android, use the default Downloads directory
+        final directory = await getExternalStorageDirectory();
+        if (directory != null) {
+          final downloadsPath = '${directory.path}/Download';
+          final downloadsDir = Directory(downloadsPath);
+          if (!await downloadsDir.exists()) {
+            await downloadsDir.create(recursive: true);
+          }
+          return '$downloadsPath/$fileName';
+        }
+      } else {
+        // For iOS and other platforms, let user pick the location
+        String? outputFile = await FilePicker.platform.saveFile(
+          dialogTitle: 'Save PDF file',
+          fileName: fileName,
+          type: FileType.custom,
+          allowedExtensions: ['pdf'],
+        );
+        return outputFile;
+      }
+    } catch (e) {
+      print('Error picking save location: $e');
+    }
+    return null;
+  }
+
+  void _showDownloadSuccessDialog(String savePath) {
+    // Extract only the path from "/Download/" onwards
+    String displayPath = savePath;
+    final downloadIndex = savePath.indexOf('/Download/');
+    if (downloadIndex != -1) {
+      displayPath = savePath.substring(downloadIndex);
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dismissing by tapping outside
+      builder: (BuildContext context) {
+        final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+        final background = isDarkMode ? const Color(0xFF09090B) : Colors.white;
+        final foreground = isDarkMode ? Colors.white : const Color(0xFF09090B);
+        final accent =
+            isDarkMode ? const Color(0xFF18181B) : const Color(0xFFFAFAFA);
+        final border =
+            isDarkMode ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+        final mutedForeground =
+            isDarkMode ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+
+        return AlertDialog(
+          backgroundColor: background,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF10B981).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.check_circle,
+                  color: Color(0xFF10B981),
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Download Complete!',
+                style: TextStyle(
+                  color: foreground,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          content: Container(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Your PDF has been successfully downloaded.',
+                  style: TextStyle(
+                    color: foreground,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: accent,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Saved to:',
+                        style: TextStyle(
+                          color: mutedForeground,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      SelectableText(
+                        displayPath,
+                        style: TextStyle(
+                          color: foreground,
+                          fontSize: 13,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text(
+                'Close',
+                style: TextStyle(
+                  color: mutedForeground,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+            ElevatedButton.icon(
+              onPressed: () async {
+                try {
+                  final result = await OpenFilex.open(savePath);
+                  if (result.type != ResultType.done) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content:
+                              Text('Could not open file: ${result.message}'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
+                } catch (e) {
+                  print('Error opening file: $e');
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Could not open file: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF10B981),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              icon: const Icon(Icons.open_in_new, size: 16),
+              label: const Text(
+                'Open File',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _downloadFile() async {
+    if (isDownloading) return;
+
+    setState(() {
+      isDownloading = true;
+      downloadProgress = 0.0;
+      downloadStatus = 'Preparing download...';
+    });
+
+    try {
+      // Request storage permission
+      await _requestStoragePermission();
+
+      // Pick save location
+      setState(() {
+        downloadStatus = 'Choosing save location...';
+      });
+
+      final savePath = await _pickSaveLocation();
+      if (savePath == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Download cancelled'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+
+      // Track download first
+      await _trackDownload();
+
+      // Download file
+      setState(() {
+        downloadStatus = 'Downloading...';
+      });
+
+      final url = "${ApiConstants.baseUrl}/api/uploads/${widget.file['url']}";
+
+      await dio.download(
+        url,
+        savePath,
+        onReceiveProgress: (received, total) {
+          if (total != -1) {
+            setState(() {
+              downloadProgress = received / total;
+              downloadStatus =
+                  'Downloading... ${(downloadProgress * 100).toStringAsFixed(1)}%';
+            });
+          }
+        },
+      );
+
+      setState(() {
+        downloadStatus = 'Download completed!';
+      });
+
+      if (mounted) {
+        _showDownloadSuccessDialog(savePath);
+      }
+    } catch (e) {
+      setState(() {
+        downloadStatus = 'Download failed';
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Download failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } finally {
+      setState(() {
+        isDownloading = false;
+        downloadProgress = 0.0;
+        downloadStatus = '';
+      });
+    }
+  }
+
   String formatUploadedDate(String rawDate) {
     final date = DateTime.parse(rawDate);
     final day = date.day;
@@ -151,7 +520,7 @@ class InfoDialog extends StatelessWidget {
                   border: Border.all(color: border),
                 ),
                 child: Text(
-                  'File ${fileIndex + 1}',
+                  'File ${widget.fileIndex + 1}',
                   style: TextStyle(
                     color: foreground,
                     fontWeight: FontWeight.w500,
@@ -170,7 +539,7 @@ class InfoDialog extends StatelessWidget {
               GestureDetector(
                 onTap: () async {
                   final url =
-                      "${ApiConstants.baseUrl}/api/uploads/${file['url']}";
+                      "${ApiConstants.baseUrl}/api/uploads/${widget.file['url']}";
                   try {
                     if (await canLaunchUrl(Uri.parse(url))) {
                       await launchUrl(
@@ -196,7 +565,7 @@ class InfoDialog extends StatelessWidget {
                 },
                 onLongPress: () {
                   final url =
-                      "${ApiConstants.baseUrl}/api/uploads/${file['url']}";
+                      "${ApiConstants.baseUrl}/api/uploads/${widget.file['url']}";
                   showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
@@ -260,7 +629,7 @@ class InfoDialog extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          "${ApiConstants.baseUrl}/api/uploads/${file['url']}",
+                          "${ApiConstants.baseUrl}/api/uploads/${widget.file['url']}",
                           style: TextStyle(
                             fontSize: 12,
                             fontFamily: 'monospace',
@@ -280,6 +649,78 @@ class InfoDialog extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
+
+              // Download Button
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: accent,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: border),
+                ),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (isDownloading) ...[
+                      Text(
+                        downloadStatus,
+                        style: TextStyle(
+                          color: foreground,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      LinearProgressIndicator(
+                        value: downloadProgress,
+                        backgroundColor: border,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          const Color(0xFF10B981),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: isDownloading ? null : _downloadFile,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF10B981),
+                          foregroundColor: Colors.white,
+                          disabledBackgroundColor: border,
+                          disabledForegroundColor: mutedForeground,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        icon: isDownloading
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.download, size: 20),
+                        label: Text(
+                          isDownloading
+                              ? 'Downloading...'
+                              : 'Download to Device',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
               Text(
                 'Upload Information:',
                 style: TextStyle(
@@ -314,7 +755,7 @@ class InfoDialog extends StatelessWidget {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => ProfilePage(
-                                  userId: file['uploadedBy']['_id'],
+                                  userId: widget.file['uploadedBy']['_id'],
                                 ),
                               ),
                             );
@@ -339,7 +780,7 @@ class InfoDialog extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                file['uploadedBy']['name'],
+                                widget.file['uploadedBy']['name'],
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -348,7 +789,7 @@ class InfoDialog extends StatelessWidget {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                '@${file['uploadedBy']['username']}',
+                                '@${widget.file['uploadedBy']['username']}',
                                 style: TextStyle(
                                   fontSize: 11,
                                   color: mutedForeground,
@@ -356,7 +797,7 @@ class InfoDialog extends StatelessWidget {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                file['uploadedBy']['universityEmail'],
+                                widget.file['uploadedBy']['universityEmail'],
                                 style: TextStyle(
                                   fontSize: 11,
                                   color: mutedForeground,
@@ -376,7 +817,7 @@ class InfoDialog extends StatelessWidget {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        'Uploaded at: ${formatUploadedDate(file['uploadedAt'])}',
+                        'Uploaded at: ${formatUploadedDate(widget.file['uploadedAt'])}',
                         style: TextStyle(
                           fontSize: 12,
                           color: mutedForeground,
@@ -426,8 +867,8 @@ class InfoDialog extends StatelessWidget {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => ChatPage(
-                                  userId: file['uploadedBy']['_id'],
-                                  userName: file['uploadedBy']['name'],
+                                  userId: widget.file['uploadedBy']['_id'],
+                                  userName: widget.file['uploadedBy']['name'],
                                 ),
                               ),
                             );
@@ -438,7 +879,8 @@ class InfoDialog extends StatelessWidget {
                   ],
                 ),
               ),
-              if (file['teachers'] != null && file['teachers'].isNotEmpty) ...[
+              if (widget.file['teachers'] != null &&
+                  widget.file['teachers'].isNotEmpty) ...[
                 const SizedBox(height: 16),
                 Text(
                   'Associated Teachers:',
@@ -448,7 +890,7 @@ class InfoDialog extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                ...file['teachers']
+                ...widget.file['teachers']
                     .map<Widget>((teacher) => Container(
                           margin: const EdgeInsets.only(bottom: 12),
                           padding: const EdgeInsets.all(16),

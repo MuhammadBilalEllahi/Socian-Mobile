@@ -22,6 +22,7 @@ import 'package:socian/pages/drawer/student/pages/pastPaper/PastPapers.dart';
 import 'package:socian/pages/drawer/student/pages/pastPaper/SubjectsView.dart';
 import 'package:socian/pages/drawer/student/pages/pastPaper/discussion/DiscussionView.dart';
 import 'package:socian/pages/drawer/student/pages/pastPaper/discussion/answerPage/AnswersPage.dart';
+import 'package:socian/pages/drawer/student/pages/moderators/Moderators.dart';
 import 'package:socian/pages/drawer/student/pages/teachersReviews/TeachersPage.dart';
 import 'package:socian/pages/drawer/teacher/review/TeacherSelfReview.dart';
 import 'package:socian/pages/explore/MapsPage.dart';
@@ -183,6 +184,7 @@ class RouteGuard {
       AppRoutes.personalInfoEditScreen: const PersonalInfoEditPage(),
       AppRoutes.jobProfile: const JobProfile(),
       AppRoutes.alumniScrolls: const AlumniScrolls(),
+      AppRoutes.moderatorsPage: const ModeratorsPage(),
     };
 
     switch (role) {
