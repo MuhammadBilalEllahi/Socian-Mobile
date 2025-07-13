@@ -77,7 +77,7 @@ class _CreateSocietyPageState extends ConsumerState<CreateSocietyPage> {
     // ];
     _rolesList.add(ref.read(authProvider).user?['role'] ??
         'unauthorized'); // Add the user's role
-    if (ref.read(authProvider).user?['role'] == AppSuperRoles.moderator) {
+    if (ref.read(authProvider).user?['super_role'] == AppSuperRoles.moderator) {
       _rolesList.add(AppRoles.student);
       _rolesList.add(AppRoles.teacher);
       _rolesList.add(AppRoles.alumni);
