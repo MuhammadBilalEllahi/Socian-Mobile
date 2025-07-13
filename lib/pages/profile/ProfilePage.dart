@@ -1391,7 +1391,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
       try {
         profileResponse = await _apiClient
             .get('/api/user/profile', queryParameters: {'id': userId});
-        log("____USER PROFILE_____ $profileResponse ________");
+        log("____USER PROFILE_____ $profileResponse ________ ${profileResponse?['super_role']}");
       } catch (e) {
         debugPrint('Error fetching profile: $e');
       }
@@ -1436,13 +1436,32 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
           !profileResponse.containsKey('error') &&
           profileResponse['profile'] != null;
 
+      // Fetch posts based on user role
+      List<dynamic> posts = [];
+      if (hasProfileData) {
+        try {
+          if (profileResponse['super_role'] == "super") {
+            final response =
+                await _apiClient.get("/api/posts/admin/profile/posts");
+            posts = response['posts'] ?? [];
+            log("____ADMIN POSTS_____ ${response['posts']} ________");
+          } else {
+            posts = (profileResponse['profile']['posts'] ?? [])
+                .where((post) => post['author']['_id'] == userId)
+                .toList();
+            log("____REGULAR POSTS_____ $posts ________");
+          }
+        } catch (e) {
+          debugPrint('Error fetching posts: $e');
+          posts = [];
+        }
+      }
+
       setState(() {
         // Set detailed profile if available
         if (hasProfileData) {
           _detailedProfile = profileResponse as Map<String, dynamic>;
-          _posts = (_detailedProfile?['profile']['posts'] ?? [])
-              .where((post) => post['author']['_id'] == userId)
-              .toList();
+          _posts = posts;
         }
 
         // Set other data if available, otherwise use empty defaults
@@ -2484,16 +2503,27 @@ Future<void> _showReportDialog(String userId) async {
                               width: 2,
                             ),
                           ),
-                          child: CircleAvatar(
-                            radius: 30,
-                            backgroundColor: accent,
-                            backgroundImage:
-                                _basicProfile?['profile']?['picture'] != null
-                                    ? NetworkImage(
-                                        _basicProfile!['profile']['picture'])
-                                    : const AssetImage(
-                                            "assets/images/profilepic2.jpg")
-                                        as ImageProvider,
+                          child: GestureDetector(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PictureZoomableView(
+                                  imageUrl: _basicProfile?['profile']
+                                      ?['picture'],
+                                ),
+                              ),
+                            ),
+                            child: CircleAvatar(
+                              radius: 30,
+                              backgroundColor: accent,
+                              backgroundImage:
+                                  _basicProfile?['profile']?['picture'] != null
+                                      ? NetworkImage(
+                                          _basicProfile!['profile']['picture'])
+                                      : const AssetImage(
+                                              "assets/images/profilepic2.jpg")
+                                          as ImageProvider,
+                            ),
                           ),
                         ),
                       ],
@@ -2697,5 +2727,50 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
     return false;
+  }
+}
+
+class PictureZoomableView extends StatelessWidget {
+  final String imageUrl;
+
+  const PictureZoomableView({super.key, required this.imageUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: const Text("Image Preview"),
+      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return InteractiveViewer(
+            panEnabled: true,
+            scaleEnabled: true,
+            minScale: 0.5,
+            maxScale: 5.0,
+            child: Image.network(
+              imageUrl,
+              width: constraints.maxWidth,
+              height: constraints.maxHeight,
+              fit: BoxFit.contain,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return const Center(child: CircularProgressIndicator());
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return const Center(
+                  child:
+                      Icon(Icons.broken_image, size: 60, color: Colors.white),
+                );
+              },
+            ),
+          );
+        },
+      ),
+    );
   }
 }

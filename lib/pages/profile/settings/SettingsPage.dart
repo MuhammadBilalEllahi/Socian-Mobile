@@ -6,6 +6,7 @@ import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/shared/utils/constants.dart';
 import 'package:socian/pages/profile/settings/ServerSelectionPage.dart';
 import 'package:socian/pages/profile/settings/YourSocieties.dart';
+import 'package:socian/pages/profile/settings/ModRequestPage.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -136,12 +137,25 @@ class SettingsPage extends ConsumerWidget {
                 'Server Selection Disabled',
                 Icons.cloud_outlined,
                 () {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (context) => const ServerSelectionPage(),
-                  //   ),
-                  // );
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ServerSelectionPage(),
+                    ),
+                  );
+                },
+                isDarkMode,
+              ),
+              _buildListTile(
+                'Mod Request',
+                Icons.person_add_alt_1_outlined,
+                () {
+                  // Navigate to personal info edit
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ModRequestPage()),
+                  );
                 },
                 isDarkMode,
               ),
