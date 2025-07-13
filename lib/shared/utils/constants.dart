@@ -36,7 +36,7 @@ class ApiConstants {
     101: "https://192.bilalellahi.com"
   };
 
-  static int _currentUrlIndex = 101;
+  static int _currentUrlIndex = -2;
   static const String _urlIndexCacheKey = 'current_url_index';
 
   static Future<void> initializeBaseUrl() async {

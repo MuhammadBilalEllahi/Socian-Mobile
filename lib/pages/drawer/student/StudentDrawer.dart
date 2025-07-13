@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
-import 'package:socian/pages/profile/settings/CreateSocietyPage.dart';
 import 'package:socian/pages/providers/page_provider.dart';
 import 'package:socian/shared/utils/constants.dart';
 
@@ -19,6 +18,7 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
     String name = auth.user?['name'] ?? "";
     final role = auth.user!['role'];
     String username = auth.user?['username'] ?? "";
+    String picture = auth.user?['profile']?['picture'];
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Drawer(
@@ -126,12 +126,18 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                             backgroundColor: isDarkMode
                                 ? const Color(0xFF2A2A2A)
                                 : Colors.grey[200],
-                            child: Icon(
-                              Icons.person,
-                              size: 28,
-                              color:
-                                  isDarkMode ? Colors.white70 : Colors.black54,
-                            ),
+                            // child: Icon(
+                            //   Icons.person,
+                            //   size: 28,
+                            //   color:
+                            //       isDarkMode ? Colors.white70 : Colors.black54,
+                            // ),
+
+                            backgroundImage: picture != null
+                                ? NetworkImage(picture)
+                                : const AssetImage(
+                                        "assets/images/profilepic2.jpg")
+                                    as ImageProvider,
                           ),
                         ),
                         const SizedBox(width: 16),
