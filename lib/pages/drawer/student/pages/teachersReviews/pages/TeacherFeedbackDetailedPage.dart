@@ -245,7 +245,7 @@ class _TeacherFeedbackDetailedPageState
               reply: Map<String, dynamic>.from(reply),
               isDark: widget.isDark,
               teacherId: widget.teacherId,
-              onReaction: _handleReaction,
+              // onReaction: _handleReaction,
               onReplyAdded: _addReplyOptimistically,
               onReplyRemoved: _removeOptimisticReply,
               onReplyEdited: _replaceReplyOptimistically,

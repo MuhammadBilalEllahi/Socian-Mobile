@@ -848,35 +848,16 @@
 //   }
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import 'dart:async';
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:socian/shared/services/api_client.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
+import 'package:socian/shared/services/api_client.dart';
 
 class CreateNewGathering2 extends ConsumerStatefulWidget {
   const CreateNewGathering2({super.key});
@@ -911,7 +892,7 @@ class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
   static const LatLng _ituLahore = LatLng(31.4759632, 74.3428525);
   static const double _restrictionRadius = 1000.0; // 1km radius
   static const double _minZoomLevel = 14.0;
-  static const double _maxZoomLevel = 18.0;
+  static const double _maxZoomLevel = 30.0;
 
   // Debounce timer for camera updates
   Timer? _debounceTimer;
@@ -921,9 +902,11 @@ class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
   String? _userCampus;
 
   LatLngBounds? get _restrictedBounds {
-    if (_userUniversity == 'Comsats' && _userCampus?.contains('Lahore') == true) {
-      const double kmPerDegree = 111319.9; // Approximate meters per degree latitude
-      final double latDiff = _restrictionRadius / kmPerDegree;
+    if (_userUniversity == 'Comsats' &&
+        _userCampus?.contains('Lahore') == true) {
+      const double kmPerDegree =
+          111319.9; // Approximate meters per degree latitude
+      const double latDiff = _restrictionRadius / kmPerDegree;
       final double lngDiff = _restrictionRadius /
           (kmPerDegree * cos(_comsatsLahore.latitude * pi / 180));
       return LatLngBounds(
@@ -936,9 +919,10 @@ class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
           _comsatsLahore.longitude + lngDiff,
         ),
       );
-    } else if (_userUniversity == 'ITU' && _userCampus?.contains('Lahore') == true) {
+    } else if (_userUniversity == 'ITU' &&
+        _userCampus?.contains('Lahore') == true) {
       const double kmPerDegree = 111319.9;
-      final double latDiff = _restrictionRadius / kmPerDegree;
+      const double latDiff = _restrictionRadius / kmPerDegree;
       final double lngDiff = _restrictionRadius /
           (kmPerDegree * cos(_ituLahore.latitude * pi / 180));
       return LatLngBounds(
@@ -971,7 +955,8 @@ class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
       return;
     }
     setState(() {
-      _userUniversity = auth.user?['university']?['universityId']?['name']?.toString();
+      _userUniversity =
+          auth.user?['university']?['universityId']?['name']?.toString();
       _userCampus = auth.user?['university']?['campusId']?['name']?.toString();
     });
     _getCurrentLocation();
@@ -1620,7 +1605,8 @@ class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
     try {
       final position = await Geolocator.getCurrentPosition();
       final userLocation = LatLng(position.latitude, position.longitude);
-      if (_userUniversity == 'Comsats' && _userCampus?.contains('Lahore') == true) {
+      if (_userUniversity == 'Comsats' &&
+          _userCampus?.contains('Lahore') == true) {
         if (_isWithinBounds(userLocation)) {
           setState(() {
             _selectedLocation = userLocation;
@@ -1639,11 +1625,12 @@ class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
           });
           _mapController?.animateCamera(
             CameraUpdate.newCameraPosition(
-              CameraPosition(target: _comsatsLahore, zoom: _minZoomLevel),
+              const CameraPosition(target: _comsatsLahore, zoom: _minZoomLevel),
             ),
           );
         }
-      } else if (_userUniversity == 'ITU' && _userCampus?.contains('Lahore') == true) {
+      } else if (_userUniversity == 'ITU' &&
+          _userCampus?.contains('Lahore') == true) {
         if (_isWithinBounds(userLocation)) {
           setState(() {
             _selectedLocation = userLocation;
@@ -1662,7 +1649,7 @@ class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
           });
           _mapController?.animateCamera(
             CameraUpdate.newCameraPosition(
-              CameraPosition(target: _ituLahore, zoom: _minZoomLevel),
+              const CameraPosition(target: _ituLahore, zoom: _minZoomLevel),
             ),
           );
         }
@@ -1678,23 +1665,24 @@ class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
       }
     } catch (e) {
       setState(() {
-        if (_userUniversity == 'Comsats' && _userCampus?.contains('Lahore') == true) {
+        if (_userUniversity == 'Comsats' &&
+            _userCampus?.contains('Lahore') == true) {
           _selectedLocation = _comsatsLahore;
-          _errorMessage =
-              ' ';
+          _errorMessage = ' ';
           _mapController?.animateCamera(
             CameraUpdate.newCameraPosition(
-              CameraPosition(target: _comsatsLahore, zoom: _minZoomLevel),
+              const CameraPosition(target: _comsatsLahore, zoom: _minZoomLevel),
             ),
           );
-        } else if (_userUniversity == 'ITU' && _userCampus?.contains('Lahore') == true) {
+        } else if (_userUniversity == 'ITU' &&
+            _userCampus?.contains('Lahore') == true) {
           _selectedLocation = _ituLahore;
           _errorMessage =
               // 'Could not get current location; defaulting to ITU Lahore';
               ' ';
           _mapController?.animateCamera(
             CameraUpdate.newCameraPosition(
-              CameraPosition(target: _ituLahore, zoom: _minZoomLevel),
+              const CameraPosition(target: _ituLahore, zoom: _minZoomLevel),
             ),
           );
         } else {
@@ -1735,26 +1723,26 @@ class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
 
     if (pickedDate != null) {
       final pickedTime = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.fromDateTime(initialDate),
-        builder: (context, child) {
-          return Theme(
-            data: Theme.of(context).copyWith(
-              colorScheme: ColorScheme.light(
-                primary: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white
-                    : Colors.black,
-                onPrimary: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.black
-                    : Colors.white,
-                onSurface: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white
-                    : Colors.black,
+          context: context,
+          initialTime: TimeOfDay.fromDateTime(initialDate),
+          builder: (context, child) {
+            return Theme(
+              data: Theme.of(context).copyWith(
+                colorScheme: ColorScheme.light(
+                  primary: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,
+                  onPrimary: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.black
+                      : Colors.white,
+                  onSurface: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,
+                ),
               ),
-            ),
-            child: child!,
-        );
-      });
+              child: child!,
+            );
+          });
 
       if (pickedTime != null) {
         final newDateTime = DateTime(
@@ -1870,7 +1858,8 @@ class _CreateNewGathering2State extends ConsumerState<CreateNewGathering2> {
       } catch (e, stackTrace) {
         if (mounted) {
           setState(() {
-            _errorMessage = 'Failed to create gathering. Please check your internet connection.';
+            _errorMessage =
+                'Failed to create gathering. Please check your internet connection.';
             _isLoading = false;
           });
         }
