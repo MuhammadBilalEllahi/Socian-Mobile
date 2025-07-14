@@ -71,7 +71,8 @@ class _AlumniScrollsState extends State<AlumniScrolls> {
       };
 
       final response = await _apiClient.get(
-        '/api/user/campus-users',
+        // '/api/user/campus-users',
+        '/api/user/all-users2',
         queryParameters: queryParams,
       );
 
@@ -115,7 +116,8 @@ class _AlumniScrollsState extends State<AlumniScrolls> {
       };
 
       final response = await _apiClient.get(
-        '/api/user/campus-users',
+        // '/api/user/campus-users',
+        '/api/user/all-users2',
         queryParameters: queryParams,
       );
 

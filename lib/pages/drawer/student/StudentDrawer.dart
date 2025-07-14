@@ -211,7 +211,7 @@ class _StudentDrawerState extends ConsumerState<StudentDrawer> {
                     isDarkMode: isDarkMode,
                   ),
                   _buildDrawerItem(
-                    icon: Icons.people,
+                    icon: Icons.public,
                     title: "Explore World",
                     onTap: () => Navigator.pushNamed(
                       context,
