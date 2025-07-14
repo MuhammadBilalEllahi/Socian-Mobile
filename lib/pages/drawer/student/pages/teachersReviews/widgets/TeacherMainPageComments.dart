@@ -1651,30 +1651,6 @@
 //   }
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import 'dart:async';
 import 'dart:developer';
 
@@ -2068,8 +2044,10 @@ class _CommentItemState extends ConsumerState<_CommentItem> {
       final selectedReportType = await showDialog<Map<String, dynamic>>(
         context: context,
         builder: (context) => AlertDialog(
-          backgroundColor: widget.isDark ? const Color(0xFF09090B) : Colors.white,
-          surfaceTintColor: widget.isDark ? const Color(0xFF09090B) : Colors.white,
+          backgroundColor:
+              widget.isDark ? const Color(0xFF09090B) : Colors.white,
+          surfaceTintColor:
+              widget.isDark ? const Color(0xFF09090B) : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: BorderSide(
@@ -2097,8 +2075,9 @@ class _CommentItemState extends ConsumerState<_CommentItem> {
                     title: Text(
                       reportType['name'] ?? 'Unknown',
                       style: TextStyle(
-                          color:
-                              widget.isDark ? Colors.white : const Color(0xFF09090B)),
+                          color: widget.isDark
+                              ? Colors.white
+                              : const Color(0xFF09090B)),
                     ),
                     onTap: () => Navigator.pop(context, {
                       'id': reportType['_id'],
@@ -2137,7 +2116,8 @@ class _CommentItemState extends ConsumerState<_CommentItem> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(response['message'] ?? 'Comment reported successfully'),
+                content: Text(
+                    response['message'] ?? 'Comment reported successfully'),
               ),
             );
           }
@@ -2215,8 +2195,7 @@ class _CommentItemState extends ConsumerState<_CommentItem> {
                   color: isDarkMode ? Colors.white : Colors.black)),
         ),
         TextButton(
-          onPressed: () =>
-              Navigator.pop(context, reasonController.text.trim()),
+          onPressed: () => Navigator.pop(context, reasonController.text.trim()),
           child: Text('Submit',
               style: TextStyle(
                   fontSize: 14,
@@ -2603,7 +2582,8 @@ class _CommentItemState extends ConsumerState<_CommentItem> {
                     if (value == 'delete') _handleDelete();
                     if (value == 'edit') _handleEdit(widget.comment);
                     if (value == 'hide') _handleHide();
-                    if (value == 'report') _showReportDialog(widget.comment['_id']);
+                    if (value == 'report')
+                      _showReportDialog(widget.comment['_id']);
                   },
                 ),
               ],

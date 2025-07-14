@@ -458,23 +458,24 @@ class _SocietyVerificationState extends State<SocietyVerification> {
       'comments': _commentsController.text.trim(),
       'requirements': jsonEncode(_requirements),
       'customDocumentNames': jsonEncode(_customDocumentNames),
+      'files': [],
     };
 
     // Add files to form data if they exist
     if (_registrationCertificate != null) {
-      formData['registrationCertificate'] = _registrationCertificate;
+      formData['files']['registrationCertificate'] = _registrationCertificate;
     }
 
     if (_eventPicture != null) {
-      formData['eventPicture'] = _eventPicture;
+      formData['files']['eventPicture'] = _eventPicture;
     }
 
     if (_advisorEmailScreenshot != null) {
-      formData['advisorEmailScreenshot'] = _advisorEmailScreenshot;
+      formData['files']['advisorEmailScreenshot'] = _advisorEmailScreenshot;
     }
 
     if (_customDocuments.isNotEmpty) {
-      formData['customDocuments'] = _customDocuments;
+      formData['files']['customDocuments'] = _customDocuments;
     }
 
     await _apiClient.postFormData(
@@ -490,23 +491,24 @@ class _SocietyVerificationState extends State<SocietyVerification> {
       'comments': _commentsController.text.trim(),
       'requirements': jsonEncode(_requirements),
       'customDocumentNames': jsonEncode(_customDocumentNames),
+      'files': [],
     };
 
     // Add new files for strengthening the request
     if (_registrationCertificate != null) {
-      formData['registrationCertificate'] = _registrationCertificate;
+      formData['files']['registrationCertificate'] = _registrationCertificate;
     }
 
     if (_eventPicture != null) {
-      formData['eventPicture'] = _eventPicture;
+      formData['files']['eventPicture'] = _eventPicture;
     }
 
     if (_advisorEmailScreenshot != null) {
-      formData['advisorEmailScreenshot'] = _advisorEmailScreenshot;
+      formData['files']['advisorEmailScreenshot'] = _advisorEmailScreenshot;
     }
 
     if (_customDocuments.isNotEmpty) {
-      formData['customDocuments'] = _customDocuments;
+      formData['files']['customDocuments'] = _customDocuments;
     }
 
     await _apiClient.putFormData(
