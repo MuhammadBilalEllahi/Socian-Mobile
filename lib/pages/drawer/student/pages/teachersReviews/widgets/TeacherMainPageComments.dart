@@ -2323,21 +2323,58 @@ class _CommentItemState extends ConsumerState<_CommentItem> {
                             const SizedBox(
                               width: 10,
                             ),
+                            // if (widget.comment['rating'] != null)
+                            //   Row(
+                            //     children: List.generate(5, (index) {
+                            //       return Icon(
+                            //         index < (widget.comment['rating'] as int)
+                            //             ? Icons.star_rounded
+                            //             : Icons.star_outline_rounded,
+                            //         size: 16,
+                            //         color: index <
+                            //                 (widget.comment['rating'] as int)
+                            //             ? const Color(0xFFFFD700)
+                            //             : widget.isDark
+                            //                 ? Colors.white.withOpacity(0.3)
+                            //                 : Colors.black.withOpacity(0.3),
+                            //       );
+                            //     }),
+                            //   ),
+
                             if (widget.comment['rating'] != null)
                               Row(
                                 children: List.generate(5, (index) {
-                                  return Icon(
-                                    index < (widget.comment['rating'] as int)
-                                        ? Icons.star_rounded
-                                        : Icons.star_outline_rounded,
-                                    size: 16,
-                                    color: index <
-                                            (widget.comment['rating'] as int)
-                                        ? const Color(0xFFFFD700)
-                                        : widget.isDark
-                                            ? Colors.white.withOpacity(0.3)
-                                            : Colors.black.withOpacity(0.3),
-                                  );
+                                  final rating = (widget.comment['rating']
+                                          is int)
+                                      ? (widget.comment['rating'] as int)
+                                          .toDouble() // Convert int to double
+                                      : widget.comment['rating']
+                                          as double; // Already double
+                                  if (index < rating.floor()) {
+                                    // Fully filled star
+                                    return const Icon(
+                                      Icons.star_rounded,
+                                      size: 16,
+                                      color: Color(0xFFFFD700),
+                                    );
+                                  } else if (index < rating &&
+                                      rating - index >= 0.5) {
+                                    // Half-filled star for ratings like 3.5
+                                    return const Icon(
+                                      Icons.star_half_rounded,
+                                      size: 16,
+                                      color: Color(0xFFFFD700),
+                                    );
+                                  } else {
+                                    // Empty star
+                                    return Icon(
+                                      Icons.star_outline_rounded,
+                                      size: 16,
+                                      color: widget.isDark
+                                          ? Colors.white.withOpacity(0.3)
+                                          : Colors.black.withOpacity(0.3),
+                                    );
+                                  }
                                 }),
                               ),
                           ],
