@@ -116,6 +116,7 @@ class RBAC {
       Permissions.moderator[ModeratorPermissionsEnum.manageContent.name]!,
       Permissions.moderator[ModeratorPermissionsEnum.manageComments.name]!,
       Permissions.moderator[ModeratorPermissionsEnum.viewAll.name]!,
+      Permissions.moderator[ModeratorPermissionsEnum.hidePost.name]!,
     ],
   };
 

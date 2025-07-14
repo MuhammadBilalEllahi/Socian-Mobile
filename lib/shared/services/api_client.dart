@@ -96,7 +96,9 @@ class ApiClient {
         if (headers != null) ...headers,
       };
 
-      FormData formData = FormData.fromMap(data);
+      // Convert File objects to MultipartFile objects
+      final processedData = await _processFormData(data);
+      FormData formData = FormData.fromMap(processedData);
 
       final response = await _dio.post(
         endpoint,
@@ -130,7 +132,9 @@ class ApiClient {
         if (headers != null) ...headers,
       };
 
-      FormData formData = FormData.fromMap(data);
+      // Convert File objects to MultipartFile objects
+      final processedData = await _processFormData(data);
+      FormData formData = FormData.fromMap(processedData);
 
       final response = await _dio.put(
         endpoint,
@@ -142,6 +146,40 @@ class ApiClient {
     } catch (e) {
       throw ApiException.fromDioError(e);
     }
+  }
+
+  // Helper method to process form data and convert File objects to MultipartFile
+  Future<Map<String, dynamic>> _processFormData(
+      Map<String, dynamic> data) async {
+    final processedData = <String, dynamic>{};
+
+    for (final entry in data.entries) {
+      final key = entry.key;
+      final value = entry.value;
+
+      if (value is File) {
+        // Convert single File to MultipartFile
+        processedData[key] = await MultipartFile.fromFile(
+          value.path,
+          filename: value.path.split('/').last,
+        );
+      } else if (value is List<File>) {
+        // Convert List<File> to List<MultipartFile>
+        final multipartFiles = <MultipartFile>[];
+        for (final file in value) {
+          multipartFiles.add(await MultipartFile.fromFile(
+            file.path,
+            filename: file.path.split('/').last,
+          ));
+        }
+        processedData[key] = multipartFiles;
+      } else {
+        // Keep other values as is
+        processedData[key] = value;
+      }
+    }
+
+    return processedData;
   }
 
   Future<T> get<T>(
