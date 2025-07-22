@@ -32,11 +32,11 @@ class ApiConstants {
     11: "http://192.168.1.11:8080",
     90: "http://10.135.48.250:8080",
     100: "http://10.135.55.56:8080",
-    111: "http://10.135.54.210:8080",
-    101: "https://192.bilalellahi.com"
+    111: "http://10.107.248.4:8080",
+    101: "https://192.bilalellahi.com",
   };
 
-  static int _currentUrlIndex = 101;
+  static int _currentUrlIndex = 0;
   static const String _urlIndexCacheKey = 'current_url_index';
 
   static Future<void> initializeBaseUrl() async {
@@ -208,7 +208,7 @@ class IntroStatus {
   static final Map<IntroStatusEnum, bool> introStatus = {
     IntroStatusEnum.pastpaperRightNaviagation: false,
     IntroStatusEnum.skip: false,
-    IntroStatusEnum.allCompleted: false
+    IntroStatusEnum.allCompleted: false,
   };
 
   static final Map<IntroStatusEnum, bool> _introStatus = {
@@ -238,7 +238,8 @@ class IntroStatus {
   }
 
   static Future<void> markIntroCompleted(
-      IntroStatusEnum introStatusEmun) async {
+    IntroStatusEnum introStatusEmun,
+  ) async {
     _introStatus[introStatusEmun] = true;
     final prefs = AppPrefs();
     await prefs.setBool(_keyFor(introStatusEmun), true);
@@ -264,7 +265,7 @@ enum RiveThumb {
   tap2,
   tap,
   doubleTap,
-  idle
+  idle,
 }
 
 class RiveComponentStrings {
