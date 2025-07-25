@@ -22,7 +22,7 @@ class ShimmerCard extends StatelessWidget {
         border: Border.all(color: border, width: 1.2),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(9.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -75,7 +75,7 @@ class ShimmerCard extends StatelessWidget {
                         color: border,
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      margin: const EdgeInsets.only(top: 6),
+                      margin: const EdgeInsets.only(top: 2),
                     ),
                   ],
                 ),

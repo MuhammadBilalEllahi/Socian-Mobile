@@ -8,14 +8,14 @@
     android:elevation="2dp">
 
     <!-- Icon -->
-    <ImageView
+    <!-- <ImageView
         android:id="@+id/ad_icon"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginBottom="8dp"
         android:scaleType="centerCrop"
         android:background="@drawable/circle_background"
-        android:clipToOutline="true" />
+        android:clipToOutline="true" /> -->
 
     <!-- Advertiser Name -->
     <TextView

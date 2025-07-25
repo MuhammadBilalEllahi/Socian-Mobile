@@ -355,11 +355,11 @@ class _OriginalCommentState extends ConsumerState<OriginalComment> {
                           Row(
                             children: List.generate(5, (index) {
                               return Icon(
-                                index < (comment['rating'] as int)
+                                index < (comment['rating'] as double)
                                     ? Icons.star_rounded
                                     : Icons.star_outline_rounded,
                                 size: 16,
-                                color: index < (comment['rating'] as int)
+                                color: index < (comment['rating'] as double)
                                     ? const Color(0xFFFFD700)
                                     : widget.isDark
                                         ? Colors.white.withOpacity(0.3)
