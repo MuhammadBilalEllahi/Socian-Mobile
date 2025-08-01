@@ -33,10 +33,10 @@ android {
    
     signingConfigs {
         release {
-            storeFile file("D:\\Projects\\Final Year Project\\beyond-the-class\\apps\\mobile\\BeyondTheClass_mobile\\android\\socian.jks")
-            storePassword "app.socian.secure"
-            keyAlias "my-key-alias"
-            keyPassword "app.socian.secure"
+            // storeFile file("D:\\Projects\\Final Year Project\\beyond-the-class\\apps\\mobile\\BeyondTheClass_mobile\\android\\socian.jks")
+            // storePassword "app.socian.secure"
+            // keyAlias "my-key-alias"
+            // keyPassword "app.socian.secure"
         }
     }
 
