@@ -4,10 +4,28 @@ on:
   push:
     branches: [main]
 
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Create .env file
+        run: |
+            cat <<EOF > .env
+            GIPHY_API_KEY=${{ secrets.GIPHY_API_KEY }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            JTM=${{ secrets.JTM }}
+            MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}
+            NATIVE_AD_MOB=${{ secrets.NATIVE_AD_MOB }}
+            PRODUCTION=${{ secrets.PRODUCTION }}
+            EOF
+      - name: Decode socian.jks
+        run: |
+            echo "$SOCIAN_JKS_BASE64" | base64 -d > android/app/socian.jks
+        shell: bash
+        env:
+            SOCIAN_JKS_BASE64: ${{ secrets.SOCIAN_JKS_BASE64 }}
+
       - name: Checkout Repo
         uses: actions/checkout@v3
 
