@@ -19,12 +19,12 @@ jobs:
             NATIVE_AD_MOB=${{ secrets.NATIVE_AD_MOB }}
             PRODUCTION=${{ secrets.PRODUCTION }}
             EOF
-      - name: Decode socian.jks
-        run: |
-            echo "$SOCIAN_JKS_BASE64" | base64 -d > android/socian.jks
-        shell: bash
-        env:
-            SOCIAN_JKS_BASE64: ${{ secrets.SOCIAN_JKS_BASE64 }}
+    #   - name: Decode socian.jks
+    #     run: |
+    #         echo "$SOCIAN_JKS_BASE64" | base64 -d > android/socian.jks
+    #     shell: bash
+    #     env:
+    #         SOCIAN_JKS_BASE64: ${{ secrets.SOCIAN_JKS_BASE64 }}
 
       - name: Checkout Repo
         uses: actions/checkout@v3
