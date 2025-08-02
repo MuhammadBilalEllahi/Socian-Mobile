@@ -1,0 +1,47 @@
+name: Build Flutter APK
+
+on:
+  push:
+    branches: [main]
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create .env file
+        run: |
+            cat <<EOF > .env
+            GIPHY_API_KEY=${{ secrets.GIPHY_API_KEY }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            JTM=${{ secrets.JTM }}
+            MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}
+            NATIVE_AD_MOB=${{ secrets.NATIVE_AD_MOB }}
+            PRODUCTION=${{ secrets.PRODUCTION }}
+            EOF
+    #   - name: Decode socian.jks
+    #     run: |
+    #         echo "$SOCIAN_JKS_BASE64" | base64 -d > android/socian.jks
+    #     shell: bash
+    #     env:
+    #         SOCIAN_JKS_BASE64: ${{ secrets.SOCIAN_JKS_BASE64 }}
+
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.2'
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
