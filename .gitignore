@@ -9,6 +9,8 @@
 .history
 .svn/
 migrate_working_dir/
+android/socian.jks
+android/socian.jks.base64
 
 # IntelliJ related
 *.iml

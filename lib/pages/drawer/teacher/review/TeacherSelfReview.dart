@@ -58,7 +58,7 @@ class _TeacherSelfReviewState extends ConsumerState<TeacherSelfReview> {
       }
 
       final apiClient = ApiClient();
-      if (user['teacherConnectivities']['teacherModal'] != null) {
+      if (user['teacherConnectivities']?['teacherModal'] != null) {
         final response = await apiClient.get(
           '/api/teacher/account/feedbacks',
           queryParameters: {
