@@ -39,15 +39,12 @@ jobs:
           PRODUCTION=${{ secrets.PRODUCTION }}
           "@ | Out-File -Encoding utf8 .env
 
-      # ⚠️ If you're decoding a base64-encoded JKS file
-      # Update path if needed to match your signingConfig
-    #   - name: Decode socian.jks (if needed)
-    #     if: ${{ secrets.SOCIAN_JKS_BASE64 != '' }}
-    #     shell: pwsh
-    #     run: |
-    #       New-Item -ItemType Directory -Force -Path "android\app"
-    #       $jksBytes = [System.Convert]::FromBase64String("${{ secrets.SOCIAN_JKS_BASE64 }}")
-    #       [System.IO.File]::WriteAllBytes("android\app\socian.jks", $jksBytes)
+      - name: Decode and place socian.jks
+        shell: pwsh
+        run: |
+           New-Item -ItemType Directory -Force -Path "android\app"
+           $jksBytes = [System.Convert]::FromBase64String("${{ secrets.SOCIAN_JKS_BASE64 }}")
+           [System.IO.File]::WriteAllBytes("android\app\socian.jks", $jksBytes)
 
       - name: Build APK
         run: flutter build apk --release
