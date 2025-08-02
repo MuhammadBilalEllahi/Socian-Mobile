@@ -4,28 +4,11 @@ on:
   push:
     branches: [main]
 
-
 jobs:
   build:
     runs-on: windows-latest
-    steps:
-      - name: Create .env file
-        run: |
-            cat <<EOF > .env
-            GIPHY_API_KEY=${{ secrets.GIPHY_API_KEY }}
-            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
-            JTM=${{ secrets.JTM }}
-            MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}
-            NATIVE_AD_MOB=${{ secrets.NATIVE_AD_MOB }}
-            PRODUCTION=${{ secrets.PRODUCTION }}
-            EOF
-    #   - name: Decode socian.jks
-    #     run: |
-    #         echo "$SOCIAN_JKS_BASE64" | base64 -d > android/socian.jks
-    #     shell: bash
-    #     env:
-    #         SOCIAN_JKS_BASE64: ${{ secrets.SOCIAN_JKS_BASE64 }}
 
+    steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
@@ -37,10 +20,33 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
+      # OPTIONAL: Create .env file — not commonly used in native Flutter unless you're injecting via Dart
+      - name: Create .env file
+        shell: pwsh
+        run: |
+          @"
+          GIPHY_API_KEY=${{ secrets.GIPHY_API_KEY }}
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          JTM=${{ secrets.JTM }}
+          MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}
+          NATIVE_AD_MOB=${{ secrets.NATIVE_AD_MOB }}
+          PRODUCTION=${{ secrets.PRODUCTION }}
+          "@ | Out-File -Encoding utf8 .env
+
+      # ⚠️ If you're decoding a base64-encoded JKS file
+      # Update path if needed to match your signingConfig
+    #   - name: Decode socian.jks (if needed)
+    #     if: ${{ secrets.SOCIAN_JKS_BASE64 != '' }}
+    #     shell: pwsh
+    #     run: |
+    #       New-Item -ItemType Directory -Force -Path "android\app"
+    #       $jksBytes = [System.Convert]::FromBase64String("${{ secrets.SOCIAN_JKS_BASE64 }}")
+    #       [System.IO.File]::WriteAllBytes("android\app\socian.jks", $jksBytes)
+
       - name: Build APK
         run: flutter build apk --release
 
-      - name: Upload Artifact
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release.apk
