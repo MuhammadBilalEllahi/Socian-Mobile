@@ -1,98 +1,10 @@
-name: Build and Release Flutter APK
-
-on:
-  push:
-    branches: [main]
-    tags:
-      - 'v*'  # Trigger on version tags like v1.0.0
-
-jobs:
-  build:
-    runs-on: windows-latest
-
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Needed for version detection
-
-      - name: Set up Java 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.29.2'
-
-      - name: Get App Version
-        id: version
-        run: |
-          $version = (Get-Content pubspec.yaml | Select-String 'version:').ToString().Split()[1]
-          echo "APP_VERSION=$version" >> $env:GITHUB_ENV
-          echo "::set-output name=version::$version"
-
-      - name: Install Dependencies
-        run: flutter pub get
-
-      - name: Create .env file
-        shell: pwsh
-        run: |
-          @"
-          GIPHY_API_KEY=${{ secrets.GIPHY_API_KEY }}
-          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
-          JTM=${{ secrets.JTM }}
-          MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}
-          NATIVE_AD_MOB=${{ secrets.NATIVE_AD_MOB }}
-          PRODUCTION=${{ secrets.PRODUCTION }}
-          "@ | Out-File -Encoding utf8 .env
-
-      - name: Decode and place socian.jks
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force -Path "android\app"
-          $jksBytes = [System.Convert]::FromBase64String("${{ secrets.SOCIAN_JKS_BASE64 }}")
-          [System.IO.File]::WriteAllBytes("android\app\socian.jks", $jksBytes)
-
-      - name: Build APK
-        run: flutter build apk --release
-
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release.apk
-          path: build/app/outputs/flutter-apk/app-release.apk
-
-      - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/flutter-apk/output-metadata.json
-          tag_name: ${{ github.ref_name }}
-          name: ${{ env.APP_VERSION }} (${{ github.ref_name }})
-          body: |
-            ### Version ${{ env.APP_VERSION }}
-            
-            **Build Date**: ${{ github.event.repository.updated_at }}
-            
-            **Changes**:
-            - Automatic release
-            - Version from pubspec.yaml
-            
-            ### Download
-            [app-release.apk](build/app/outputs/flutter-apk/app-release.apk)
-          draft: false
-          prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') }}
-
-# name: Build Flutter APK
+# name: Build and Release Flutter APK
 
 # on:
 #   push:
 #     branches: [main]
+#     tags:
+#       - 'v*'  # Trigger on version tags like v1.0.0
 
 # jobs:
 #   build:
@@ -101,22 +13,30 @@ jobs:
 #     steps:
 #       - name: Checkout Repo
 #         uses: actions/checkout@v3
+#         with:
+#           fetch-depth: 0  # Needed for version detection
+
 #       - name: Set up Java 17
 #         uses: actions/setup-java@v3
 #         with:
-#             distribution: 'temurin'
-#             java-version: '17'
-
+#           distribution: 'temurin'
+#           java-version: '17'
 
 #       - name: Setup Flutter
 #         uses: subosito/flutter-action@v2
 #         with:
 #           flutter-version: '3.29.2'
 
+#       - name: Get App Version
+#         id: version
+#         run: |
+#           $version = (Get-Content pubspec.yaml | Select-String 'version:').ToString().Split()[1]
+#           echo "APP_VERSION=$version" >> $env:GITHUB_ENV
+#           echo "::set-output name=version::$version"
+
 #       - name: Install Dependencies
 #         run: flutter pub get
 
-#       # OPTIONAL: Create .env file — not commonly used in native Flutter unless you're injecting via Dart
 #       - name: Create .env file
 #         shell: pwsh
 #         run: |
@@ -132,9 +52,9 @@ jobs:
 #       - name: Decode and place socian.jks
 #         shell: pwsh
 #         run: |
-#            New-Item -ItemType Directory -Force -Path "android\app"
-#            $jksBytes = [System.Convert]::FromBase64String("${{ secrets.SOCIAN_JKS_BASE64 }}")
-#            [System.IO.File]::WriteAllBytes("android\app\socian.jks", $jksBytes)
+#           New-Item -ItemType Directory -Force -Path "android\app"
+#           $jksBytes = [System.Convert]::FromBase64String("${{ secrets.SOCIAN_JKS_BASE64 }}")
+#           [System.IO.File]::WriteAllBytes("android\app\socian.jks", $jksBytes)
 
 #       - name: Build APK
 #         run: flutter build apk --release
@@ -144,3 +64,83 @@ jobs:
 #         with:
 #           name: app-release.apk
 #           path: build/app/outputs/flutter-apk/app-release.apk
+
+#       - name: Create Release
+#         if: startsWith(github.ref, 'refs/tags/v')
+#         uses: softprops/action-gh-release@v1
+#         with:
+#           files: |
+#             build/app/outputs/flutter-apk/app-release.apk
+#             build/app/outputs/flutter-apk/output-metadata.json
+#           tag_name: ${{ github.ref_name }}
+#           name: ${{ env.APP_VERSION }} (${{ github.ref_name }})
+#           body: |
+#             ### Version ${{ env.APP_VERSION }}
+            
+#             **Build Date**: ${{ github.event.repository.updated_at }}
+            
+#             **Changes**:
+#             - Automatic release
+#             - Version from pubspec.yaml
+            
+#             ### Download
+#             [app-release.apk](build/app/outputs/flutter-apk/app-release.apk)
+#           draft: false
+#           prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') }}
+
+name: Build Flutter APK
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Set up Java 17
+        uses: actions/setup-java@v3
+        with:
+            distribution: 'temurin'
+            java-version: '17'
+
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.2'
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      # OPTIONAL: Create .env file — not commonly used in native Flutter unless you're injecting via Dart
+      - name: Create .env file
+        shell: pwsh
+        run: |
+          @"
+          GIPHY_API_KEY=${{ secrets.GIPHY_API_KEY }}
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          JTM=${{ secrets.JTM }}
+          MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}
+          NATIVE_AD_MOB=${{ secrets.NATIVE_AD_MOB }}
+          PRODUCTION=${{ secrets.PRODUCTION }}
+          "@ | Out-File -Encoding utf8 .env
+
+      - name: Decode and place socian.jks
+        shell: pwsh
+        run: |
+           New-Item -ItemType Directory -Force -Path "android\app"
+           $jksBytes = [System.Convert]::FromBase64String("${{ secrets.SOCIAN_JKS_BASE64 }}")
+           [System.IO.File]::WriteAllBytes("android\app\socian.jks", $jksBytes)
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk

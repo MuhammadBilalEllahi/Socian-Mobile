@@ -1,0 +1,67 @@
+name: Version Artifacts
+
+on:
+  workflow_run:
+    workflows: ["Build Flutter APK"]
+    types:
+      - completed
+
+jobs:
+  process:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Download APK Artifact
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: ${{ github.event.workflow_run.id }},
+            });
+            const match = artifacts.data.artifacts.find((artifact) => artifact.name === "app-release.apk");
+            const download = await github.rest.actions.downloadArtifact({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              artifact_id: match.id,
+              archive_format: 'zip',
+            });
+            const fs = require('fs');
+            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/app-release.zip`, Buffer.from(download.data));
+
+      - name: Extract APK
+        run: unzip app-release.zip -d extracted-apk/
+
+      - name: Get Version Info
+        id: version
+        run: |
+          VERSION=$(cat extracted-apk/output-metadata.json | jq -r '.elements[0].versionName')
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Detected version: $VERSION"
+
+      - name: Create Versioned Artifact
+        run: |
+          cp extracted-apk/app-release.apk "socian-v${{ steps.version.outputs.VERSION }}.apk"
+          echo "Created versioned APK: socian-v${{ steps.version.outputs.VERSION }}.apk"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: |
+            socian-v${{ steps.version.outputs.VERSION }}.apk
+            extracted-apk/output-metadata.json
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          name: "Release v${{ steps.version.outputs.VERSION }}"
+          body: |
+            ### Version ${{ steps.version.outputs.VERSION }}
+            
+            **Build Date**: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+            
+            ### Download
+            [socian-v${{ steps.version.outputs.VERSION }}.apk](socian-v${{ steps.version.outputs.VERSION }}.apk)
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.VERSION, 'beta') || contains(steps.version.outputs.VERSION, 'alpha') }}
