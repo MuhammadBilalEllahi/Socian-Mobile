@@ -1,7 +1,11 @@
 name: Release Flutter APK
 
 on:
-  workflow_dispatch:
+#   workflow_dispatch:
+  workflow_run:
+   workflows: ["Build Flutter APK"]
+   types:
+      - completed
 
 jobs:
   release:
