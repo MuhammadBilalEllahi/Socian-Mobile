@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -18,6 +17,7 @@ import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/pages/explore/SocietyProvider.dart';
 import 'package:socian/shared/services/api_client.dart';
 import 'package:socian/shared/utils/constants.dart';
+import 'package:universal_io/io.dart';
 import 'package:video_player/video_player.dart';
 
 import 'widgets/location_section.dart';

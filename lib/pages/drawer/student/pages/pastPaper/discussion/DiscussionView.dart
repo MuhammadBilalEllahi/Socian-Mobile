@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -9,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:socian/pages/drawer/student/pages/pastPaper/discussion/info_dialog.dart';
 import 'package:socian/shared/services/api_client.dart';
 import 'package:socian/shared/utils/constants.dart';
+import 'package:universal_io/io.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../../pages/message/ChatPage.dart';

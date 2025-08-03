@@ -33,13 +33,14 @@ android {
    
     signingConfigs {
         release {
-            // storeFile file("D:\\Projects\\Final Year Project\\beyond-the-class\\apps\\mobile\\BeyondTheClass_mobile\\android\\socian.jks")
-            // storePassword "app.socian.secure"
-            // keyAlias "my-key-alias"
-            // keyPassword "app.socian.secure"
+            storeFile file("D:\\Projects\\Final Year Project\\beyond-the-class\\apps\\mobile\\BeyondTheClass_mobile\\android\\socian.jks")
+            storePassword "app.socian.secure"
+            keyAlias "my-key-alias"
+            keyPassword "app.socian.secure"
         }
     }
-
+// github _pat_ 11AQGKH7Y0csDjIe7b98Iv_ ==== 1QSvVXzOAhOhW7VqFvK8nyica28xU0FCQyqnh41yNTKPIF5Y24Ht0ywtGOn
+// github _pat_ 11AQGKH7Y0xkZvBTrL9Ny4_ ==== i10cN4FMqC4cSrz3xGtaVsX6xz19Q8ZEKpZEVUoWmdGLTDBL6IZqGoq8hVl
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.

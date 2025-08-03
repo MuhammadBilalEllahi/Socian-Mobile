@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:dio/dio.dart';
@@ -14,6 +13,7 @@ import 'package:socian/features/auth/presentation/alumni/FaceCaptureScreen.dart'
 import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/shared/services/api_client.dart';
 import 'package:socian/shared/utils/constants.dart';
+import 'package:universal_io/io.dart';
 
 class UploadCardPage extends ConsumerStatefulWidget {
   const UploadCardPage({super.key});

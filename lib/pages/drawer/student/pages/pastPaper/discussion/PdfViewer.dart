@@ -1,6 +1,6 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:universal_io/io.dart';
 
 class PdfViewer extends StatefulWidget {
   final File? pdfFile;
@@ -65,9 +65,9 @@ class _PdfViewerState extends State<PdfViewer> {
           defaultPage: 0,
           fitPolicy: FitPolicy.BOTH,
           preventLinkNavigation: false,
-          onRender: (_pages) {
+          onRender: (pages) {
             setState(() {
-              pages = _pages;
+              pages = pages;
               isReady = true;
               isLoading = false;
             });

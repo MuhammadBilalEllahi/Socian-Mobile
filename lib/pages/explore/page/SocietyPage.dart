@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:dio/dio.dart' as dio;
 import 'package:flutter/material.dart';
@@ -11,9 +10,9 @@ import 'package:shimmer/shimmer.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/pages/explore/page/ModeratorsPage.dart';
 import 'package:socian/pages/explore/page/verification/SocietyVerification.dart';
-import 'package:socian/pages/home/widgets/components/post/page/PostDetailPage.dart';
 import 'package:socian/pages/home/widgets/components/post/post_stat_item.dart';
 import 'package:socian/shared/services/api_client.dart';
+import 'package:universal_io/io.dart';
 
 class SocietyPage extends ConsumerStatefulWidget {
   final String societyId;
@@ -180,157 +179,157 @@ class _SocietyPageState extends ConsumerState<SocietyPage> {
     }
   }
 
+  Future<void> _showReportDialog(String societyId) async {
+    try {
+      // Fetch available report types from the API
+      final response = await _apiClient.get('/api/report/types');
+      final List<dynamic> reportTypes = response['reportTypes'] ?? [];
 
-Future<void> _showReportDialog(String societyId) async {
-  try {
-    // Fetch available report types from the API
-    final response = await _apiClient.get('/api/report/types');
-    final List<dynamic> reportTypes = response['reportTypes'] ?? [];
-
-    if (reportTypes.isEmpty) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No report types available')),
-        );
+      if (reportTypes.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No report types available')),
+          );
+        }
+        return;
       }
-      return;
-    }
 
-    // Show dialog with dynamic report types
-    final selectedReportType = await showDialog<Map<String, dynamic>>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: _getThemeColors(context)['bg'],
-        surfaceTintColor: _getThemeColors(context)['bg'],
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: _getThemeColors(context)['border']!, width: 1.5),
-        ),
-        title: Text(
-          'Report Society',
-          style: TextStyle(
-            color: _getThemeColors(context)['fg'],
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        content: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.5,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: reportTypes.map<Widget>((reportType) {
-                return ListTile(
-                  title: Text(
-                    reportType['name'] ?? 'Unknown',
-                    style: TextStyle(color: _getThemeColors(context)['fg']),
-                  ),
-                  onTap: () => Navigator.pop(context, {
-                    'id': reportType['_id'],
-                    'name': reportType['name'],
-                  }),
-                );
-              }).toList(),
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                color: _getThemeColors(context)['muted'],
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
-      ),
-    );
-
-    // Show confirmation dialog
-    if (selectedReportType != null && mounted) {
-      final bool? confirmed = await showDialog<bool>(
+      // Show dialog with dynamic report types
+      final selectedReportType = await showDialog<Map<String, dynamic>>(
         context: context,
         builder: (context) => AlertDialog(
           backgroundColor: _getThemeColors(context)['bg'],
           surfaceTintColor: _getThemeColors(context)['bg'],
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: _getThemeColors(context)['border']!, width: 1.5),
+            side: BorderSide(
+                color: _getThemeColors(context)['border']!, width: 1.5),
           ),
           title: Text(
-            'Confirm Report',
+            'Report Society',
             style: TextStyle(
               color: _getThemeColors(context)['fg'],
               fontWeight: FontWeight.w600,
             ),
           ),
-          content: Text(
-            'Are you sure you want to report this society for "${selectedReportType['name']}"?',
-            style: TextStyle(color: _getThemeColors(context)['fg']),
+          content: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.5,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: reportTypes.map<Widget>((reportType) {
+                  return ListTile(
+                    title: Text(
+                      reportType['name'] ?? 'Unknown',
+                      style: TextStyle(color: _getThemeColors(context)['fg']),
+                    ),
+                    onTap: () => Navigator.pop(context, {
+                      'id': reportType['_id'],
+                      'name': reportType['name'],
+                    }),
+                  );
+                }).toList(),
+              ),
+            ),
           ),
           actions: [
             TextButton(
               child: Text(
                 'Cancel',
-                style: TextStyle(color: _getThemeColors(context)['muted']),
+                style: TextStyle(
+                  color: _getThemeColors(context)['muted'],
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-              onPressed: () => Navigator.pop(context, false),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _getThemeColors(context)['accent'],
-              ),
-              child: Text(
-                'Report',
-                style: TextStyle(color: _getThemeColors(context)['onAccent']),
-              ),
-              onPressed: () => Navigator.pop(context, true),
+              onPressed: () => Navigator.pop(context),
             ),
           ],
         ),
       );
 
-      if (confirmed == true && mounted) {
-        try {
-          // Send report to the backend
-          final response = await _apiClient.post('/api/report/society', {
-            'societyId': societyId,
-            'reportType': selectedReportType['id'],
-            'reason': selectedReportType['name'],
-          });
-
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(response['message'] ?? 'Society reported successfully'),
+      // Show confirmation dialog
+      if (selectedReportType != null && mounted) {
+        final bool? confirmed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: _getThemeColors(context)['bg'],
+            surfaceTintColor: _getThemeColors(context)['bg'],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(
+                  color: _getThemeColors(context)['border']!, width: 1.5),
+            ),
+            title: Text(
+              'Confirm Report',
+              style: TextStyle(
+                color: _getThemeColors(context)['fg'],
+                fontWeight: FontWeight.w600,
               ),
-            );
-          }
-        } catch (e) {
-          debugPrint('Error reporting society: $e');
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Failed to report society')),
-            );
+            ),
+            content: Text(
+              'Are you sure you want to report this society for "${selectedReportType['name']}"?',
+              style: TextStyle(color: _getThemeColors(context)['fg']),
+            ),
+            actions: [
+              TextButton(
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(color: _getThemeColors(context)['muted']),
+                ),
+                onPressed: () => Navigator.pop(context, false),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _getThemeColors(context)['accent'],
+                ),
+                child: Text(
+                  'Report',
+                  style: TextStyle(color: _getThemeColors(context)['onAccent']),
+                ),
+                onPressed: () => Navigator.pop(context, true),
+              ),
+            ],
+          ),
+        );
+
+        if (confirmed == true && mounted) {
+          try {
+            // Send report to the backend
+            final response = await _apiClient.post('/api/report/society', {
+              'societyId': societyId,
+              'reportType': selectedReportType['id'],
+              'reason': selectedReportType['name'],
+            });
+
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                      response['message'] ?? 'Society reported successfully'),
+                ),
+              );
+            }
+          } catch (e) {
+            debugPrint('Error reporting society: $e');
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Failed to report society')),
+              );
+            }
           }
         }
       }
-    }
-  } catch (e) {
-    debugPrint('Error fetching report types: $e');
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to load report types')),
-      );
+    } catch (e) {
+      debugPrint('Error fetching report types: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to load report types')),
+        );
+      }
     }
   }
-}
-
-
 
   //   Future<void> _showReportDialog(String societyId) async {
   //   try {
@@ -435,10 +434,6 @@ Future<void> _showReportDialog(String societyId) async {
   //     }
   //   }
   // }
-
-
-
-
 
   void _loadMorePosts() {
     if (!isLoadingMore && hasMore) {
@@ -721,20 +716,6 @@ Future<void> _showReportDialog(String societyId) async {
     }
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   Widget _buildPostListItem(BuildContext context, Map<String, dynamic> post) {
     final colors = _getThemeColors(context);
     final author = post['author'] ?? {};
@@ -830,16 +811,7 @@ Future<void> _showReportDialog(String societyId) async {
           child: Padding(
             padding: const EdgeInsets.only(left: 20, top: 20, bottom: 20),
             child: GestureDetector(
-
-
-           onTap: () {
-            
-              
-            },        
-
-
-
-
+              onTap: () {},
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -938,7 +910,6 @@ Future<void> _showReportDialog(String societyId) async {
                         isActive: isDisliked,
                       ),
                       const SizedBox(width: 16),
-                      
                     ],
                   ),
                 ],
@@ -949,16 +920,6 @@ Future<void> _showReportDialog(String societyId) async {
       },
     );
   }
-
-
-
-
-
-
-
-
-
-
 
   String _timeAgo(DateTime date) {
     final now = DateTime.now();
@@ -1776,92 +1737,89 @@ Future<void> _showReportDialog(String societyId) async {
 
     return Scaffold(
       backgroundColor: colors['bg'],
-      appBar: 
-      
-      
-      
-      
-      // AppBar(
-      //   backgroundColor: Colors.transparent,
-      //   elevation: 0,
-      //   iconTheme: IconThemeData(color: colors['fg']),
-      //   titleSpacing: 0,
-      //   actions: [
-      //     if (isModerator)
-      //       PopupMenuButton<String>(
-      //         icon: Icon(Icons.more_vert, color: colors['fg']),
-      //         color: colors['bg'],
-      //         surfaceTintColor: colors['bg'],
-      //         shape: RoundedRectangleBorder(
-      //           borderRadius: BorderRadius.circular(10),
-      //           side: BorderSide(color: colors['border']!, width: 1),
-      //         ),
-      //         onSelected: (value) {
-      //           if (value == 'edit') {
-      //             setState(() {
-      //               editable = !editable;
-      //             });
-      //           }
-      //           if (value == 'verify') {
-      //             Navigator.push(
-      //               context,
-      //               MaterialPageRoute(
-      //                   builder: (context) => SocietyVerification(
-      //                         societyId: societyData?['_id'],
-      //                         societyName: societyData?['name'],
-      //                       )),
-      //             );
-      //           }
-      //         },
-      //         itemBuilder: (BuildContext context) => [
-      //           PopupMenuItem<String>(
-      //             value: 'edit',
-      //             child: Row(
-      //               children: [
-      //                 Icon(
-      //                   editable ? Icons.edit_off : Icons.edit,
-      //                   color: colors['accent'],
-      //                   size: 18,
-      //                 ),
-      //                 const SizedBox(width: 8),
-      //                 Text(
-      //                   editable ? 'Disable Edit' : 'Enable Edit',
-      //                   style: TextStyle(
-      //                     color: colors['fg'],
-      //                     fontWeight: FontWeight.w500,
-      //                   ),
-      //                 ),
-      //               ],
-      //             ),
-      //           ),
-      //           PopupMenuItem<String>(
-      //             value: 'verify',
-      //             child: Row(
-      //               children: [
-      //                 Icon(Icons.verified, color: colors['accent'], size: 18),
-      //                 const SizedBox(width: 8),
-      //                 Text(
-      //                   'Verify Society',
-      //                   style: TextStyle(
-      //                     color: colors['fg'],
-      //                     fontWeight: FontWeight.w500,
-      //                   ),
-      //                 ),
-      //               ],
-      //             ),
-      //           ),
-      //         ],
-      //       )
-      //     else
-      //       _MinimalIconButton(
-      //         icon: Icons.more_vert,
-      //         color: colors['fg']!,
-      //         onTap: () {},
-      //       ),
-      //   ],
-      // ),
+      appBar:
 
-AppBar(
+          // AppBar(
+          //   backgroundColor: Colors.transparent,
+          //   elevation: 0,
+          //   iconTheme: IconThemeData(color: colors['fg']),
+          //   titleSpacing: 0,
+          //   actions: [
+          //     if (isModerator)
+          //       PopupMenuButton<String>(
+          //         icon: Icon(Icons.more_vert, color: colors['fg']),
+          //         color: colors['bg'],
+          //         surfaceTintColor: colors['bg'],
+          //         shape: RoundedRectangleBorder(
+          //           borderRadius: BorderRadius.circular(10),
+          //           side: BorderSide(color: colors['border']!, width: 1),
+          //         ),
+          //         onSelected: (value) {
+          //           if (value == 'edit') {
+          //             setState(() {
+          //               editable = !editable;
+          //             });
+          //           }
+          //           if (value == 'verify') {
+          //             Navigator.push(
+          //               context,
+          //               MaterialPageRoute(
+          //                   builder: (context) => SocietyVerification(
+          //                         societyId: societyData?['_id'],
+          //                         societyName: societyData?['name'],
+          //                       )),
+          //             );
+          //           }
+          //         },
+          //         itemBuilder: (BuildContext context) => [
+          //           PopupMenuItem<String>(
+          //             value: 'edit',
+          //             child: Row(
+          //               children: [
+          //                 Icon(
+          //                   editable ? Icons.edit_off : Icons.edit,
+          //                   color: colors['accent'],
+          //                   size: 18,
+          //                 ),
+          //                 const SizedBox(width: 8),
+          //                 Text(
+          //                   editable ? 'Disable Edit' : 'Enable Edit',
+          //                   style: TextStyle(
+          //                     color: colors['fg'],
+          //                     fontWeight: FontWeight.w500,
+          //                   ),
+          //                 ),
+          //               ],
+          //             ),
+          //           ),
+          //           PopupMenuItem<String>(
+          //             value: 'verify',
+          //             child: Row(
+          //               children: [
+          //                 Icon(Icons.verified, color: colors['accent'], size: 18),
+          //                 const SizedBox(width: 8),
+          //                 Text(
+          //                   'Verify Society',
+          //                   style: TextStyle(
+          //                     color: colors['fg'],
+          //                     fontWeight: FontWeight.w500,
+          //                   ),
+          //                 ),
+          //               ],
+          //             ),
+          //           ),
+          //         ],
+          //       )
+          //     else
+          //       _MinimalIconButton(
+          //         icon: Icons.more_vert,
+          //         color: colors['fg']!,
+          //         onTap: () {},
+          //       ),
+          //   ],
+          // ),
+
+          AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: IconThemeData(color: colors['fg']),
@@ -1951,7 +1909,7 @@ AppBar(
                   value: 'report',
                   child: Row(
                     children: [
-                      Icon(Icons.report, color: Colors.orange, size: 18),
+                      const Icon(Icons.report, color: Colors.orange, size: 18),
                       const SizedBox(width: 8),
                       Text(
                         'Report Society',
@@ -1967,8 +1925,6 @@ AppBar(
             ),
         ],
       ),
-
-
       body: RefreshIndicator(
         color: colors['accent'],
         backgroundColor: colors['bg'],

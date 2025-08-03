@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
-import 'dart:async';
-import '../CreatePost.dart';
+import 'package:universal_io/io.dart';
 
 class VoiceNoteSection extends StatelessWidget {
   final bool isRecording;
@@ -178,4 +176,4 @@ class WaveformPainter extends CustomPainter {
   bool shouldRepaint(WaveformPainter oldDelegate) {
     return waveform != oldDelegate.waveform;
   }
-} 
+}

@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:socian/shared/services/api_client.dart';
+import 'package:universal_io/io.dart';
 
 class SocietyVerification extends StatefulWidget {
   final String? societyId;
@@ -207,8 +207,8 @@ class _SocietyVerificationState extends State<SocietyVerification> {
           allowMultiple: false,
         );
 
-        if (result != null && result.files.single.path != null) {
-          final file = File(result.files.single.path!);
+        if (result?.files.single.path != null) {
+          final file = File(result!.files.single.path!);
           setState(() {
             if (customIndex != null && customIndex < _customDocuments.length) {
               // Replace existing document
@@ -228,8 +228,8 @@ class _SocietyVerificationState extends State<SocietyVerification> {
           allowMultiple: false,
         );
 
-        if (result != null && result.files.single.path != null) {
-          final file = File(result.files.single.path!);
+        if (result?.files.single.path != null) {
+          final file = File(result!.files.single.path!);
           setState(() {
             switch (type) {
               case 'registrationCertificate':

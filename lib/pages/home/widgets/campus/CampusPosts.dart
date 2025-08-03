@@ -4,7 +4,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:socian/ads/NativeAdPostWidget.dart';
+// import 'package:socian/ads/NativeAdPostWidget.dart';
 import 'package:socian/components/effects/ShiningLinearProgressBar.dart';
 import 'package:socian/pages/home/widgets/campus/PostProvider.dart';
 import 'package:socian/shared/services/api_client.dart';
@@ -257,9 +257,9 @@ class _CampusPostsState extends ConsumerState<CampusPosts>
         int adjustedIndex = hasAdminPost ? index - 1 : index;
 
         // 2. Ad every 5th slot
-        if ((adjustedIndex + 1) % (adFrequency + 1) == 0) {
-          return const NativeAdPostWidget();
-        }
+        // if ((adjustedIndex + 1) % (adFrequency + 1) == 0) {
+        //   return const NativeAdPostWidget();
+        // }
 
         // 3. Calculate post index considering how many ads already inserted
         final adsBefore = (adjustedIndex / (adFrequency + 1)).floor();

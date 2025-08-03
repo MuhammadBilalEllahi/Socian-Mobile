@@ -1,14 +1,15 @@
-import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:socian/shared/services/api_client.dart';
 import 'package:socian/shared/utils/constants.dart';
+import 'package:universal_io/io.dart';
+import 'package:universal_io/io.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:open_filex/open_filex.dart';
 
 import '../../../../../../pages/message/ChatPage.dart';
 import '../../../../../../pages/profile/ProfilePage.dart';
@@ -675,8 +676,8 @@ class _InfoDialogState extends State<InfoDialog> {
                       LinearProgressIndicator(
                         value: downloadProgress,
                         backgroundColor: border,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          const Color(0xFF10B981),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          Color(0xFF10B981),
                         ),
                       ),
                       const SizedBox(height: 12),

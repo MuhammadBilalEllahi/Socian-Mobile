@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/shared/services/api_client.dart';
 import 'package:socian/shared/utils/constants.dart';
+import 'package:universal_io/io.dart';
 
 class CreateSocietyPage extends ConsumerStatefulWidget {
   const CreateSocietyPage({super.key});

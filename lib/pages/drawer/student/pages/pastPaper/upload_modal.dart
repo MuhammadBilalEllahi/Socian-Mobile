@@ -153,11 +153,9 @@ class _UploadModalState extends State<UploadModal> {
         },
       );
 
-      if (result != null) {
-        setState(() {
-          _selectedFile = result.files.first;
-        });
-      }
+      setState(() {
+        _selectedFile = result!.files.first;
+      });
     } catch (e) {
       // debugPrint('Error picking file: $e');
     }

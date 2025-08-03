@@ -1,10 +1,10 @@
-import 'dart:io';
-
+import 'package:flutter/foundation.dart';
 import 'package:socian/features/auth/data/auth_data_source.dart';
 import 'package:socian/shared/services/api_client.dart';
 // import 'package:flutter/foundation.dart';
 //  import 'package:posthog_flutter/posthog_flutter.dart';
 import 'package:socian/shared/utils/constants.dart';
+import 'package:universal_io/io.dart';
 // import 'package:socian/shared/services/secure_storage_service.dart';
 // import 'package:socian/shared/services/secure_storage_service.dart';
 
@@ -45,7 +45,7 @@ class AuthDataSourceImpl implements AuthDataSource {
         {
           'email': email,
           'password': password,
-          'ip': await getPublicIp(),
+          'ip': kIsWeb ? 'app-web' : await getPublicIp(),
           'val_platform': Platform.isIOS
               ? 'ios'
               : Platform.isAndroid

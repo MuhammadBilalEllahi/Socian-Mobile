@@ -1,5 +1,5 @@
 // import 'package:flutter/material.dart';
-// import 'dart:io';
+// import 'package:universal_io/io.dart';
 // import '../CreatePost.dart';
 
 // class MediaControls extends StatelessWidget {
@@ -180,9 +180,8 @@
 //   }
 // }
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:universal_io/io.dart';
 
 import '../CreatePost.dart';
 

@@ -1,12 +1,17 @@
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
+import 'dart:html' as html;
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:socian/shared/services/secure_storage_service.dart';
 import 'package:socian/shared/utils/constants.dart';
+import 'package:socian/shared/utils/platform/file/io_checker.dart';
+import 'package:universal_io/io.dart';
 
 class ApiClient {
   final Dio _dio;
@@ -18,14 +23,21 @@ class ApiClient {
             Dio(BaseOptions(
               baseUrl: ApiConstants.baseUrl,
             )) {
-    _initDeviceId();
+    if (!kIsWeb) {
+      _initDeviceId();
+    }
   }
 
   Future<void> _initDeviceId() async {
+    if (kIsWeb) {
+      _deviceId = "web";
+      return;
+    }
+
     // First try to get stored device ID
     _deviceId = await SecureStorageService.instance.getDeviceId();
 
-    // If no stored device ID, generate a new one
+// If no stored device ID, generate a new one
     if (_deviceId == null || _deviceId!.isEmpty) {
       final deviceInfo = DeviceInfoPlugin();
       if (Platform.isAndroid) {
@@ -148,7 +160,6 @@ class ApiClient {
     }
   }
 
-  // Helper method to process form data and convert File objects to MultipartFile
   Future<Map<String, dynamic>> _processFormData(
       Map<String, dynamic> data) async {
     final processedData = <String, dynamic>{};
@@ -157,30 +168,82 @@ class ApiClient {
       final key = entry.key;
       final value = entry.value;
 
-      if (value is File) {
-        // Convert single File to MultipartFile
-        processedData[key] = await MultipartFile.fromFile(
-          value.path,
-          filename: value.path.split('/').last,
-        );
-      } else if (value is List<File>) {
-        // Convert List<File> to List<MultipartFile>
-        final multipartFiles = <MultipartFile>[];
-        for (final file in value) {
-          multipartFiles.add(await MultipartFile.fromFile(
-            file.path,
-            filename: file.path.split('/').last,
-          ));
+      if (kIsWeb) {
+        if (value is html.File) {
+          final reader = html.FileReader();
+          final completer = Completer<Uint8List>();
+          reader.readAsArrayBuffer(value);
+          reader.onLoadEnd.listen((event) {
+            completer.complete(reader.result as Uint8List);
+          });
+          final bytes = await completer.future;
+
+          processedData[key] = MultipartFile.fromBytes(
+            bytes,
+            filename: value.name,
+            contentType: MediaType.parse(value.type),
+          );
+        } else {
+          processedData[key] = value;
         }
-        processedData[key] = multipartFiles;
       } else {
-        // Keep other values as is
-        processedData[key] = value;
+        if (IoChecker.isFile(value)) {
+          processedData[key] = await MultipartFile.fromFile(
+            value.path,
+            filename: value.path.split('/').last,
+          );
+        } else if (IoChecker.isListOfFiles(value)) {
+          final multipartFiles = <MultipartFile>[];
+          for (final file in value) {
+            multipartFiles.add(await MultipartFile.fromFile(
+              file.path,
+              filename: file.path.split('/').last,
+            ));
+          }
+          processedData[key] = multipartFiles;
+        } else {
+          processedData[key] = value;
+        }
       }
     }
 
     return processedData;
   }
+
+  // Helper method to process form data and convert File objects to MultipartFile
+  // Future<Map<String, dynamic>> _processFormData(
+  //     Map<String, dynamic> data) async {
+  //   final processedData = <String, dynamic>{};
+
+  //   for (final entry in data.entries) {
+  //     final key = entry.key;
+  //     final value = entry.value;
+  //     if (!kIsWeb) {
+  //       if (value is File) {
+  //         // Convert single File to MultipartFile
+  //         processedData[key] = await MultipartFile.fromFile(
+  //           value.path,
+  //           filename: value.path.split('/').last,
+  //         );
+  //       } else if (value is List<File>) {
+  //         // Convert List<File> to List<MultipartFile>
+  //         final multipartFiles = <MultipartFile>[];
+  //         for (final file in value) {
+  //           multipartFiles.add(await MultipartFile.fromFile(
+  //             file.path,
+  //             filename: file.path.split('/').last,
+  //           ));
+  //         }
+  //         processedData[key] = multipartFiles;
+  //       } else {
+  //         // Keep other values as is
+  //         processedData[key] = value;
+  //       }
+  //     }
+  //   }
+
+  //   return processedData;
+  // }
 
   Future<T> get<T>(
     String endpoint, {
@@ -368,30 +431,34 @@ class ExternalApiClient {
             Dio(BaseOptions(
               baseUrl: ApiConstants.baseUrl,
             )) {
-    _initDeviceId();
+    if (!kIsWeb) {
+      _initDeviceId();
+    }
   }
   Future<void> _initDeviceId() async {
     // First try to get stored device ID
     _deviceId = await SecureStorageService.instance.getDeviceId();
 
-    // If no stored device ID, generate a new one
-    if (_deviceId == null || _deviceId!.isEmpty) {
-      final deviceInfo = DeviceInfoPlugin();
-      if (Platform.isAndroid) {
-        final androidInfo = await deviceInfo.androidInfo;
-        _deviceId = androidInfo.id ?? 'unknown';
-        log('androidInfo.id: ${androidInfo.id}');
-        if (_deviceId != 'unknown') {
-          SecureStorageService.instance.saveDeviceId(_deviceId!);
+    if (!kIsWeb) {
+      // If no stored device ID, generate a new one
+      if (_deviceId == null || _deviceId!.isEmpty) {
+        final deviceInfo = DeviceInfoPlugin();
+        if (Platform.isAndroid) {
+          final androidInfo = await deviceInfo.androidInfo;
+          _deviceId = androidInfo.id ?? 'unknown';
+          log('androidInfo.id: ${androidInfo.id}');
+          if (_deviceId != 'unknown') {
+            SecureStorageService.instance.saveDeviceId(_deviceId!);
+          }
+        } else if (Platform.isIOS) {
+          final iosInfo = await deviceInfo.iosInfo;
+          _deviceId = iosInfo.identifierForVendor ?? 'unknown';
+          if (_deviceId != 'unknown') {
+            SecureStorageService.instance.saveDeviceId(_deviceId!);
+          }
+        } else {
+          _deviceId = 'unknown';
         }
-      } else if (Platform.isIOS) {
-        final iosInfo = await deviceInfo.iosInfo;
-        _deviceId = iosInfo.identifierForVendor ?? 'unknown';
-        if (_deviceId != 'unknown') {
-          SecureStorageService.instance.saveDeviceId(_deviceId!);
-        }
-      } else {
-        _deviceId = 'unknown';
       }
     }
   }

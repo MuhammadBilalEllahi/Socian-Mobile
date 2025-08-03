@@ -1,5 +1,4 @@
 import 'dart:developer' as developer;
-import 'dart:io';
 
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:dio/dio.dart';
@@ -13,6 +12,7 @@ import 'package:socian/features/auth/providers/auth_provider.dart';
 import 'package:socian/shared/services/api_client.dart';
 import 'package:socian/shared/services/secure_storage_service.dart';
 import 'package:socian/shared/utils/constants.dart';
+import 'package:universal_io/io.dart';
 
 class ProfileImageUploadPage extends ConsumerStatefulWidget {
   const ProfileImageUploadPage({super.key});
